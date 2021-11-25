@@ -1,0 +1,43 @@
+<table width="100%" border="0" align="center" cellpadding="4" cellspacing="0">
+  <tr>
+    <td style="border-bottom: 1px solid; border-color: #cccccc;">
+      <div align="right"><img src="{$logo_path}logo.gif" /></div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <font size="2" face="Verdana, Arial, Helvetica, sans-serif">
+        <strong>{if $GENDER == 'm'}Dear Mr.{elseif $GENDER == 'f'}Dear Ms./Mrs.{else}Hello{/if} {$NAME},</strong><br />
+        <br />
+        The status of your order {if $ORDER_NR}No. {$ORDER_NR}{/if} {if $ORDER_DATE}from {$ORDER_DATE}{/if} has been changed.<br /><br />
+        {if $ORDER_LINK}Link to order:
+          <a href="{$ORDER_LINK}">click here</a>
+        {/if}
+        <br />
+        <br />
+        {if $NOTIFY_COMMENTS}
+          <br />
+          Notes to your order:
+          <br />
+          {$NOTIFY_COMMENTS}
+          <br />
+        {/if}
+        <br />
+        New status:
+        <b>{$ORDER_STATUS}</b><br />
+        <br />
+        {if $PARCEL_COUNT > 0}
+          <br /><br />
+          Your shipment consists of {$PARCEL_COUNT} parcel(s).<br />
+          You can inform yourself about the delivery status with a click on the following package number(s):<br />
+          {foreach name=aussen item=tracking_data from=$PARCEL_ARRAY}
+            <a target="_blank" href="{$tracking_data.tracking_link}">{$tracking_data.parcel_id}</a><br />
+          {/foreach}
+        {/if}
+        If you have any questions, please reply to this e-mail. <br />
+      </font>
+    </td>
+  </tr>
+</table>
+
+[SIGNATUR]

@@ -1,0 +1,50 @@
+<link rel="stylesheet" href="{$payonecss}" type="text/css" media="screen" />
+<table width="100%" class="payone_elv_form_table">
+	<tr>
+		<td class="label">{$smarty.const.ELV_COUNTRY}</td>
+		<td>
+			<select id="p1_elv_country" name="p1_elv_country">
+			  {foreach name=outer item=data from=$sepa_countries}
+					<option value="{$data.countries_iso_code_2}" {if $data.countries_iso_code_2 == $sendto_iso2}selected="selected"{/if}>{$data.countries_name}</option>
+			  {/foreach}
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="label">{$smarty.const.ELV_IBAN}</td>
+		<td><input type="text" id="p1_elv_iban" name="p1_elv_iban" value="{$smarty.session.payone_elv_data.iban}"></td>
+	</tr>
+	<tr>
+		<td class="label">{$smarty.const.ELV_BIC}</td>
+		<td><input type="text" id="p1_elv_bic" name="p1_elv_bic" value="{$smarty.session.payone_elv_data.bic}"></td>
+	</tr>
+  {if $genre_specific.sepa_display_ktoblz == 'true'}
+    <tr>
+      <td colspan="2"><p><strong>{$smarty.const.NOTE_GERMAN_ACCOUNT}</strong></p></td>
+    </tr>
+    <tr>
+      <td class="label">{$smarty.const.ELV_ACCOUNT_NUMBER}</td>
+      <td><input type="text" id="p1_elv_accountnumber" name="p1_elv_accountnumber" value="{$smarty.session.payone_elv_data.accountnumber}"></td>
+    </tr>
+    <tr>
+      <td class="label">{$smarty.const.ELV_BANKCODE}</td>
+      <td><input type="text" id="p1_elv_bankcode" name="p1_elv_bankcode" value="{$smarty.session.payone_elv_data.bankcode}"></td>
+    </tr>
+	{/if}
+  {if $required_fields}
+    {foreach key=key_data item=item_data from=$required_fields}
+      <tr>
+        <td class="label">{$key_data|constant}</td>
+        <td style="min-width: 120px;"><input id="{$key_data}" name="{$key_data}" type="text" value="{$item_data}"></td>
+      </tr>
+    {/foreach}
+  {/if}
+  {if $confirm_text}
+    <tr style="text-align:left;line-height:18px;">
+      <td colspan="2"><input type="checkbox" id="p1_elv_conditions" name="p1_elv_conditions" value="true"/> {$confirm_text}</td>
+    </tr>
+    <tr style="text-align:left;line-height:18px;">
+      <td colspan="2"><input type="checkbox" id="p1_elv_sepa" name="p1_elv_sepa" value="true"/> {$sepa_text}</td>
+    </tr>
+  {/if}
+</table>

@@ -1,0 +1,14 @@
+#  -----------------------------------------------------------------------------------------
+#  $Id: .htaccess 10268 2016-08-24 12:22:21Z GTB $
+#
+#  modified eCommerce Shopsoftware
+#  http://www.modified-shop.org
+#
+#  Copyright (c) 2009 - 2016 [www.modified-shop.org]
+#  -----------------------------------------------------------------------------------------
+#  Released under the GNU General Public License 
+#  -----------------------------------------------------------------------------------------
+#
+# This is used with Apache WebServers
+
+AddType application/octet-stream .zip .rar .pdf .doc .xls .txt .mov .avi .mpg .mpeg .jpg .jpeg .png .gif .bmp .psd .tif .tiff .wmf .eps .cdr .svg

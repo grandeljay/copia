@@ -1,0 +1,42 @@
+{config_load file="$language/lang_$language.conf" section="gift_cart"}
+{if $ACTIVATE_GIFT == 'true'}
+  {$FORM_ACTION}
+  {if $D_FLAG == 'checkout'}
+  <h2>{#title#}</h2>
+  <div style="clear:both"></div>
+  {else}
+  <h1>{#title#}</h1>
+  {/if}
+  {if $D_FLAG == 'checkout'}
+    {if $coupon_message != ''}<div class="errormessage">{$coupon_message}</div>{/if}
+    {if $success_message != ''}<div class="infomessage">{$success_message}</div>{/if}
+  {/if}
+  {if isset($GV_AMOUNT) && $GV_AMOUNT > 0}
+    <p>{#text_info#}</p>
+    <p>{#voucher_balance#} <strong>{$GV_AMOUNT}</strong></p>
+    <p>{#text_send_to_friend#} <a href="{$GV_SEND_TO_FRIEND_LINK}">{#box_send_to_friend#}</a></p>
+  {/if}
+  {if isset($COUPON_AMOUNT2) && $COUPON_AMOUNT2 > 0}
+    <p>{#voucher_redeemed#}</p>
+    <p>{$COUPON_AMOUNT2}</p>
+  {/if}
+  {if $C_FLAG == 'true'}
+    {if isset($COUPON_HELP_LINK)}
+      <p>{$COUPON_HELP_LINK}{#cart_coupon_info#}</a></p>
+    {/if}
+    <p>{#text_gift#}</p>
+    <div class="highlightbox"{if $D_FLAG == 'checkout'} style="margin-right:20px;"{/if}>
+      <table border="0" cellspacing="0" cellpadding="4">
+        <tr>
+          <td><strong>{#text_code#}</strong></td>
+          <td>{$INPUT_CODE}</td>
+          <td>{$BUTTON_SUBMIT}</td>
+        </tr>
+      </table>
+    </div>
+  {else}
+    <p>{#create_account#}<br />
+    <a href="{$LINK_ACCOUNT}"><strong>{#text_create_account#}</strong></a></p>
+  {/if}
+  {$FORM_END}
+{/if}

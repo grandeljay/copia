@@ -1,0 +1,93 @@
+
+/*Credits: Dynamic Drive CSS Library */
+/*URL: http://www.dynamicdrive.com/style/ */
+.columnLeft2 {
+  display: block;
+}
+.suckertreemenu ul{
+	list-style-type: none;
+   margin: 0;
+   padding: 0;
+   width: 190px;
+}
+.suckertreemenu li {
+  border-top: 1px solid #ddd;
+}
+.suckertreemenu ul > li:first-child {
+  border-top: 0px;
+}
+.suckertreemenu ul ul  {
+  border-top: 1px solid #ddd;
+}
+.suckertreemenu li a{
+	display: block;
+	width: 100%;
+	padding: 3px 0px 3px 0px;
+	text-decoration: none;
+	outline: none;
+	letter-spacing: normal;
+  font-size:12px !important; 
+  line-height:16px; 		
+}
+ul#treemenu1 li ul li ul {
+  text-indent: 10px;
+}
+/*Top level menu link items style*/
+.suckertreemenu li a:hover, .buttonmenu li a:active{
+	color: #af417e;
+	background-color: #eeeeee;
+	outline: none;
+}
+#cssmenu ul li .dataNavHeadingContent {
+  background-color: #eee;
+  margin-top:15px;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  padding: 4px;
+}
+
+#top1{
+  margin-top: 0px;
+	margin-bottom: 5px;	
+	border-top: 0px solid #b40076;
+}
+#top2{
+  margin-top: 0px;
+	margin-bottom: 5px;	
+	border-top: 5px solid #b40076;
+}
+/* EOF - web28 - 2010-04-10 - added ADMIN SERACH BAR */
+
+/*FIX FÜR ECONDA & CLEVERREACH*/
+li{
+	list-style-type: none;
+	margin-left:0px;
+}
+
+/*FIXED HEADER*/
+#fixed-header {
+  background-color: #fff;
+  height: 48px;
+  position: fixed !important;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  padding-top: 0px !important;
+}
+#fixed-header.active {
+  height: 88px;
+}
+.fixed-header-height {
+  height: 46px !important;
+}
+.fixed-header-height.active {
+  height: 84px !important;
+}
+.admin_spacer {
+  height: 42px !important;
+}
+
+.fixed_messageStack{
+  margin: 5px;
+}

@@ -1,0 +1,25 @@
+{
+    "orders": {
+        "headline": "Bestellimport",
+        "fields": {
+            "defaultpayment": {
+                "values": {
+                    "textfield": "Aus Textfeld",
+                    "matching": "Automatische Zurodnung"
+                },
+                "default": "matching"
+            },
+            "importpaidorders": {
+                "label": "Only import paid orders",
+                "key": "_#_platformName_#_.order.importonlypaid",
+                "type": "radio",
+                "submit": "Orders.ImportOnlyPaid",
+                "values": {
+                    "true": "Yes",
+                    "false": "No"
+                },
+                "default": "false"
+            }
+        }
+    }
+}

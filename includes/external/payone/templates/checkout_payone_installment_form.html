@@ -1,0 +1,88 @@
+<link rel="stylesheet" href="{$payonecss}" type="text/css" media="screen" />
+<script src="https://cdn.klarna.com/public/kitt/core/v1.0/js/klarna.min.js"></script>
+<script src="https://cdn.klarna.com/public/kitt/toc/v1.1/js/klarna.terms.min.js"></script>
+
+<div class="payone_cc_container">
+  {if $error}<div class="errormessage">{$error}</div>{/if}
+
+  <table width="100%" class="payone_cc_table">
+    {if $required_fields}
+      {foreach key=key_data item=item_data from=$required_fields}
+        <tr>
+          <td class="label">{$key_data|constant}</td>
+          <td style="min-width: 120px;"><input id="{$key_data}" name="{$key_data}" type="text" value="{$item_data}"></td>
+        </tr>
+      {/foreach}
+    {/if}
+    
+    {if $installment_plan}
+      <tr>
+        <td colspan="2" style="text-align:left;">
+          <div id="horizontalAccordion" class="checkout_accordion">
+          {foreach name=inner item=item_data from=$installment_plan}
+            <ul class="resp-tabs-list nonjs-fallback">
+              <li><input id="rd-{$item_data.Duration}" type="radio" name="duration" value="{$item_data.Duration}" {if $smarty.foreach.inner.iteration == 1}checked="checked"{/if}> {$item_data.plan.1.Amount|number_format:"2":",":""} {$item_data.Currency} {$smarty.const.TEXT_EACH_MONTH} - {$item_data.Duration} {$smarty.const.TEXT_RATES}</li>
+            </ul>
+            <div class="resp-tabs-container">
+              <div>
+              <table width="100%" class="payone_cc_table small">
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_DURATION}:</td>
+                  <td>{$item_data.Duration} {$smarty.const.TEXT_DURATION_MONTHS}</td>
+                </tr>
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_FINANCING_AMOUNT}:</td>
+                  <td>{$item_data.OriginalAmount|number_format:"2":",":""} {$item_data.Currency}</td>
+                </tr>
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_TOTAL_AMOUNT}:</td>
+                  <td>{$item_data.TotalAmount|number_format:"2":",":""} {$item_data.Currency}</td>
+                </tr>
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_INTERESTRATE}:</td>
+                  <td>{$item_data.InterestRate}%</td>
+                </tr>
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_EFFECTIVE_INTERESTRATE}:</td>
+                  <td>{$item_data.EffectiveInterestRate}%</td>
+                </tr>
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_MONTHLY_RATES}:</td>
+                  <td>{$item_data.plan.1.Amount|number_format:"2":",":""} {$item_data.Currency}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="label" style="text-align:center;">{$smarty.const.TEXT_RATES_PLAN}</td>
+                </tr>
+                {foreach name=plan item=item_plan from=$item_data.plan}
+                <tr>
+                  <td class="label">{$smarty.foreach.plan.iteration}. {$smarty.const.TEXT_RATES_DUE} {$item_plan.Due|xtc_date_short}</td>
+                  <td>{$item_plan.Amount|number_format:"2":",":""} {$item_data.Currency}</td>
+                </tr>
+                {/foreach}
+                <tr>
+                  <td class="label">{$smarty.const.TEXT_CONTRACT}:</td>
+                  <td><a target="_blank" href="{$item_data.StandardCreditInformationUrl}">{$smarty.const.TEXT_DOWNLOAD_CONTRACT}</a></td>
+                </tr>
+              </table>
+              </div>
+            </div>
+          {/foreach}
+          </div>
+        </td>
+      </tr>
+    {/if}
+
+    {if $confirm_text}
+      <tr style="text-align:left;line-height:18px;">
+        <td colspan="2"><input type="checkbox" id="conditions" name="conditions" value="true"/> {$confirm_text}</td>
+      </tr>
+    {/if}
+    {if isset($smarty.session.payone_installment.installment_type) && $smarty.session.payone_installment.installment_type == 'klarna'}
+    <tr>
+      <td colspan="2" align="right">{$smarty.const.TEXT_KLARNA_INVOICE} <span id="invoice"></span></td>
+    </tr>
+    {/if}
+  </table>
+</div>
+{$invoice_js}
+{$confirm_js}
