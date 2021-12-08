@@ -1,28 +1,26 @@
 <?php
-include ('includes/application_top.php');
-require_once(DIR_FS_CATALOG."includes/external/billpay/base/billpayBase.php");
+
+include('includes/application_top.php');
+require_once(DIR_FS_CATALOG . "includes/external/billpay/base/billpayBase.php");
 /** @var BillpayPayLater $billpay */
 $billpay = billpayBase::PaymentInstance('BILLPAYPAYLATER');
 $billpay->requireLang();
 $billpay->_logDebug('Giropay campaign: Start');
 
-if (empty($_SESSION['billpay_onAfterProcess']))
-{
+if (empty($_SESSION['billpay_onAfterProcess'])) {
     $err_msg = constant('MODULE_PAYMENT_BILLPAY_TEXT_ERROR_DEFAULT');
-    xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'error_message='.urlencode($err_msg), 'SSL'));
+    xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'error_message=' . urlencode($err_msg), 'SSL'));
     exit();
 }
 
 $billpay->_logDebug('Giropay campaign: No error');
-if (!empty($_GET['continue']))
-{
-    header('Location: '.$_SESSION['billpay_onAfterProcess']['externalRedirect']);
+if (!empty($_GET['continue'])) {
+    header('Location: ' . $_SESSION['billpay_onAfterProcess']['externalRedirect']);
     exit();
 }
 
 $billpay->_logDebug('Giropay campaign: No continue');
-if (!empty($_GET['abort']))
-{
+if (!empty($_GET['abort'])) {
     $orderId = $_SESSION['tmp_oID'];
     $billpay->setOrderBillpayState(billpayBase::STATE_CANCELLED, $orderId);
     xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL'));
@@ -34,7 +32,7 @@ require_once(DIR_FS_CATALOG . 'includes/external/billpay/base/Config.php');
 $oBillpayConfig = new Billpay_Base_Config();
 
 // create smarty elements
-$smarty = new Smarty;
+$smarty = new Smarty();
 $smarty->caching = 0;
 $smarty->assign('language', $_SESSION['language']);
 
@@ -43,20 +41,20 @@ $_SERVER['REQUEST_URI'] = FILENAME_CHECKOUT_PAYMENT;
 
 // include boxes and header
 // Warning: Gambio executes boxes.php in class context (uses $this)
-if(!$billpay->isGambio()) {
+if (!$billpay->isGambio()) {
     $billpay->_logDebug('Giropay campaign: No Gambio');
 
-    require (DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/source/boxes.php');
-    require (DIR_WS_INCLUDES.'header.php');
+    require(DIR_FS_CATALOG . 'templates/' . CURRENT_TEMPLATE . '/source/boxes.php');
+    require(DIR_WS_INCLUDES . 'header.php');
 }
 
 $billpaySmarty = new Smarty();
 $billpaySmarty->caching = 0;
 
 $billpaySmarty->assign('campaignText', billpayBase::EnsureUTF8($_SESSION['billpay_onAfterProcess']['campaignText']));
-$billpaySmarty->assign('campaignImg', $_SESSION['billpay_onAfterProcess']['campaignImg'] );
-$billpaySmarty->assign('externalRedirect', $_SESSION['billpay_onAfterProcess']['externalRedirect'] );
-$billpaySmarty->assign('rateLink', $_SESSION['billpay_onAfterProcess']['rateLink'] );
+$billpaySmarty->assign('campaignImg', $_SESSION['billpay_onAfterProcess']['campaignImg']);
+$billpaySmarty->assign('externalRedirect', $_SESSION['billpay_onAfterProcess']['externalRedirect']);
+$billpaySmarty->assign('rateLink', $_SESSION['billpay_onAfterProcess']['rateLink']);
 $billpaySmarty->assign('language', $_SESSION['language']);
 $billpay->_logDebug('Giropay campaign: Assigned billpay smarty values');
 
@@ -71,14 +69,14 @@ if (defined('RM') === false) {
     }
 }
 
-if(!$billpay->isGambio()) {
+if (!$billpay->isGambio()) {
     $billpay->_logDebug('Giropay campaign: No Gambio - creating view with own .tpl file');
 
     $smarty->assign('language', $_SESSION['language']); // intended duplicate
     $smarty->assign('main_content', $billpaySmarty->fetch('../includes/external/billpay/templates/checkout_billpay_giropay.tpl'));
     $smarty->display(CURRENT_TEMPLATE . '/index.html');
 
-    include ('includes/application_bottom.php');
+    include('includes/application_bottom.php');
 } else {
     $billpay->_logDebug('Giropay campaign: Gambio - creating view with a layout content control');
     $mainContent = $billpaySmarty->fetch('../includes/external/billpay/templates/checkout_billpay_giropay.tpl');

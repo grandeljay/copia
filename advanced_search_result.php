@@ -1,4 +1,5 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
    $Id: advanced_search_result.php 12036 2019-07-29 15:20:46Z GTB $
 
@@ -16,13 +17,13 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-include ('includes/application_top.php');
+include('includes/application_top.php');
 
 // create smarty elements
-$smarty = new Smarty;
+$smarty = new Smarty();
 
 // include needed functions
-require_once (DIR_FS_INC.'xtc_parse_search_string.inc.php');
+require_once(DIR_FS_INC . 'xtc_parse_search_string.inc.php');
 
 // security fix
 $keywords = $_GET['keywords'] = !empty($_GET['keywords']) ? stripslashes(trim(urldecode($_GET['keywords']))) : false;
@@ -37,44 +38,41 @@ $keywordcheck = xtc_parse_search_string($keywords, $search_keywords);
 
 // error check
 if (!$keywords && !$pfrom && !$pto) {
-  $errorno += 1;
+    $errorno += 1;
 }
 if ($keywords && strlen($keywords) > 0 && mb_strlen($keywords, $_SESSION['language_charset']) < (int)SEARCH_MIN_LENGTH) {
-  $errorno += 2;
+    $errorno += 2;
 }
-if ($pfrom && (!is_numeric($pfrom) || !settype($pfrom, "float")) ) {
-  $errorno += 10000;
+if ($pfrom && (!is_numeric($pfrom) || !settype($pfrom, "float"))) {
+    $errorno += 10000;
 }
-if ($pto && (!is_numeric($pto) || !settype($pto, "float")) ) {
-  $errorno += 100000;
+if ($pto && (!is_numeric($pto) || !settype($pto, "float"))) {
+    $errorno += 100000;
 }
 if ($pfrom && !(($errorno & 10000) == 10000) && $pto && !(($errorno & 100000) == 100000) && $pfrom > $pto) {
-  $errorno += 1000000;
+    $errorno += 1000000;
 }
 if ($keywords && !$keywordcheck) {
-  $errorno += 10000000;
+    $errorno += 10000000;
 }
 
 if ($errorno) {
-  xtc_redirect(xtc_href_link(FILENAME_ADVANCED_SEARCH, xtc_get_all_get_params(array('errorno')).'errorno='.$errorno));
-
+    xtc_redirect(xtc_href_link(FILENAME_ADVANCED_SEARCH, xtc_get_all_get_params(array('errorno')) . 'errorno=' . $errorno));
 } else {
-
   // include boxes
-  require (DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/source/boxes.php');
+    require(DIR_FS_CATALOG . 'templates/' . CURRENT_TEMPLATE . '/source/boxes.php');
 
   // build breadcrumb
-  $breadcrumb->add(NAVBAR_TITLE1_ADVANCED_SEARCH, xtc_href_link(FILENAME_ADVANCED_SEARCH));
-  $breadcrumb->add(NAVBAR_TITLE2_ADVANCED_SEARCH, xtc_href_link(FILENAME_ADVANCED_SEARCH_RESULT, xtc_get_all_get_params(array('filter', 'show', 'filter_id', 'cat'))));
+    $breadcrumb->add(NAVBAR_TITLE1_ADVANCED_SEARCH, xtc_href_link(FILENAME_ADVANCED_SEARCH));
+    $breadcrumb->add(NAVBAR_TITLE2_ADVANCED_SEARCH, xtc_href_link(FILENAME_ADVANCED_SEARCH_RESULT, xtc_get_all_get_params(array('filter', 'show', 'filter_id', 'cat'))));
 
-  include (DIR_WS_MODULES.'default.php');
-  require (DIR_WS_INCLUDES.'header.php');
+    include(DIR_WS_MODULES . 'default.php');
+    require(DIR_WS_INCLUDES . 'header.php');
 }
 
 $smarty->assign('language', $_SESSION['language']);
 if (!defined('RM')) {
-  $smarty->load_filter('output', 'note');
+    $smarty->load_filter('output', 'note');
 }
-$smarty->display(CURRENT_TEMPLATE.'/index.html');
-include ('includes/application_bottom.php');
-?>
+$smarty->display(CURRENT_TEMPLATE . '/index.html');
+include('includes/application_bottom.php');

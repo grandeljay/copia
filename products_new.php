@@ -1,4 +1,5 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
    $Id: products_new.php 11989 2019-07-23 06:41:02Z GTB $
 
@@ -21,33 +22,32 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-include ('includes/application_top.php');
+include('includes/application_top.php');
 
-$smarty = new Smarty;
+$smarty = new Smarty();
 
 // include needed function
-require_once (DIR_FS_INC.'xtc_date_long.inc.php');
-require_once (DIR_FS_INC.'xtc_get_vpe_name.inc.php');
+require_once(DIR_FS_INC . 'xtc_date_long.inc.php');
+require_once(DIR_FS_INC . 'xtc_get_vpe_name.inc.php');
 
 // include boxes
-require (DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/source/boxes.php');
+require(DIR_FS_CATALOG . 'templates/' . CURRENT_TEMPLATE . '/source/boxes.php');
 
 if ($language_not_found === true) {
-  $site_error = TEXT_SITE_NOT_FOUND;
-  include (DIR_WS_MODULES.FILENAME_ERROR_HANDLER);
-
+    $site_error = TEXT_SITE_NOT_FOUND;
+    include(DIR_WS_MODULES . FILENAME_ERROR_HANDLER);
 } else {
-  $breadcrumb->add(NAVBAR_TITLE_PRODUCTS_NEW, xtc_href_link(FILENAME_PRODUCTS_NEW));
+    $breadcrumb->add(NAVBAR_TITLE_PRODUCTS_NEW, xtc_href_link(FILENAME_PRODUCTS_NEW));
 
-  include (DIR_WS_MODULES.'default.php');
+    include(DIR_WS_MODULES . 'default.php');
 }
 
-require (DIR_WS_INCLUDES.'header.php');
+require(DIR_WS_INCLUDES . 'header.php');
 
 $smarty->assign('language', $_SESSION['language']);
 $smarty->caching = 0;
-if (!defined('RM'))
-	$smarty->load_filter('output', 'note');
-$smarty->display(CURRENT_TEMPLATE.'/index.html');
-include ('includes/application_bottom.php');
-?>
+if (!defined('RM')) {
+    $smarty->load_filter('output', 'note');
+}
+$smarty->display(CURRENT_TEMPLATE . '/index.html');
+include('includes/application_bottom.php');
