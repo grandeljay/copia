@@ -1,4 +1,5 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
    $Id: language.php 12440 2019-12-02 17:54:12Z GTB $
 
@@ -23,12 +24,14 @@
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
-if ( !class_exists( "language" ) ) {
-  class language {
-    var $languages, $catalog_languages, $browser_languages, $language;
+if (!class_exists("language")) {
+    class language
+    {
+        var $languages, $catalog_languages, $browser_languages, $language;
 
-    function __construct($lng = '') {
-      $this->languages = array('ar' => array('ar([-_][[:alpha:]]{2})?|arabic', 'arabic', 'ar'),
+        function __construct($lng = '')
+        {
+            $this->languages = array('ar' => array('ar([-_][[:alpha:]]{2})?|arabic', 'arabic', 'ar'),
                                'bg-win1251' => array('bg|bulgarian', 'bulgarian-win1251', 'bg'),
                                'bg-koi8r' => array('bg|bulgarian', 'bulgarian-koi8', 'bg'),
                                'ca' => array('ca|catalan', 'catala', 'ca'),
@@ -71,41 +74,41 @@ if ( !class_exists( "language" ) ) {
                                'zh-tw' => array('zh[-_]tw|chinese traditional', 'chinese_big5', 'zh-TW'),
                                'zh' => array('zh|chinese simplified', 'chinese_gb', 'zh'));
 
-      $this->catalog_languages = array();
-      $where = !defined('RUN_MODE_ADMIN') ? ((isset($_SESSION['customers_status']['customers_status']) && $_SESSION['customers_status']['customers_status'] == '0') ? "WHERE status_admin = '1'" : "WHERE status = '1'") : '';
-      $languages_query = xtDBquery("SELECT * 
-                                      FROM " . TABLE_LANGUAGES . " 
-                                           ".$where." 
+            $this->catalog_languages = array();
+            $where = !defined('RUN_MODE_ADMIN') ? ((isset($_SESSION['customers_status']['customers_status']) && $_SESSION['customers_status']['customers_status'] == '0') ? "WHERE status_admin = '1'" : "WHERE status = '1'") : '';
+            $languages_query = xtDBquery("SELECT *
+                                      FROM " . TABLE_LANGUAGES . "
+                                           " . $where . "
                                   ORDER BY sort_order");
-      while ($languages = xtc_db_fetch_array($languages_query, true)) {
-        $this->catalog_languages[$languages['code']] = $languages;
-        $this->catalog_languages[$languages['code']]['id'] = $languages['languages_id'];
-      }
+            while ($languages = xtc_db_fetch_array($languages_query, true)) {
+                  $this->catalog_languages[$languages['code']] = $languages;
+                  $this->catalog_languages[$languages['code']]['id'] = $languages['languages_id'];
+            }
 
-      $this->browser_languages = '';
-      $this->language = '';
+            $this->browser_languages = '';
+            $this->language = '';
 
-      if ( (!empty($lng)) && (isset($this->catalog_languages[$lng])) ) {
-        $this->language = $this->catalog_languages[$lng];        
-        } elseif(isset($this->catalog_languages[DEFAULT_LANGUAGE])) {
-          $this->language = $this->catalog_languages[DEFAULT_LANGUAGE];
-        } else {
-          $this->language = $this->catalog_languages[key($this->catalog_languages)];
-      }
-    }
-
-    function get_browser_language() {
-      $this->browser_languages = explode(',', (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '')); //DokuMan - 2010-08-04 - use $_SERVER here for better windows environment compatiblity
-      for ($i=0, $n=sizeof($this->browser_languages); $i<$n; $i++) {
-        reset($this->languages);
-        foreach ($this->languages as $key => $value) {
-          if (preg_match('/^(' . $value[0] . ')(;q=[0-9]\\.[0-9])?$/i', $this->browser_languages[$i]) && isset($this->catalog_languages[$key])) {
-            $this->language = $this->catalog_languages[$key];
-            break 2;
-          }
+            if ((!empty($lng)) && (isset($this->catalog_languages[$lng]))) {
+                $this->language = $this->catalog_languages[$lng];
+            } elseif (isset($this->catalog_languages[DEFAULT_LANGUAGE])) {
+                $this->language = $this->catalog_languages[DEFAULT_LANGUAGE];
+            } else {
+                $this->language = $this->catalog_languages[key($this->catalog_languages)];
+            }
         }
-      }
+
+        function get_browser_language()
+        {
+            $this->browser_languages = explode(',', (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '')); //DokuMan - 2010-08-04 - use $_SERVER here for better windows environment compatiblity
+            for ($i = 0, $n = sizeof($this->browser_languages); $i < $n; $i++) {
+                reset($this->languages);
+                foreach ($this->languages as $key => $value) {
+                    if (preg_match('/^(' . $value[0] . ')(;q=[0-9]\\.[0-9])?$/i', $this->browser_languages[$i]) && isset($this->catalog_languages[$key])) {
+                        $this->language = $this->catalog_languages[$key];
+                        break 2;
+                    }
+                }
+            }
+        }
     }
-  }
 }
-?>

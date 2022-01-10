@@ -1,4 +1,5 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
    $Id: class.logger.php 11642 2019-03-28 12:16:57Z GTB $
 
@@ -11,9 +12,9 @@
    ---------------------------------------------------------------------------------------*/
 
 spl_autoload_register(function ($class) {
-  if (is_file(DIR_FS_EXTERNAL . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php')) {
-    require_once(DIR_FS_EXTERNAL . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php');
-  }
+    if (is_file(DIR_FS_EXTERNAL . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php')) {
+        require_once(DIR_FS_EXTERNAL . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php');
+    }
 });
 
 use Psr\Log\LogLevel;
@@ -90,7 +91,7 @@ class LoggingManager implements \Psr\Log\LoggerInterface
         $this->logfile = $logfile;
         $this->channel = $channel;
         $this->stdout  = false;
-        
+
         $this->setLogLevel($loglevel);
     }
 
@@ -258,9 +259,8 @@ class LoggingManager implements \Psr\Log\LoggerInterface
     public function log($level, $message, array $context = array())
     {
         $level = strtolower($level);
-             
-        if ($this->logAtThisLevel($level)) 
-        {
+
+        if ($this->logAtThisLevel($level)) {
             // Build logline
             $pid                       = getmypid();
             list($exception, $context) = $this->handleException($context);
@@ -268,11 +268,11 @@ class LoggingManager implements \Psr\Log\LoggerInterface
             $context                   = $context ?: '{}'; // Fail-safe incase json_encode fails.
             $logline                   = $this->formatLogLine($level, $pid, $message, $context, $exception);
             $logfile                   = sprintf($this->logfile, $level, date('Y-m-d'));
-            
+
             // Log to file
             try {
                 if (is_file($logfile)) {
-                    $filesize = filesize($logfile);            
+                    $filesize = filesize($logfile);
                     if ($filesize >= $this->threshold) {
                         $this->LoggerRotate($logfile);
                     }
@@ -300,9 +300,9 @@ class LoggingManager implements \Psr\Log\LoggerInterface
     private function logAtThisLevel($level)
     {
         if (!array_key_exists($level, self::LEVELS)) {
-          $level = self::LOG_LEVEL_NONE;
+            $level = self::LOG_LEVEL_NONE;
         }
-        
+
         return self::LEVELS[$level] >= $this->loglevel;
     }
 
@@ -324,7 +324,7 @@ class LoggingManager implements \Psr\Log\LoggerInterface
             }
             unset($context['exception']);
         }
-        
+
         return [$exception_data, $context];
     }
 
@@ -402,12 +402,13 @@ class LoggingManager implements \Psr\Log\LoggerInterface
      *
      * @param string|int $treshold
      */
-    private function parseTreshold($treshold) {
-      preg_match('/(.+)(.{2})$/', $treshold, $matches);
-      list($treshold, $value, $unit) = $matches;
-      $treshold = (int) ($value * pow(1024, array_search(strtolower($unit), array(1 => 'kb','mb','gb','tb'))));
+    private function parseTreshold($treshold)
+    {
+        preg_match('/(.+)(.{2})$/', $treshold, $matches);
+        list($treshold, $value, $unit) = $matches;
+        $treshold = (int) ($value * pow(1024, array_search(strtolower($unit), array(1 => 'kb','mb','gb','tb'))));
 
-      return $treshold;
+        return $treshold;
     }
 
     /**
@@ -421,7 +422,7 @@ class LoggingManager implements \Psr\Log\LoggerInterface
         foreach (new DirectoryIterator(dirname($logfile)) as $info) {
             if ($info->isDot() || !$info->isFile()) {
                 continue;
-            }            
+            }
             $fileinfo = pathinfo($info->getFilename());
             if ($fileinfo['filename'] == basename($logfile)) {
                 if ($fileinfo['extension'] > $counter) {
@@ -429,11 +430,9 @@ class LoggingManager implements \Psr\Log\LoggerInterface
                 }
             }
         }
-        $counter ++;
-        
-        // rotate
-        rename($logfile, $logfile.'.'.$counter);
-    }
+        $counter++;
 
+        // rotate
+        rename($logfile, $logfile . '.' . $counter);
+    }
 }
-?>
