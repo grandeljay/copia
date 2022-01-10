@@ -1,26 +1,29 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
-   $Id: filenames.php 11973 2019-07-22 11:54:20Z Tomcraft $   
+   $Id: filenames.php 11973 2019-07-22 11:54:20Z Tomcraft $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
 
    Copyright (c) 2003 XT-Commerce
    -----------------------------------------------------------------------------------------
-   based on: 
+   based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(filenames.php,v 1.3 2003/05/25); www.oscommerce.com 
-   (c) 2003  nextcommerce (filenames.php,v 1.21 2003/08/25); www.nextcommerce.org 
+   (c) 2002-2003 osCommerce(filenames.php,v 1.3 2003/05/25); www.oscommerce.com
+   (c) 2003  nextcommerce (filenames.php,v 1.21 2003/08/25); www.nextcommerce.org
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-require_once(DIR_FS_INC.'auto_include.inc.php');
-foreach(auto_include(DIR_FS_CATALOG.'includes/extra/filenames/','php') as $file) require ($file);
+require_once(DIR_FS_INC . 'auto_include.inc.php');
+foreach (auto_include(DIR_FS_CATALOG . 'includes/extra/filenames/', 'php') as $file) {
+    require($file);
+}
 
 //compatibility for modified eCommerce Shopsoftware 1.06 files
 if (!defined('DIR_ADMIN')) {
-  define('DIR_ADMIN', 'admin/');
+    define('DIR_ADMIN', 'admin/');
 }
 
 $filename_array = array(
@@ -43,11 +46,11 @@ $filename_array = array(
   'FILENAME_CHECKOUT_SHIPPING_ADDRESS' => 'checkout_shipping_address.php',
   'FILENAME_CHECKOUT_SUCCESS' => 'checkout_success.php',
   'FILENAME_COOKIE_USAGE' => 'cookie_usage.php',
-  'FILENAME_CUSTOMERS' => DIR_ADMIN.'customers.php',
+  'FILENAME_CUSTOMERS' => DIR_ADMIN . 'customers.php',
   'FILENAME_CREATE_ACCOUNT' => 'create_account.php',
   'FILENAME_DEFAULT' => 'index.php',
   'FILENAME_DOWNLOAD' => 'download.php',
-  'FILENAME_MODULES' => DIR_ADMIN.'modules.php',
+  'FILENAME_MODULES' => DIR_ADMIN . 'modules.php',
   'FILENAME_NEW_PRODUCTS' => 'new_products.php',
   'FILENAME_LOGIN' => 'login.php',
   'FILENAME_LOGOFF' => 'logoff.php',
@@ -63,10 +66,10 @@ $filename_array = array(
   'FILENAME_REVIEWS' => 'reviews.php',
   'FILENAME_SHIPPING' => 'shipping.php',
   'FILENAME_SHOPPING_CART' => 'shopping_cart.php',
-  'FILENAME_START' => DIR_ADMIN.'start.php',
+  'FILENAME_START' => DIR_ADMIN . 'start.php',
   'FILENAME_SPECIALS' => 'specials.php',
   'FILENAME_SSL_CHECK' => 'ssl_check.php',
-  'FILENAME_ORDERS' => DIR_ADMIN.'orders.php',
+  'FILENAME_ORDERS' => DIR_ADMIN . 'orders.php',
   'FILENAME_METATAGS' => 'metatags.php',
   'FILENAME_MINIMUM_ORDER' => 'reviews.php',
   'FILENAME_PRODUCTS_MEDIA' => 'products_media.php',
@@ -83,7 +86,7 @@ $filename_array = array(
   'FILENAME_PRODUCT_LISTING_COL' => 'product_listing_col.php',
   'FILENAME_POPUP_COUPON_HELP' => 'popup_coupon_help.php',
   'FILENAME_POPUP_CONTENT' => 'popup_content.php',
-  'FILENAME_EDIT_PRODUCTS' => DIR_ADMIN.'categories.php',
+  'FILENAME_EDIT_PRODUCTS' => DIR_ADMIN . 'categories.php',
   'FILENAME_GRADUATED_PRICE' => 'graduated_prices.php',
   'FILENAME_PRINT_PRODUCT_INFO' => 'print_product_info.php',
   'FILENAME_PRINT_ORDER' => 'print_order.php',
@@ -96,8 +99,7 @@ $filename_array = array(
   'FILENAME_MEDIA_CONTENT' => 'media_content.php',
 );
 
-// define 
+// define
 foreach ($filename_array as $key => $val) {
-  defined($key) or define($key, $val);
+    defined($key) or define($key, $val);
 }
-?>

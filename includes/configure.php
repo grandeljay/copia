@@ -1,4 +1,5 @@
 <?php
+
 /* --------------------------------------------------------------
    $Id: configure.php 13170 2021-01-15 13:52:36Z GTB $
 
@@ -32,29 +33,30 @@
   define('DB_DATABASE', '');
   define('DB_SERVER_CHARSET', 'latin1'); // set db charset 'utf8' or 'latin1'
   define('USE_PCONNECT', 'false'); // use persistent connections?
-  
-  if (DB_DATABASE != '') {
-    // auto include
-    require_once (DIR_FS_CATALOG.'inc/auto_include.inc.php');
 
-    foreach(auto_include(DIR_FS_CATALOG.'includes/extra/configure/','php') as $file) require_once ($file);
-  }
-  
+if (DB_DATABASE != '') {
+    // auto include
+    require_once(DIR_FS_CATALOG . 'inc/auto_include.inc.php');
+
+    foreach (auto_include(DIR_FS_CATALOG . 'includes/extra/configure/', 'php') as $file) {
+        require_once($file);
+    }
+}
+
   // server
   defined('HTTP_SERVER') or define('HTTP_SERVER', 'http://localhost'); // eg, http://localhost - should not be empty for productive servers
   defined('HTTPS_SERVER') or define('HTTPS_SERVER', 'https://localhost'); // eg, https://localhost - should not be empty for productive servers
 
   // secure SSL
   defined('ENABLE_SSL') or define('ENABLE_SSL', false); // secure webserver for checkout procedure?
-  
+
   // session handling
   defined('STORE_SESSIONS') or define('STORE_SESSIONS', 'mysql'); // leave empty '' for default handler or set to 'mysql'
 
-  if (DB_DATABASE != '') {
+if (DB_DATABASE != '') {
     // set admin directory DIR_ADMIN
-    require_once(DIR_FS_CATALOG.'inc/set_admin_directory.inc.php');
+    require_once(DIR_FS_CATALOG . 'inc/set_admin_directory.inc.php');
 
     // include standard settings
-    require(DIR_FS_CATALOG.(defined('RUN_MODE_ADMIN')? DIR_ADMIN : '').'includes/paths.php');
-  }
-?>
+    require(DIR_FS_CATALOG . (defined('RUN_MODE_ADMIN') ? DIR_ADMIN : '') . 'includes/paths.php');
+}

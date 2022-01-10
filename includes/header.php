@@ -28,56 +28,58 @@
    ---------------------------------------------------------------------------------------*/
 
 //SET SHOP OFFLINE 503 STATUS CODE
-require_once(DIR_FS_INC . 'xtc_get_shop_conf.inc.php'); 
+require_once(DIR_FS_INC . 'xtc_get_shop_conf.inc.php');
 
 $shop_is_offline = get_shop_offline_status();
 if ($shop_is_offline) {
-  $current_link = preg_replace("/([^\?]*)(\?.*)/", "$1", $_SERVER['REQUEST_URI']);  
-  $redirect_link = xtc_href_link(FILENAME_DEFAULT);
-  $category_link = str_replace(array(HTTP_SERVER, HTTPS_SERVER), '', preg_replace("/([^\?]*)(\?.*)/", "$1", $redirect_link));
-  if ($category_link != $current_link) {
-    header('Location: '.preg_replace("/[\r\n]+(.*)$/i", "", html_entity_decode($redirect_link)));
-    exit();
-  }  
-  header("HTTP/1.1 503 Service Temporarily Unavailable");
-  header("Status: 503 Service Temporarily Unavailable");
+    $current_link = preg_replace("/([^\?]*)(\?.*)/", "$1", $_SERVER['REQUEST_URI']);
+    $redirect_link = xtc_href_link(FILENAME_DEFAULT);
+    $category_link = str_replace(array(HTTP_SERVER, HTTPS_SERVER), '', preg_replace("/([^\?]*)(\?.*)/", "$1", $redirect_link));
+    if ($category_link != $current_link) {
+        header('Location: ' . preg_replace("/[\r\n]+(.*)$/i", "", html_entity_decode($redirect_link)));
+        exit();
+    }
+    header("HTTP/1.1 503 Service Temporarily Unavailable");
+    header("Status: 503 Service Temporarily Unavailable");
 }
 //SET 410 STATUS CODE
-elseif (isset($site_error) 
-        && ($site_error === CATEGORIE_NOT_FOUND 
-            || $site_error === TEXT_PRODUCT_NOT_FOUND 
-            || $site_error === TEXT_CONTENT_NOT_FOUND 
+elseif (
+    isset($site_error)
+        && ($site_error === CATEGORIE_NOT_FOUND
+            || $site_error === TEXT_PRODUCT_NOT_FOUND
+            || $site_error === TEXT_CONTENT_NOT_FOUND
             || $site_error === MANUFACTURER_NOT_FOUND
             || $site_error === TEXT_SITE_NOT_FOUND
             )
-        ) 
-{
-  header("HTTP/1.0 410 Gone"); 
-  header("Status: 410 Gone"); // FAST CGI
+) {
+    header("HTTP/1.0 410 Gone");
+    header("Status: 410 Gone"); // FAST CGI
 }
 
 // gzip compression
-if (GZIP_COMPRESSION == 'true' 
+if (
+    GZIP_COMPRESSION == 'true'
     && isset($ext_zlib_loaded)
-    && $ext_zlib_loaded == true 
+    && $ext_zlib_loaded == true
     && isset($ini_zlib_output_compression)
     && $ini_zlib_output_compression < 1
     && $encoding = xtc_check_gzip()
-    )
-{
-  header('Content-Encoding: ' . $encoding);
+) {
+    header('Content-Encoding: ' . $encoding);
 }
 
-foreach(auto_include(DIR_FS_CATALOG.'includes/extra/header/header_begin/','php') as $file) require_once ($file);
+foreach (auto_include(DIR_FS_CATALOG . 'includes/extra/header/header_begin/', 'php') as $file) {
+    require_once($file);
+}
 
 defined('TEMPLATE_RESPONSIVE') or define('TEMPLATE_RESPONSIVE', 'false');
 defined('TEMPLATE_HTML_ENGINE') or define('TEMPLATE_HTML_ENGINE', 'xhtml');
 ?>
 <!DOCTYPE html<?php echo ((TEMPLATE_HTML_ENGINE == 'xhtml') ? ' PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"' : ''); ?>>
-<html<?php echo ((TEMPLATE_HTML_ENGINE == 'xhtml') ? ' '.HTML_PARAMS : ' lang="'.$_SESSION['language_code'].'"'); ?>>
+<html<?php echo ((TEMPLATE_HTML_ENGINE == 'xhtml') ? ' ' . HTML_PARAMS : ' lang="' . $_SESSION['language_code'] . '"'); ?>>
 <head>
-<?php include(DIR_WS_MODULES.FILENAME_METATAGS); ?>
-<?php include(DIR_WS_MODULES.'favicons.php'); ?>
+<?php include(DIR_WS_MODULES . FILENAME_METATAGS); ?>
+<?php include(DIR_WS_MODULES . 'favicons.php'); ?>
 <?php
 /*
   The following copyright announcement is in compliance
@@ -106,54 +108,54 @@ Please visit our website: www.modified-shop.org
 <meta name="generator" content="(c) by <?php echo PROJECT_VERSION; ?> 80C https://www.modified-shop.org" />
 <?php
 if (DIR_WS_BASE == '') {
-  echo '<base href="'.(($request_type == 'SSL') ? HTTPS_SERVER : HTTP_SERVER).DIR_WS_CATALOG.'" />'.PHP_EOL;
+    echo '<base href="' . (($request_type == 'SSL') ? HTTPS_SERVER : HTTP_SERVER) . DIR_WS_CATALOG . '" />' . PHP_EOL;
 }
-if (is_file('templates/'.CURRENT_TEMPLATE.'/css/general.css.php')) {
-  require('templates/'.CURRENT_TEMPLATE.'/css/general.css.php');
-} else { //Maintain backwards compatibility for older templates 
-  echo '<link rel="stylesheet" type="text/css" href="templates/'.CURRENT_TEMPLATE.'/stylesheet.css" />'.PHP_EOL;
+if (is_file('templates/' . CURRENT_TEMPLATE . '/css/general.css.php')) {
+    require('templates/' . CURRENT_TEMPLATE . '/css/general.css.php');
+} else { //Maintain backwards compatibility for older templates
+    echo '<link rel="stylesheet" type="text/css" href="templates/' . CURRENT_TEMPLATE . '/stylesheet.css" />' . PHP_EOL;
 }
 
 // require theme based javascript
-require('templates/'.CURRENT_TEMPLATE.'/javascript/general.js.php');
+require('templates/' . CURRENT_TEMPLATE . '/javascript/general.js.php');
 
 // require additional javascript
-switch(basename($PHP_SELF)) {
+switch (basename($PHP_SELF)) {
+    case FILENAME_CHECKOUT_PAYMENT:
+        require('includes/form_check.js.php');
+        if (method_exists($payment_modules, 'javascript_validation')) {
+            echo $payment_modules->javascript_validation();
+        }
+        break;
 
-  case FILENAME_CHECKOUT_PAYMENT:
-      require('includes/form_check.js.php');
-      if (method_exists($payment_modules, 'javascript_validation')) {
-        echo $payment_modules->javascript_validation();
-      }
-    break;
+    case FILENAME_CHECKOUT_SHIPPING:
+        require('includes/form_check.js.php');
+        if (method_exists($shipping_modules, 'javascript_validation')) {
+            echo $shipping_modules->javascript_validation();
+        }
+        break;
 
-  case FILENAME_CHECKOUT_SHIPPING:
-      require('includes/form_check.js.php');
-      if (method_exists($shipping_modules, 'javascript_validation')) {
-        echo $shipping_modules->javascript_validation();
-      }
-    break;
+    case FILENAME_CREATE_ACCOUNT:
+    case FILENAME_CREATE_GUEST_ACCOUNT:
+    case FILENAME_ACCOUNT_PASSWORD:
+    case FILENAME_ACCOUNT_EDIT:
+    case FILENAME_CHECKOUT_SHIPPING_ADDRESS:
+    case FILENAME_CHECKOUT_PAYMENT_ADDRESS:
+    case FILENAME_ADVANCED_SEARCH:
+    case FILENAME_PRODUCT_REVIEWS_WRITE:
+        require('includes/form_check.js.php');
+        break;
 
-  case FILENAME_CREATE_ACCOUNT:
-  case FILENAME_CREATE_GUEST_ACCOUNT:
-  case FILENAME_ACCOUNT_PASSWORD:
-  case FILENAME_ACCOUNT_EDIT:
-  case FILENAME_CHECKOUT_SHIPPING_ADDRESS:
-  case FILENAME_CHECKOUT_PAYMENT_ADDRESS:
-  case FILENAME_ADVANCED_SEARCH:
-  case FILENAME_PRODUCT_REVIEWS_WRITE: 
-      require('includes/form_check.js.php');
-    break;
-
-  case FILENAME_ADDRESS_BOOK_PROCESS:
-      if (isset($_GET['delete']) === false) {
-        include('includes/form_check.js.php');
-      }
-    break;
-
+    case FILENAME_ADDRESS_BOOK_PROCESS:
+        if (isset($_GET['delete']) === false) {
+            include('includes/form_check.js.php');
+        }
+        break;
 }
 
-foreach(auto_include(DIR_FS_CATALOG.'includes/extra/header/header_head/','php') as $file) require_once ($file);
+foreach (auto_include(DIR_FS_CATALOG . 'includes/extra/header/header_head/', 'php') as $file) {
+    require_once($file);
+}
 ?>
 </head>
 <body>
@@ -165,82 +167,84 @@ require_once('inc/xtc_parse_input_field_data.inc.php');
 
 // check if the 'install' directory exists, and warn of its existence
 if (WARN_INSTALL_EXISTENCE == 'true') {
-  if (is_dir(DIR_FS_CATALOG . '/' . DIR_MODIFIED_INSTALLER)) {
-    xtc_output_warning(sprintf(WARNING_INSTALL_DIRECTORY_EXISTS, DIR_FS_CATALOG . DIR_MODIFIED_INSTALLER));
-  }
+    if (is_dir(DIR_FS_CATALOG . '/' . DIR_MODIFIED_INSTALLER)) {
+        xtc_output_warning(sprintf(WARNING_INSTALL_DIRECTORY_EXISTS, DIR_FS_CATALOG . DIR_MODIFIED_INSTALLER));
+    }
 }
 
 // check if the configure.php file is writeable
 if (WARN_CONFIG_WRITEABLE == 'true') {
-  if ((is_file(DIR_WS_INCLUDES . 'configure.php')) && (is_writeable(DIR_WS_INCLUDES . 'configure.php'))) {
-    xtc_output_warning(sprintf(WARNING_CONFIG_FILE_WRITEABLE, DIR_WS_INCLUDES . 'configure.php'));
-  }
-  if ((is_file(DIR_WS_INCLUDES . 'local/configure.php')) && (is_writeable(DIR_WS_INCLUDES . 'local/configure.php'))) {
-    xtc_output_warning(sprintf(WARNING_CONFIG_FILE_WRITEABLE, DIR_WS_INCLUDES . 'local/configure.php'));
-  }
+    if ((is_file(DIR_WS_INCLUDES . 'configure.php')) && (is_writeable(DIR_WS_INCLUDES . 'configure.php'))) {
+        xtc_output_warning(sprintf(WARNING_CONFIG_FILE_WRITEABLE, DIR_WS_INCLUDES . 'configure.php'));
+    }
+    if ((is_file(DIR_WS_INCLUDES . 'local/configure.php')) && (is_writeable(DIR_WS_INCLUDES . 'local/configure.php'))) {
+        xtc_output_warning(sprintf(WARNING_CONFIG_FILE_WRITEABLE, DIR_WS_INCLUDES . 'local/configure.php'));
+    }
 }
 
 // check if the session folder is writeable
 if (WARN_SESSION_DIRECTORY_NOT_WRITEABLE == 'true') {
-  if (STORE_SESSIONS == '') {
-    if (!is_dir(xtc_session_save_path())) {
-      xtc_output_warning(WARNING_SESSION_DIRECTORY_NON_EXISTENT);
-    } elseif (!is_writeable(xtc_session_save_path())) {
-      xtc_output_warning(WARNING_SESSION_DIRECTORY_NOT_WRITEABLE);
+    if (STORE_SESSIONS == '') {
+        if (!is_dir(xtc_session_save_path())) {
+            xtc_output_warning(WARNING_SESSION_DIRECTORY_NON_EXISTENT);
+        } elseif (!is_writeable(xtc_session_save_path())) {
+            xtc_output_warning(WARNING_SESSION_DIRECTORY_NOT_WRITEABLE);
+        }
     }
-  }
 }
 
 // check session.auto_start is disabled
-if ( (WARN_SESSION_AUTO_START == 'true') && (function_exists('ini_get')) ) {
-  if (ini_get('session.auto_start') == '1') {
-    xtc_output_warning(WARNING_SESSION_AUTO_START);
-  }
+if ((WARN_SESSION_AUTO_START == 'true') && (function_exists('ini_get'))) {
+    if (ini_get('session.auto_start') == '1') {
+        xtc_output_warning(WARNING_SESSION_AUTO_START);
+    }
 }
 
-if ( (WARN_DOWNLOAD_DIRECTORY_NOT_READABLE == 'true') && (DOWNLOAD_ENABLED == 'true') ) {
-  if (!is_dir(DIR_FS_DOWNLOAD)) {
-    xtc_output_warning(WARNING_DOWNLOAD_DIRECTORY_NON_EXISTENT);
-  }
+if ((WARN_DOWNLOAD_DIRECTORY_NOT_READABLE == 'true') && (DOWNLOAD_ENABLED == 'true')) {
+    if (!is_dir(DIR_FS_DOWNLOAD)) {
+        xtc_output_warning(WARNING_DOWNLOAD_DIRECTORY_NON_EXISTENT);
+    }
 }
 
 $smarty->assign('navtrail', $breadcrumb->trail(' &raquo; '));
 if (isset($_SESSION['customer_id'])) {
-	$smarty->assign('logoff',xtc_href_link(FILENAME_LOGOFF, '', 'SSL'));
+    $smarty->assign('logoff', xtc_href_link(FILENAME_LOGOFF, '', 'SSL'));
 } else {
-	$smarty->assign('login',xtc_href_link(FILENAME_LOGIN, '', 'SSL'));
-	$smarty->assign('create_account',xtc_href_link(FILENAME_CREATE_ACCOUNT, '', 'SSL'));
+    $smarty->assign('login', xtc_href_link(FILENAME_LOGIN, '', 'SSL'));
+    $smarty->assign('create_account', xtc_href_link(FILENAME_CREATE_ACCOUNT, '', 'SSL'));
 }
-$smarty->assign('index',xtc_href_link(FILENAME_DEFAULT));
-if ((isset($_SESSION['customer_id']) 
+$smarty->assign('index', xtc_href_link(FILENAME_DEFAULT));
+if (
+    (isset($_SESSION['customer_id'])
      && $_SESSION['customers_status']['customers_status_id'] != DEFAULT_CUSTOMERS_STATUS_ID_GUEST
      ) || GUEST_ACCOUNT_EDIT == 'true'
-    ) 
-{
-  $smarty->assign('account',xtc_href_link(FILENAME_ACCOUNT, '', 'SSL'));
+) {
+    $smarty->assign('account', xtc_href_link(FILENAME_ACCOUNT, '', 'SSL'));
 }
-$smarty->assign('cart',xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
-$smarty->assign('checkout',xtc_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL'));
+$smarty->assign('cart', xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
+$smarty->assign('checkout', xtc_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL'));
 $smarty->assign('store_name', encode_htmlspecialchars(TITLE));
 
 if (isset($_GET['error_message']) && xtc_not_null($_GET['error_message'])) {
-  $smarty->assign('error', get_message('error_message'));
+    $smarty->assign('error', get_message('error_message'));
 }
 if (isset($_GET['info_message']) && xtc_not_null($_GET['info_message'])) {
-  $smarty->assign('error', get_message('info_message'));
+    $smarty->assign('error', get_message('info_message'));
 }
 
 ## header_body_extra
 
 // SHOP OFFLINE INFO
 if ($shop_is_offline) {
-  $smarty->assign('language', $_SESSION['language']);
-  $smarty->assign('shop_offline_msg', xtc_get_shop_conf('SHOP_OFFLINE_MSG'));	
-  $smarty->display(CURRENT_TEMPLATE.'/offline.html');	
-  include ('includes/application_bottom.php');
-  exit();
+    $smarty->assign('language', $_SESSION['language']);
+    $smarty->assign('shop_offline_msg', xtc_get_shop_conf('SHOP_OFFLINE_MSG'));
+    $smarty->display(CURRENT_TEMPLATE . '/offline.html');
+    include('includes/application_bottom.php');
+    exit();
 }
 
-foreach(auto_include(DIR_FS_CATALOG.'includes/extra/header/header_body/','php') as $file) require_once ($file);
+foreach (auto_include(DIR_FS_CATALOG . 'includes/extra/header/header_body/', 'php') as $file) {
+    require_once($file);
+}
 ## header_body_extra
 ?>
