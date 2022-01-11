@@ -21,7 +21,7 @@
  *  DATE / TIME
  *
  */
- 
+
 define('HTML_PARAMS','dir="ltr" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml"');
 @setlocale(LC_TIME, 'en_GB.UTF-8', 'en_GB@euro', 'en_GB', 'en-GB', 'en', 'en_GB.ISO_8859-1', 'English','en_GB.ISO_8859-15');
 
@@ -30,7 +30,7 @@ define('DATE_FORMAT_LONG', '%A %d %B, %Y'); // this is used for strftime()
 define('DATE_FORMAT', 'd/m/Y');  // this is used for strftime()
 define('DATE_TIME_FORMAT', DATE_FORMAT_SHORT . ' %H:%M:%S');
 define('DOB_FORMAT_STRING', 'dd/mm/jjjj');
- 
+
 function xtc_date_raw($date, $reverse = false) {
   if ($reverse) {
     return substr($date, 0, 2) . substr($date, 3, 2) . substr($date, 6, 4);
@@ -46,7 +46,7 @@ define('TITLE', STORE_NAME);
 define('HEADER_TITLE_TOP', 'Main page');
 define('HEADER_TITLE_CATALOG', 'Catalogue');
 
-// if USE_DEFAULT_LANGUAGE_CURRENCY is true, use the following currency when changing language, 
+// if USE_DEFAULT_LANGUAGE_CURRENCY is true, use the following currency when changing language,
 // instead of staying with the applications default currency
 define('LANGUAGE_CURRENCY', 'EUR');
 
@@ -74,8 +74,8 @@ define('BOX_MANUFACTURER_INFO_HOMEPAGE', '%s Homepage');
 define('BOX_MANUFACTURER_INFO_OTHER_PRODUCTS', 'More products');
 
 define('BOX_HEADING_ADD_PRODUCT_ID','Add to cart');
-  
-define('BOX_LOGINBOX_STATUS','Customer group:');     
+
+define('BOX_LOGINBOX_STATUS','Customer group:');
 define('BOX_LOGINBOX_DISCOUNT','Product discount');
 define('BOX_LOGINBOX_DISCOUNT_TEXT','Discount');
 define('BOX_LOGINBOX_DISCOUNT_OT','');
@@ -205,7 +205,7 @@ define('IMAGE_BUTTON_IN_CART', 'Add to cart');
 define('IMAGE_BUTTON_SEARCH', 'Search');
 define('IMAGE_BUTTON_UPDATE', 'Update');
 define('IMAGE_BUTTON_UPDATE_CART', 'Update shopping cart');
-define('IMAGE_BUTTON_WRITE_REVIEW', 'Write evaluation');
+define('IMAGE_BUTTON_WRITE_REVIEW', 'Write review');
 define('IMAGE_BUTTON_ADMIN', 'Admin');
 define('IMAGE_BUTTON_PRODUCT_EDIT', 'Edit product');
 define('IMAGE_BUTTON_SEND', 'Send'); //DokuMan - 2010-03-15 - Added button description for contact form
@@ -248,7 +248,7 @@ define('TEXT_REVIEW_WORD_COUNT', '%s words');
 define('TEXT_REVIEW_RATING', 'Review: %s [%s]');
 define('TEXT_REVIEW_DATE_ADDED', 'Date added: %s');
 define('TEXT_NO_REVIEWS', 'There are no reviews yet.');
-define('TEXT_NO_NEW_PRODUCTS', 'There are no new products for the last '.MAX_DISPLAY_NEW_PRODUCTS_DAYS.' days. Instead of that we will show you the latest arrived products.'); 
+define('TEXT_NO_NEW_PRODUCTS', 'There are no new products for the last '.MAX_DISPLAY_NEW_PRODUCTS_DAYS.' days. Instead of that we will show you the latest arrived products.');
 define('TEXT_UNKNOWN_TAX_RATE', 'Unknown tax rate');
 
 /*
@@ -485,7 +485,7 @@ define('TAX_INFO_EXCL','%s VAT excl.');
 define('TAX_INFO_ADD','%s VAT plus.');
 define('SHIPPING_EXCL','excl.');
 define('SHIPPING_INCL','incl.');
-define('SHIPPING_COSTS','Shipping costs'); 
+define('SHIPPING_COSTS','Shipping costs');
 
 define('SHIPPING_TIME','Shipping time: ');
 define('MORE_INFO','[More]');
@@ -497,7 +497,7 @@ define('_MODULE_INVALID_SHIPPING_ZONE', 'Unfortunately we do not deliver to the 
 define('_MODULE_UNDEFINED_SHIPPING_RATE', 'Shipping costs cannot be calculated at the moment, please contact us.');
 
 define('NAVBAR_TITLE_1_ACCOUNT_DELETE', 'Your account');
-define('NAVBAR_TITLE_2_ACCOUNT_DELETE', 'Delete account');	
+define('NAVBAR_TITLE_2_ACCOUNT_DELETE', 'Delete account');
 
 //contact-form error messages
 define('ERROR_EMAIL','<p><b>Your e-mail address:</b> None or invalid input!</p>');
@@ -506,7 +506,7 @@ define('ERROR_MSG_BODY','<p><b>Your message:</b> No input!</p>');
 
 //Table Header checkout_confirmation.php
 define('HEADER_QTY', 'Number');
-define('HEADER_ARTICLE', 'Item');    
+define('HEADER_ARTICLE', 'Item');
 define('HEADER_SINGLE', 'Singleprice');
 define('HEADER_TOTAL','Total');
 define('HEADER_MODEL', 'Model');
@@ -611,7 +611,7 @@ define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_9', 'No account number specified!');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_10', 'You do not have account holders indicated.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_128', 'Internal error when checking the bank details.');
 
-// Fehlermeldungen alle IBAN-Nummern 
+// Fehlermeldungen alle IBAN-Nummern
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1000', 'In IBAN included country code (1st and 2nd place) unknown.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1010', 'IBAN length wrong: Too many points entered.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1020', 'IBAN length wrong: Too few points entered.');
@@ -623,7 +623,7 @@ define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1070', 'BIC-length wrong: Zu wenige Ze
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1080', 'BIC-length invalid: 8 or 11 characters are required.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1200', 'IBANs from the specified country (1st and 2nd place of the IBAN) are not accepted.');
 
-// Fehlermeldungen für deutsche Kontonummern 
+// Fehlermeldungen für deutsche Kontonummern
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_2001', 'In IBAN included account number (points 13 to 22) and/or routing number (points 5 to 12) invalid or do not match each other.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_2002', 'In IBAN included account number (points 13 to 22) is not automatically testable.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_2003', 'For in IBAN included account number (points 13 to 22) there is no check digit defined.');
