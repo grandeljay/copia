@@ -1,4 +1,5 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
    $Id: german.php 13488 2021-04-01 09:24:18Z GTB $
 
@@ -12,18 +13,18 @@
    (c) 2002-2003 osCommerce(german.php,v 1.119 2003/05/19); www.oscommerce.com
    (c) 2003 nextcommerce (german.php,v 1.25 2003/08/25); www.nextcommerce.org
    (c) 2006 XT-Commerce
-   
-   Released under the GNU General Public License 
+
+   Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
 /*
- * 
+ *
  *  DATE / TIME
- * 
+ *
  */
- 
-define('HTML_PARAMS','dir="ltr" xml:lang="de" xmlns="http://www.w3.org/1999/xhtml"');
-@setlocale(LC_TIME, 'de_DE.UTF-8' ,'de_DE@euro', 'de_DE', 'de-DE', 'de', 'ge', 'de_DE.ISO_8859-1', 'German','de_DE.ISO_8859-15');
+
+define('HTML_PARAMS', 'dir="ltr" xml:lang="de" xmlns="http://www.w3.org/1999/xhtml"');
+@setlocale(LC_TIME, 'de_DE.UTF-8', 'de_DE@euro', 'de_DE', 'de-DE', 'de', 'ge', 'de_DE.ISO_8859-1', 'German', 'de_DE.ISO_8859-15');
 
 define('DATE_FORMAT_SHORT', '%d.%m.%Y');  // this is used for strftime()
 define('DATE_FORMAT_LONG', '%A, %d. %B %Y'); // this is used for strftime()
@@ -31,22 +32,25 @@ define('DATE_FORMAT', 'd.m.Y');  // this is used for strftime()
 define('DATE_TIME_FORMAT', DATE_FORMAT_SHORT . ' %H:%M:%S');
 define('DOB_FORMAT_STRING', 'tt.mm.jjjj');
 
-function xtc_date_raw($date, $reverse = false) {
-  if ($reverse) {
-    return substr($date, 0, 2) . substr($date, 3, 2) . substr($date, 6, 4);
-  } else {
-    return substr($date, 6, 4) . substr($date, 3, 2) . substr($date, 0, 2);
-  }
+function xtc_date_raw($date, $reverse = false)
+{
+    if ($reverse) {
+        return substr($date, 0, 2) . substr($date, 3, 2) . substr($date, 6, 4);
+    } else {
+        return substr($date, 6, 4) . substr($date, 3, 2) . substr($date, 0, 2);
+    }
 }
 
-require_once(DIR_FS_INC.'auto_include.inc.php');
-foreach(auto_include(DIR_WS_LANGUAGES.'german/extra/','php') as $file) require ($file);
+require_once DIR_FS_INC . 'auto_include.inc.php';
+foreach (auto_include(DIR_WS_LANGUAGES . 'german/extra/', 'php') as $file) {
+    require $file;
+}
 
 define('TITLE', STORE_NAME);
-define('HEADER_TITLE_TOP', 'Startseite');    
+define('HEADER_TITLE_TOP', 'Startseite');
 define('HEADER_TITLE_CATALOG', 'Katalog');
 
-// if USE_DEFAULT_LANGUAGE_CURRENCY is true, use the following currency when changing language, 
+// if USE_DEFAULT_LANGUAGE_CURRENCY is true, use the following currency when changing language,
 // instead of staying with the applications default currency
 define('LANGUAGE_CURRENCY', 'EUR');
 
@@ -55,30 +59,30 @@ define('FEMALE', 'Frau');
 define('DIVERSE', 'Divers');
 
 /*
- * 
+ *
  *  BOXES
- * 
+ *
  */
 
 // text for gift voucher redeeming
-define('IMAGE_REDEEM_GIFT','Gutschein einl&ouml;sen!');
+define('IMAGE_REDEEM_GIFT', 'Gutschein einl&ouml;sen!');
 
-define('BOX_TITLE_STATISTICS','Statistik:');
-define('BOX_ENTRY_CUSTOMERS','Kunden:');
-define('BOX_ENTRY_PRODUCTS','Artikel:');
-define('BOX_ENTRY_REVIEWS','Rezensionen:');
-define('TEXT_VALIDATING','Nicht best&auml;tigt');
+define('BOX_TITLE_STATISTICS', 'Statistik:');
+define('BOX_ENTRY_CUSTOMERS', 'Kunden:');
+define('BOX_ENTRY_PRODUCTS', 'Artikel:');
+define('BOX_ENTRY_REVIEWS', 'Rezensionen:');
+define('TEXT_VALIDATING', 'Nicht best&auml;tigt');
 
 // manufacturer box text
 define('BOX_MANUFACTURER_INFO_HOMEPAGE', '%s Homepage');
 define('BOX_MANUFACTURER_INFO_OTHER_PRODUCTS', 'Mehr Artikel');
 
-define('BOX_HEADING_ADD_PRODUCT_ID','In den Korb legen');
-  
-define('BOX_LOGINBOX_STATUS','Kundengruppe: ');
-define('BOX_LOGINBOX_DISCOUNT','Artikelrabatt');
-define('BOX_LOGINBOX_DISCOUNT_TEXT','Rabatt');
-define('BOX_LOGINBOX_DISCOUNT_OT','');
+define('BOX_HEADING_ADD_PRODUCT_ID', 'In den Korb legen');
+
+define('BOX_LOGINBOX_STATUS', 'Kundengruppe: ');
+define('BOX_LOGINBOX_DISCOUNT', 'Artikelrabatt');
+define('BOX_LOGINBOX_DISCOUNT_TEXT', 'Rabatt');
+define('BOX_LOGINBOX_DISCOUNT_OT', '');
 
 // reviews box text in includes/boxes/reviews.php
 define('BOX_REVIEWS_WRITE_REVIEW', 'Schreiben Sie eine Rezension zu diesem Artikel!');
@@ -103,9 +107,9 @@ define('JS_ERROR_PRIVACY_NOTICE_NOT_ACCEPTED', '* Sofern Sie unsere Regelungen z
 define('JS_REVIEW_AUTHOR', '* Bitte geben Sie Ihren Namen ein.\n\n');
 
 /*
- * 
+ *
  * ACCOUNT FORMS
- * 
+ *
  */
 
 define('ENTRY_COMPANY_ERROR', '');
@@ -154,11 +158,11 @@ define('ENTRY_PASSWORD_NEW_ERROR', 'Ihr neues Passwort muss aus mindestens ' . E
 define('ENTRY_PASSWORD_NEW_ERROR_NOT_MATCHING', 'Ihre Passw&ouml;rter stimmen nicht &uuml;berein.');
 
 /*
- * 
+ *
  *  RESULT PAGES
- * 
+ *
  */
- 
+
 define('TEXT_RESULT_PAGE', 'Seiten:');
 define('TEXT_DISPLAY_NUMBER_OF_PRODUCTS', 'Zeige <strong>%d</strong> bis <strong>%d</strong> (von insgesamt <strong>%d</strong> Artikeln)');
 define('TEXT_DISPLAY_NUMBER_OF_ORDERS', 'Zeige <strong>%d</strong> bis <strong>%d</strong> (von insgesamt <strong>%d</strong> Bestellungen)');
@@ -167,9 +171,9 @@ define('TEXT_DISPLAY_NUMBER_OF_PRODUCTS_NEW', 'Zeige <strong>%d</strong> bis <st
 define('TEXT_DISPLAY_NUMBER_OF_SPECIALS', 'Zeige <strong>%d</strong> bis <strong>%d</strong> (von insgesamt <strong>%d</strong> Angeboten)');
 
 /*
- * 
+ *
  * SITE NAVIGATION
- * 
+ *
  */
 
 define('PREVNEXT_TITLE_PREVIOUS_PAGE', 'vorherige Seite');
@@ -179,18 +183,18 @@ define('PREVNEXT_TITLE_PREV_SET_OF_NO_PAGE', 'Vorhergehende %d Seiten');
 define('PREVNEXT_TITLE_NEXT_SET_OF_NO_PAGE', 'N&auml;chste %d Seiten');
 
 /*
- * 
+ *
  * PRODUCT NAVIGATION
- * 
+ *
  */
 
 define('PREVNEXT_BUTTON_PREV', '&laquo;');
 define('PREVNEXT_BUTTON_NEXT', '&raquo;');
 
 /*
- * 
+ *
  * IMAGE BUTTONS
- * 
+ *
  */
 
 define('IMAGE_BUTTON_ADD_ADDRESS', 'Neue Adresse');
@@ -206,7 +210,7 @@ define('IMAGE_BUTTON_SEARCH', 'Suchen');
 define('IMAGE_BUTTON_UPDATE', 'Aktualisieren');
 define('IMAGE_BUTTON_UPDATE_CART', 'Warenkorb aktualisieren');
 define('IMAGE_BUTTON_WRITE_REVIEW', 'Ihre Meinung');
-define('IMAGE_BUTTON_ADMIN', 'Admin'); 
+define('IMAGE_BUTTON_ADMIN', 'Admin');
 define('IMAGE_BUTTON_PRODUCT_EDIT', 'Produkt bearbeiten');
 define('IMAGE_BUTTON_SEND', 'Absenden');
 define('IMAGE_BUTTON_CONTINUE_SHOPPING', 'Einkauf fortsetzen');
@@ -228,9 +232,9 @@ define('TEXT_PRINT', 'Drucken');
 define('BUTTON_RESET', 'Reset');
 define('BUTTON_UPDATE', 'Update');
 /*
- * 
+ *
  *  GREETINGS
- * 
+ *
  */
 
 define('TEXT_GREETING_PERSONAL', 'Sch&ouml;n, dass Sie wieder da sind, <span class="greetUser">%s!</span> M&ouml;chten Sie sich unsere <a href="%s">neuen Artikel</a> ansehen?');
@@ -248,13 +252,13 @@ define('TEXT_REVIEW_WORD_COUNT', '%s Worte');
 define('TEXT_REVIEW_RATING', 'Bewertung: %s [%s]');
 define('TEXT_REVIEW_DATE_ADDED', 'Hinzugef&uuml;gt am: %s');
 define('TEXT_NO_REVIEWS', 'Es liegen noch keine Rezensionen vor.');
-define('TEXT_NO_NEW_PRODUCTS', 'Keine neuen Artikel in den letzten '.MAX_DISPLAY_NEW_PRODUCTS_DAYS.' Tagen erschienen. Stattdessen sehen Sie hier die zuletzt erschienenen Artikel.');
+define('TEXT_NO_NEW_PRODUCTS', 'Keine neuen Artikel in den letzten ' . MAX_DISPLAY_NEW_PRODUCTS_DAYS . ' Tagen erschienen. Stattdessen sehen Sie hier die zuletzt erschienenen Artikel.');
 define('TEXT_UNKNOWN_TAX_RATE', 'Unbekannter Steuersatz');
 
 /*
- * 
+ *
  * WARNINGS
- * 
+ *
  */
 
 define('WARNING_INSTALL_DIRECTORY_EXISTS', 'Warnung: Das Installationverzeichnis ist noch vorhanden auf: %s. Bitte l&ouml;schen Sie das Verzeichnis aus Gr&uuml;nden der Sicherheit!');
@@ -282,23 +286,23 @@ define('ERROR_CONDITIONS_NOT_ACCEPTED', '* Sofern Sie unsere Allgemeinen Gesch&a
 define('ERROR_REVOCATION_NOT_ACCEPTED', '* Sofern Sie das Erl&ouml;schen des Widerrufsrechts f&uuml;r virtuelle Artikel nicht akzeptieren, k&ouml;nnen wir Ihre Bestellung bedauerlicherweise nicht entgegennehmen!');
 define('ERROR_PRIVACY_NOTICE_NOT_ACCEPTED', '* Sofern Sie unsere Regelungen zum Datenschutz nicht zur Kenntnis nehmen, k&ouml;nnen wir Ihre Bestellung bedauerlicherweise nicht entgegennehmen!');
 
-define('SUB_TITLE_OT_DISCOUNT','Rabatt:');
+define('SUB_TITLE_OT_DISCOUNT', 'Rabatt:');
 
-define('NOT_ALLOWED_TO_SEE_PRICES','Sie k&ouml;nnen als Gast (bzw. mit Ihrem derzeitigen Status) keine Preise sehen.');
-define('NOT_ALLOWED_TO_SEE_PRICES_TEXT','Sie haben keine Erlaubnis, Preise zu sehen. Erstellen Sie bitte ein Kundenkonto.');
+define('NOT_ALLOWED_TO_SEE_PRICES', 'Sie k&ouml;nnen als Gast (bzw. mit Ihrem derzeitigen Status) keine Preise sehen.');
+define('NOT_ALLOWED_TO_SEE_PRICES_TEXT', 'Sie haben keine Erlaubnis, Preise zu sehen. Erstellen Sie bitte ein Kundenkonto.');
 
-define('TEXT_DOWNLOAD','Download');
-define('TEXT_VIEW','Ansehen');
+define('TEXT_DOWNLOAD', 'Download');
+define('TEXT_VIEW', 'Ansehen');
 
 define('TEXT_BUY', '%s x \'');
 define('TEXT_NOW', '\' bestellen');
-define('TEXT_GUEST',' Gast');
-define('TEXT_SEARCH_ENGINE_AGENT','Suchmaschine');
+define('TEXT_GUEST', ' Gast');
+define('TEXT_SEARCH_ENGINE_AGENT', 'Suchmaschine');
 
 /*
- * 
+ *
  * ADVANCED SEARCH
- * 
+ *
  */
 
 define('TEXT_AC_ALL_CATEGORIES', 'Alle');
@@ -306,12 +310,12 @@ define('TEXT_ALL_CATEGORIES', 'Alle Kategorien');
 define('TEXT_ALL_MANUFACTURERS', 'Alle Hersteller');
 define('JS_AT_LEAST_ONE_INPUT', '* Eines der folgenden Felder muss ausgef&uuml;llt werden:\nStichworte\nPreis ab\nPreis bis\n');
 define('AT_LEAST_ONE_INPUT', 'Eines der folgenden Felder muss ausgef&uuml;llt werden:<br />Stichworte mit mindestens drei Zeichen<br />Preis ab<br />Preis bis<br />');
-define('TEXT_SEARCH_TERM','Ihre Suche nach: ');
+define('TEXT_SEARCH_TERM', 'Ihre Suche nach: ');
 define('JS_INVALID_FROM_DATE', '* ung&uuml;ltiges Datum (von)\n');
 define('JS_INVALID_TO_DATE', '* ung&uuml;ltiges Datum (bis)\n');
 define('JS_TO_DATE_LESS_THAN_FROM_DATE', '* Das Datum(von) muss gr&ouml;&szlig;er oder gleich sein als das Datum (bis)\n');
-define('JS_PRICE_FROM_MUST_BE_NUM', '* \"Preis ab\" muss eine Zahl sein\n\n');
-define('JS_PRICE_TO_MUST_BE_NUM', '* \"Preis bis\" muss eine Zahl sein\n\n');
+define('JS_PRICE_FROM_MUST_BE_NUM', '* "Preis ab" muss eine Zahl sein\n\n');
+define('JS_PRICE_TO_MUST_BE_NUM', '* "Preis bis" muss eine Zahl sein\n\n');
 define('JS_PRICE_TO_LESS_THAN_PRICE_FROM', '* Preis bis muss gr&ouml;&szlig;er oder gleich Preis ab sein.\n');
 define('JS_INVALID_KEYWORDS', '* Suchbegriff unzul&auml;ssig\n');
 define('TEXT_LOGIN_ERROR', '<b>FEHLER:</b> Keine &Uuml;bereinstimmung der eingegebenen \'E-Mail-Adresse\' und/oder dem \'Passwort\'.');
@@ -336,9 +340,9 @@ define('ERROR_INVALID_PRODUCT', 'Der von Ihnen gew&auml;hlte Artikel wurde nicht
 define('JS_KEYWORDS_MIN_LENGTH', 'Der Suchbegriff muss mindestens ' . (int)SEARCH_MIN_LENGTH . ' Zeichen lang sein.\n');
 
 /*
- * 
+ *
  * NAVBAR TITLE
- * 
+ *
  */
 
 define('NAVBAR_TITLE_ACCOUNT', 'Ihr Konto');
@@ -375,55 +379,55 @@ define('NAVBAR_TITLE_1_CHECKOUT_SUCCESS', 'Kasse');
 define('NAVBAR_TITLE_2_CHECKOUT_SUCCESS', 'Erfolg');
 define('NAVBAR_TITLE_CREATE_ACCOUNT', 'Konto erstellen');
 define('NAVBAR_TITLE_LOGIN', 'Anmelden');
-define('NAVBAR_TITLE_LOGOFF','Auf Wiedersehen');
+define('NAVBAR_TITLE_LOGOFF', 'Auf Wiedersehen');
 define('NAVBAR_TITLE_PRODUCTS_NEW', 'Neue Artikel');
 define('NAVBAR_TITLE_SHOPPING_CART', 'Warenkorb');
 define('NAVBAR_TITLE_SPECIALS', 'Angebote');
 define('NAVBAR_TITLE_COOKIE_USAGE', 'Cookie-Nutzung');
 define('NAVBAR_TITLE_PRODUCT_REVIEWS', 'Rezensionen');
 define('NAVBAR_TITLE_REVIEWS_WRITE', 'Rezensionen');
-define('NAVBAR_TITLE_REVIEWS','Rezensionen');
+define('NAVBAR_TITLE_REVIEWS', 'Rezensionen');
 define('NAVBAR_TITLE_SSL_CHECK', 'Sicherheitshinweis');
-define('NAVBAR_TITLE_CREATE_GUEST_ACCOUNT','Ihre Kundenadresse');
-define('NAVBAR_TITLE_PASSWORD_DOUBLE_OPT','Passwort vergessen?');
-define('NAVBAR_TITLE_NEWSLETTER','Newsletter');
+define('NAVBAR_TITLE_CREATE_GUEST_ACCOUNT', 'Ihre Kundenadresse');
+define('NAVBAR_TITLE_PASSWORD_DOUBLE_OPT', 'Passwort vergessen?');
+define('NAVBAR_TITLE_NEWSLETTER', 'Newsletter');
 define('NAVBAR_GV_REDEEM', 'Gutschein einl&ouml;sen');
 define('NAVBAR_GV_SEND', 'Gutschein versenden');
 define('NAVBAR_TITLE_DOWNLOAD', 'Downloads');
 
 /*
- * 
+ *
  *  MISC
- * 
+ *
  */
 
-define('TEXT_NEWSLETTER','Sie m&ouml;chten immer auf dem Laufenden bleiben?<br />Kein Problem, tragen Sie sich in unseren Newsletter ein und Sie sind immer auf dem neuesten Stand.');
-define('TEXT_EMAIL_INPUT','Ihre E-Mail-Adresse wurde in unser System eingetragen.<br />Gleichzeitig wurde Ihnen vom System eine E-Mail mit einem Aktivierungslink geschickt. Bitte klicken Sie nach dem Erhalt der E-Mail auf den Link, um Ihre Eintragung zu best&auml;tigen. Ansonsten bekommen Sie keinen Newsletter von uns zugestellt!');
+define('TEXT_NEWSLETTER', 'Sie m&ouml;chten immer auf dem Laufenden bleiben?<br />Kein Problem, tragen Sie sich in unseren Newsletter ein und Sie sind immer auf dem neuesten Stand.');
+define('TEXT_EMAIL_INPUT', 'Ihre E-Mail-Adresse wurde in unser System eingetragen.<br />Gleichzeitig wurde Ihnen vom System eine E-Mail mit einem Aktivierungslink geschickt. Bitte klicken Sie nach dem Erhalt der E-Mail auf den Link, um Ihre Eintragung zu best&auml;tigen. Ansonsten bekommen Sie keinen Newsletter von uns zugestellt!');
 
-define('TEXT_WRONG_CODE','Ihr eingegebener Sicherheitscode stimmte nicht mit dem angezeigten Code &uuml;berein. Bitte versuchen Sie es erneut.');
-define('TEXT_EMAIL_EXIST_NO_NEWSLETTER','Diese E-Mail-Adresse existiert bereits in unserer Datenbank, ist aber noch nicht f&uuml;r den Empfang des Newsletters freigeschaltet!');
-define('TEXT_EMAIL_EXIST_NEWSLETTER','Diese E-Mail-Adresse existiert bereits in unserer Datenbank und ist f&uuml;r den Newsletterempfang bereits freigeschaltet!');
-define('TEXT_EMAIL_NOT_EXIST','Diese E-Mail-Adresse existiert nicht in unserer Datenbank!');
-define('TEXT_EMAIL_DEL','Ihre E-Mail-Adresse wurde aus unserer Newsletterdatenbank gel&ouml;scht.');
-define('TEXT_EMAIL_DEL_ERROR','Es ist ein Fehler aufgetreten, Ihre E-Mail-Adresse wurde nicht gel&ouml;scht!');
-define('TEXT_EMAIL_ACTIVE','Ihre E-Mail-Adresse wurde erfolgreich f&uuml;r den Newsletterempfang freigeschaltet!');
-define('TEXT_EMAIL_ACTIVE_ERROR','Es ist ein Fehler aufgetreten, Ihre E-Mail-Adresse wurde nicht freigeschaltet!');
-define('TEXT_EMAIL_SUBJECT','Ihre Newsletter-Anmeldung');
+define('TEXT_WRONG_CODE', 'Ihr eingegebener Sicherheitscode stimmte nicht mit dem angezeigten Code &uuml;berein. Bitte versuchen Sie es erneut.');
+define('TEXT_EMAIL_EXIST_NO_NEWSLETTER', 'Diese E-Mail-Adresse existiert bereits in unserer Datenbank, ist aber noch nicht f&uuml;r den Empfang des Newsletters freigeschaltet!');
+define('TEXT_EMAIL_EXIST_NEWSLETTER', 'Diese E-Mail-Adresse existiert bereits in unserer Datenbank und ist f&uuml;r den Newsletterempfang bereits freigeschaltet!');
+define('TEXT_EMAIL_NOT_EXIST', 'Diese E-Mail-Adresse existiert nicht in unserer Datenbank!');
+define('TEXT_EMAIL_DEL', 'Ihre E-Mail-Adresse wurde aus unserer Newsletterdatenbank gel&ouml;scht.');
+define('TEXT_EMAIL_DEL_ERROR', 'Es ist ein Fehler aufgetreten, Ihre E-Mail-Adresse wurde nicht gel&ouml;scht!');
+define('TEXT_EMAIL_ACTIVE', 'Ihre E-Mail-Adresse wurde erfolgreich f&uuml;r den Newsletterempfang freigeschaltet!');
+define('TEXT_EMAIL_ACTIVE_ERROR', 'Es ist ein Fehler aufgetreten, Ihre E-Mail-Adresse wurde nicht freigeschaltet!');
+define('TEXT_EMAIL_SUBJECT', 'Ihre Newsletter-Anmeldung');
 
-define('TEXT_CUSTOMER_GUEST',' Gast');
+define('TEXT_CUSTOMER_GUEST', ' Gast');
 
-define('TEXT_LINK_MAIL_SENDED','Ihre Anfrage nach einem neuen Passwort muss von Ihnen erst best&auml;tigt werden.<br />Deshalb wurde Ihnen vom System eine E-Mail mit einem Best&auml;tigungslink geschickt. Bitte klicken Sie nach Erhalt der E-Mail auf den mitgeschickten Link. Andernfalls k&ouml;nnen Sie kein neues Passwort vergeben! <br/><br/>Der Best&auml;tigungslink ist %s Minuten g&uuml;ltig.');
-define('TEXT_PASSWORD_MAIL_SENDED','Eine E-Mail mit einem neuen Anmelde-Passwort wurde Ihnen soeben zugestellt.<br />Bitte &auml;ndern Sie nach Ihrer n&auml;chsten Anmeldung Ihr Passwort wie gew&uuml;nscht.');
-define('TEXT_CODE_ERROR','Bitte geben Sie Ihre E-Mail-Adresse und den Sicherheitscode erneut ein. <br />Achten Sie dabei auf Tippfehler!');
-define('TEXT_EMAIL_ERROR','Bitte geben Sie Ihre E-Mail-Adresse erneut ein. <br />Achten Sie dabei auf Tippfehler!');
-define('TEXT_NO_ACCOUNT','Leider m&uuml;ssen wir Ihnen mitteilen, dass Ihre Anfrage f&uuml;r ein neues Anmelde-Passwort entweder ung&uuml;ltig war oder abgelaufen ist.<br />Bitte versuchen Sie es erneut.');
-define('HEADING_PASSWORD_FORGOTTEN','Passwort vergessen?');
-define('TEXT_PASSWORD_FORGOTTEN','&Auml;ndern Sie Ihr Passwort in drei leichten Schritten.');
-define('TEXT_EMAIL_PASSWORD_FORGOTTEN','Bestätigungs-E-Mail für Passwortänderung'); // ä und ü für korrekte E-Mail Betreffszeile lassen!
-define('TEXT_EMAIL_PASSWORD_NEW_PASSWORD','Ihr neues Passwort');
-define('ERROR_MAIL','Bitte &uuml;berpr&uuml;fen Sie Ihre eingegebenen Daten im Formular.');
+define('TEXT_LINK_MAIL_SENDED', 'Ihre Anfrage nach einem neuen Passwort muss von Ihnen erst best&auml;tigt werden.<br />Deshalb wurde Ihnen vom System eine E-Mail mit einem Best&auml;tigungslink geschickt. Bitte klicken Sie nach Erhalt der E-Mail auf den mitgeschickten Link. Andernfalls k&ouml;nnen Sie kein neues Passwort vergeben! <br/><br/>Der Best&auml;tigungslink ist %s Minuten g&uuml;ltig.');
+define('TEXT_PASSWORD_MAIL_SENDED', 'Eine E-Mail mit einem neuen Anmelde-Passwort wurde Ihnen soeben zugestellt.<br />Bitte &auml;ndern Sie nach Ihrer n&auml;chsten Anmeldung Ihr Passwort wie gew&uuml;nscht.');
+define('TEXT_CODE_ERROR', 'Bitte geben Sie Ihre E-Mail-Adresse und den Sicherheitscode erneut ein. <br />Achten Sie dabei auf Tippfehler!');
+define('TEXT_EMAIL_ERROR', 'Bitte geben Sie Ihre E-Mail-Adresse erneut ein. <br />Achten Sie dabei auf Tippfehler!');
+define('TEXT_NO_ACCOUNT', 'Leider m&uuml;ssen wir Ihnen mitteilen, dass Ihre Anfrage f&uuml;r ein neues Anmelde-Passwort entweder ung&uuml;ltig war oder abgelaufen ist.<br />Bitte versuchen Sie es erneut.');
+define('HEADING_PASSWORD_FORGOTTEN', 'Passwort vergessen?');
+define('TEXT_PASSWORD_FORGOTTEN', '&Auml;ndern Sie Ihr Passwort in drei leichten Schritten.');
+define('TEXT_EMAIL_PASSWORD_FORGOTTEN', 'Bestï¿½tigungs-E-Mail fï¿½r Passwortï¿½nderung'); // ï¿½ und ï¿½ fï¿½r korrekte E-Mail Betreffszeile lassen!
+define('TEXT_EMAIL_PASSWORD_NEW_PASSWORD', 'Ihr neues Passwort');
+define('ERROR_MAIL', 'Bitte &uuml;berpr&uuml;fen Sie Ihre eingegebenen Daten im Formular.');
 
-define('CATEGORIE_NOT_FOUND','Kategorie wurde nicht gefunden');
+define('CATEGORIE_NOT_FOUND', 'Kategorie wurde nicht gefunden');
 
 define('GV_FAQ', 'Gutschein FAQ');
 define('ERROR_NO_REDEEM_CODE', 'Sie haben leider keinen Code eingegeben.');
@@ -431,27 +435,27 @@ define('ERROR_NO_INVALID_REDEEM_GV', 'Ung&uuml;ltiger Gutscheincode');
 define('TABLE_HEADING_CREDIT', 'Guthaben');
 define('EMAIL_GV_TEXT_SUBJECT', 'Ein Geschenk von %s');
 define('MAIN_MESSAGE', 'Sie haben sich dazu entschieden, einen Gutschein im Wert von %s an %s zu versenden, dessen E-Mail-Adresse %s lautet.<br /><br />Folgender Text erscheint in Ihrer E-Mail:<br /><br />Hallo %s,<br /><br />Ihnen wurde ein Gutschein im Wert von %s durch %s geschickt.');
-define('REDEEMED_AMOUNT','Ihr Gutschein wurde erfolgreich auf Ihr Konto verbucht. Gutscheinwert: %s');
-define('REDEEMED_COUPON','Ihr Coupon wurde erfolgreich eingebucht und wird bei Ihrer Bestellung automatisch eingel&ouml;st.');
+define('REDEEMED_AMOUNT', 'Ihr Gutschein wurde erfolgreich auf Ihr Konto verbucht. Gutscheinwert: %s');
+define('REDEEMED_COUPON', 'Ihr Coupon wurde erfolgreich eingebucht und wird bei Ihrer Bestellung automatisch eingel&ouml;st.');
 
-define('ERROR_INVALID_USES_USER_COUPON','Sie k&ouml;nnen den Coupon nur ');
-define('ERROR_INVALID_USES_COUPON','Diesen Coupon k&ouml;nnen Kunden nur ');
-define('TIMES',' mal einl&ouml;sen.');
-define('ERROR_INVALID_STARTDATE_COUPON','Ihr Coupon ist noch nicht verf&uuml;gbar.');
-define('ERROR_INVALID_FINISDATE_COUPON','Ihr Coupon ist bereits abgelaufen.');
+define('ERROR_INVALID_USES_USER_COUPON', 'Sie k&ouml;nnen den Coupon nur ');
+define('ERROR_INVALID_USES_COUPON', 'Diesen Coupon k&ouml;nnen Kunden nur ');
+define('TIMES', ' mal einl&ouml;sen.');
+define('ERROR_INVALID_STARTDATE_COUPON', 'Ihr Coupon ist noch nicht verf&uuml;gbar.');
+define('ERROR_INVALID_FINISDATE_COUPON', 'Ihr Coupon ist bereits abgelaufen.');
 define('ERROR_INVALID_MINIMUM_ORDER_COUPON', 'Dieser Coupon kann erst ab einem Mindestbestellwert von %s eingel&ouml;st werden!');
-define('ERROR_INVALID_MINIMUM_ORDER_COUPON_ADD','<br/>Sie m&uuml;ssen den Couponcode beim Erreichen des Mindestbestellwertes erneut eingeben!');
+define('ERROR_INVALID_MINIMUM_ORDER_COUPON_ADD', '<br/>Sie m&uuml;ssen den Couponcode beim Erreichen des Mindestbestellwertes erneut eingeben!');
 define('ERROR_COUPON_REQUIRES_ACCOUNT', 'Zum Einl&ouml;sen des Coupons ben&ouml;tigen Sie ein Kundenkonto.');
 define('PERSONAL_MESSAGE', '%s schreibt:');
 
 define('TEXT_LINK_TITLE_INFORMATION', 'Information');
 
 /*
- * 
+ *
  *  COUPON POPUP
- * 
+ *
  */
- 
+
 define('TEXT_CLOSE_WINDOW', 'Fenster schliessen [x]');
 define('TEXT_COUPON_HELP_HEADER', 'Ihr Gutschein/Coupon wurde erfolgreich verbucht.');
 define('TEXT_COUPON_HELP_NAME', '<br /><br />Gutschein-/Couponbezeichnung: %s');
@@ -472,58 +476,58 @@ define('TEXT_COUPON_CATEGORIES_RESTRICT', 'Der Coupon ist auf eine Auswahl an Ka
 // VAT Reg No
 define('ENTRY_VAT_TEXT', 'Nur f&uuml;r Deutschland und EU!');
 define('ENTRY_VAT_ERROR', 'Die eingegebene USt-IdNr. ist ung&uuml;ltig oder kann derzeit nicht &uuml;berpr&uuml;ft werden! Bitte geben Sie eine g&uuml;ltige ID ein oder lassen Sie das Feld zun&auml;chst leer.');
-define('MSRP','UVP');
-define('YOUR_PRICE','Ihr Preis ');
-define('UNIT_PRICE','St&uuml;ckpreis ');
-define('ONLY',' Jetzt nur ');
-define('FROM','ab ');
-define('YOU_SAVE','Sie sparen ');
-define('INSTEAD','Unser bisheriger Preis ');
-define('TXT_PER',' pro ');
-define('TAX_INFO_INCL','inkl. %s MwSt.');
-define('TAX_INFO_EXCL','exkl. %s MwSt.');
-define('TAX_INFO_ADD','zzgl. %s MwSt.');
-define('SHIPPING_EXCL','zzgl.');
-define('SHIPPING_INCL','inkl.');
-define('SHIPPING_COSTS','Versandkosten');
+define('MSRP', 'UVP');
+define('YOUR_PRICE', 'Ihr Preis ');
+define('UNIT_PRICE', 'St&uuml;ckpreis ');
+define('ONLY', ' Jetzt nur ');
+define('FROM', 'ab ');
+define('YOU_SAVE', 'Sie sparen ');
+define('INSTEAD', 'Unser bisheriger Preis ');
+define('TXT_PER', ' pro ');
+define('TAX_INFO_INCL', 'inkl. %s MwSt.');
+define('TAX_INFO_EXCL', 'exkl. %s MwSt.');
+define('TAX_INFO_ADD', 'zzgl. %s MwSt.');
+define('SHIPPING_EXCL', 'zzgl.');
+define('SHIPPING_INCL', 'inkl.');
+define('SHIPPING_COSTS', 'Versandkosten');
 
-define('SHIPPING_TIME','Lieferzeit: ');
-define('MORE_INFO','[Mehr]');
+define('SHIPPING_TIME', 'Lieferzeit: ');
+define('MORE_INFO', '[Mehr]');
 
-define('ENTRY_PRIVACY_ERROR','Bitte best&auml;tigen Sie, dass Sie unsere Datenschutzrichtlinien zur Kenntnis genommen haben!');
-define('TEXT_PAYMENT_FEE','Zahlungsgeb&uuml;hr');
+define('ENTRY_PRIVACY_ERROR', 'Bitte best&auml;tigen Sie, dass Sie unsere Datenschutzrichtlinien zur Kenntnis genommen haben!');
+define('TEXT_PAYMENT_FEE', 'Zahlungsgeb&uuml;hr');
 
 define('_MODULE_INVALID_SHIPPING_ZONE', 'Es ist leider kein Versand in dieses Land m&ouml;glich');
 define('_MODULE_UNDEFINED_SHIPPING_RATE', 'Die Versandkosten k&ouml;nnen im Moment nicht errechnet werden');
 
 define('NAVBAR_TITLE_1_ACCOUNT_DELETE', 'Ihr Konto');
 define('NAVBAR_TITLE_2_ACCOUNT_DELETE', 'Konto l&ouml;schen');
-	
+
 //contact-form error messages
-define('ERROR_EMAIL','<p><b>Ihre E-Mail-Adresse:</b> Keine oder ung&uuml;ltige Eingabe!</p>');
-define('ERROR_VVCODE','<p><b>Sicherheitscode:</b> Keine &Uuml;bereinstimmung, bitte geben Sie den Sicherheitscode erneut ein!</p>');
-define('ERROR_MSG_BODY','<p><b>Ihre Nachricht:</b> Keine Eingabe!</p>');	
+define('ERROR_EMAIL', '<p><b>Ihre E-Mail-Adresse:</b> Keine oder ung&uuml;ltige Eingabe!</p>');
+define('ERROR_VVCODE', '<p><b>Sicherheitscode:</b> Keine &Uuml;bereinstimmung, bitte geben Sie den Sicherheitscode erneut ein!</p>');
+define('ERROR_MSG_BODY', '<p><b>Ihre Nachricht:</b> Keine Eingabe!</p>');
 
 //Table Header checkout_confirmation.php
 define('HEADER_QTY', 'Anzahl');
-define('HEADER_ARTICLE', 'Artikel');    
+define('HEADER_ARTICLE', 'Artikel');
 define('HEADER_SINGLE', 'Einzelpreis');
-define('HEADER_TOTAL','Summe');
+define('HEADER_TOTAL', 'Summe');
 define('HEADER_MODEL', 'Artikel Nr.');
 
 ### PayPal API Modul
 define('ERROR_ADDRESS_NOT_ACCEPTED', '* Solange Sie Ihre Rechnungs- und Versandadresse nicht akzeptieren,\n k&ouml;nnen wir Ihre Bestellung bedauerlicherweise nicht entgegennehmen!\n\n');
-define('PAYPAL_EXP_VORL','Vorl&auml;ufige Versandkosten');
+define('PAYPAL_EXP_VORL', 'Vorl&auml;ufige Versandkosten');
 ### PayPal API Modul
 
-define('BASICPRICE_VPE_TEXT','bei dieser Menge nur ');
+define('BASICPRICE_VPE_TEXT', 'bei dieser Menge nur ');
 define('GRADUATED_PRICE_MAX_VALUE', 'ab');
 define('_SHIPPING_TO', 'Versand nach ');
 
-define('ERROR_SQL_DB_QUERY','Es tut uns leid, aber es ist ein Datenbankfehler aufgetreten.');
-define('ERROR_SQL_DB_QUERY_REDIRECT','Sie werden in %s Sekunden auf unsere Homepage weitergeleitet!');
+define('ERROR_SQL_DB_QUERY', 'Es tut uns leid, aber es ist ein Datenbankfehler aufgetreten.');
+define('ERROR_SQL_DB_QUERY_REDIRECT', 'Sie werden in %s Sekunden auf unsere Homepage weitergeleitet!');
 
-define('TEXT_AGB_CHECKOUT','Bitte nehmen Sie unsere AGB und Kundeninformation %s sowie unsere Datenschutzerkl&auml;rung %s zur Kenntnis.');
+define('TEXT_AGB_CHECKOUT', 'Bitte nehmen Sie unsere AGB und Kundeninformation %s sowie unsere Datenschutzerkl&auml;rung %s zur Kenntnis.');
 define('TEXT_REVOCATION_CHECKOUT', ', unsere Widerrufsbelehrung %s');
 define('DOWNLOAD_NOT_ALLOWED', '<h1>Forbidden</h1>This server could not verify that you are authorized to access the document requested. Either you supplied the wrong credentials (e.g., bad password), or your browser does not understand how to supply the credentials required.');
 
@@ -538,14 +542,14 @@ define('ERROR_REVIEW_AUTHOR', 'Bitte geben Sie Ihren Namen ein.');
 define('GV_NO_PAYMENT_INFO', '<div class="infomessage">Sie k&ouml;nnen mit Ihrem Guthaben die Bestellung komplett bezahlen. Wenn Sie Ihr Guthaben nicht einl&ouml;sen m&ouml;chten, deaktivieren Sie die Guthabenauswahl und w&auml;hlen eine Zahlungsweise!</div>');
 define('GV_ADD_PAYMENT_INFO', '<div class="errormessage">Ihr Guthaben reicht nicht aus bzw. kann nicht auf alle Positionen angewendet werden um die Bestellung komplett zu bezahlen. Bitte w&auml;hlen Sie zus&auml;tzlich eine Zahlungsweise!</div>');
 
-define('_SHIPPING_FREE','Versandkostenfrei');
+define('_SHIPPING_FREE', 'Versandkostenfrei');
 define('TEXT_INFO_FREE_SHIPPING_COUPON', 'Die Versandkosten werden durch Ihren Coupon abgedeckt.');
 
 define('TEXT_CONTENT_NOT_FOUND', 'Diese Seite wurde nicht gefunden!');
 define('TEXT_SITE_NOT_FOUND', 'Diese Seite wurde nicht gefunden!');
 
 // error message for exceeded product quantity, noRiddle
-define('MAX_PROD_QTY_EXCEEDED', 'Die maximal erlaubte St&uuml;ckzahl i.H.v. ' .MAX_PRODUCTS_QTY. ' f&uuml;r <span style="font-style:italic;">"%s"</span> wurde &uuml;berschritten.<br />Die St&uuml;ckzahl wurde automatisch auf die erlaubte St&uuml;ckzahl reduziert.');
+define('MAX_PROD_QTY_EXCEEDED', 'Die maximal erlaubte St&uuml;ckzahl i.H.v. ' . MAX_PRODUCTS_QTY . ' f&uuml;r <span style="font-style:italic;">"%s"</span> wurde &uuml;berschritten.<br />Die St&uuml;ckzahl wurde automatisch auf die erlaubte St&uuml;ckzahl reduziert.');
 
 define('IMAGE_BUTTON_CONTENT_EDIT', 'Content bearbeiten');
 define('PRINTVIEW_INFO', 'Artikeldatenblatt drucken');
@@ -598,7 +602,7 @@ define('ENTRY_TOKEN_ERROR', 'Bitte &uuml;berpr&uuml;fen Sie Ihre Eingaben.');
 define('IMAGE_BUTTON_CONFIRM', 'Best&auml;tigen'); // Needed for PayPal
 
 // ***************************************************
-//  Kontodaten-PrŸfung
+//  Kontodaten-Prï¿½fung
 // ***************************************************
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_0', 'Bankverbindung okay.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1', 'Kontonummer und/oder BLZ sind ung&uuml;ltig bzw. passen nicht zueinander!');
@@ -611,7 +615,7 @@ define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_9', 'Keine Kontonummer angegeben!');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_10', 'Sie haben keinen Kontoinhaber angegeben.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_128', 'Interner Fehler bei Pr&uuml;fung der Bankverbindung.');
 
-// Fehlermeldungen alle IBAN-Nummern 
+// Fehlermeldungen alle IBAN-Nummern
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1000', 'In IBAN enthaltenes L&auml;nderk&uuml;rzel (1. und 2. Stelle) unbekannt.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1010', 'IBAN-L&auml;nge falsch: Zu viele Stellen eingegeben.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1020', 'IBAN-L&auml;nge falsch: Zu wenige Stellen eingegeben.');
@@ -623,7 +627,7 @@ define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1070', 'BIC-L&auml;nge falsch: Zu weni
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1080', 'BIC-L&auml;nge ung&uuml;tig: 8 oder 11 Zeichen erforderlich.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_1200', 'IBANs aus dem angegebenen Land (1. und 2. Stelle der IBAN) k&ouml;nnen wir leider nicht akzeptieren.');
 
-// Fehlermeldungen fŸr deutsche Kontonummern 
+// Fehlermeldungen fï¿½r deutsche Kontonummern
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_2001', 'In IBAN enthaltene Kontonummer (Stellen 13 bis 22) und/oder Bankleitzahl (Stellen 5 bis 12) ung&uuml;ltig bzw. nicht zueinander passend.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_2002', 'In IBAN enthaltene Kontonummer (Stellen 13 bis 22) nicht automatisch pr&uuml;fbar.');
 define('BANKACCOUNT_CHECK_TEXT_BANK_ERROR_2003', 'F&uuml;r in IBAN enthaltene Kontonummer (Stellen 13 bis 22) ist kein Pr&uuml;fziffernverfahren definiert.');
@@ -648,4 +652,3 @@ define('SITEMAP_ERROR_401', 'Fehler 401: Authentifizierungsfehler.');
 define('SITEMAP_ERROR_403', 'Fehler 403: Der Server verweigert die Ausf&uuml;hrung.');
 define('SITEMAP_ERROR_404', 'Fehler 404: Die gesuchte Seite wurde nicht gefunden!');
 define('SITEMAP_ERROR_500', 'Fehler 500: Beim Server gab es einen internen Fehler.');
-?>
