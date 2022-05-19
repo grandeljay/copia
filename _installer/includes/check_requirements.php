@@ -1,6 +1,7 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
-   $Id: check_requirements.php 13452 2021-03-05 17:01:23Z GTB $
+   $Id: check_requirements.php 13939 2022-01-17 10:34:44Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -9,137 +10,153 @@
    -----------------------------------------------------------------------------------------
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
-  
-  
-  $requirement_array = array();
-  
-  $php_flag = true;
-  if(version_compare(phpversion(), PHP_VERSION_MIN, "<")){
-    $error = true;
+
+
+$requirement_array = array();
+$php_flag          = true;
+
+if (version_compare(phpversion(), PHP_VERSION_MIN, "<")) {
+    $error    = true;
     $php_flag = false;
-  }
-  if(version_compare(phpversion(), PHP_VERSION_MAX, ">")){
+}
+if (version_compare(phpversion(), PHP_VERSION_MAX, ">")) {
     $php_flag = false;
-    $error = true;
-  }
-  
-  $requirement_array[] = array(
-    'name' => 'PHP VERSION',
-    'version' => phpversion(),
+    $error    = true;
+}
+
+$requirement_array[] = array(
+    'name'        => 'PHP VERSION',
+    'version'     => phpversion(),
     'version_min' => PHP_VERSION_MIN,
     'version_max' => PHP_VERSION_MAX,
-    'status' => $php_flag
-  );
-  
-  
-  $status = false;
-  $status_tls = false;
-  $ssl_version = 'undefined';
-  $curl_version = array(
-    'version' => 'undefined'
-  );
-  if (function_exists('curl_init')) {
-    $status = true;
-    $curl_version = curl_version();
-    $remote_address = xtc_get_ip_address();
-    
-    if (substr($remote_address, 0, 4) != '127.' 
-        && $remote_address != '::1' 
-        && strpos($_SERVER['SERVER_NAME'], 'localhost') === false
-        )
-    {
-      // check for SSL Version
-      $ch = curl_init('https://www.howsmyssl.com/a/check');
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      $data = curl_exec($ch);
-      curl_close($ch);
-      $json = json_decode($data);
-      if (is_object($json)) {
-        $ssl_version = $json->tls_version;
-      }
-      if (version_compare(preg_replace('/[^0-9.]/', '', $ssl_version), SSL_VERSION_MIN, "<")) {
-        $status_tls = false;
-        $error = true;
-      } else {
-        $status_tls = true;
-      }
-    } else {
-      $status_tls = false;
-    }
-  } else {
-    $error = true;
-  }
+    'status'      => $php_flag
+);
 
-  $requirement_array[] = array(
-    'name' => 'CURL VERSION',
-    'version' => $curl_version['version'],
+$status       = false;
+$status_tls   = false;
+$ssl_version  = 'undefined';
+$curl_version = array(
+    'version' => 'undefined'
+);
+
+if (function_exists('curl_init')) {
+    $status         = true;
+    $curl_version   = curl_version();
+    $remote_address = xtc_get_ip_address();
+
+    if (
+           '127.' !== substr($remote_address, 0, 4)
+        && '::1' !== $remote_address
+        && strpos($_SERVER['SERVER_NAME'], 'localhost') === false
+    ) {
+        // check for SSL Version
+        $ch = curl_init('https://www.howsmyssl.com/a/check');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        $json = json_decode($data);
+
+        if (is_object($json)) {
+            $ssl_version = $json->tls_version;
+        }
+        if (version_compare(preg_replace('/[^0-9.]/', '', $ssl_version), SSL_VERSION_MIN, "<")) {
+            $status_tls = false;
+            $error      = true;
+        } else {
+            $status_tls = true;
+        }
+    } else {
+        $status_tls = false;
+    }
+} else {
+    $error = true;
+}
+
+$requirement_array[] = array(
+    'name'        => 'CURL VERSION',
+    'version'     => $curl_version['version'],
     'version_min' => '',
     'version_max' => '',
-    'status' => $status
-  );
+    'status'      => $status
+);
 
-  $requirement_array[] = array(
-    'name' => 'SSL VERSION',
-    'version' => $ssl_version,
+$requirement_array[] = array(
+    'name'        => 'SSL VERSION',
+    'version'     => $ssl_version,
     'version_min' => SSL_VERSION_MIN,
     'version_max' => '',
-    'status' => $status_tls
-  );
+    'status'      => $status_tls
+);
 
-  
-  if (function_exists('fsockopen')) {
+if (class_exists('finfo')) {
     $status = true;
-  } else {
+} else {
     $status = false;
-    $error = true;
-  }
+    $error  = true;
+}
 
-  $requirement_array[] = array(
-    'name' => 'FSOCKOPEN',
-    'version' => '',
+$requirement_array[] = array(
+    'name'        => 'FLEINFO',
+    'version'     => '',
     'version_min' => '',
     'version_max' => '',
-    'status' => $status
-  );
-  
-  if (function_exists('mb_get_info')) {
-    $status = true;
-  } else {
-    $status = false;
-    $error = true;
-  }
+    'status'      => $status
+);
 
-  $requirement_array[] = array(
-    'name' => 'MBSTRING',
-    'version' => '',
+if (function_exists('fsockopen')) {
+    $status = true;
+} else {
+    $status = false;
+    $error  = true;
+}
+
+$requirement_array[] = array(
+    'name'        => 'FSOCKOPEN',
+    'version'     => '',
     'version_min' => '',
     'version_max' => '',
-    'status' => $status
-  );  
-  
-  $status = false;
-  if (function_exists('gd_info')) {
+    'status'      => $status
+);
+
+if (function_exists('mb_get_info')) {
+    $status = true;
+} else {
+    $status = false;
+    $error  = true;
+}
+
+$requirement_array[] = array(
+    'name'        => 'MBSTRING',
+    'version'     => '',
+    'version_min' => '',
+    'version_max' => '',
+    'status'      => $status
+);
+
+$status = false;
+if (function_exists('gd_info')) {
     $gd = gd_info();
-    if ($gd['GD Version'] == '') {
-      $gd['GD Version'] = 'undefined';
+
+    if ('' === $gd['GD Version']) {
+        $gd['GD Version'] = 'undefined';
     }
-    if ($gd['GIF Read Support'] == 1 || $gd['GIF Support'] == 1) {
-      $status = true;
+    if (1 == $gd['GIF Read Support'] || 1 == $gd['GIF Support']) {
+        $status = true;
     } else {
-      $error = true;
+        $error = true;
     }
-  } else {
-    $gd = array(
-      'GD Version' => 'undefined'
+} else {
+    $gd     = array(
+        'GD Version' => 'undefined'
     );
     $status = false;
-    $error = true;
-  }
+    $error  = true;
+}
 
-  $requirement_array[] = array(
-    'name' => 'GDlib VERSION',
-    'version' => $gd['GD Version'],
+$requirement_array[] = array(
+    'name'        => 'GDlib VERSION',
+    'version'     => $gd['GD Version'],
     'version_min' => '',
     'version_max' => '',
-    'status' => $status
-  );
+    'status'      => $status
+);
