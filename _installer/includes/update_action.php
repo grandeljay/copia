@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: update_action.php 11177 2018-05-31 09:27:08Z GTB $
+   $Id: update_action.php 13504 2021-04-07 10:11:18Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -34,7 +34,7 @@
     foreach ($modified_drop_table_array as $table) {
       xtc_db_query("DROP TABLE IF EXISTS ".$table);
     }
-    xtc_db_query("TRUNCATE `session`");
+    xtc_db_query("TRUNCATE `sessions`");
     clear_dir(DIR_FS_DOCUMENT_ROOT.'cache/');
     clear_dir(DIR_FS_DOCUMENT_ROOT.'templates_c/');
   }
