@@ -9,10 +9,12 @@ if (preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) {
 }
 
 // check if customer is allowed to send this order!
-$order_query_check = xtc_db_query("SELECT customers_id
-                                     FROM " . TABLE_ORDERS . "
-                                    WHERE orders_id='" . (int)$insert_id . "'");
-$order_check = xtc_db_fetch_array($order_query_check);
+$order_query_check = xtc_db_query(
+    "SELECT customers_id
+       FROM " . TABLE_ORDERS . "
+      WHERE orders_id='" . (int) $insert_id . "'"
+);
+$order_check       = xtc_db_fetch_array($order_query_check);
 
 if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) { // Send Order by Admin
     $order = new order($insert_id);
@@ -53,9 +55,9 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
     $smarty->assign('logo_path', HTTP_SERVER . DIR_WS_CATALOG . 'templates/' . CURRENT_TEMPLATE . '/img/');
     $smarty->assign('oID', $order->info['order_id']);
 
-    //shipping method
+    // shipping method
     $shipping_class = explode('_', $order->info['shipping_class']);
-    if ($order->info['shipping_class'] != '' && $shipping_class[0] != 'free') {
+    if ('' !== $order->info['shipping_class'] && 'free' !== $shipping_class[0]) {
         include_once DIR_FS_CATALOG . 'lang/' . $order->info['language'] . '/modules/shipping/' . $shipping_class[0] . '.php';
         $shipping_method = constant(strtoupper('MODULE_SHIPPING_' . $shipping_class[0] . '_TEXT_TITLE'));
     } else {
@@ -67,13 +69,13 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
 
     //payment method
     $payment_method = $payment_class = '';
-    if ($order->info['payment_method'] != '' && $order->info['payment_method'] != 'no_payment') {
+    if ('' !== $order->info['payment_method'] && 'no_payment' !== $order->info['payment_method']) {
         if (!isset($payment_modules) || !is_object($payment_modules)) {
             require_once(DIR_FS_CATALOG . 'includes/classes/payment.php');
             $payment_modules = new payment($order->info['payment_class']);
         }
         $payment_method = $payment_modules::payment_title($order->info['payment_method'], $order->info['order_id']);
-        $payment_class = $order->info['payment_class'];
+        $payment_class  = $order->info['payment_class'];
     }
     $smarty->assign('PAYMENT_METHOD', $payment_method);
     $smarty->assign('PAYMENT_CLASS', $payment_class);
@@ -107,7 +109,7 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
 
     // Cash on Delivery
     if (
-           $order->info['payment_method'] == 'cod'
+           'cod' === $order->info['payment_method']
         && (defined('MODULE_PAYMENT_COD_DISPLAY_INFO') && MODULE_PAYMENT_COD_DISPLAY_INFO == 'True')
     ) {
         $smarty->assign('PAYMENT_INFO_HTML', MODULE_PAYMENT_COD_TEXT_INFO);
@@ -130,15 +132,17 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
 
     // revocation to email
     require_once DIR_FS_INC . 'get_lang_id_by_directory.inc.php';
-    $lang_id = ((isset($order->info['languages_id']) && $order->info['languages_id'] != '0')
-             ? $order->info['languages_id']
-             : get_lang_id_by_directory($order->info['language']));
+    $lang_id           = ((isset($order->info['languages_id']) && '0' != $order->info['languages_id'])
+                       ? $order->info['languages_id']
+                       : get_lang_id_by_directory($order->info['language']));
     $shop_content_data = $main->getContentData(REVOCATION_ID, $lang_id, $order->info['status']);
 
     // Image path correction - absolute path needed
-    $shop_content_data = str_replace('src="' . DIR_WS_CATALOG . 'images/', 'src="' .
-                         (ENABLE_SSL === true ? HTTPS_SERVER : HTTP_SERVER) .
-                         DIR_WS_CATALOG . 'images/', $shop_content_data);
+    $shop_content_data = str_replace(
+        'src="' . DIR_WS_CATALOG . 'images/',
+        'src="' . (ENABLE_SSL === true ? HTTPS_SERVER : HTTP_SERVER) . DIR_WS_CATALOG . 'images/',
+        $shop_content_data
+    );
     $smarty->assign('REVOCATION_HTML', $shop_content_data['content_text']);
     $smarty->assign('REVOCATION_TXT', $shop_content_data['content_text']);
 
@@ -146,9 +150,11 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
     $shop_content_data = $main->getContentData(3, $lang_id, $order->info['status']);
 
     // Image path correction - absolute path needed
-    $shop_content_data = str_replace('src="' . DIR_WS_CATALOG . 'images/', 'src="' .
-                         (ENABLE_SSL === true ? HTTPS_SERVER : HTTP_SERVER) .
-                         DIR_WS_CATALOG . 'images/', $shop_content_data);
+    $shop_content_data = str_replace(
+        'src="' . DIR_WS_CATALOG . 'images/',
+        'src="' . (ENABLE_SSL === true ? HTTPS_SERVER : HTTP_SERVER) . DIR_WS_CATALOG . 'images/',
+        $shop_content_data
+    );
     $smarty->assign('AGB_HTML', $shop_content_data['content_text']);
     $smarty->assign('AGB_TXT', $shop_content_data['content_text']);
 
@@ -156,15 +162,18 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
     $shop_content_data = $main->getContentData(2, $lang_id, $order->info['status']);
 
     // Image path correction - absolute path needed
-    $shop_content_data = str_replace('src="' . DIR_WS_CATALOG . 'images/', 'src="' .
-                         (ENABLE_SSL === true ? HTTPS_SERVER : HTTP_SERVER) .
-                         DIR_WS_CATALOG . 'images/', $shop_content_data);
+    $shop_content_data = str_replace(
+        'src="' . DIR_WS_CATALOG . 'images/',
+        'src="' . (ENABLE_SSL === true ? HTTPS_SERVER : HTTP_SERVER) . DIR_WS_CATALOG . 'images/',
+        $shop_content_data
+    );
     $smarty->assign('PRIVACY_POLICY_HTML', $shop_content_data['content_text']);
     $smarty->assign('PRIVACY_POLICY_TXT', $shop_content_data['content_text']);
 
-    if (DOWNLOAD_ENABLED == 'true') {
-        $send_order = true;
+    if ('true' === DOWNLOAD_ENABLED) {
+        $send_order       = true;
         $_GET['order_id'] = $order->info['order_id'];
+
         include DIR_WS_MODULES . 'downloads.php';
     }
 
@@ -176,8 +185,8 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
     }
 
     $smarty->caching = 0;
-    $html_mail = $smarty->fetch(CURRENT_TEMPLATE . '/mail/' . $order->info['language'] . '/order_mail.html');
-    $txt_mail = $smarty->fetch(CURRENT_TEMPLATE . '/mail/' . $order->info['language'] . '/order_mail.txt');
+    $html_mail       = $smarty->fetch(CURRENT_TEMPLATE . '/mail/' . $order->info['language'] . '/order_mail.html');
+    $txt_mail        = $smarty->fetch(CURRENT_TEMPLATE . '/mail/' . $order->info['language'] . '/order_mail.txt');
 
     // create subject
     $order_subject = str_replace('{$nr}', $insert_id, EMAIL_BILLING_SUBJECT_ORDER);
@@ -190,7 +199,7 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
     }
 
     // send mail to admin
-    if (ORDER_EMAIL_SEND_COPY_TO_ADMIN == 'true') {
+    if ('true' === ORDER_EMAIL_SEND_COPY_TO_ADMIN) {
         xtc_php_mail(
             EMAIL_BILLING_ADDRESS,
             EMAIL_BILLING_NAME,
@@ -208,7 +217,7 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
     }
 
     // send mail to customer
-    if (SEND_EMAILS == 'true' || $send_by_admin) {
+    if ('true' === SEND_EMAILS || $send_by_admin) {
         xtc_php_mail(
             EMAIL_BILLING_ADDRESS,
             EMAIL_BILLING_NAME,
@@ -242,7 +251,7 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
         }
     }
 
-    if (AFTERBUY_ACTIVATED == 'true') {
+    if ('true' === AFTERBUY_ACTIVATED) {
         require_once(DIR_WS_CLASSES . 'afterbuy.php');
         $aBUY = new xtc_afterbuy_functions($insert_id);
         if ($aBUY->order_send()) {
@@ -252,16 +261,16 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
 
     if (isset($send_by_admin)) {
         $customer_notified = '1';
-        $orders_status_id = '1';
-        $orders_status_id = ($order->info['orders_status'] < 1) ? '1' : $order->info['orders_status'];
-        $comments = encode_utf8(decode_htmlentities(COMMENT_SEND_ORDER_BY_ADMIN));
+        $orders_status_id  = '1';
+        $orders_status_id  = ($order->info['orders_status'] < 1) ? '1' : $order->info['orders_status'];
+        $comments          = encode_utf8(decode_htmlentities(COMMENT_SEND_ORDER_BY_ADMIN));
 
         if (
                defined('MODULE_ORDER_MAIL_STEP_STATUS')
             && MODULE_ORDER_MAIL_STEP_STATUS == 'true'
         ) {
-            if ($action == 'send') {
-                $orders_status_id = ($order->info['orders_status'] != MODULE_ORDER_MAIL_STEP_ORDERS_STATUS_ID)
+            if ('send' === $action) {
+                $orders_status_id = (MODULE_ORDER_MAIL_STEP_ORDERS_STATUS_ID != $order->info['orders_status'])
                                   ? MODULE_ORDER_MAIL_STEP_ORDERS_STATUS_ID
                                   : $order->info['orders_status'];
                 $messageStack->add_session(SUCCESS_ORDER_SEND, 'success');
@@ -280,15 +289,15 @@ if ($_SESSION['customer_id'] == $order_check['customers_id'] || $send_by_admin) 
         xtc_db_perform(TABLE_ORDERS, $sql_data_array, 'update', "orders_id = '" . (int)$insert_id . "'");
 
         $sql_data_array = array(
-            'orders_id' => (int)$insert_id,
-            'orders_status_id' => (int)$orders_status_id,
-            'date_added' => 'now()',
+            'orders_id'         => (int)$insert_id,
+            'orders_status_id'  => (int)$orders_status_id,
+            'date_added'        => 'now()',
             'customer_notified' => $customer_notified,
-            'comments' => $comments,
+            'comments'          => $comments,
         );
         xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
 
-        if (isset($_GET['site']) && $_GET['site'] == 1) {
+        if (isset($_GET['site']) && 1 == $_GET['site']) {
             xtc_redirect(xtc_href_link(FILENAME_ORDERS, 'oID=' . $_GET['oID'] . '&action=edit'));
         } else {
             xtc_redirect(xtc_href_link(FILENAME_ORDERS, 'oID=' . $_GET['oID']));
