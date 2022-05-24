@@ -4,8 +4,8 @@
     <br />
     <br />
   {/if}
-  {if isset($error)}<div class="errormessage cf">{$error}</div>{/if}
-  
+  {if isset($error_message)}<div class="errormessage cf">{$error_message}</div>{/if}
+
   {if isset($PROCESSING)}
     {if $UPDATE_ACTION == 'convert'}
       <div id="info_text">{$smarty.const.TEXT_INFO_DO_UPDATE}</div>
@@ -69,7 +69,7 @@
     <p>{$INPUT_DB_INSTALL}<label for="db_install">{$smarty.const.TEXT_DB_INSTALL}</label></p>
     {$INPUT_HIDDEN}
   {/if}
-  
+
   {if !isset($PROCESSING)}
     {$JAVASCRIPTCHECK}
     <noscript><div class="errormessage cf"><strong>{$smarty.const.TEXT_ERROR_JAVASCRIPT}</strong></div></noscript>
