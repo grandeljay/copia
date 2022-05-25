@@ -31,7 +31,7 @@ class ups
     public $title;
     public $description;
     public $icon;
-    public $enabled;
+    public bool $enabled;
     public $num_ups;
 
     public function __construct()
@@ -45,9 +45,9 @@ class ups
         $this->icon        = DIR_WS_ICONS . 'shipping_ups.gif';
         $this->tax_class   = ((defined('MODULE_SHIPPING_UPS_TAX_CLASS')) ? MODULE_SHIPPING_UPS_TAX_CLASS : '');
         $this->free        = MODULE_SHIPPING_UPS_TEXT_FREE;
-        $this->enabled     = ((defined('MODULE_SHIPPING_UPS_STATUS') && MODULE_SHIPPING_UPS_STATUS == 'True') ? true : false);
+        $this->enabled     = ((defined('MODULE_SHIPPING_UPS_STATUS') && 'True' === MODULE_SHIPPING_UPS_STATUS) ? true : false);
 
-        if (($this->enabled == true) && ((int)MODULE_SHIPPING_UPS_ZONE > 0) && is_object($order)) {
+        if ((true === $this->enabled) && ((int)MODULE_SHIPPING_UPS_ZONE > 0) && is_object($order)) {
             $check_flag  = false;
             $check_query = xtc_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_SHIPPING_UPS_ZONE . "' and zone_country_id = '" . $order->delivery['country']['id'] . "' order by zone_id");
             while ($check = xtc_db_fetch_array($check_query)) {
@@ -60,7 +60,7 @@ class ups
                 }
             }
 
-            if ($check_flag == false) {
+            if (false === $check_flag) {
                 $this->enabled = false;
             }
         }
@@ -72,7 +72,7 @@ class ups
     }
 
     /**
-     * class methods
+     * Methods
      */
     public function quote($method = '')
     {
@@ -92,15 +92,15 @@ class ups
                 break;
             }
             // rest of the world
-            if ($countries_table == 'WORLD') {
+            if ('WORLD' === $countries_table) {
                 $dest_zone = $i;
             }
             // rest of the world eof
         }
 
-        if ($dest_zone == 0) {
+        if (0 === $dest_zone) {
             $error = true;
-        } elseif (($dest_zone == 1) && ((round($_SESSION['cart']->show_total())) >= MODULE_SHIPPING_UPS_FREEAMOUNT)) {
+        } elseif ((1 === $dest_zone) && ((round($_SESSION['cart']->show_total())) >= MODULE_SHIPPING_UPS_FREEAMOUNT)) {
             $freeship        = true;
             $shipping        = 0;
             $shipping_method = MODULE_SHIPPING_UPS_TEXT_WAY . ' ' . $dest_country . ': ';
@@ -108,7 +108,8 @@ class ups
             $lowship   = true;
             $shipping  = -1;
             $ups_cost  = constant('MODULE_SHIPPING_UPS_COST_' . $dest_zone);
-            $ups_table = preg_split("/[:,]/", $ups_cost); // Hetfield - 2009-08-18 - replaced deprecated function split with preg_split to be ready for PHP >= 5.3
+            $ups_table = preg_split("/[:,]/", $ups_cost);
+
             for ($i = 0; $i < sizeof($ups_table); $i += 2) {
                 if ($shipping_weight <= $ups_table[$i]) {
                     $shipping        = $ups_table[$i + 1];
@@ -116,9 +117,11 @@ class ups
                     break;
                 }
             }
+
             $i         = 1;
             $ups_cost  = constant('MODULE_SHIPPING_UPS_COST_' . $dest_zone);
-            $ups_table = preg_split("/[:,]/", $ups_cost); // Hetfield - 2009-08-18 - replaced deprecated function split with preg_split to be ready for PHP >= 5.3
+            $ups_table = preg_split("/[:,]/", $ups_cost);
+
             for ($i = 0; $i < sizeof($ups_table); $i += 2) {
                 if ($shipping_weight <= $ups_table[$i]) {
                     $diff = $ups_table[$i + 1];
@@ -129,7 +132,8 @@ class ups
         } else {
             $shipping  = -1;
             $ups_cost  = constant('MODULE_SHIPPING_UPS_COST_' . $dest_zone);
-            $ups_table = preg_split("/[:,]/", $ups_cost); // Hetfield - 2009-08-18 - replaced deprecated function split with preg_split to be ready for PHP >= 5.3
+            $ups_table = preg_split("/[:,]/", $ups_cost);
+
             for ($i = 0; $i < sizeof($ups_table); $i += 2) {
                 if ($shipping_weight <= $ups_table[$i]) {
                     $shipping        = $ups_table[$i + 1];
@@ -139,15 +143,14 @@ class ups
             }
         }
 
-        if ($shipping == -1) {
+        if (-1 == $shipping) {
             $shipping_cost   = 0;
             $shipping_method = MODULE_SHIPPING_UPS_UNDEFINED_RATE;
         } else {
             $shipping_cost = ($shipping + MODULE_SHIPPING_UPS_HANDLING);
         }
 
-
-        if ($freeship == true) {
+        if (true === $freeship) {
             $this->quotes = array(
                 'id'      => $this->code,
                 'module'  => MODULE_SHIPPING_UPS_TEXT_TITLE,
@@ -159,7 +162,7 @@ class ups
                     )
                 )
             );
-        } elseif ($lowship == true) {
+        } elseif (true === $lowship) {
             $this->quotes = array(
                 'id'      => $this->code,
                 'module'  => MODULE_SHIPPING_UPS_TEXT_TITLE,
@@ -193,10 +196,9 @@ class ups
             $this->quotes['icon'] = xtc_image($this->icon, $this->title);
         }
 
-        if ($error == true) {
+        if (true === $error) {
             $this->quotes['error'] = MODULE_SHIPPING_UPS_INVALID_ZONE;
         }
-//  if ($lowship == true) $this->quotes['error'] = $ups_cost;
 
         return $this->quotes;
     }
