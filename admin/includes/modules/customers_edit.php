@@ -110,10 +110,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
             <?php if ('true' == ACCOUNT_GENDER) { ?>
                 <tr>
                     <td class="dataTableConfig col-left"><?php echo ENTRY_GENDER; ?></td>
-                    <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_gender_error == true) ? ' col-error' : ''); ?>">
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_gender_error) ? ' col-error' : ''); ?>">
                         <?php
-                        if ($error == true) {
-                            if ($entry_gender_error == true) {
+                        if (true == $error) {
+                            if (true == $entry_gender_error) {
                                 echo xtc_draw_pull_down_menu('customers_gender', get_customers_gender(), $cInfo->customers_gender) . '&nbsp;' . ENTRY_GENDER_ERROR;
                             } else {
                                 echo get_customers_gender($cInfo->customers_gender);
@@ -140,10 +140,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
             <tr>
                 <td class="dataTableConfig col-left"><?php echo ENTRY_FIRST_NAME; ?></td>
-                <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_firstname_error == true) ? ' col-error' : ''); ?>">
+                <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_firstname_error) ? ' col-error' : ''); ?>">
                     <?php
-                    if ($error == true) {
-                        if ($entry_firstname_error == true) {
+                    if (true == $error) {
+                        if (true == $entry_firstname_error) {
                             echo xtc_draw_input_field('customers_firstname', $cInfo->customers_firstname, 'maxlength="32"') . '&nbsp;' . ENTRY_FIRST_NAME_ERROR;
                         } else {
                             echo $cInfo->customers_firstname . xtc_draw_hidden_field('customers_firstname', $cInfo->customers_firstname);
@@ -157,10 +157,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
             <tr>
                 <td class="dataTableConfig col-left"><?php echo ENTRY_LAST_NAME; ?></td>
-                <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_lastname_error == true) ? ' col-error' : ''); ?>">
+                <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_lastname_error) ? ' col-error' : ''); ?>">
                     <?php
-                    if ($error == true) {
-                        if ($entry_lastname_error == true) {
+                    if (true == $error) {
+                        if (true == $entry_lastname_error) {
                             echo xtc_draw_input_field('customers_lastname', $cInfo->customers_lastname, 'maxlength="32"') . '&nbsp;' . ENTRY_LAST_NAME_ERROR;
                         } else {
                             echo $cInfo->customers_lastname . xtc_draw_hidden_field('customers_lastname', $cInfo->customers_lastname);
@@ -172,39 +172,35 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
                 </td>
             </tr>
 
-            <?php
-            if (ACCOUNT_DOB == 'true') {
-                echo ($cInfo->customers_default_address_id != $cInfo->address_book_id) ? '<tr style="display:none;">' : '<tr>';
-            ?>
-                <td class="dataTableConfig col-left"><?php echo ENTRY_DATE_OF_BIRTH; ?></td>
-                <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_date_of_birth_error == true) ? ' col-error' : ''); ?>">
-                    <?php
-                    if ($error == true) {
-                        if ($entry_date_of_birth_error == true) {
-                            echo xtc_draw_input_field('customers_dob', xtc_date_short($cInfo->customers_dob), 'maxlength="10"') . '&nbsp;' . ENTRY_DATE_OF_BIRTH_ERROR;
+            <?php if (ACCOUNT_DOB == 'true') { ?>
+                <?php echo ($cInfo->customers_default_address_id != $cInfo->address_book_id) ? '<tr style="display:none;">' : '<tr>'; ?>
+                    <td class="dataTableConfig col-left"><?php echo ENTRY_DATE_OF_BIRTH; ?></td>
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_date_of_birth_error ) ? ' col-error' : ''); ?>">
+                        <?php
+                        if (true == $error) {
+                            if (true == $entry_date_of_birth_error) {
+                                echo xtc_draw_input_field('customers_dob', xtc_date_short($cInfo->customers_dob), 'maxlength="10"') . '&nbsp;' . ENTRY_DATE_OF_BIRTH_ERROR;
+                            } else {
+                                echo xtc_date_short($cInfo->customers_dob) . xtc_draw_hidden_field('customers_dob', xtc_date_short($cInfo->customers_dob));
+                            }
                         } else {
-                            echo xtc_date_short($cInfo->customers_dob) . xtc_draw_hidden_field('customers_dob', xtc_date_short($cInfo->customers_dob));
+                            echo xtc_draw_input_field('customers_dob', xtc_date_short($cInfo->customers_dob), 'maxlength="10"', true);
                         }
-                    } else {
-                        echo xtc_draw_input_field('customers_dob', xtc_date_short($cInfo->customers_dob), 'maxlength="10"', true);
-                    }
-                    ?>
-                </td>
-            </tr>
-            <?php
-            }
+                        ?>
+                    </td>
+                </tr>
+            <?php } ?>
 
-            echo ($cInfo->customers_default_address_id != $cInfo->address_book_id) ? '<tr style="display:none;">' : '<tr>';
-            ?>
+            <?php echo ($cInfo->customers_default_address_id != $cInfo->address_book_id) ? '<tr style="display:none;">' : '<tr>'; ?>
                 <td class="dataTableConfig col-left"><?php echo ENTRY_EMAIL_ADDRESS; ?></td>
-                <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_email_address_error == true) ? ' col-error' : ''); ?>">
+                <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_email_address_error) ? ' col-error' : ''); ?>">
                     <?php
-                    if ($error == true) {
-                        if ($entry_email_address_error == true) {
+                    if (true == $error) {
+                        if (true == $entry_email_address_error) {
                             echo xtc_draw_input_field('customers_email_address', $cInfo->customers_email_address, 'autocomplete="off" readonly="readonly" onfocus="this.removeAttribute(\'readonly\');" onblur="this.setAttribute(\'readonly\', \'readonly\');" maxlength="96"') . '&nbsp;' . ENTRY_EMAIL_ADDRESS_ERROR;
-                        } elseif ($entry_email_address_check_error == true) {
+                        } elseif (true == $entry_email_address_check_error) {
                             echo xtc_draw_input_field('customers_email_address', $cInfo->customers_email_address, 'autocomplete="off" readonly="readonly" onfocus="this.removeAttribute(\'readonly\');" onblur="this.setAttribute(\'readonly\', \'readonly\');" maxlength="96"') . '&nbsp;' . ENTRY_EMAIL_ADDRESS_CHECK_ERROR;
-                        } elseif ($entry_email_address_exists == true) {
+                        } elseif (true == $entry_email_address_exists) {
                             echo xtc_draw_input_field('customers_email_address', $cInfo->customers_email_address, 'autocomplete="off" readonly="readonly" onfocus="this.removeAttribute(\'readonly\');" onblur="this.setAttribute(\'readonly\', \'readonly\');" maxlength="96"') . '&nbsp;' . ENTRY_EMAIL_ADDRESS_ERROR_EXISTS;
                         } else {
                             echo $cInfo->customers_email_address . xtc_draw_hidden_field('customers_email_address', $cInfo->customers_email_address);
@@ -234,7 +230,7 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
                     <?php
                     if (ACCOUNT_COMPANY_VAT_CHECK == 'true') {
-                        if ($action == 'edit' && $cInfo->customers_vat_id != '') {
+                        if ('edit' == $action && '' != $cInfo->customers_vat_id) {
                             switch ($cInfo->customers_vat_id_status) {
                                 case '0':
                                     $entry_vat_error_text = TEXT_VAT_FALSE;
@@ -266,15 +262,15 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
                             }
                         }
 
-                    echo ($cInfo->customers_default_address_id != $cInfo->address_book_id) ? '<tr style="display:none;">' : '<tr>';
-                    ?>
-                        <td class="dataTableConfig col-left"><?php echo ENTRY_VAT_ID; ?></td>
-                        <td class="dataTableConfig col-single-right">
-                            <?php
-                                echo xtc_draw_input_field('customers_vat_id', $cInfo->customers_vat_id, 'maxlength="32"') . '&nbsp;' . $entry_vat_error_text;
-                            ?>
-                        </td>
-                    </tr>
+                        echo ($cInfo->customers_default_address_id != $cInfo->address_book_id) ? '<tr style="display:none;">' : '<tr>';
+                        ?>
+                            <td class="dataTableConfig col-left"><?php echo ENTRY_VAT_ID; ?></td>
+                            <td class="dataTableConfig col-single-right">
+                                <?php
+                                    echo xtc_draw_input_field('customers_vat_id', $cInfo->customers_vat_id, 'maxlength="32"') . '&nbsp;' . $entry_vat_error_text;
+                                ?>
+                            </td>
+                        </tr>
                     <?php } ?>
                 </table>
             </div>
@@ -285,10 +281,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
             <table class="tableConfig borderall">
                 <tr>
                     <td class="dataTableConfig col-left"><?php echo ENTRY_STREET_ADDRESS; ?></td>
-                    <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_street_address_error == true) ? ' col-error' : ''); ?>">
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_street_address_error) ? ' col-error' : ''); ?>">
                         <?php
-                        if ($error == true) {
-                            if ($entry_street_address_error == true) {
+                        if (true == $error) {
+                            if (true == $entry_street_address_error) {
                                 echo xtc_draw_input_field('entry_street_address', $cInfo->entry_street_address, 'maxlength="64"') . '&nbsp;' . ENTRY_STREET_ADDRESS_ERROR;
                             } else {
                                 echo $cInfo->entry_street_address . xtc_draw_hidden_field('entry_street_address', $cInfo->entry_street_address);
@@ -313,10 +309,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
                 <tr>
                     <td class="dataTableConfig col-left"><?php echo ENTRY_POST_CODE; ?></td>
-                    <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_post_code_error == true) ? ' col-error' : ''); ?>">
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_post_code_error) ? ' col-error' : ''); ?>">
                         <?php
-                        if ($error == true) {
-                            if ($entry_post_code_error == true) {
+                        if (true == $error) {
+                            if (true == $entry_post_code_error) {
                                 echo xtc_draw_input_field('entry_postcode', $cInfo->entry_postcode, 'maxlength="8"') . '&nbsp;' . ENTRY_POST_CODE_ERROR;
                             } else {
                                 echo $cInfo->entry_postcode . xtc_draw_hidden_field('entry_postcode', $cInfo->entry_postcode);
@@ -330,10 +326,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
                 <tr>
                     <td class="dataTableConfig col-left"><?php echo ENTRY_CITY; ?></td>
-                    <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_city_error == true) ? ' col-error' : ''); ?>">
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_city_error) ? ' col-error' : ''); ?>">
                         <?php
-                        if ($error == true) {
-                            if ($entry_city_error == true) {
+                        if (true == $error) {
+                            if (true == $entry_city_error) {
                                 echo xtc_draw_input_field('entry_city', $cInfo->entry_city, 'maxlength="32"') . '&nbsp;' . ENTRY_CITY_ERROR;
                             } else {
                                 echo $cInfo->entry_city . xtc_draw_hidden_field('entry_city', $cInfo->entry_city);
@@ -347,10 +343,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
                 <tr>
                     <td class="dataTableConfig col-left"><?php echo ENTRY_COUNTRY; ?></td>
-                    <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_country_error == true) ? ' col-error' : ''); ?>">
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_country_error) ? ' col-error' : ''); ?>">
                         <?php
-                        if ($error == true) {
-                            if ($entry_country_error == true) {
+                        if (true == $error) {
+                            if (true == $entry_country_error) {
                                 echo xtc_draw_pull_down_menu('entry_country_id', xtc_get_countries('', 1), $cInfo->entry_country_id, 'style="width:250px"') . '&nbsp;' . ENTRY_COUNTRY_ERROR;
                             } else {
                                 echo xtc_get_country_name($cInfo->entry_country_id) . xtc_draw_hidden_field('entry_country_id', $cInfo->entry_country_id);
@@ -365,13 +361,13 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
                 <?php if (ACCOUNT_STATE == 'true') { ?>
                     <tr id="states">
                         <td class="dataTableConfig col-left"><?php echo ENTRY_STATE; ?></td>
-                        <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_state_error == true) ? ' col-error' : ''); ?>" id="entry_state">
+                        <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_state_error) ? ' col-error' : ''); ?>" id="entry_state">
                             <?php
                             $entry_state = xtc_get_zone_code($cInfo->entry_country_id, $cInfo->entry_zone_id, $cInfo->entry_state);
 
-                            if ($error == true) {
-                                if ($entry_state_error == true) {
-                                    if ($entry_state_has_zones == true) {
+                            if (true == $error) {
+                                if (true == $entry_state_error) {
+                                    if (true == $entry_state_has_zones) {
                                         $zones_array = array ();
                                         $zones_query = xtc_db_query("SELECT zone_name FROM " . TABLE_ZONES . " WHERE zone_country_id = '" . xtc_db_input($cInfo->entry_country_id) . "' order by zone_name");
                                         while ($zones_values = xtc_db_fetch_array($zones_query)) {
@@ -404,10 +400,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
             <table class="tableConfig borderall">
                 <tr>
                     <td class="dataTableConfig col-left"><?php echo ENTRY_TELEPHONE_NUMBER; ?></td>
-                    <td class="dataTableConfig col-single-right<?php echo (($error == true && $entry_telephone_error == true) ? ' col-error' : ''); ?>">
+                    <td class="dataTableConfig col-single-right<?php echo ((true == $error && true == $entry_telephone_error) ? ' col-error' : ''); ?>">
                         <?php
-                        if ($error == true) {
-                            if ($entry_telephone_error == true) {
+                        if (true == $error) {
+                            if (true == $entry_telephone_error) {
                                 echo xtc_draw_input_field('customers_telephone', $cInfo->customers_telephone, 'maxlength="32"') . '&nbsp;' . ENTRY_TELEPHONE_NUMBER_ERROR;
                             } else {
                                 echo $cInfo->customers_telephone . xtc_draw_hidden_field('customers_telephone', $cInfo->customers_telephone);
@@ -423,7 +419,7 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
                     <td class="dataTableConfig col-left"><?php echo ENTRY_FAX_NUMBER; ?></td>
                     <td class="dataTableConfig col-single-right">
                         <?php
-                        if ($processed == true) {
+                        if (true == $processed) {
                             echo $cInfo->customers_fax . xtc_draw_hidden_field('customers_fax', $cInfo->customers_fax);
                         } else {
                             echo xtc_draw_input_field('customers_fax', $cInfo->customers_fax, 'maxlength="32"');
@@ -454,10 +450,10 @@ $xtPrice = new xtcPrice(DEFAULT_CURRENCY, $cInfo->customers_status);
 
                     <tr>
                         <td class="dataTableConfig col-left"><?php echo ENTRY_NEW_PASSWORD; ?></td>
-                        <td class="dataTableConfig col-single-right bg_notice<?php echo (($error == true && $entry_password_error == true) ? ' col-error' : ''); ?>">
+                        <td class="dataTableConfig col-single-right bg_notice<?php echo ((true == $error && true == $entry_password_error) ? ' col-error' : ''); ?>">
                             <?php
-                            if ($error == true) {
-                                if ($entry_password_error == true) {
+                            if (true == $error) {
+                                if (true == $entry_password_error) {
                                     echo xtc_draw_password_field('customers_password', $cInfo->customers_password, false, 'autocomplete="off" readonly="readonly" onfocus="this.removeAttribute(\'readonly\');" onblur="this.setAttribute(\'readonly\', \'readonly\');"') . '&nbsp;' . ENTRY_PASSWORD_ERROR;
                                 } else {
                                     echo xtc_draw_password_field('customers_password', $cInfo->customers_password, false, 'autocomplete="off" readonly="readonly" onfocus="this.removeAttribute(\'readonly\');" onblur="this.setAttribute(\'readonly\', \'readonly\');"');
