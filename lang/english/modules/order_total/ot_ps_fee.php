@@ -10,7 +10,7 @@
    based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
    (c) 2002-2003 osCommerce(ot_cod_fee.php,v 1.02 2003/02/24); www.oscommerce.com
-   (C) 2001 - 2003 TheMedia, Dipl.-Ing Thomas Pl‰nkers ; http://www.themedia.at & http://www.oscommerce.at
+   (C) 2001 - 2003 TheMedia, Dipl.-Ing Thomas Pl√§nkers ; http://www.themedia.at & http://www.oscommerce.at
    (c) 2006 XT-Commerce (ot_ps_fee.php 899 2005-04-29 02)
 
    Released under the GNU General Public License
@@ -48,7 +48,7 @@
         }
         //support for ot_shipping
         $title = $shipping_code == 'FREE' ? 'Free Shipping (order total modul ot_shipping)' : $title;
-        
+
         $shipping_code = ($shipping_code == 'FREEAMOUNT') ? 'FREEAMOUNT_FREE' : 'FEE_' . $shipping_code;
 
         define('MODULE_ORDER_TOTAL_PS_'.$shipping_code.'_TITLE',$title);

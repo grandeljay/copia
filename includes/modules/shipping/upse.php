@@ -1,30 +1,30 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: upse.php 12901 2020-09-24 13:02:08Z Tomcraft $   
+   $Id: upse.php 12901 2020-09-24 13:02:08Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on: 
+   based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(dp.php,v 1.36 2003/03/09 02:14:35); www.oscommerce.com 
+   (c) 2002-2003 osCommerce(dp.php,v 1.36 2003/03/09 02:14:35); www.oscommerce.com
    (c) 2003	 nextcommerce (dp.php,v 1.12 2003/08/24); www.nextcommerce.org
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   German Post (Deutsche Post WorldNet)         	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
+   German Post (Deutsche Post WorldNet)         	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    UPS - Modul
    ---------------------------------------------------------------------------------------*/
-   
-   
 
- 
+
+
+
   class upse {
     var $code, $title, $description, $icon, $enabled, $num_upse;
 

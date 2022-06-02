@@ -10,7 +10,7 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2010 Payment Network AG - http://www.payment-network.com
 
@@ -99,10 +99,10 @@ if (xtc_not_null($tID)) {
         $comments .= "\n".'Reason: ' . constant('TEXT_SOFORT_'.strtoupper($reason));
       }
 
-      xtc_db_query("UPDATE ".TABLE_ORDERS." 
-                       SET orders_status = '".(int) $order_status_id."' 
+      xtc_db_query("UPDATE ".TABLE_ORDERS."
+                       SET orders_status = '".(int) $order_status_id."'
                      WHERE orders_id = '".(int) $orders['order_id']."'");
-      
+
       $sql_data_array = array(
         'orders_id' => (int) $orders['order_id'],
         'orders_status_id' => (int) $order_status_id,
@@ -120,7 +120,7 @@ if (xtc_not_null($tID)) {
     // order is missing
     header("HTTP/1.0 404 Not Found");
     header("Status: 404 Not Found");
-    
+
   }
 } else {
   die('Direct access to this location is not allowed.');

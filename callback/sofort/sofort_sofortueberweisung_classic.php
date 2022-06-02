@@ -10,7 +10,7 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Pl‰nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Pl√§nkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2010 Payment Network AG - http://www.payment-network.com
 
@@ -112,5 +112,5 @@ if (xtc_db_num_rows($orders_query) == 1) {
   // order is missing
   header("HTTP/1.0 404 Not Found");
   header("Status: 404 Not Found");
-  
+
 }

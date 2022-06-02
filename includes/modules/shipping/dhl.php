@@ -16,7 +16,7 @@
    Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   dhl_austria_1.02       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Pl‰nkers | http://www.themedia.at & http://www.oscommerce.at
+   dhl_austria_1.02       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Pl√§nkers | http://www.themedia.at & http://www.oscommerce.at
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
@@ -536,7 +536,7 @@ xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, config
         $keys[] = 'MODULE_SHIPPING_DHL_STEP_SDX_50_' . $i;
         $keys[] = 'MODULE_SHIPPING_DHL_STEP_SDX_51_' . $i;
       }
-      
+
       $exclude_array = array('MODULE_SHIPPING_DHL_COST_DOX_1',
                              'MODULE_SHIPPING_DHL_COST_WPX_1',
                              'MODULE_SHIPPING_DHL_STEP_DOX_20_1',
@@ -622,7 +622,7 @@ xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, config
                              'MODULE_SHIPPING_DHL_STEP_ECX_30_10',
                              'MODULE_SHIPPING_DHL_STEP_ECX_50_10',
                              'MODULE_SHIPPING_DHL_STEP_ECX_51_10');
-      
+
       for ($x=0, $n=sizeof($keys); $x<$n; $x++) {
         if (in_array($keys[$x], $exclude_array)) {
           unset($keys[$x]);

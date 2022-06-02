@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ap.php 11585 2019-03-21 11:50:23Z GTB $   
+   $Id: ap.php 11585 2019-03-21 11:50:23Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -9,18 +9,18 @@
    -----------------------------------------------------------------------------------------
    based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(ap.php,v 1.02 2003/02/18); www.oscommerce.com 
+   (c) 2002-2003 osCommerce(ap.php,v 1.02 2003/02/18); www.oscommerce.com
    (c) 2003	 nextcommerce (ap.php,v 1.4 2003/08/13); www.nextcommerce.org
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   austrian_post_1.05       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
+   austrian_post_1.05       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
-   
+
 
 define('MODULE_SHIPPING_AP_TEXT_TITLE', 'Austrian Post AG');
 define('MODULE_SHIPPING_AP_TEXT_DESCRIPTION', 'Austrian Post AG - Worldwide Dispatch');

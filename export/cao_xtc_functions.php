@@ -1,7 +1,7 @@
 <?php
 /***********************************************************************************************
 *                                                                                              *
-*  CAO-Faktura für Windows Version 1.4 (http://www.cao-faktura.de)                             *
+*  CAO-Faktura fÃ¼r Windows Version 1.4 (http://www.cao-faktura.de)                             *
 *  Copyright (C) 2009 Jan Pokrandt / Jan@JP-SOFT.de                                            *
 *                                                                                              *
 *  This program is free software; you can redistribute it and/or                               *
@@ -37,7 +37,7 @@
 *  based on:                                                                                   *
 * (c) 2000 - 2001 The Exchange Project                                                         *
 * (c) 2001 - 2003 osCommerce, Open Source E-Commerce Solutions                                 *
-* (c) 2001 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers                                          *
+* (c) 2001 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers                                          *
 * (c) 2003 JP-Soft, Jan Pokrandt                                                               *
 * (c) 2003 IN-Solution, Henri Schmidhuber                                                      *
 * (c) 2003 www.websl.de, Karl Langmann                                                         *
@@ -283,17 +283,17 @@ function SendOrders ()
   echo $schema;
 
   $sql ="select * from " . TABLE_ORDERS . " where orders_id >= '" . xtc_db_input($order_from) . "'";
-  
+
   if ($order_to) {
     $sql .= " and orders_id <= " . $order_to;
   }
 
-  if (!$order_status && !$order_from) {    
+  if (!$order_status && !$order_from) {
     $sql .= " and orders_status IN ('". DEFAULT_ORDERS_STATUS_ID ."', '". PAYPAL_ORDER_STATUS_SUCCESS_ID ."', '". PAYPAL_ORDER_STATUS_PENDING_ID ."')";
   } elseif ($order_status) {
     $sql .= " and orders_status = " . $order_status;
   }
- 
+
   $orders_query = xtc_db_query($sql);
 
   while ($orders = xtc_db_fetch_array($orders_query))
@@ -442,7 +442,7 @@ function SendOrders ()
                      '</OPTION>' . "\n";
         }
       }
-      $schema .=  '</PRODUCT>' . "\n";      
+      $schema .=  '</PRODUCT>' . "\n";
     }
     $schema .= '</ORDER_PRODUCTS>' . "\n";
     $schema .= '<ORDER_TOTAL>' . "\n";
@@ -481,7 +481,7 @@ function SendOrders ()
     }
     */
 
-    //Es werden jetzt alle Kommentare mit übertragen, nicht nur der letzte
+    //Es werden jetzt alle Kommentare mit Ã¼bertragen, nicht nur der letzte
     //JP 2008-12-15
     $comments_query = "SELECT comments FROM " . TABLE_ORDERS_STATUS_HISTORY .
                       " WHERE orders_id = '" . $orders['orders_id'] ."'";
@@ -1098,7 +1098,7 @@ function SendShopConfig ()
 
 function SendXMLHeader ()
 {
-  header ("Last-Modified: ". gmdate ("D, d M Y H:i:s"). " GMT");  // immer geändert
+  header ("Last-Modified: ". gmdate ("D, d M Y H:i:s"). " GMT");  // immer geÃ¤ndert
   header ("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
   header ("Pragma: no-cache"); // HTTP/1.0
   header ("Content-type: text/xml");
@@ -1108,7 +1108,7 @@ function SendXMLHeader ()
 
 function SendHTMLHeader ()
 {
-  header ("Last-Modified: ". gmdate ("D, d M Y H:i:s"). " GMT");  // immer geändert
+  header ("Last-Modified: ". gmdate ("D, d M Y H:i:s"). " GMT");  // immer geÃ¤ndert
   header ("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
   header ("Pragma: no-cache"); // HTTP/1.0
   header ("Content-type: text/html");
@@ -1161,7 +1161,7 @@ function UpdateTables ()
   SendHTMLHeader;
 
   echo '<html><head></head><body>';
-  echo '<h3>Tabellen-Update / Erweiterung für CAO-Faktura</h3>';
+  echo '<h3>Tabellen-Update / Erweiterung fÃ¼r CAO-Faktura</h3>';
   echo '<h4>Version ' . $version_nr . ' Stand : ' . $version_datum .'</h4>';
 
   $sql[1]  = 'ALTER TABLE ' . TABLE_PRODUCTS . ' ADD products_ean VARCHAR(128) AFTER products_id';
@@ -1295,12 +1295,12 @@ function xtc_remove_product($product_id)
         }
 
         //delete more images
-        $mo_images_query = xtc_db_query("SELECT image_name 
-                                           FROM ".TABLE_PRODUCTS_IMAGES." 
+        $mo_images_query = xtc_db_query("SELECT image_name
+                                           FROM ".TABLE_PRODUCTS_IMAGES."
                                           WHERE products_id = '".(int)$product_id."'");
         while ($mo_images_values = xtc_db_fetch_array($mo_images_query)) {
-          $duplicate_more_image_query = xtc_db_query("SELECT count(*) AS total 
-                                                        FROM ".TABLE_PRODUCTS_IMAGES." 
+          $duplicate_more_image_query = xtc_db_query("SELECT count(*) AS total
+                                                        FROM ".TABLE_PRODUCTS_IMAGES."
                                                        WHERE image_name = '".xtc_db_input($mo_images_values['image_name'])."'");
           $duplicate_more_image = xtc_db_fetch_array($duplicate_more_image_query);
           if ($duplicate_more_image['total'] < 2) {
@@ -1401,7 +1401,7 @@ function ProductsImageUpload ()
   if ($products_image = &xtc_try_upload('products_image',DIR_FS_CATALOG.DIR_WS_ORIGINAL_IMAGES,'777', '', true))
   {
     $products_image_name = $products_image_name_process = $products_image->filename;
-    
+
     // rewrite values to use resample classes
     define('DIR_FS_CATALOG_ORIGINAL_IMAGES',DIR_FS_CATALOG.DIR_WS_ORIGINAL_IMAGES);
     define('DIR_FS_CATALOG_INFO_IMAGES',DIR_FS_CATALOG.DIR_WS_INFO_IMAGES);
@@ -1722,7 +1722,7 @@ function ProductsUpdate ()
 
 //VPE Frank
   if (isset($_POST['products_basis_factor'])) $products_vpe_value = xtc_db_prepare_input($_POST['products_basis_factor']);
-// Wird von CAO noch fehlerhaft übergeben  if (isset($_POST['products_basis_me'])) $products_vpe = xtc_db_prepare_input($_POST['products_basis_me']);
+// Wird von CAO noch fehlerhaft Ã¼bergeben  if (isset($_POST['products_basis_me'])) $products_vpe = xtc_db_prepare_input($_POST['products_basis_me']);
 
   if ($_POST['products_basis_factor'] == 1) {
 	$products_vpe_status = 0;
@@ -1950,7 +1950,7 @@ function ProductsUpdate ()
     }
   }
 
-  //Burn VK1-4 an die jeweiligen Gruppen übergeben
+  //Burn VK1-4 an die jeweiligen Gruppen Ã¼bergeben
 
     if (isset($_POST['products_vk1']))               $products_vk1               = xtc_db_prepare_input($_POST['products_vk1']);
     if (isset($_POST['products_vk2']))               $products_vk2               = xtc_db_prepare_input($_POST['products_vk2']);
@@ -2331,12 +2331,12 @@ function OrderUpdate ()
 
   if ((isset($_POST['order_id'])) && (isset($_POST['status'])))
   {
-    // Per Post übergebene Variablen
+    // Per Post Ã¼bergebene Variablen
     $oID = $_POST['order_id'];
     $status = $_POST['status'];
     $comments = xtc_db_prepare_input($_POST['comments']);
 
-    //Status überprüfen
+    //Status Ã¼berprÃ¼fen
     $check_status_query = xtc_db_query("select * from " . TABLE_ORDERS . " where orders_id = '" . xtc_db_input($oID) . "'");
     if ($check_status = xtc_db_fetch_array($check_status_query))
     {
@@ -2346,7 +2346,7 @@ function OrderUpdate ()
         $customer_notified = '0';
         if ($_POST['notify'] == 'on')
         {
-          // Falls eine Sprach ID zur Order existiert die Emailbestätigung in dieser Sprache ausführen
+          // Falls eine Sprach ID zur Order existiert die EmailbestÃ¤tigung in dieser Sprache ausfÃ¼hren
           if (isset($check_status['orders_language_id']) && $check_status['orders_language_id'] > 0 )
           {
             $orders_status_query = xtc_db_query("select orders_status_id, orders_status_name from " . TABLE_ORDERS_STATUS . " where language_id = '" . $check_status['orders_language_id'] . "'");

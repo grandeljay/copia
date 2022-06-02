@@ -17,7 +17,7 @@
    -----------------------------------------------------------------------------------------
    Third Party contributions:
    GLS (German Logistic Service) based on DP (Deutsche Post)
-   (c) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Pl‰nkers | http://www.themedia.at & http://www.oscommerce.at
+   (c) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Pl√§nkers | http://www.themedia.at & http://www.oscommerce.at
    GLS contribution made by shd-media (c) 2009 shd-media - www.shd-media.de
 
    updated version by franky_n

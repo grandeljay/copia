@@ -1,24 +1,24 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ap.php 12901 2020-09-24 13:02:08Z Tomcraft $   
+   $Id: ap.php 12901 2020-09-24 13:02:08Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on: 
+   based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(ap.php,v 1.05 2003/02/18); www.oscommerce.com 
+   (c) 2002-2003 osCommerce(ap.php,v 1.05 2003/02/18); www.oscommerce.com
    (c) 2003	 nextcommerce (ap.php,v 1.11 2003/08/24); www.nextcommerce.org
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   austrian_post_1.05       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
+   austrian_post_1.05       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
 
-   Released under the GNU General Public License 
+   Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
   class ap {
@@ -54,7 +54,7 @@
         }
       }
 
-      if ($this->check() > 0) {      
+      if ($this->check() > 0) {
         $check_zones_query = xtc_db_query("SELECT * FROM " . TABLE_CONFIGURATION . " WHERE configuration_key LIKE 'MODULE_SHIPPING_AP_COUNTRIES_%'");
         $check_zones_rows = xtc_db_num_rows($check_zones_query);
 
@@ -73,7 +73,7 @@
         }
       }
     }
-    
+
     function quote($method = '') {
       global $order, $shipping_weight, $shipping_num_boxes;
 
@@ -131,7 +131,7 @@
                                                  'cost'  => $shipping_cost));
         }
       }
-      
+
       if ($this->tax_class > 0) {
         $this->quotes['tax'] = xtc_get_tax_rate($this->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
       }
@@ -164,8 +164,8 @@
 
       if ($check_zones_rows_query != 0) {
         $this->install_zones($check_zones_rows_query);
-        xtc_db_query("UPDATE ".TABLE_CONFIGURATION." 
-                         SET configuration_value = '".(int)$check_zones_rows_query."' 
+        xtc_db_query("UPDATE ".TABLE_CONFIGURATION."
+                         SET configuration_value = '".(int)$check_zones_rows_query."'
                        WHERE configuration_key = 'MODULE_SHIPPING_".strtoupper($this->code)."_NUMBER_ZONES'");
       }
   	}
@@ -184,13 +184,13 @@
             xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_AP_COST_".$i."', '', '6', '0', now())");
             xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_AP_HANDLING_".$i."', '0', '6', '0', now())");
           }
-        }      
+        }
       } else {
         // remove zone
         for ($i = $number_of_zones; $i >= $this->num_zones; $i --) {
           xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_AP_COUNTRIES_".$i."'");
-          xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_AP_COST_".$i."'");      
-          xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_AP_HANDLING_".$i."'");      
+          xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_AP_COST_".$i."'");
+          xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_AP_HANDLING_".$i."'");
         }
       }
 
@@ -237,7 +237,7 @@
           xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '0' WHERE  configuration_key = 'MODULE_SHIPPING_AP_HANDLING_8'");
         }
       }
-      
+
       // restore old values
       xtc_restore_configuration($this->keys_zones($this->num_zones));
     }
@@ -257,13 +257,13 @@
     }
 
     function keys() {
-      $keys = array('MODULE_SHIPPING_AP_STATUS', 
-                    'MODULE_SHIPPING_AP_ALLOWED', 
-                    'MODULE_SHIPPING_AP_TAX_CLASS', 
-                    'MODULE_SHIPPING_AP_ZONE', 
+      $keys = array('MODULE_SHIPPING_AP_STATUS',
+                    'MODULE_SHIPPING_AP_ALLOWED',
+                    'MODULE_SHIPPING_AP_TAX_CLASS',
+                    'MODULE_SHIPPING_AP_ZONE',
                     'MODULE_SHIPPING_AP_SORT_ORDER',
                     'MODULE_SHIPPING_AP_NUMBER_ZONES',
-                    'MODULE_SHIPPING_AP_DISPLAY'                    
+                    'MODULE_SHIPPING_AP_DISPLAY'
                     );
 
       $keys = array_merge($keys, $this->keys_zones($this->num_zones));

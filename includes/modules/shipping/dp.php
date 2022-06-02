@@ -17,7 +17,7 @@
    -----------------------------------------------------------------------------------------
    Third Party contributions:
    German Post (Deutsche Post WorldNet)
-   Autor:  Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
+   Autor:  Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
 
    Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
@@ -56,11 +56,11 @@
           $this->enabled = false;
         }
       }
-      
-      if ($this->check() > 0) {      
+
+      if ($this->check() > 0) {
         $check_zones_query = xtc_db_query("SELECT * FROM " . TABLE_CONFIGURATION . " WHERE configuration_key LIKE 'MODULE_SHIPPING_DP_COUNTRIES_%'");
         $check_zones_rows = xtc_db_num_rows($check_zones_query);
-        
+
         //update compatibility
         if (!defined('MODULE_SHIPPING_DP_NUMBER_ZONES')) {
           $this->num_zones = $check_zones_rows;
@@ -140,7 +140,7 @@
       }
 
       if (xtc_not_null($this->icon)) $this->quotes['icon'] = xtc_image($this->icon, $this->title);
-      
+
       if ($this->enabled) {
         return $this->quotes;
       }
@@ -173,14 +173,14 @@
 
       if ($check_zones_rows_query != 0) {
         $this->install_zones($check_zones_rows_query);
-        xtc_db_query("UPDATE ".TABLE_CONFIGURATION." 
-                         SET configuration_value = '".(int)$check_zones_rows_query."' 
+        xtc_db_query("UPDATE ".TABLE_CONFIGURATION."
+                         SET configuration_value = '".(int)$check_zones_rows_query."'
                        WHERE configuration_key = 'MODULE_SHIPPING_".strtoupper($this->code)."_NUMBER_ZONES'");
       }
     }
 
     function install_zones($number_of_zones) {
-                    
+
       // backup old values
       xtc_backup_configuration($this->keys_zones($number_of_zones));
 
@@ -192,12 +192,12 @@
             xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) values ('MODULE_SHIPPING_DP_COUNTRIES_".$i."', '', '6', '0', 'xtc_cfg_textarea(', now())");
             xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_DP_COST_".$i."', '', '6', '0', now())");
           }
-        }      
+        }
       } else {
         // remove zone
         for ($i = $number_of_zones; $i >= $this->num_zones; $i --) {
           xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_DP_COUNTRIES_".$i."'");
-          xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_DP_COST_".$i."'");      
+          xtc_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_SHIPPING_DP_COST_".$i."'");
         }
       }
 
@@ -224,7 +224,7 @@
           xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '5:40.00,10:55.00,20:85.00,31.5:115.00' WHERE  configuration_key = 'MODULE_SHIPPING_DP_COST_5'");
         }
       }
-      
+
       // restore old values
       xtc_restore_configuration($this->keys_zones($this->num_zones));
     }
@@ -241,13 +241,13 @@
       }
       return $keys_zones;
     }
-    
+
     function keys() {
-      $keys = array('MODULE_SHIPPING_DP_STATUS', 
+      $keys = array('MODULE_SHIPPING_DP_STATUS',
                     'MODULE_SHIPPING_DP_HANDLING',
-                    'MODULE_SHIPPING_DP_ALLOWED', 
-                    'MODULE_SHIPPING_DP_TAX_CLASS', 
-                    'MODULE_SHIPPING_DP_ZONE', 
+                    'MODULE_SHIPPING_DP_ALLOWED',
+                    'MODULE_SHIPPING_DP_TAX_CLASS',
+                    'MODULE_SHIPPING_DP_ZONE',
                     'MODULE_SHIPPING_DP_SORT_ORDER',
                     'MODULE_SHIPPING_DP_NUMBER_ZONES',
                     'MODULE_SHIPPING_DP_DISPLAY'

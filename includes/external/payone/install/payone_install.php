@@ -10,10 +10,10 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2013 Gambio GmbH - http://www.gambio.de
-  
+
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
@@ -161,16 +161,16 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_sepa_countries` (
 $bankgroups = array(
   'eps' => array(
     'ARZ_OVB' => 'Volksbanken',
-    'ARZ_BAF' => 'Bank für Ärzte und Freie Berufe',
-    'ARZ_NLH' => 'Niederösterreichische Landes-Hypo',
+    'ARZ_BAF' => 'Bank fÃ¼r Ã„rzte und Freie Berufe',
+    'ARZ_NLH' => 'NiederÃ¶sterreichische Landes-Hypo',
     'ARZ_VLH' => 'Vorarlberger Landes-Hypo',
-    'ARZ_BCS' => 'Bankhaus Carl Spängler & Co. AG',
+    'ARZ_BCS' => 'Bankhaus Carl SpÃ¤ngler & Co. AG',
     'ARZ_HTB' => 'Hypo Tirol',
     'ARZ_HAA' => 'Hypo Alpe Adria',
     'ARZ_IKB' => 'Investkreditbank',
-    'ARZ_OAB' => 'Österreichische Apothekerbank',
+    'ARZ_OAB' => 'Ã–sterreichische Apothekerbank',
     'ARZ_IMB' => 'Immobank',
-    'ARZ_GRB' => 'Gärtnerbank',
+    'ARZ_GRB' => 'GÃ¤rtnerbank',
     'ARZ_HIB' => 'HYPO Investment',
     'BA_AUS' => 'Bank Austria',
     'BAWAG_BWG' => 'BAWAG',
@@ -180,7 +180,7 @@ $bankgroups = array(
     'SPARDAT_EBS' => 'Erste Bank',
     'SPARDAT_BBL' => 'Bank Burgenland',
     'RAC_RAC' => 'Raiffeisen',
-    'HRAC_OOS' => 'Hypo Oberösterreich',
+    'HRAC_OOS' => 'Hypo OberÃ¶sterreich',
     'HRAC_SLB' => 'Hypo Salzburg',
     'HRAC_STM' => 'Hypo Steiermark',
   ),
@@ -251,7 +251,7 @@ $sql_configuration_array = array(
 );
 
 
-// action                     
+// action
 if (count($sql) > 0) {
   foreach($sql as $query) {
     xtc_db_query($query);
@@ -267,7 +267,7 @@ if (count($bankgroups) > 0) {
       $sql_data_array['bank_name'] = $bank_name;
       xtc_db_perform('payone_bankgroups', $sql_data_array);
     }
-  }	
+  }
 }
 
 if (count($sepa_countries) > 0) {
