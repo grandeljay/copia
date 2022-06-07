@@ -36,7 +36,7 @@ class shipping
 
             $module_directory = DIR_WS_MODULES . 'shipping/';
             foreach ($modules as $file) {
-                $class = substr($file, 0, strrpos($file, '.'));
+                $class         = substr($file, 0, strrpos($file, '.'));
                 $module_status = (defined('MODULE_SHIPPING_' . strtoupper($class) . '_STATUS') && strtolower(constant('MODULE_SHIPPING_' . strtoupper($class) . '_STATUS')) == 'true') ? true : false;
                 if (is_file($module_directory . $file) && $module_status) {
                     $this->modules[] = $file;
@@ -54,18 +54,18 @@ class shipping
                 && isset($module['id'])
                 && in_array(substr($module['id'], 0, strpos($module['id'], '_')) . '.php', $this->modules)
             ) {
-                $class = substr($module['id'], 0, strpos($module['id'], '_'));
+                $class             = substr($module['id'], 0, strpos($module['id'], '_'));
                 $include_modules[] = array(
                 'class' => $class,
-                'file' => $class . '.php'
+                'file'  => $class . '.php'
                 );
             } else {
                 reset($this->modules);
                 foreach ($this->modules as $value) {
-                    $class = substr($value, 0, strrpos($value, '.'));
+                    $class             = substr($value, 0, strrpos($value, '.'));
                     $include_modules[] = array(
                     'class' => $class,
-                    'file' => $value
+                    'file'  => $value
                     );
                 }
             }
@@ -107,9 +107,9 @@ class shipping
         $quotes_array = array();
 
         if (is_array($this->modules)) {
-            $shipping_quoted = '';
+            $shipping_quoted    = '';
             $shipping_num_boxes = 1;
-            $shipping_weight = $total_weight;
+            $shipping_weight    = $total_weight;
 
             if ((double)SHIPPING_BOX_WEIGHT >= ($shipping_weight * (double)SHIPPING_BOX_PADDING / 100)) {
                 $shipping_weight = $shipping_weight + (double)SHIPPING_BOX_WEIGHT;
@@ -119,7 +119,7 @@ class shipping
 
             if ((double)SHIPPING_MAX_WEIGHT != '' && $shipping_weight > (double)SHIPPING_MAX_WEIGHT) { // Split into many boxes
                 $shipping_num_boxes = ceil($shipping_weight / (double)SHIPPING_MAX_WEIGHT);
-                $shipping_weight = $shipping_weight / $shipping_num_boxes;
+                $shipping_weight    = $shipping_weight / $shipping_num_boxes;
             }
 
             $include_quotes = array();
@@ -163,7 +163,7 @@ class shipping
                     && $GLOBALS[$class]->enabled
                 ) {
                     $quotes = $GLOBALS[$class]->quotes;
-                    $size = isset($quotes['methods']) && is_array($quotes['methods']) ? sizeof($quotes['methods']) : 0;
+                    $size   = isset($quotes['methods']) && is_array($quotes['methods']) ? sizeof($quotes['methods']) : 0;
                     for ($i = 0; $i < $size; $i++) {
                         if (
                             array_key_exists('cost', $quotes['methods'][$i])
@@ -183,9 +183,9 @@ class shipping
                                 $title = parse_multi_language_value(CUSTOM_SHIPPING_TITLE, $_SESSION['language_code']);
                             }
                             $rates[] = array(
-                            'id' => $quotes['id'] . '_' . $quotes['methods'][$i]['id'],
+                            'id'    => $quotes['id'] . '_' . $quotes['methods'][$i]['id'],
                             'title' => $title,
-                            'cost' => $quotes['methods'][$i]['cost'],
+                            'cost'  => $quotes['methods'][$i]['cost'],
                             'total' => $quotes['methods'][$i]['total'],
                             );
                         }
