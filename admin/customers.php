@@ -574,22 +574,22 @@ if ($action) {
                 $entry_email_address_exists = false;
             }
 
-            if ($error == false) {
+            if (false == $error) {
                 $sql_data_array = array(
-                'customers_firstname'     => $customers_firstname,
-                'customers_cid'           => $customers_cid,
-                'customers_vat_id'        => $customers_vat_id,
-                'customers_vat_id_status' => $customers_vat_id_status,
-                'customers_lastname'      => $customers_lastname,
-                'customers_email_address' => $customers_email_address,
-                'customers_telephone'     => $customers_telephone,
-                'customers_fax'           => $customers_fax,
-                'payment_unallowed'       => $payment_unallowed,
-                'shipping_unallowed'      => $shipping_unallowed,
-                'customers_last_modified' => 'now()'
+                    'customers_firstname'     => $customers_firstname,
+                    'customers_cid'           => $customers_cid,
+                    'customers_vat_id'        => $customers_vat_id,
+                    'customers_vat_id_status' => $customers_vat_id_status,
+                    'customers_lastname'      => $customers_lastname,
+                    'customers_email_address' => $customers_email_address,
+                    'customers_telephone'     => $customers_telephone,
+                    'customers_fax'           => $customers_fax,
+                    'payment_unallowed'       => $payment_unallowed,
+                    'shipping_unallowed'      => $shipping_unallowed,
+                    'customers_last_modified' => 'now()'
                 );
 
-                if ($password != '') {
+                if ('' != $password) {
                     $sql_data_array['customers_password']      = xtc_encrypt_password($password);
                     $sql_data_array['customers_password_time'] = time();
                     if ($_SESSION['customer_id'] == $customers_id) {
