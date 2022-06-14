@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-  $Id: categories.php 13249 2021-01-27 16:01:27Z GTB $
+  $Id: categories.php 10393 2016-11-07 11:36:15Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -33,22 +33,16 @@ defined('ADD_PRODUCTS_FIELDS') or require_once (DIR_WS_INCLUDES.'add_db_fields.p
 class categories {
   //new module support
   function __construct() {
-    require_once (DIR_WS_CLASSES.'categoriesModules.class.php');
-    $this->catModules = new categoriesModules();
-
-    $this->images_type_array = array(
-      '',
-      '_list',
-      '_mobile'
-    );
+      require_once (DIR_WS_CLASSES.'categoriesModules.class.php');
+      $this->catModules = new categoriesModules();
   }
 
   // deletes an array of categories, with products
   // makes use of remove_category, remove_product
   function remove_categories($category_id) {
     $categories = xtc_get_category_tree($category_id, '', '0', '', true);
-    $products = array();
-    $products_delete = array();
+    $products = array ();
+    $products_delete = array ();
     for ($i = 0, $n = sizeof($categories); $i < $n; $i ++) {
       $product_ids_query = xtc_db_query("SELECT products_id
                                            FROM ".TABLE_PRODUCTS_TO_CATEGORIES."
@@ -58,7 +52,7 @@ class categories {
       }
     }
     reset($products);
-    foreach ($products as $key => $value) {
+    while (list ($key, $value) = each($products)) {
       $check_query = xtc_db_query("SELECT COUNT(*) AS total
                                      FROM ".TABLE_PRODUCTS_TO_CATEGORIES."
                                     WHERE products_id = '".$key."'
@@ -69,39 +63,33 @@ class categories {
       }
     }
     // Removing categories can be a lengthy process
-    xtc_set_time_limit(0);
+    @ xtc_set_time_limit(0);
     for ($i = 0, $n = sizeof($categories); $i < $n; $i ++) {
       $this->remove_category($categories[$i]['id']);
     }
     reset($products_delete);
-    foreach ($products_delete as $key) {
+    while (list ($key) = each($products_delete)) {
       $this->remove_product($key);
     }
   }
 
+
   // deletes a single category, without products
   function remove_category($category_id) {
-    $category_image_query = xtc_db_query("SELECT *
+    $category_image_query = xtc_db_query("SELECT categories_image 
                                             FROM ".TABLE_CATEGORIES." 
                                            WHERE categories_id = '".xtc_db_input($category_id)."'");
     $category_image = xtc_db_fetch_array($category_image_query);
+    $duplicate_image_query = xtc_db_query("SELECT count(*) AS total 
+                                             FROM ".TABLE_CATEGORIES." 
+                                            WHERE categories_image = '".xtc_db_input($category_image['categories_image'])."'");
+    $duplicate_image = xtc_db_fetch_array($duplicate_image_query);
 
-    foreach ($this->images_type_array as $image_type) {
-      $duplicate_image_query = xtc_db_query("SELECT count(*) AS total 
-                                               FROM ".TABLE_CATEGORIES." 
-                                              WHERE categories_image".$image_type." = '".xtc_db_input($category_image['categories_image'.$image_type])."'");
-      $duplicate_image = xtc_db_fetch_array($duplicate_image_query);
-
-      if ($duplicate_image['total'] < 2) {
-        if (file_exists(DIR_FS_CATALOG_IMAGES.'categories/'.$category_image['categories_image'.$image_type])) {
-          unlink(DIR_FS_CATALOG_IMAGES.'categories/'.$category_image['categories_image'.$image_type]);
-        }
-        if (file_exists(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$category_image['categories_image'.$image_type])) {
-          unlink(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$category_image['categories_image'.$image_type]);
-        }
-        
-        $this->catModules->delete_category_image($category_image['categories_image'.$image_type]);
+    if ($duplicate_image['total'] < 2) {
+      if (file_exists(DIR_FS_CATALOG_IMAGES.'categories/'.$category_image['categories_image'])) {
+        @ unlink(DIR_FS_CATALOG_IMAGES.'categories/'.$category_image['categories_image']);
       }
+      $this->catModules->delete_category_image($category_image['categories_image']);
     }
 
     //new module support
@@ -122,7 +110,7 @@ class categories {
     $sort_order = xtc_db_prepare_input($categories_data['sort_order']);
     $categories_status = xtc_db_prepare_input($categories_data['status']);
     $customers_statuses_array = xtc_get_customers_statuses();
-    $permission = array();
+    $permission = array ();
     for ($i = 0, $n = sizeof($customers_statuses_array); $i < $n; $i ++) {
       if (isset($customers_statuses_array[$i]['id']))
         $permission[$customers_statuses_array[$i]['id']] = 0;
@@ -133,7 +121,7 @@ class categories {
       }
     // build array
       if (isset($permission['all']) && $permission['all']==1) {
-      $permission = array();
+      $permission = array ();
       end($customers_statuses_array);
       for ($i = 0, $n = key($customers_statuses_array); $i < $n+1; $i ++) {
         if (isset($customers_statuses_array[$i]['id']))
@@ -141,23 +129,22 @@ class categories {
       }
     }
 
-    $permission_array = array();
+    $permission_array = array ();
     // set pointer to last key
     end($customers_statuses_array);
     for ($i = 0, $n = key($customers_statuses_array); $i < $n+1; $i ++) {
       if (isset($customers_statuses_array[$i]['id'])) {
-        $permission_array = array_merge($permission_array, array('group_permission_'.$customers_statuses_array[$i]['id'] => $permission[$customers_statuses_array[$i]['id']]));
+        $permission_array = array_merge($permission_array, array ('group_permission_'.$customers_statuses_array[$i]['id'] => $permission[$customers_statuses_array[$i]['id']]));
       }
     }
 
-    $sql_data_array = array(
-      'sort_order' => $sort_order,
-      'categories_status' => $categories_status,
-      'products_sorting' => xtc_db_prepare_input($categories_data['products_sorting']),
-      'products_sorting2' => xtc_db_prepare_input($categories_data['products_sorting2']),
-      'categories_template' => xtc_db_prepare_input($categories_data['categories_template']),
-      'listing_template' => xtc_db_prepare_input($categories_data['listing_template'])
-    );
+    $sql_data_array = array('sort_order' => $sort_order,
+                            'categories_status' => $categories_status,
+                            'products_sorting' => xtc_db_prepare_input($categories_data['products_sorting']),
+                            'products_sorting2' => xtc_db_prepare_input($categories_data['products_sorting2']),
+                            'categories_template' => xtc_db_prepare_input($categories_data['categories_template']),
+                            'listing_template' => xtc_db_prepare_input($categories_data['listing_template'])
+                            );
 
     if (trim(ADD_CATEGORIES_FIELDS) != '') {
       $sql_data_array = array_merge($sql_data_array, $this->add_data_fields(ADD_CATEGORIES_FIELDS,$categories_data));
@@ -168,16 +155,13 @@ class categories {
     $sql_data_array = $this->catModules->insert_category_before($sql_data_array,$categories_data);//Return parameter must be in first place
     
     if ($action == 'insert') {
-      $insert_sql_data = array(
-        'parent_id' => $dest_category_id, 
-        'date_added' => 'now()'
-      );
-      $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
+      $insert_sql_data = array ('parent_id' => $dest_category_id, 'date_added' => 'now()');
+      $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
       xtc_db_perform(TABLE_CATEGORIES, $sql_data_array);
       $categories_id = xtc_db_insert_id();
     } elseif ($action == 'update') {
-      $update_sql_data = array('last_modified' => 'now()');
-      $sql_data_array = array_merge($sql_data_array, $update_sql_data);
+      $update_sql_data = array ('last_modified' => 'now()');
+      $sql_data_array = xtc_array_merge($sql_data_array, $update_sql_data);
       xtc_db_perform(TABLE_CATEGORIES, $sql_data_array, 'update', "categories_id = '".$categories_id."'");
     }
 
@@ -191,14 +175,13 @@ class categories {
     $languages = xtc_get_languages();
     foreach ($languages AS $lang) {
       if (isset($categories_data['name'])) $categories_name_array = $categories_data['name'];
-      $sql_data_array = array(
-        'categories_name' => xtc_db_prepare_input($categories_data['categories_name'][$lang['id']]),
-        'categories_heading_title' => xtc_db_prepare_input($categories_data['categories_heading_title'][$lang['id']]),
-        'categories_description' => xtc_db_prepare_input($categories_data['categories_description'][$lang['id']]),
-        'categories_meta_title' => xtc_db_prepare_input($categories_data['categories_meta_title'][$lang['id']]),
-        'categories_meta_description' => xtc_db_prepare_input($categories_data['categories_meta_description'][$lang['id']]),
-        'categories_meta_keywords' => xtc_db_prepare_input($categories_data['categories_meta_keywords'][$lang['id']])
-      );
+      $sql_data_array = array('categories_name' => xtc_db_prepare_input($categories_data['categories_name'][$lang['id']]),
+                              'categories_heading_title' => xtc_db_prepare_input($categories_data['categories_heading_title'][$lang['id']]),
+                              'categories_description' => xtc_db_prepare_input($categories_data['categories_description'][$lang['id']]),
+                              'categories_meta_title' => xtc_db_prepare_input($categories_data['categories_meta_title'][$lang['id']]),
+                              'categories_meta_description' => xtc_db_prepare_input($categories_data['categories_meta_description'][$lang['id']]),
+                              'categories_meta_keywords' => xtc_db_prepare_input($categories_data['categories_meta_keywords'][$lang['id']])
+                             );
 
       if (trim(ADD_CATEGORIES_DESCRIPTION_FIELDS) != '') {
         $sql_data_array = array_merge($sql_data_array, $this->add_data_fields(ADD_CATEGORIES_DESCRIPTION_FIELDS,$categories_data,$lang['id']));
@@ -208,11 +191,8 @@ class categories {
       $sql_data_array = $this->catModules->insert_category_desc($sql_data_array,$categories_data,$categories_id,$lang['id']);
       
       if ($action == 'insert') {
-        $insert_sql_data = array(
-          'categories_id' => $categories_id, 
-          'language_id' => $lang['id']
-        );
-        $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
+        $insert_sql_data = array ('categories_id' => $categories_id, 'language_id' => $lang['id']);
+        $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
         xtc_db_perform(TABLE_CATEGORIES_DESCRIPTION, $sql_data_array);
       } elseif ($action == 'update') {
         $category_query = xtc_db_query("SELECT * 
@@ -229,41 +209,30 @@ class categories {
     $accepted_categories_image_files_extensions = array("jpg","jpeg","jpe","gif","png","bmp","tiff","tif","bmp");
     $accepted_categories_image_files_mime_types = array("image/jpeg","image/gif","image/png","image/bmp");
     
-    foreach ($this->images_type_array as $image_type) {
-      //are we asked to delete some pics?
-      if (isset($categories_data['del_cat_pic'.$image_type]) && $categories_data['del_cat_pic'.$image_type] == 'yes') {
-        if (is_file(DIR_FS_CATALOG_IMAGES.'categories/'.$categories_data['categories_previous_image'.$image_type])) {
-          unlink(DIR_FS_CATALOG_IMAGES.'categories/'.$categories_data['categories_previous_image'.$image_type]);
-        }
-        if (is_file(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$categories_data['categories_previous_image'.$image_type])) {
-          unlink(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$categories_data['categories_previous_image'.$image_type]);
-        }
-      
-        $this->catModules->delete_category_image($categories_data['categories_previous_image'.$image_type]);
-      
-        xtc_db_query("UPDATE ".TABLE_CATEGORIES."
-                         SET categories_image".$image_type." = ''
-                       WHERE categories_id = '".(int) $categories_id."'");
+    //are we asked to delete some pics?
+    if (isset($categories_data['del_cat_pic']) && $categories_data['del_cat_pic'] == 'yes') {
+      if (is_file(DIR_FS_CATALOG_IMAGES.'categories/'.$categories_data['categories_previous_image'])) {
+        @ unlink(DIR_FS_CATALOG_IMAGES.'categories/'.$categories_data['categories_previous_image']);
       }
+      
+      $this->catModules->delete_category_image($categories_data['categories_previous_image']);
+      
+      xtc_db_query("UPDATE ".TABLE_CATEGORIES."
+                       SET categories_image = ''
+                     WHERE categories_id = '".(int) $categories_id."'");
+    }
     
-      if ($categories_image = xtc_try_upload('categories_image'.$image_type, DIR_FS_CATALOG_IMAGES.'categories/original_images/', '777', $accepted_categories_image_files_extensions, $accepted_categories_image_files_mime_types)) {
-        $cname_arr = explode('.', $categories_image->filename);
-        $cnsuffix = array_pop($cname_arr);
-        $categories_image_name = $categories_image_name_process = $this->image_name($categories_id, substr($image_type, 1), $cnsuffix, $cname_arr, false, $categories_data);
-        rename(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$categories_image->filename, DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$categories_image_name);
-        xtc_db_query("UPDATE ".TABLE_CATEGORIES."
-                         SET categories_image".$image_type." = '".xtc_db_input($categories_image_name)."'
-                       WHERE categories_id = '".(int) $categories_id."'");
+    if ($categories_image = xtc_try_upload('categories_image', DIR_FS_CATALOG_IMAGES.'categories/', '777', $accepted_categories_image_files_extensions, $accepted_categories_image_files_mime_types)) {
+      $cname_arr = explode('.', $categories_image->filename);
+      $cnsuffix = array_pop($cname_arr);
+      $categories_image_name = $categories_image_name_process = $this->image_name($categories_id, '', $cnsuffix, $cname_arr, false, $categories_data);
+      rename(DIR_FS_CATALOG_IMAGES.'categories/'.$categories_image->filename, DIR_FS_CATALOG_IMAGES.'categories/'.$categories_image_name);
+      xtc_db_query("UPDATE ".TABLE_CATEGORIES."
+                       SET categories_image = '".xtc_db_input($categories_image_name)."'
+                     WHERE categories_id = '".(int) $categories_id."'");
                      
-        //image processing
-        require(DIR_WS_INCLUDES.'categories_image'.$image_type.'.php');
-        
-        //image chmod
-        chmod(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$categories_image_name, 0644);
-
-        //categories image processing
-        $this->catModules->categories_image_process($categories_image_name, $categories_image_name_process, $image_type);
-      }
+      //categories image processing
+      $this->catModules->categories_image_process($categories_image_name, $categories_image_name_process);
     }
    
     return $categories_id;
@@ -290,13 +259,9 @@ class categories {
   function move_category($src_category_id, $dest_category_id) {
     $src_category_id = xtc_db_prepare_input($src_category_id);
     $dest_category_id = xtc_db_prepare_input($dest_category_id);
-    $sql_data_array = array(
-      'parent_id' => $dest_category_id,
-      'last_modified' => 'now()'
-    );
+    $sql_data_array = array('parent_id' => $dest_category_id,
+                            'last_modified' => 'now()');
     xtc_db_perform(TABLE_CATEGORIES, $sql_data_array, 'update', "categories_id = '".(int)$src_category_id."'");         
-
-    $this->catModules->move_category($src_category_id, $dest_category_id);
   }
 
 
@@ -351,32 +316,23 @@ class categories {
         }
       }
 
-      foreach ($this->images_type_array as $image_type) {
-        //copy+rename image
-        $src_pic = DIR_FS_CATALOG_IMAGES.'categories/'.$ccopy_values['categories_image'.$image_type];
-        $src_orig_pic = DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$ccopy_values['categories_image'.$image_type];
-        if (is_file($src_pic)) {
-          $get_suffix = explode('.', $ccopy_values['categories_image'.$image_type]);
-          $suffix = array_pop($get_suffix);
-          $dest_pic = $this->image_name($new_cat_id, substr($image_type, 1), $suffix, $get_suffix, $src_category_id, $ccopy_values);
+      //copy+rename image
+      $src_pic = DIR_FS_CATALOG_IMAGES.'categories/'.$ccopy_values['categories_image'];
+      if (is_file($src_pic)) {
+        $get_suffix = explode('.', $ccopy_values['categories_image']);
+        $suffix = array_pop($get_suffix);
+        $categories_image_name = $categories_image_name_process = $this->image_name($new_cat_id, '', $cnsuffix, $cname_arr, false, $sql_data_array);
+        @copy($src_pic, DIR_FS_CATALOG_IMAGES.'categories/'.$dest_pic);
+        @chmod(DIR_FS_CATALOG_IMAGES.'categories/'.$dest_pic, 0644);
 
-          copy($src_pic, DIR_FS_CATALOG_IMAGES.'categories/'.$dest_pic);
-          chmod(DIR_FS_CATALOG_IMAGES.'categories/'.$dest_pic, 0644);
-          
-          if (is_file($src_orig_pic)) {
-            copy($src_orig_pic, DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$dest_pic);
-            chmod(DIR_FS_CATALOG_IMAGES.'categories/original_images/'.$dest_pic, 0644);
-          }
+        $this->catModules->copy_category_image($src_pic,$dest_pic);
 
-          $this->catModules->copy_category_image($src_pic, $dest_pic);
-
-          //write to DB
-          xtc_db_query("UPDATE ".TABLE_CATEGORIES." 
-                           SET categories_image".$image_type." = '".xtc_db_input($dest_pic)."' 
-                         WHERE categories_id = '".$new_cat_id."'");
-        }
+        //write to DB
+        xtc_db_query("UPDATE ".TABLE_CATEGORIES." 
+                         SET categories_image = '".xtc_db_input($dest_pic)."' 
+                       WHERE categories_id = '".$new_cat_id."'");
       }
-    
+
       //get descriptions
       $cdcopy_query = xtc_db_query("SELECT * 
                                       FROM ".TABLE_CATEGORIES_DESCRIPTION." 
@@ -421,7 +377,7 @@ class categories {
        $duplicate_content = xtc_db_fetch_array($duplicate_content_query);
        if ($duplicate_content['total'] == 0) {
          if (is_file(DIR_FS_DOCUMENT_ROOT.'media/products/'.$product_content['content_file'])) {
-           unlink(DIR_FS_DOCUMENT_ROOT.'media/products/'.$product_content['content_file']);
+           @unlink(DIR_FS_DOCUMENT_ROOT.'media/products/'.$product_content['content_file']);
          }
        }
        //delete DB-Entry
@@ -466,25 +422,11 @@ class categories {
     xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_IMAGES." WHERE products_id = '".(int)$product_id."'");
     xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_TO_CATEGORIES." WHERE products_id = '".(int)$product_id."'");
     xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_DESCRIPTION." WHERE products_id = '".(int)$product_id."'");
-    
-    xtc_db_query("DELETE pad 
-                    FROM ".TABLE_PRODUCTS_ATTRIBUTES_DOWNLOAD." pad
-                    JOIN ".TABLE_PRODUCTS_ATTRIBUTES." pa 
-                         ON pa.products_attributes_id = pad.products_attributes_id
-                            AND pa.products_id = '".(int)$product_id."'");
     xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_ATTRIBUTES." WHERE products_id = '".(int)$product_id."'");
-
     xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS_BASKET." WHERE products_id = '" . (int)$product_id . "' OR products_id LIKE '" . (int)$product_id . "{%'");
     xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS_BASKET_ATTRIBUTES." WHERE products_id = '" . (int)$product_id . "' OR products_id LIKE '" . (int)$product_id . "{%'");
     xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_TAGS." WHERE products_id = '".(int)$product_id."'");
 
-    xtc_db_query("DELETE rd
-                    FROM ".TABLE_REVIEWS_DESCRIPTION." rd
-                    JOIN ".TABLE_REVIEWS." r
-                         ON r.reviews_id = rd.reviews_id
-                            AND r.products_id = '".(int)$product_id."'");
-    xtc_db_query("DELETE FROM ".TABLE_REVIEWS." WHERE products_id = '".(int)$product_id."'");
-    
     if (defined('MODULE_WISHLIST_SYSTEM_STATUS') && MODULE_WISHLIST_SYSTEM_STATUS == 'true') {
       xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS_WISHLIST." WHERE products_id = '" . (int)$product_id . "' OR products_id LIKE '" . (int)$product_id . "{%'");
       xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS_WISHLIST_ATTRIBUTES." WHERE products_id = '" . (int)$product_id . "' OR products_id LIKE '" . (int)$product_id . "{%'");
@@ -495,6 +437,14 @@ class categories {
       if (isset($customers_statuses_array[$i]['id']))
         xtc_db_query("DELETE FROM ".TABLE_PERSONAL_OFFERS_BY.$customers_statuses_array[$i]['id']." WHERE products_id = '".(int)$product_id."'");
     }
+
+    $product_reviews_query = xtc_db_query("SELECT reviews_id 
+                                             FROM ".TABLE_REVIEWS." 
+                                            WHERE products_id = '".(int)$product_id."'");
+    while ($product_reviews = xtc_db_fetch_array($product_reviews_query)) {
+      xtc_db_query("DELETE FROM ".TABLE_REVIEWS_DESCRIPTION." WHERE reviews_id = '".$product_reviews['reviews_id']."'");
+    }
+    xtc_db_query("DELETE FROM ".TABLE_REVIEWS." WHERE products_id = '".(int)$product_id."'");
   }
 
 
@@ -515,36 +465,7 @@ class categories {
       $this->remove_product($product_id);
     }
     //new module support
-    $this->catModules->delete_product($product_id, $product_categories);
-  }
-
-
-  function update_product($products_data) {
-    global $messageStack;
-    
-    $products_id = xtc_db_prepare_input($products_data['products_id']);
-
-    $prod_quantity_query = xtc_db_query("SELECT products_quantity 
-                                           FROM ".TABLE_PRODUCTS." 
-                                          WHERE products_id = '".$products_id."'");
-    $prod_quantity = xtc_db_fetch_array($prod_quantity_query);
-    if ($prod_quantity['products_quantity'] != $products_data['products_quantity_before_edit']) {
-      $messageStack->add_session(ERROR_QTY_SAVE_CHANGED, 'error');
-    } else {
-      xtc_db_query("UPDATE ".TABLE_PRODUCTS." 
-                       SET products_quantity = '".xtc_db_input($products_data['products_quantity'])."' 
-                     WHERE products_id = '".(int)$products_id."'");  
-    
-      if (xtc_db_affected_rows() > 0) {
-        $messageStack->add_session(TEXT_STOCK_UPDATE_SUCCESS, 'success');
-      } else {
-        $messageStack->add_session(TEXT_STOCK_UPDATE_ERROR, 'error');
-      }
-    }
-    
-    return array('error' => true,
-                 'products_id' => $products_id
-                 );
+    $this->catModules->remove_product($product_id,$product_categories);
   }
 
 
@@ -569,7 +490,7 @@ class categories {
     $products_data['products_price'] = $this->priceCheck($products_data['products_price'],$products_tax_rate);
 
     $customers_statuses_array = xtc_get_customers_statuses();
-    $permission = array();
+    $permission = array ();
     for ($i = 0, $n = sizeof($customers_statuses_array); $i < $n; $i ++) {
       if (isset($customers_statuses_array[$i]['id']))
         $permission[$customers_statuses_array[$i]['id']] = 0;
@@ -580,8 +501,8 @@ class categories {
       }
     }
     // build array
-    if (isset($permission['all']) && $permission['all']==1) {
-      $permission = array();
+    if ($permission['all']==1) {
+      $permission = array ();
       end($customers_statuses_array);
       for ($i = 0, $n = key($customers_statuses_array); $i < $n+1; $i ++) {
         if (isset($customers_statuses_array[$i]['id'])) {
@@ -589,38 +510,37 @@ class categories {
         }
       }
     }
-    $permission_array = array();
+    $permission_array = array ();
 
     // set pointer to last key
     end($customers_statuses_array);
     for ($i = 0, $n = key($customers_statuses_array); $i < $n+1; $i ++) {
       if (isset($customers_statuses_array[$i]['id'])) {
-        $permission_array = array_merge($permission_array, array('group_permission_'.$customers_statuses_array[$i]['id'] => $permission[$customers_statuses_array[$i]['id']]));
+        $permission_array = array_merge($permission_array, array ('group_permission_'.$customers_statuses_array[$i]['id'] => $permission[$customers_statuses_array[$i]['id']]));
       }
     }
 
-    $sql_data_array = array(
-      'products_quantity' => xtc_db_prepare_input($products_data['products_quantity']),
-      'products_model' => xtc_db_prepare_input($products_data['products_model']),
-      'products_ean' => xtc_db_prepare_input($products_data['products_ean']),
-      'products_price' => xtc_db_prepare_input($products_data['products_price']),
-      'products_sort' => xtc_db_prepare_input($products_data['products_sort']),
-      'products_shippingtime' => xtc_db_prepare_input($products_data['shipping_status']),
-      'products_discount_allowed' => xtc_db_prepare_input($products_data['products_discount_allowed']),
-      'products_date_available' => $products_date_available,
-      'products_weight' => xtc_db_prepare_input($products_data['products_weight']),
-      'products_status' => $products_status,
-      'products_startpage' => xtc_db_prepare_input($products_data['products_startpage']),
-      'products_startpage_sort' => xtc_db_prepare_input($products_data['products_startpage_sort']),
-      'products_tax_class_id' => xtc_db_prepare_input($products_data['products_tax_class_id']),
-      'product_template' => xtc_db_prepare_input($products_data['info_template']),
-      'options_template' => xtc_db_prepare_input($products_data['options_template']),
-      'manufacturers_id' => xtc_db_prepare_input($products_data['manufacturers_id']),
-      'products_fsk18' => xtc_db_prepare_input($products_data['fsk18']),
-      'products_vpe_value' => xtc_db_prepare_input($products_data['products_vpe_value']),
-      'products_vpe_status' => xtc_db_prepare_input($products_data['products_vpe_status']),
-      'products_vpe' => xtc_db_prepare_input($products_data['products_vpe'])
-    );
+    $sql_data_array = array ('products_quantity' => xtc_db_prepare_input($products_data['products_quantity']),
+                             'products_model' => xtc_db_prepare_input($products_data['products_model']),
+                             'products_ean' => xtc_db_prepare_input($products_data['products_ean']),
+                             'products_price' => xtc_db_prepare_input($products_data['products_price']),
+                             'products_sort' => xtc_db_prepare_input($products_data['products_sort']),
+                             'products_shippingtime' => xtc_db_prepare_input($products_data['shipping_status']),
+                             'products_discount_allowed' => xtc_db_prepare_input($products_data['products_discount_allowed']),
+                             'products_date_available' => $products_date_available,
+                             'products_weight' => xtc_db_prepare_input($products_data['products_weight']),
+                             'products_status' => $products_status,
+                             'products_startpage' => xtc_db_prepare_input($products_data['products_startpage']),
+                             'products_startpage_sort' => xtc_db_prepare_input($products_data['products_startpage_sort']),
+                             'products_tax_class_id' => xtc_db_prepare_input($products_data['products_tax_class_id']),
+                             'product_template' => xtc_db_prepare_input($products_data['info_template']),
+                             'options_template' => xtc_db_prepare_input($products_data['options_template']),
+                             'manufacturers_id' => xtc_db_prepare_input($products_data['manufacturers_id']),
+                             'products_fsk18' => xtc_db_prepare_input($products_data['fsk18']),
+                             'products_vpe_value' => xtc_db_prepare_input($products_data['products_vpe_value']),
+                             'products_vpe_status' => xtc_db_prepare_input($products_data['products_vpe_status']),
+                             'products_vpe' => xtc_db_prepare_input($products_data['products_vpe'])
+                             );
 
     if (trim(ADD_PRODUCTS_FIELDS) != '') {
       $sql_data_array = array_merge($sql_data_array, $this->add_data_fields(ADD_PRODUCTS_FIELDS,$products_data));
@@ -641,19 +561,17 @@ class categories {
     $sql_data_array = $this->catModules->insert_product_before($sql_data_array,$products_data);
     
     if ($action == 'insert') {
-      $insert_sql_data = array('products_date_added' => 'now()');
-      $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
+      $insert_sql_data = array ('products_date_added' => 'now()');
+      $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
       xtc_db_perform(TABLE_PRODUCTS, $sql_data_array);
       $products_id = xtc_db_insert_id();
       $products_data['products_id'] = $products_id;
-      $sql_data_array = array(
-        'products_id' => $products_id,
-        'categories_id' => $dest_category_id
-      );
+      $sql_data_array = array('products_id' => $products_id,
+                              'categories_id' => $dest_category_id);
       xtc_db_perform(TABLE_PRODUCTS_TO_CATEGORIES, $sql_data_array);                   
     } elseif ($action == 'update') {
-      $update_sql_data = array('products_last_modified' => 'now()');
-      $sql_data_array = array_merge($sql_data_array, $update_sql_data);
+      $update_sql_data = array ('products_last_modified' => 'now()');
+      $sql_data_array = xtc_array_merge($sql_data_array, $update_sql_data);
       xtc_db_perform(TABLE_PRODUCTS, $sql_data_array, 'update', "products_id = '".(int)$products_id."'");
     }
     
@@ -700,10 +618,10 @@ class categories {
     while ($group_values = xtc_db_fetch_array($group_query)) {
       // load data into array
       $i ++;
-      $group_data[$i] = array('STATUS_ID' => $group_values['customers_status_id']);
+      $group_data[$i] = array ('STATUS_ID' => $group_values['customers_status_id']);
     }
     for ($col = 0, $n = sizeof($group_data); $col < $n +1; $col ++) {
-      if (array_key_exists($col, $group_data) && $group_data[$col]['STATUS_ID'] != '') {
+      if ($group_data[$col]['STATUS_ID'] != '') {
         $personal_price = xtc_db_prepare_input($products_data['products_price_'.$group_data[$col]['STATUS_ID']]);
         if ($personal_price == '' || $personal_price == '0.0000') {
           $personal_price = '0.00';
@@ -714,23 +632,21 @@ class categories {
         xtc_db_query("DELETE FROM ".TABLE_PERSONAL_OFFERS_BY.$group_data[$col]['STATUS_ID']." WHERE products_id = '".$products_id."'");
         
         // insert price for 1 piece
-        $insert_array = array(
-          'personal_offer' => $personal_price,
-          'quantity' => '1',
-          'products_id' => $products_id
-        );
+        $insert_array = array ('personal_offer' => $personal_price,
+                               'quantity' => '1',
+                               'products_id' => $products_id
+                               );
         xtc_db_perform(TABLE_PERSONAL_OFFERS_BY.$group_data[$col]['STATUS_ID'], $insert_array);
 
         for ($is=0, $ns=sizeof($products_data['products_staffel'][$group_data[$col]['STATUS_ID']]); $is<$ns; $is++) {
           if ($products_data['products_staffel'][$group_data[$col]['STATUS_ID']][$is]['quantity'] > 1) {
             $staffelpreis = $products_data['products_staffel'][$group_data[$col]['STATUS_ID']][$is]['personal_offer'];
             $staffelpreis = $this->priceCheck($staffelpreis,$products_tax_rate);
-            $insert_array = array(
-              'personal_offer' => $staffelpreis,
-              'quantity' => $products_data['products_staffel'][$group_data[$col]['STATUS_ID']][$is]['quantity'],
-              'price_id' => $products_data['products_staffel'][$group_data[$col]['STATUS_ID']][$is]['price_id'],
-              'products_id' => $products_id,
-            );
+            $insert_array = array ('personal_offer' => $staffelpreis,
+                                   'quantity' => $products_data['products_staffel'][$group_data[$col]['STATUS_ID']][$is]['quantity'],
+                                   'price_id' => $products_data['products_staffel'][$group_data[$col]['STATUS_ID']][$is]['price_id'],
+                                   'products_id' => $products_id,
+                                   );
             xtc_db_perform(TABLE_PERSONAL_OFFERS_BY.$group_data[$col]['STATUS_ID'], $insert_array);
           }
           
@@ -753,15 +669,10 @@ class categories {
     while ($group_values = xtc_db_fetch_array($group_query)) {
       // load data into array
       $i ++;
-      $group_data[$i] = array('STATUS_ID' => $group_values['customers_status_id']);
+      $group_data[$i] = array ('STATUS_ID' => $group_values['customers_status_id']);
     }
     for ($col = 0, $n = sizeof($group_data); $col < $n +1; $col ++) {
-      if (array_key_exists($col, $group_data) 
-          && $group_data[$col]['STATUS_ID'] != ''
-          && isset($products_data['products_quantity_staffel_'.$group_data[$col]['STATUS_ID']])
-          && isset($products_data['products_price_staffel_'.$group_data[$col]['STATUS_ID']])
-          )
-      {
+      if ($group_data[$col]['STATUS_ID'] != '') {
         $quantity = xtc_db_prepare_input($products_data['products_quantity_staffel_'.$group_data[$col]['STATUS_ID']]);
         $staffelpreis = xtc_db_prepare_input($products_data['products_price_staffel_'.$group_data[$col]['STATUS_ID']]);
         if (PRICE_IS_BRUTTO == 'true') {
@@ -778,12 +689,10 @@ class categories {
                                           AND quantity    = '".$quantity."'");
           // dont insert if same qty!
           if (xtc_db_num_rows($check_query) < 1) {
-            $insert_array = array(
-              'price_id' => '',
-              'products_id' => $products_id,
-              'quantity' => $quantity,
-              'personal_offer' => $staffelpreis
-            );
+            $insert_array = array('price_id' => '',
+                                  'products_id' => $products_id,
+                                  'quantity' => $quantity,
+                                  'personal_offer' => $staffelpreis);
             xtc_db_perform(TABLE_PERSONAL_OFFERS_BY.$group_data[$col]['STATUS_ID'], $insert_array);                 
           }
         }
@@ -791,17 +700,15 @@ class categories {
     }
     foreach ($languages AS $lang) {
       $language_id = $lang['id'];
-      $sql_data_array = array(
-        'products_name' => xtc_db_prepare_input($products_data['products_name'][$language_id]),
-        'products_heading_title' => xtc_db_prepare_input($products_data['products_heading_title'][$language_id]),
-        'products_description' => xtc_db_prepare_input($products_data['products_description'][$language_id]),
-        'products_short_description' => xtc_db_prepare_input($products_data['products_short_description'][$language_id]),
-        'products_keywords' => xtc_db_prepare_input($products_data['products_keywords'][$language_id]),
-        'products_url' => xtc_db_prepare_input($products_data['products_url'][$language_id]),
-        'products_meta_title' => xtc_db_prepare_input($products_data['products_meta_title'][$language_id]),
-        'products_meta_description' => xtc_db_prepare_input($products_data['products_meta_description'][$language_id]),
-        'products_meta_keywords' => xtc_db_prepare_input($products_data['products_meta_keywords'][$language_id])
-      );
+      $sql_data_array = array('products_name' => xtc_db_prepare_input($products_data['products_name'][$language_id]),
+                              'products_description' => xtc_db_prepare_input($products_data['products_description'][$language_id]),
+                              'products_short_description' => xtc_db_prepare_input($products_data['products_short_description'][$language_id]),
+                              'products_keywords' => xtc_db_prepare_input($products_data['products_keywords'][$language_id]),
+                              'products_url' => xtc_db_prepare_input($products_data['products_url'][$language_id]),
+                              'products_meta_title' => xtc_db_prepare_input($products_data['products_meta_title'][$language_id]),
+                              'products_meta_description' => xtc_db_prepare_input($products_data['products_meta_description'][$language_id]),
+                              'products_meta_keywords' => xtc_db_prepare_input($products_data['products_meta_keywords'][$language_id])
+                              );
       if (trim(ADD_PRODUCTS_DESCRIPTION_FIELDS)) {
         $sql_data_array = array_merge($sql_data_array, $this->add_data_fields(ADD_PRODUCTS_DESCRIPTION_FIELDS,$products_data,$language_id));
       }
@@ -810,11 +717,8 @@ class categories {
       $sql_data_array = $this->catModules->insert_product_desc($sql_data_array,$products_data,$products_id,$language_id);
    
       if ($action == 'insert') {
-        $insert_sql_data = array(
-          'products_id' => $products_id, 
-          'language_id' => $language_id
-        );
-        $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
+        $insert_sql_data = array ('products_id' => $products_id, 'language_id' => $language_id);
+        $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
         xtc_db_perform(TABLE_PRODUCTS_DESCRIPTION, $sql_data_array);
       } elseif ($action == 'update') {
         $product_query = xtc_db_query("SELECT * 
@@ -828,9 +732,6 @@ class categories {
       }
     }
     
-    //new module support 
-    $this->catModules->insert_product_end($products_id);
-
     return array('error' => $error,
                  'products_id' => $products_id
                  );
@@ -880,12 +781,10 @@ class categories {
                        SET products_image = '".xtc_db_input($dup_products_image_name)."' 
                      WHERE products_id = '".$this->dup_products_id."'");
       
-      copy(DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$dup_products_image_name);
-      copy(DIR_FS_CATALOG_POPUP_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_POPUP_IMAGES.'/'.$dup_products_image_name);
-      copy(DIR_FS_CATALOG_INFO_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_INFO_IMAGES.'/'.$dup_products_image_name);
-      copy(DIR_FS_CATALOG_MIDI_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_MIDI_IMAGES.'/'.$dup_products_image_name);
-      copy(DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$dup_products_image_name);
-      copy(DIR_FS_CATALOG_MINI_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_MINI_IMAGES.'/'.$dup_products_image_name);
+      @ copy(DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$dup_products_image_name);
+      @ copy(DIR_FS_CATALOG_INFO_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_INFO_IMAGES.'/'.$dup_products_image_name);
+      @ copy(DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$dup_products_image_name);
+      @ copy(DIR_FS_CATALOG_POPUP_IMAGES.'/'.$product['products_image'], DIR_FS_CATALOG_POPUP_IMAGES.'/'.$dup_products_image_name);
       $this->set_products_images_file_rights($dup_products_image_name);
     } else {
       unset ($dup_products_image_name);
@@ -910,10 +809,8 @@ class categories {
       xtc_db_perform(TABLE_PRODUCTS_DESCRIPTION, $sql_data_array);
     }
 
-    $sql_data_array = array(
-      'products_id' => $this->dup_products_id,
-      'categories_id' => $dest_categories_id
-    );
+    $sql_data_array = array('products_id' => $this->dup_products_id,
+                            'categories_id' => $dest_categories_id);
     xtc_db_perform(TABLE_PRODUCTS_TO_CATEGORIES, $sql_data_array);                   
 
     //mo_images by Novalis@eXanto.de
@@ -925,19 +822,17 @@ class categories {
         $nsuffix = array_pop($pname_arr);
         $dup_products_image_name = $this->image_name($this->dup_products_id, $mo_img['image_nr'], $nsuffix, $pname_arr, $src_products_id, $product);
         //copy org images to duplicate
-        copy(DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$dup_products_image_name);
-        copy(DIR_FS_CATALOG_POPUP_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_POPUP_IMAGES.'/'.$dup_products_image_name);
-        copy(DIR_FS_CATALOG_INFO_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_INFO_IMAGES.'/'.$dup_products_image_name);
-        copy(DIR_FS_CATALOG_MIDI_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_MIDI_IMAGES.'/'.$dup_products_image_name);
-        copy(DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$dup_products_image_name);
-        copy(DIR_FS_CATALOG_MINI_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_MINI_IMAGES.'/'.$dup_products_image_name);
+        @ copy(DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$dup_products_image_name);
+        @ copy(DIR_FS_CATALOG_INFO_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_INFO_IMAGES.'/'.$dup_products_image_name);
+        @ copy(DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_THUMBNAIL_IMAGES.'/'.$dup_products_image_name);
+        @ copy(DIR_FS_CATALOG_POPUP_IMAGES.'/'.$mo_img['image_name'], DIR_FS_CATALOG_POPUP_IMAGES.'/'.$dup_products_image_name);
         $this->set_products_images_file_rights($dup_products_image_name);
 
         //write to DB
         $sql_data_array = $mo_img;
         unset($sql_data_array['image_id']);
-        $sql_data_array['products_id'] = $this->dup_products_id;
-        $sql_data_array['image_name'] = $dup_products_image_name;
+        $sql_data_array = array('products_id' => $this->dup_products_id,
+                                'image_name' => $dup_products_image_name);
 
         xtc_db_perform(TABLE_PRODUCTS_IMAGES, $sql_data_array);
       }
@@ -951,21 +846,19 @@ class categories {
     while ($group_values = xtc_db_fetch_array($group_query)) {
       // load data into array
       $i++;
-      $group_data[$i] = array('STATUS_ID' => $group_values['customers_status_id']);
+      $group_data[$i] = array ('STATUS_ID' => $group_values['customers_status_id']);
     }
     for ($col = 0, $n = sizeof($group_data); $col < $n +1; $col ++) {
-      if (array_key_exists($col, $group_data) && $group_data[$col]['STATUS_ID'] != '') {
+      if ($group_data[$col]['STATUS_ID'] != '') {
         $copy_query = xtc_db_query("SELECT quantity,
                                            personal_offer
                                       FROM ".TABLE_PERSONAL_OFFERS_BY.$group_data[$col]['STATUS_ID']."
                                      WHERE products_id = '".$src_products_id."'");
         while ($copy_data = xtc_db_fetch_array($copy_query)) {
-          $insert_array = array(
-            'price_id' => '',
-            'products_id' => $this->dup_products_id,
-            'quantity' => $copy_data['quantity'],
-            'personal_offer' => $copy_data['personal_offer']
-          );
+          $insert_array = array('price_id' => '',
+                                'products_id' => $this->dup_products_id,
+                                'quantity' => $copy_data['quantity'],
+                                'personal_offer' => $copy_data['personal_offer']);
           xtc_db_perform(TABLE_PERSONAL_OFFERS_BY.$group_data[$col]['STATUS_ID'], $insert_array);                 
         }
       }
@@ -983,18 +876,6 @@ class categories {
         $sql_data_array['products_id'] = $this->dup_products_id;
         //write attributes data to DB
         xtc_db_perform(TABLE_PRODUCTS_ATTRIBUTES, $sql_data_array);
-        $products_attributes_id = xtc_db_insert_id();
-        
-        $dl_copy_data_query = xtc_db_query("SELECT *
-                                              FROM ".TABLE_PRODUCTS_ATTRIBUTES_DOWNLOAD."
-                                             WHERE products_attributes_id = '".$attribute_copy_data['products_attributes_id']."'");
-        while ($dl_copy_data = xtc_db_fetch_array($dl_copy_data_query)) {
-          $sql_data_array = $dl_copy_data;
-
-          unset($sql_data_array['products_attributes_id']);
-          $sql_data_array['products_attributes_id'] = $products_attributes_id;
-          xtc_db_perform(TABLE_PRODUCTS_ATTRIBUTES_DOWNLOAD, $sql_data_array);          
-        }
       }
     }
 
@@ -1005,7 +886,6 @@ class categories {
                                         WHERE products_id = '".$src_products_id."'");
       while ($tags_copy_data = xtc_db_fetch_array($tags_copy_query)) {
         $sql_data_array = $tags_copy_data;
-        unset($sql_data_array['products_tags_id']);
         $sql_data_array['products_id'] = $this->dup_products_id;
         //write tags data to DB
         xtc_db_perform(TABLE_PRODUCTS_TAGS, $sql_data_array);
@@ -1038,9 +918,6 @@ class categories {
         xtc_db_perform(TABLE_PRODUCTS_TO_CATEGORIES, $sql_data_array);
       }
     }
-
-    //new module support 
-    $this->catModules->duplicate_product_end($this->dup_products_id);
   }
 
 
@@ -1085,10 +962,8 @@ class categories {
     $duplicate_check = xtc_db_fetch_array($duplicate_check_query);
     if ($duplicate_check['total'] < 1) {
       if ($dest_category_id != 0) {
-        $sql_data_array = array(
-          'products_id' => $src_products_id,
-          'categories_id' => $dest_category_id
-        );
+        $sql_data_array = array('products_id' => $src_products_id,
+                                'categories_id' => $dest_category_id);
         xtc_db_perform(TABLE_PRODUCTS_TO_CATEGORIES, $sql_data_array, 'update', "products_id = '".$src_products_id."' AND categories_id = '".$src_category_id."'");                   
       }
       if ($dest_category_id == 0) {
@@ -1101,20 +976,16 @@ class categories {
 
   // Sets the status of a product
   function set_product_status($products_id, $status) {
-    $sql_data_array = array(
-      'products_status' => $status,
-      'products_last_modified' => 'now()'
-    );
+    $sql_data_array = array('products_status' => $status,
+                            'products_last_modified' => 'now()');
     xtc_db_perform(TABLE_PRODUCTS, $sql_data_array, 'update', "products_id = '".$products_id."'");                       
   }
 
 
   // Sets a product active on startpage
   function set_product_startpage($products_id, $status) {
-    $sql_data_array = array(
-      'products_startpage' => $status,
-      'products_last_modified' => 'now()'
-    );
+    $sql_data_array = array('products_startpage' => $status,
+                            'products_last_modified' => 'now()');
     xtc_db_perform(TABLE_PRODUCTS, $sql_data_array, 'update', "products_id = '".$products_id."'");                       
   }
 
@@ -1182,11 +1053,9 @@ class categories {
     if ($cross_data['special'] == 'add_entries') {
       if (isset ($cross_data['ids'])) {
         foreach ($cross_data['ids'] AS $pID) {
-          $sql_data_array = array(
-            'products_id' => $cross_data['current_product_id'], 
-            'xsell_id' => $pID,
-            'products_xsell_grp_name_id' => $cross_data['group_name'][$pID]
-          );
+          $sql_data_array = array ('products_id' => $cross_data['current_product_id'], 
+                                   'xsell_id' => $pID,
+                                   'products_xsell_grp_name_id' => $cross_data['group_name'][$pID]);
           // check if product is already linked
           $check_query = xtc_db_query("SELECT * 
                                          FROM ".TABLE_PRODUCTS_XSELL." 
@@ -1209,10 +1078,8 @@ class categories {
       if (isset ($cross_data['sort'])) {
         // edit sorting
         foreach ($cross_data['sort'] AS $ID => $sort_order) {
-          $sql_data_array = array(
-            'sort_order' => $sort_order,
-            'products_xsell_grp_name_id' => $cross_data['group_name'][$ID]
-          );
+          $sql_data_array = array('sort_order' => $sort_order,
+                                  'products_xsell_grp_name_id' => $cross_data['group_name'][$ID]);
           xtc_db_perform(TABLE_PRODUCTS_XSELL, $sql_data_array, 'update', "ID = '".$ID."'");                    
         }
       }
@@ -1225,9 +1092,9 @@ class categories {
     $add_data_fields_array = array();
     for ($i = 0, $n = sizeof($add_data_array); $i < $n; $i ++) {
       if ($language_id != '') {
-        $add_data_fields_array[$add_data_array[$i]] = xtc_db_prepare_input(implode(',', (array)$data[$add_data_array[$i]][$language_id]));
+        $add_data_fields_array[$add_data_array[$i]] = xtc_db_prepare_input($data[$add_data_array[$i]][$language_id]);
       } else {
-        $add_data_fields_array[$add_data_array[$i]] = xtc_db_prepare_input(implode(',', (array)$data[$add_data_array[$i]]));
+        $add_data_fields_array[$add_data_array[$i]] = xtc_db_prepare_input($data[$add_data_array[$i]]);
       }
     }
     return $add_data_fields_array;
@@ -1235,18 +1102,22 @@ class categories {
 
 
   function create_templates_dropdown_menu($template, $path, $default_value, $style = '') {
-    $files = array();
-    
-    if (is_dir(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.$path)) {
-      foreach(auto_include(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.$path, 'html') as $file) {
-        $files[] = array(
-          'id' => basename($file), 
-          'text' => basename($file),
-        );
+    $files = array ();
+    if ($dir = opendir(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.$path)) {
+      while (($file = readdir($dir)) !== false) {
+        if (is_file(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.$path.$file)
+            && (substr($file, -5) == ".html") 
+            && ($file != "index.html") 
+            && (substr($file, 0, 1) !=".")
+            ) 
+        {
+          $files[] = array ('id' => $file, 'text' => $file);
+        }
       }
+      closedir($dir);
     }
-    
-    $default_array = array(array('id' => 'default', 'text' => (count($files) > 0) ? TEXT_SELECT : TEXT_NO_FILE));
+    // set default value in dropdown!
+    $default_array = array (array ('id' => 'default', 'text' => (count($files) > 0) ? TEXT_SELECT : TEXT_NO_FILE));
     $files = array_merge($default_array, $files);
     return xtc_draw_pull_down_menu($template, $files, $default_value, $style);
   }
@@ -1254,21 +1125,9 @@ class categories {
 
   //set products images file rights
   function set_products_images_file_rights($image_name) {
-    if (is_file(DIR_FS_CATALOG_MINI_IMAGES.$image_name)) {
-      chmod(DIR_FS_CATALOG_MINI_IMAGES.$image_name, 0644);
-    }
-    if (is_file(DIR_FS_CATALOG_THUMBNAIL_IMAGES.$image_name)) {
-      chmod(DIR_FS_CATALOG_THUMBNAIL_IMAGES.$image_name, 0644);
-    }
-    if (is_file(DIR_FS_CATALOG_MIDI_IMAGES.$image_name)) {
-      chmod(DIR_FS_CATALOG_MIDI_IMAGES.$image_name, 0644);
-    }
-    if (is_file(DIR_FS_CATALOG_INFO_IMAGES.$image_name)) {
-      chmod(DIR_FS_CATALOG_INFO_IMAGES.$image_name, 0644);
-    }
-    if (is_file(DIR_FS_CATALOG_POPUP_IMAGES.$image_name)) {
-      chmod(DIR_FS_CATALOG_POPUP_IMAGES.$image_name, 0644);
-    }
+    @ chmod(DIR_FS_CATALOG_INFO_IMAGES.$image_name, 0644);
+    @ chmod(DIR_FS_CATALOG_THUMBNAIL_IMAGES.$image_name, 0644);
+    @ chmod(DIR_FS_CATALOG_POPUP_IMAGES.$image_name, 0644);
   }
 
 
@@ -1333,7 +1192,7 @@ class categories {
                                         WHERE products_image = '".xtc_db_input($products_data['del_pic'])."'");
       $dup_check = xtc_db_fetch_array($dup_check_query);
       if ($dup_check['total'] < 2) {
-        xtc_del_image_file($products_data['del_pic']);
+        @xtc_del_image_file($products_data['del_pic']);
       }
       xtc_db_query("UPDATE ".TABLE_PRODUCTS."
                        SET products_image = NULL
@@ -1349,7 +1208,7 @@ class categories {
                                        WHERE products_image = '".xtc_db_input($products_data['products_previous_image_0'])."'");
       $dup_check = xtc_db_fetch_array($dup_check_query);
       if ($dup_check['total'] < 2) {
-        xtc_del_image_file($products_data['products_previous_image_0']);
+        @ xtc_del_image_file($products_data['products_previous_image_0']);
       }
       //workaround if there are v2 images mixed with v3
       $dup_check_query = xtc_db_query("SELECT COUNT(*) AS total
@@ -1386,7 +1245,7 @@ class categories {
                                           WHERE image_name = '".xtc_db_input($val)."'");
         $dup_check = xtc_db_fetch_array($dup_check_query);
         if ($dup_check['total'] < 2) {
-          xtc_del_image_file($val);
+          @ xtc_del_image_file($val);
         }
         xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_IMAGES." WHERE products_id = '".(int)$products_id."' AND image_name  = '".xtc_db_input($val)."'");
       }
@@ -1402,15 +1261,13 @@ class categories {
                                           WHERE image_name = '".xtc_db_input($products_data['products_previous_image_'. ($img +1)])."'");
         $dup_check = xtc_db_fetch_array($dup_check_query);
         if ($dup_check['total'] < 2) {
-          xtc_del_image_file($products_data['products_previous_image_'. ($img +1)]);
+          @ xtc_del_image_file($products_data['products_previous_image_'. ($img +1)]);
         }
         rename(DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$pIMG->filename, DIR_FS_CATALOG_ORIGINAL_IMAGES.'/'.$products_image_name);
         //get data & write to table
-        $mo_img = array(
-          'products_id' => xtc_db_prepare_input($products_id), 
-          'image_nr' => xtc_db_prepare_input($img +1), 
-          'image_name' => xtc_db_prepare_input($products_image_name)
-        );
+        $mo_img = array ('products_id' => xtc_db_prepare_input($products_id), 
+                         'image_nr' => xtc_db_prepare_input($img +1), 
+                         'image_name' => xtc_db_prepare_input($products_image_name));
                          
         if ($action == 'insert' || !$dup_check['total']) {
           xtc_db_perform(TABLE_PRODUCTS_IMAGES, $mo_img);
@@ -1430,9 +1287,7 @@ class categories {
 
 
   function image_process($products_image_name, $products_image_name_process) {
-    require(DIR_WS_INCLUDES . 'product_mini_images.php');
     require(DIR_WS_INCLUDES . 'product_thumbnail_images.php');
-    require(DIR_WS_INCLUDES . 'product_midi_images.php');
     require(DIR_WS_INCLUDES . 'product_info_images.php');
     require(DIR_WS_INCLUDES . 'product_popup_images.php');
   }
@@ -1464,41 +1319,24 @@ class categories {
         $products_data['specials_quantity'] = 0;
       }
       
-      if (substr($products_data['specials_price'], -1) != '%') {
-        if (!isset($products_data['products_tax_class_id']) || (int)$products_data['products_tax_class_id'] <= 0) {
-          $price_query = xtc_db_query("SELECT products_tax_class_id
-                                         FROM ".TABLE_PRODUCTS."
-                                        WHERE products_id = '".(int)$products_data['products_id']."'");
-          $price = xtc_db_fetch_array($price_query);
-          $products_data['products_tax_class_id'] = $price['products_tax_class_id'];
-        }
-        $tax_rate = xtc_get_tax_rate($products_data['products_tax_class_id']);
-
-        $products_data['specials_price'] = $this->priceCheck($products_data['specials_price'], $tax_rate);
+      if (substr($products_data['specials_price'], -1) != '%'){
+        $products_data['specials_price'] = $this->priceCheck($products_data['specials_price'], $products_data['tax_rate']);
       } else {
-        if (!isset($products_data['products_price']) || (double)$products_data['products_price'] <= 0.00) {
-          $price_query = xtc_db_query("SELECT products_price
-                                         FROM ".TABLE_PRODUCTS."
-                                        WHERE products_id = '".(int)$products_data['products_id']."'");
-          $price = xtc_db_fetch_array($price_query);
-          $products_data['products_price'] = $price['products_price'];
-        }
         $products_data['specials_price'] = ($products_data['products_price'] - (($products_data['specials_price'] / 100) * $products_data['products_price']));
       }
 
       $expires_date = isset($products_data['specials_expires']) && !empty($products_data['specials_expires']) ? date('Y-m-d H:i:s', strtotime($products_data['specials_expires'].' 23:59:59')) : '';
       $start_date = isset($products_data['specials_start']) && !empty($products_data['specials_start']) ? date('Y-m-d H:i:s', strtotime($products_data['specials_start'].' 00:00:00')) : '';
     
-      $sql_data_array = array(
-        'products_id' => $products_data['products_id'],
-        'specials_quantity' => (int)$products_data['specials_quantity'],
-        'specials_new_products_price' => xtc_db_prepare_input($products_data['specials_price']),
-        'specials_date_added' => 'now()',
-        'specials_last_modified' => 'now()',
-        'start_date' => $start_date,
-        'expires_date' => $expires_date,
-        'status' => ((isset($products_data['specials_status'])) ? (int)$products_data['specials_status'] : '1')
-      );
+      $sql_data_array = array('products_id' => $products_data['products_id'],
+                              'specials_quantity' => (int)$products_data['specials_quantity'],
+                              'specials_new_products_price' => xtc_db_prepare_input($products_data['specials_price']),
+                              'specials_date_added' => 'now()',
+                              'specials_last_modified' => 'now()',
+                              'start_date' => $start_date,
+                              'expires_date' => $expires_date,
+                              'status' => ((isset($products_data['specials_status'])) ? (int)$products_data['specials_status'] : '1')
+                              );
     
       //new module support
       $sql_data_array = $this->catModules->saveSpecialsData($sql_data_array,$products_data);
@@ -1523,27 +1361,14 @@ class categories {
   
   function save_products_tags($products_data,$products_id)
   {
-      if (isset($products_data['options_id']) && is_array($products_data['options_id'])) {
-        foreach ($products_data['options_id'] as $options_id) {
-          $options_id = str_replace('oid-','',$options_id);
-          xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_TAGS." WHERE products_id = '".(int)$products_id."' AND options_id = '".(int)$options_id."'");
-        }
-      }
-      
-      if (isset($products_data['products_tags_save'])) {
-        xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_TAGS." WHERE products_id = '".(int)$products_id."'");
-      }
-      
+      xtc_db_query("DELETE FROM ".TABLE_PRODUCTS_TAGS." WHERE products_id = '".(int)$products_id."'");    
       if (isset($products_data['product_tags']) && is_array($products_data['product_tags'])) {
         foreach ($products_data['product_tags'] as $options_id => $value) {
           foreach ($value as $values_id => $subvalue) {
             if ($subvalue == 'on') {
-              $sql_data_array = array(
-                'products_id' => (int)$products_id,
-                'options_id' => (int)$options_id,
-                'values_id' => (int)$values_id,
-                'sort_order' => $products_data['product_tags_sort'][(int)$options_id][(int)$values_id],
-              );
+              $sql_data_array = array('products_id' => (int)$products_id,
+                                      'options_id' => (int)$options_id,
+                                      'values_id' => (int)$values_id);
               xtc_db_perform(TABLE_PRODUCTS_TAGS, $sql_data_array);                    
             }
           }

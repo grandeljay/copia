@@ -11,7 +11,9 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id$
+ *
+ * (c) 2010 - 2013 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -59,12 +61,6 @@ class Check24CheckinSubmit extends MagnaCompatibleCheckinSubmit {
 		// Set Price and Quantity settings
 		MLProduct::gi()->setPriceConfig(Check24Helper::loadPriceSettings($this->mpID));
 		MLProduct::gi()->setQuantityConfig(Check24Helper::loadQuantitySettings($this->mpID));
-        MLProduct::gi()->useMultiDimensionalVariations(true);
-        MLProduct::gi()->setOptions(array(
-            'sameVariationsToAttributes' => false,
-            'purgeVariations' => true,
-            'useGambioProperties' => (getDBConfigValue('general.options', '0', 'old') == 'gambioProperties')
-        ));
 	}
 
 	protected function appendAdditionalData($iPID, $aProduct, &$aData) {
@@ -83,15 +79,13 @@ class Check24CheckinSubmit extends MagnaCompatibleCheckinSubmit {
 			return;
 		}
 
-		$aData['submit']['CategoryPath'] = renderCategoryPath($iPID, 'product', ' > ');
-
 		#echo print_m($aProduct);
 
 		$aData['submit']['SKU'] = $aData['submit']['MasterSKU'] = ($this->settings['keytype'] == 'artNr') ? $aProduct['MarketplaceSku'] : $aProduct['MarketplaceId'];
 		$aData['submit']['Title'] = $aProduct['Title'];
 
-		if (!empty($aProduct['Description'])) {
-			$aData['submit']['Description'] = sanitizeProductDescription($aProduct['Description']);
+		if (empty($aProduct['Description']) === false) {
+			$aData['submit']['Description'] = $aProduct['Description'];
 		}
 
 		if (empty($aProduct['Manufacturer']) === false) {
@@ -111,18 +105,13 @@ class Check24CheckinSubmit extends MagnaCompatibleCheckinSubmit {
 			$aData['submit']['EAN'] = $aProduct['EAN'];
 		}
 
-		$sImagePath = getDBConfigValue($this->marketplace . '.imagepath', $this->mpID, SHOP_URL_POPUP_IMAGES);
 		if (empty($aProduct['Images']) === false) {
 			foreach($aProduct['Images'] as $sImg) {
-				$aData['submit']['Images'][] = array('URL' => $sImagePath.$sImg);
+				$aData['submit']['Images'][] = array('URL' => SHOP_URL_POPUP_IMAGES . $sImg);
 			}
 		}
 
-		if (isset($aProduct['Weight']) && !empty($aProduct['Weight'])) {
-			$aData['submit']['Weight'] = $aProduct['Weight'];
-		}
-
-		$aData['submit']['ProductUrl'] = $aProduct['ProductUrl'];
+		$aData['submit']['ProductUrl'] = $_SERVER['SERVER_NAME'] . DIR_WS_CATALOG . $aProduct['ProductUrl'];
 		$aData['submit']['Quantity'] = $aData['quantity'];
 		$aData['submit']['Price'] = $aData['price'];
 		$aData['submit']['BasePrice'] = $aProduct['BasePrice'];
@@ -135,36 +124,44 @@ class Check24CheckinSubmit extends MagnaCompatibleCheckinSubmit {
 		}
 	}
 
-	protected function preSubmit(&$request) {
-		$request['DATA'] = array();
-		foreach ($this->selection as $iProductId => &$aProduct) {
-			if (empty($aProduct['submit']['Variations'])) {
-				$request['DATA'][] = $aProduct['submit'];
+	protected function afterPopulateSelectionWithData() {
+		$newSelection = array();
+
+		foreach ($this->selection as $productId => $product) {
+			if (isset($product['submit']['Variations']) === false) {
+				$newSelection[$productId] = $product;
 				continue;
 			}
 
-			foreach ($aProduct['submit']['Variations'] as $aVariation) {
-				$aVariationData = $aProduct;
-				unset($aVariationData['submit']['Variations']);
-				$aVariationData['submit']['SKU'] = $aVariation['MarketplaceSku'];
-				$aVariationData['submit']['Quantity'] = $aVariation['Quantity'];
-				$aVariationData['submit']['Price'] = $aVariation['Price']['Price'];
-				$aVariationData['submit']['EAN'] = $aVariation['EAN'];
-				if (isset($aVariation['Weight'])) {
-					$aVariationData['submit']['Weight'] = $aVariation['Weight'];
+			$i = 1;
+			foreach ($product['submit']['Variations'] as $variation) {
+				$variationData = $product;
+				unset($variationData['submit']['Variations']);
+
+				$variationData['submit']['SKU'] = $variation['MarketplaceSku'];
+				$variationData['submit']['Quantity'] = $variation['Quantity'];
+				$variationData['submit']['Price'] = $variation['Price']['Price'];
+				$variationData['submit']['EAN'] = $variation['EAN'];
+
+				foreach ($product['submit']['Variations'] as $v) {
+					if ($v['MarketplaceSku'] === $variation['MarketplaceSku']) {
+						$attributes = array();
+						foreach ($v['Variation'] as $var) {
+							$attributes[] = $var['Name'].' - '.$var['Value'];
+						}
+
+						$variationData['submit']['Title'] .= ': ' . implode(', ', $attributes);
+						break;
+					}
 				}
 
-				$attributes = array();
-				foreach ($aVariation['Variation'] as $var) {
-					$attributes[] = $var['Name'].' - '.$var['Value'];
-				}
-
-				$aVariationData['submit']['Title'] .= ': ' . implode(', ', $attributes);
-				$request['DATA'][] = $aVariationData['submit'];
+				$newSelection[$productId . '_' . $i] = $variationData;
+				$i++;
 			}
 		}
 
-		arrayEntitiesToUTF8($request['DATA']);
+		$this->variationCount = count($newSelection) - count($this->selection);
+		$this->selection = $newSelection;
 	}
 
 	protected function markAsFailed($sku) {

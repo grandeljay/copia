@@ -1,6 +1,6 @@
 <?php
 /*-----------------------------------------------------------------------
-   $Id: xtc_href_link_from_admin.inc.php 10622 2017-02-08 10:06:05Z Tomcraft $
+   $Id: xtc_href_link_from_admin.inc.php 2539 2011-12-20 15:31:37Z dokuman $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,6 +21,6 @@
    ---------------------------------------------------------------------------------------*/
 
   function xtc_href_link_from_admin($page = '', $parameters = '', $connection = 'NONSSL', $add_session_id = false, $search_engine_safe = true) {    
-    return xtc_href_link($page, $parameters, $connection, $add_session_id, $search_engine_safe, true, true);
+    return xtc_href_link($page, $parameters, $connection, $add_session, $search_engine_safe, true, true);
   }
 ?>

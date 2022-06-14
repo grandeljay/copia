@@ -1,14 +1,5 @@
 <?php
-/* -----------------------------------------------------------------------------------------
-   $Id: 50_listing_filter.php 13480 2021-03-31 07:24:58Z GTB $
-
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
-
-   Copyright (c) 2009 - 2013 [www.modified-shop.org]
-   -----------------------------------------------------------------------------------------
-   Released under the GNU General Public License
-   ---------------------------------------------------------------------------------------*/
+if (PRODUCT_LIST_FILTER == 'true') {
 
   // filter set
   $filter_vars_array = array();
@@ -17,7 +8,7 @@
   if (defined('DISPLAY_FILTER_'.$filter_set_const)) {
     $filter_vars_array = explode(',', constant('DISPLAY_FILTER_'.$filter_set_const));
     $key_all = array_search('all', $filter_vars_array);
-    if ($key_all !== false && isset($filter_vars_array[$key_all])) {
+    if (isset($filter_vars_array[$key_all])) {
       $filter_vars_array[$key_all] = '999999';
     }
     $filter_vars_array[] = '';
@@ -25,7 +16,7 @@
 
   if (isset($_POST['filter_set'])) {
     $_SESSION['filter_set'] = (int)$_POST['filter_set'];
-    $_SESSION['filter_set_id'] = array_search($_POST['filter_set'], $filter_vars_array);
+    $_SESSION['filter_set_id'] = array_search((int)$_POST['filter_set'], $filter_vars_array);
     
     xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(), $request_type));
   }
@@ -42,8 +33,7 @@
   // filter sort
   if (isset($_POST['filter_sort'])) {
     $_SESSION['filter_sort'] = intval($_POST['filter_sort']);
-    
-    $sorting = '';
+
     switch ((int)$_POST['filter_sort']) {
       case 1:
         $sorting = ' ORDER BY pd.products_name ASC';
@@ -76,4 +66,5 @@
     unset($_SESSION['filter_sort']);
     unset($_SESSION['filter_sorting']);
   }
+}
 ?>

@@ -50,20 +50,19 @@
           <td><span class="fieldtext">{#text_country#}</span><span class="stern">{$SELECT_COUNTRY}</span></td>
         </tr>
         {if $state == '1'}
-        <tr{if $display_state}{$display_state}{/if}>
+        <tr>
           <td><span class="fieldtext">{#text_state#}</span><span class="stern">{$INPUT_STATE}</span></td>
         </tr>
         {/if}
-      </table>
-      {if $new == '1'}
-      <br />
-      <table>
+        {if $new == '1'}
         <tr>
-          <td class="checkbox">{$CHECKBOX_PRIMARY}</td>
-          <td class="midi td_full"><label for="primary">{#text_standard#}</label></td>
+          <td>&nbsp;</td>
         </tr>
+        <tr>
+          <td>{$CHECKBOX_PRIMARY} <label for="primary">{#text_standard#}</label></td>
+        </tr>
+        {/if}
       </table>
-      {/if}
     </div>
   </div>
            

@@ -20,18 +20,15 @@
     DIR_TMPL.'stylesheet.css',
   );
   $css_min = DIR_TMPL.'stylesheet.min.css';
-  
-  $this_f_time = filemtime(DIR_FS_CATALOG.DIR_TMPL_CSS.'general.css.php');
 
   if (COMPRESS_STYLESHEET == 'true') {
     require_once(DIR_FS_BOXES_INC.'combine_files.inc.php');
-    $css_array = combine_files($css_array,$css_min,true,$this_f_time);
+    $css_array = combine_files($css_array,$css_min,true);
   }
 
   // Put CSS-Inline-Definitions here, these CSS-files will be loaded at the TOP of every page
   
   foreach ($css_array as $css) {
-    $css .= strpos($css,$css_min) === false ? '?v=' . filemtime(DIR_FS_CATALOG.$css) : '';
     echo '<link rel="stylesheet" href="'.DIR_WS_BASE.$css.'" type="text/css" media="screen" />'.PHP_EOL;
   }
 ?>

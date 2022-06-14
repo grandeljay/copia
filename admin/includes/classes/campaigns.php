@@ -1,7 +1,7 @@
 <?php
 
 /* -----------------------------------------------------------------------------------------
-   $Id: campaigns.php 12999 2020-12-03 17:52:22Z GTB $
+   $Id: campaigns.php 1180 2007-04-23 11:13:00Z Hetfield $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -63,8 +63,6 @@ class campaigns {
 			for ($n = 0; $n < count($this->SelectArray); $n ++) {
 
 				$this->campaign = $this->SelectArray[$n]['id'];
-				$this->campaign_id = $this->SelectArray[$n]['campaigns_id'];
-
 				$this->result[$this->counterCMP]['id'] = $this->campaign;
 				$this->result[$this->counterCMP]['text'] = $this->camp[$this->campaign];
 
@@ -156,7 +154,7 @@ class campaigns {
 				$this->counter = 0;
 				$this->counterCMP++;
 			}
-
+			//			$this->printResult();
 			$this->total['sum_plain'] = $this->total['sum'];
 			$this->total['sum'] = $currencies->format($this->total['sum']);
 			
@@ -170,11 +168,7 @@ class campaigns {
 		$campaign_query = "SELECT * FROM ".TABLE_CAMPAIGNS." ORDER BY campaigns_name";
 		$campaign_query = xtc_db_query($campaign_query);
 		while ($campaign_data = xtc_db_fetch_array($campaign_query)) {
-			$campaign[] = array (
-			  'id' => $campaign_data['campaigns_refID'], 
-			  'text' => $campaign_data['campaigns_name'],
-			  'campaigns_id' => $campaign_data['campaigns_id'],
-			);
+			$campaign[] = array ('id' => $campaign_data['campaigns_refID'], 'text' => $campaign_data['campaigns_name']);
 			$this->camp[$campaign_data['campaigns_refID']] = $campaign_data['campaigns_name'];
 		}
 		return $campaign;
@@ -186,11 +180,7 @@ class campaigns {
 		$campaign_query = "SELECT * FROM ".TABLE_CAMPAIGNS." WHERE campaigns_refID='".$this->campaign."'";
 		$campaign_query = xtc_db_query($campaign_query);
 		while ($campaign_data = xtc_db_fetch_array($campaign_query)) {
-			$campaign[] = array (
-			  'id' => $campaign_data['campaigns_refID'], 
-			  'text' => $campaign_data['campaigns_name'],
-			  'campaigns_id' => $campaign_data['campaigns_id'],
-			);
+			$campaign[] = array ('id' => $campaign_data['campaigns_refID'], 'text' => $campaign_data['campaigns_name']);
 
 		}
 		return $campaign;
@@ -198,13 +188,9 @@ class campaigns {
 
 	function getTotalLeads() {
 		$end = mktime(0, 0, 0, date("m", $this->endDate), date("d", $this->endDate) + 1, date("Y", $this->endDate));
+		$selection = " and ci.customers_info_date_account_created>'".xtc_db_input(date("Y-m-d", $this->startDate))."'"." and ci.customers_info_date_account_created<'".xtc_db_input(date("Y-m-d", $end))."'";
 
-		$lead_query = "SELECT count(*) as leads 
-		                 FROM ".TABLE_CUSTOMERS." c
-		                 JOIN ".TABLE_CUSTOMERS_INFO." ci 
-		                      ON c.customers_id=ci.customers_info_id
-		                WHERE ci.customers_info_date_account_created>'".xtc_db_input(date("Y-m-d", $this->startDate))."'
-		                  AND ci.customers_info_date_account_created<'".xtc_db_input(date("Y-m-d", $end))."'";
+		$lead_query = "SELECT count(*) as leads FROM ".TABLE_CUSTOMERS." c, ".TABLE_CUSTOMERS_INFO." ci WHERE c.customers_id=ci.customers_info_id".$selection;
 		$lead_query = xtc_db_query($lead_query);
 		$lead_data = xtc_db_fetch_array($lead_query);
 
@@ -214,20 +200,11 @@ class campaigns {
 
 	function getTotalSells() {
 		$end = mktime(0, 0, 0, date("m", $this->endDate), date("d", $this->endDate) + 1, date("Y", $this->endDate));
-
+		$selection = " and o.date_purchased>'".xtc_db_input(date("Y-m-d", $this->startDate))."'"." and o.date_purchased<'".xtc_db_input(date("Y-m-d", $end))."'";
 		$status = "";
 		if ($this->status > 0)
-			$status = " AND o.orders_status='".$this->status."'";
-			
-		$sale_query = "SELECT count(*) as sells, 
-		                      SUM(ot.value/o.currency_value) as Summe 
-		                 FROM ".TABLE_ORDERS." o
-		                 JOIN ".TABLE_ORDERS_TOTAL." ot 
-		                      ON o.orders_id=ot.orders_id 
-		                         AND ot.class='ot_total'
-		                WHERE o.date_purchased>'".xtc_db_input(date("Y-m-d", $this->startDate))."'
-		                  AND o.date_purchased<'".xtc_db_input(date("Y-m-d", $end))."'
-		                      ".$status;
+			$status = " and o.orders_status='".$this->status."'";
+		$sale_query = "SELECT count(*) as sells, SUM(ot.value/o.currency_value) as Summe FROM ".TABLE_ORDERS." o, ".TABLE_ORDERS_TOTAL." ot WHERE o.orders_id=ot.orders_id and ot.class='ot_total'".$selection.$status;
 		$sale_query = xtc_db_query($sale_query);
 		$sale_data = xtc_db_fetch_array($sale_query);
 
@@ -235,7 +212,7 @@ class campaigns {
 		$this->total['sum'] = $sale_data['Summe'];
 	}
 
-	function getSells($date_start, $date_end, $type) {
+	function getSells($date_start, $date_end = '', $type) {
 		global $currencies;
 
 		switch ($type) {
@@ -243,16 +220,14 @@ class campaigns {
 			case 1 :
 			case 2 :
 			case 3 :
-				$selection = " AND o.date_purchased>'".xtc_db_input(date("Y-m-d", $date_start))."'
-				               AND o.date_purchased<'".xtc_db_input(date("Y-m-d", $date_end))."'";
+				$selection = " and o.date_purchased>'".xtc_db_input(date("Y-m-d", $date_start))."'"." and o.date_purchased<'".xtc_db_input(date("Y-m-d", $date_end))."'";
 
 				break;
 
 				// daily
 			case 4 :
 				$end = mktime(0, 0, 0, date("m", $date_start), date("d", $date_start) + 1, date("Y", $date_start));
-				$selection = " AND o.date_purchased>'".xtc_db_input(date("Y-m-d", $date_start))."'
-				               AND o.date_purchased<'".xtc_db_input(date("Y-m-d", $end))."'";
+				$selection = " and o.date_purchased>'".xtc_db_input(date("Y-m-d", $date_start))."'"." and o.date_purchased<'".xtc_db_input(date("Y-m-d", $end))."'";
 				break;
 
 		}
@@ -260,27 +235,11 @@ class campaigns {
 		$status = "";
 		if ($this->status > 0)
 			$status = " and o.orders_status='".$this->status."'";
-		$sell_query = "SELECT count(*) as sells, 
-		                      SUM(ot.value/o.currency_value) as Summe 
-		                 FROM ".TABLE_ORDERS." o
-		                 JOIN ".TABLE_ORDERS_TOTAL." ot 
-		                      ON o.orders_id=ot.orders_id 
-		                         AND ot.class='ot_total'
-		                WHERE o.conversion_type='1' 
-		                  AND o.campaign='".$this->campaign."'
-		                      ".$selection.$status;
+		$sell_query = "SELECT count(*) as sells, SUM(ot.value/o.currency_value) as Summe FROM ".TABLE_ORDERS." o, ".TABLE_ORDERS_TOTAL." ot WHERE o.orders_id=ot.orders_id and ot.class='ot_total' and o.conversion_type='1' and o.refferers_id='".$this->campaign."'".$selection.$status;
 		$sell_query = xtc_db_query($sell_query);
 		$sell_data = xtc_db_fetch_array($sell_query);
 
-		$late_sell_query = "SELECT count(*) as sells, 
-		                           SUM(ot.value/o.currency_value) as Summe 
-		                      FROM ".TABLE_ORDERS." o
-		                      JOIN ".TABLE_ORDERS_TOTAL." ot 
-		                           ON o.orders_id=ot.orders_id 
-		                              AND ot.class='ot_total'
-		                     WHERE o.conversion_type='2' 
-		                       AND o.campaign='".$this->campaign."'
-		                           ".$selection.$status;
+		$late_sell_query = "SELECT count(*) as sells, SUM(ot.value/o.currency_value) as Summe FROM ".TABLE_ORDERS." o, ".TABLE_ORDERS_TOTAL." ot WHERE o.orders_id=ot.orders_id and ot.class='ot_total' and o.conversion_type='2' and o.refferers_id='".$this->campaign."'".$selection.$status;
 		$late_sell_query = xtc_db_query($late_sell_query);
 		$late_sell_data = xtc_db_fetch_array($late_sell_query);
 
@@ -310,27 +269,20 @@ class campaigns {
 			case 1 :
 			case 2 :
 			case 3 :
-				$selection = " AND ci.customers_info_date_account_created>'".xtc_db_input(date("Y-m-d", $date_start))."'
-				               AND ci.customers_info_date_account_created<'".xtc_db_input(date("Y-m-d", $date_end))."'";
+				$selection = " and ci.customers_info_date_account_created>'".xtc_db_input(date("Y-m-d", $date_start))."'"." and ci.customers_info_date_account_created<'".xtc_db_input(date("Y-m-d", $date_end))."'";
 
 				break;
 
 			case 4 :
 				$end = mktime(0, 0, 0, date("m", $date_start), date("d", $date_start) + 1, date("Y", $date_start));
-				$selection = " AND ci.customers_info_date_account_created>'".xtc_db_input(date("Y-m-d", $date_start))."'
-				               AND ci.customers_info_date_account_created<'".xtc_db_input(date("Y-m-d", $end))."'";
+				$selection = " and ci.customers_info_date_account_created>'".xtc_db_input(date("Y-m-d", $date_start))."'"." and ci.customers_info_date_account_created<'".xtc_db_input(date("Y-m-d", $end))."'";
 
 				break;
 
 		}
 
 		// select leads
-		$lead_query = "SELECT count(*) as leads 
-		                 FROM ".TABLE_CUSTOMERS." c
-		                 JOIN ".TABLE_CUSTOMERS_INFO." ci 
-		                      ON c.customers_id=ci.customers_info_id
-		                WHERE c.refferers_id='".$this->campaign_id."'
-		                      ".$selection;		
+		$lead_query = "SELECT count(*) as leads FROM ".TABLE_CUSTOMERS." c, ".TABLE_CUSTOMERS_INFO." ci WHERE c.customers_id=ci.customers_info_id AND c.refferers_id='".$this->campaign."'".$selection;
 		$lead_query = xtc_db_query($lead_query);
 		$lead_data = xtc_db_fetch_array($lead_query);
 
@@ -351,25 +303,20 @@ class campaigns {
 			case 1 :
 			case 2 :
 			case 3 :
-				$selection = " AND time>'".xtc_db_input(date("Y-m-d", $date_start))."'
-				               AND time <'".xtc_db_input(date("Y-m-d", $date_end))."'";
+				$selection = " and time>'".xtc_db_input(date("Y-m-d", $date_start))."'"." and time <'".xtc_db_input(date("Y-m-d", $date_end))."'";
 
 				break;
 
 			case 4 :
 				$end = mktime(0, 0, 0, date("m", $date_start), date("d", $date_start) + 1, date("Y", $date_start));
-				$selection = " AND time>'".xtc_db_input(date("Y-m-d", $date_start))."'
-				               AND time<'".xtc_db_input(date("Y-m-d", $end))."'";
+				$selection = " and time>'".xtc_db_input(date("Y-m-d", $date_start))."'"." and time<'".xtc_db_input(date("Y-m-d", $end))."'";
 
 				break;
 
 		}
 
 		// select leads
-		$hits_query = "SELECT count(*) as hits 
-		                 FROM ".TABLE_CAMPAIGNS_IP." 
-		                WHERE campaign='".$this->campaign."'
-		                      ".$selection;
+		$hits_query = "SELECT count(*) as hits FROM ".TABLE_CAMPAIGNS_IP."  WHERE campaign='".$this->campaign."'".$selection;
 		$hits_query = xtc_db_query($hits_query);
 		$hits_data = xtc_db_fetch_array($hits_query);
 
@@ -383,12 +330,27 @@ class campaigns {
 	}
 
 	function getDateFormat($date_from, $date_to) {
+
 		if ($date_from != $date_to && $date_to != '') {
 			return date(DATE_FORMAT, $date_from).'-'.date(DATE_FORMAT, $date_to);
 		} else {
 			return date(DATE_FORMAT, $date_from);
 		}
+
+	}
+
+	function printResult() {
+		echo '<pre>';
+		print_r($this->result);
+
+		print_r($this->total);
+
+		echo '</pre>';
 	}
 
 }
 ?>
+
+
+
+

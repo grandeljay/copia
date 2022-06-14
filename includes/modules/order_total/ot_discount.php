@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_discount.php 11583 2019-03-21 10:23:16Z GTB $
+   $Id: ot_discount.php 2093 2011-08-14 15:32:50Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,9 +25,8 @@
       $this->code = 'ot_discount';
       $this->title = MODULE_ORDER_TOTAL_DISCOUNT_TITLE;
       $this->description = MODULE_ORDER_TOTAL_DISCOUNT_DESCRIPTION;
-      $this->enabled = ((defined('MODULE_ORDER_TOTAL_DISCOUNT_STATUS') && MODULE_ORDER_TOTAL_DISCOUNT_STATUS == 'true') ? true : false);
-      $this->sort_order = ((defined('MODULE_ORDER_TOTAL_DISCOUNT_SORT_ORDER')) ? MODULE_ORDER_TOTAL_DISCOUNT_SORT_ORDER : '');
-      $this->credit_class = true;
+      $this->enabled = ((MODULE_ORDER_TOTAL_DISCOUNT_STATUS == 'true') ? true : false);
+      $this->sort_order = MODULE_ORDER_TOTAL_DISCOUNT_SORT_ORDER;
       
       $this->output = array();
     }
@@ -43,7 +42,6 @@
         $discount_price = $xtPrice->xtcFormat(($xtPrice->xtcFormat($order->info['subtotal'], false) / 100 * $_SESSION['customers_status']['customers_status_ot_discount']), false);
         $this->deduction = $discount_price * (-1);
         
-        $order->info['subtotal'] = $order->info['subtotal'] + $this->deduction;
         $order->info['total'] = $order->info['total'] + $this->deduction;
 
         $this->output[] = array(
@@ -52,21 +50,6 @@
             'value' => $this->deduction
           );
       }
-    }
-    
-    function pre_confirmation_check($order_total) {
-      global $order, $xtPrice;
-      
-      $discount_price = 0;
-      
-      if ($_SESSION['customers_status']['customers_status_ot_discount_flag'] == '1' 
-          && $_SESSION['customers_status']['customers_status_ot_discount'] != '0.00'
-          ) 
-      {
-        $discount_price = $xtPrice->xtcFormat(($xtPrice->xtcFormat($order->info['subtotal'], false) / 100 * $_SESSION['customers_status']['customers_status_ot_discount']), false);
-      }
-
-      return $discount_price;
     }
 
     function check() {

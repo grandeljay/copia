@@ -28,7 +28,7 @@ class MagnaCompatibleCheckinSubmit extends CheckinSubmit {
 
 	protected $checkinDetails = array();
 	protected $checkinSettings = array();
-
+	
 	protected $quantitySub = false;
 	protected $quantityLumb = false;
 
@@ -394,7 +394,6 @@ class MagnaCompatibleCheckinSubmit extends CheckinSubmit {
 		$imagePath = getDBConfigValue($this->marketplace.'.imagepath', $this->mpID, '');
 		if (empty($imagePath)) {
 			$imagePath = SHOP_URL_POPUP_IMAGES;
-			$imagePath = trim($imagePath, '/ ').'/';
 		}
 		$images = array();
 		if (!empty($product['products_allimages'])) {
@@ -454,6 +453,7 @@ class MagnaCompatibleCheckinSubmit extends CheckinSubmit {
 			}
 		}
 	}
+
 	protected function filterSelection() {
 		/* false is good! It indicates nothing bad happend. */
 		return false;
@@ -473,5 +473,4 @@ class MagnaCompatibleCheckinSubmit extends CheckinSubmit {
 			'mode'   => ($state == 'fail') ? 'errorlog' : 'inventory'
 		), true);
 	}
-	
 }

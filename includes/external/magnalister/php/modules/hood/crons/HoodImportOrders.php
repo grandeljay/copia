@@ -109,17 +109,9 @@ class HoodImportOrders extends MagnaCompatibleImportOrders {
 					$class = 'paypalexpress';
 				else if (in_array('paypal3.php', $paymentModules))
 					$class = 'paypal3';
-                else if (in_array('paypalclassic.php', $paymentModules))
-                    $class = 'paypalclassic';
-                else if (in_array('paypalplus.php', $paymentModules))
-                    $class = 'paypalplus';
-                else if (in_array('paypallink.php', $paymentModules))
-                    $class = 'paypallink';
-                else if (in_array('paypalpluslink.php', $paymentModules))
-                    $class = 'paypalpluslink';
-				else if (in_array('paypalgambio_alt.php', $paymentModules))
+				if (in_array('paypalgambio_alt.php', $paymentModules))
 					$class = 'paypalgambio_alt';
-				else if (in_array('wcp_paypal.php', $paymentModules))
+				if (in_array('wcp_paypal.php', $paymentModules))
 					$class = 'wcp_paypal';
 				
 			} else if ((stripos($paymentMethod, 'Barzahlung') !== false)) {
@@ -136,11 +128,6 @@ class HoodImportOrders extends MagnaCompatibleImportOrders {
 				if (in_array('billsafe_3_installment.php', $paymentModules))
 					$class = 'billsafe_3_installment';
 			
-			} else if (stripos($paymentMethod, 'Amazon') !== false) {
-				# Amazon Pay
-				if (in_array('amazonadvpay.php', $paymentModules))
-					$class = 'amazonadvpay';
-			
 			} else if (stripos($paymentMethod, 'Bezahlung per Nachnahme') !== false) {
 				# Nachnahme
 				if (in_array('cod.php', $paymentModules))
@@ -154,9 +141,9 @@ class HoodImportOrders extends MagnaCompatibleImportOrders {
 					$class = 'uos_vorkasse_modul';
 				
 			} else if (stripos($paymentMethod, 'Kauf auf Rechnung') !== false) {
-				# Rechnung
-				if (in_array('invoice.php', $paymentModules))
-					$class = 'invoice';
+				# Nachnahme
+				if (in_array('cod.php', $paymentModules))
+					$class = 'cod';
 				
 			}
 			return $class;

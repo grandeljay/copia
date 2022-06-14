@@ -7,7 +7,7 @@
 
    Copyrigt (c) 2004 cigamth
    ------------------------------------------------------------------------------
-   $Id: dpd.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: dpd.php 5131 2013-07-18 14:17:18Z Tomcraft $
 
    XTC-GLS Shipping Module - Contribution for XT-Commerce http://www.xt-commerce.com
    modified by http://www.hhgag.com
@@ -41,10 +41,10 @@
       $this->code = 'dpd';
       $this->title = MODULE_SHIPPING_DPD_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_DPD_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_DPD_SORT_ORDER')) ? MODULE_SHIPPING_DPD_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_DPD_SORT_ORDER;
       $this->icon = DIR_WS_ICONS . 'shipping_dpd.gif';
-      $this->tax_class = ((defined('MODULE_SHIPPING_DPD_TAX_CLASS')) ? MODULE_SHIPPING_DPD_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_DPD_STATUS') && MODULE_SHIPPING_DPD_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_DPD_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_DPD_STATUS == 'True') ? true : false);
 
       if ($this->enabled == true && is_object($order) && (int)MODULE_SHIPPING_DPD_ZONE > 0) {
         $check_flag = false;
@@ -68,8 +68,7 @@
 
 
     function quote($method = '') {
-      global $shipping_quote_dpd, $shipping_quote_all, $shipping_weight, $shipping_num_boxes, $shipping_quoted, $shipping_dpd_cost, $shipping_dpd_method, $order;
-      
+      global $shipping_quote_dpd, $shipping_quote_all, $shipping_weight, $shipping_quoted, $shipping_dpd_cost, $shipping_dpd_method, $order;
       $error = false;
       $dest_country = $order->delivery['country']['iso_code_2'];
       $dest_postal_code = $order->delivery['postcode'];
@@ -117,7 +116,7 @@
       for ($i = 0; $i < count($dpd_table); $i ++) {
         if ( ($shipping_weight > $dpd_table[$i]) && ($shipping_weight <= $dpd_table[$n]) ) {
           $shipping = $dpd_table[$y];
-          $shipping_dpd_method = MODULE_SHIPPING_DPD_TEXT_WAY . ' ' . $dest_country . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_DPD_TEXT_UNITS . ') :';
+          $shipping_dpd_method = MODULE_SHIPPING_DPD_TEXT_WAY . ' ' . $dest_country . " : " . $shipping_weight . ' ' . MODULE_SHIPPING_DPD_TEXT_UNITS;
           break;
         }
         $i = $i + 2;
@@ -132,7 +131,7 @@
         //Check if there is free shipping in the database.
         if($dpd_cost['dpd_free_shipping_over'] == -1.0000){
           //do normal processing of shipping
-          $shipping_dpd_cost = ($shipping_num_boxes * $shipping) + MODULE_SHIPPING_DPD_HANDLING;
+          $shipping_dpd_cost = ($shipping + MODULE_SHIPPING_DPD_HANDLING);
         } else if(($dpd_cost['dpd_free_shipping_over'] != -1.0000) && ($dpd_cost['dpd_shipping_subsidized'] == -1.0000)){
           //free shipping if over amount
           if($order->info['subtotal'] >= $dpd_cost['dpd_free_shipping_over']){
@@ -141,17 +140,17 @@
             $shipping_dpd_method = MODULE_SHIPPING_DPD_FREE_SHIPPING;
           } else {
             //charge for shipping
-            $shipping_dpd_cost = ($shipping_num_boxes * $shipping) + MODULE_SHIPPING_DPD_HANDLING;
+            $shipping_dpd_cost = ($shipping + MODULE_SHIPPING_DPD_HANDLING);
           }
         //subsidized shipping over amount
         } else {
           if($order->info['subtotal'] >= $dpd_cost['dpd_free_shipping_over']){
             //shipping is subsidized
-            $shipping_dpd_cost = ($shipping_num_boxes * $shipping) + MODULE_SHIPPING_DPD_HANDLING - $dpd_cost['dpd_shipping_subsidized'];
-            $shipping_dpd_method = MODULE_SHIPPING_DPD_SUBSIDIZED_SHIPPING . ' ' . MODULE_SHIPPING_DPD_TEXT_WAY . ' ' . $dest_country . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_DPD_TEXT_UNITS . ') :';
+            $shipping_dpd_cost = (($shipping + MODULE_SHIPPING_DPD_HANDLING)-$dpd_cost['dpd_shipping_subsidized']);
+            $shipping_dpd_method = MODULE_SHIPPING_DPD_SUBSIDIZED_SHIPPING . ' ' .MODULE_SHIPPING_DPD_TEXT_WAY . ' ' . $dest_country . " : " . $shipping_weight . ' ' .             MODULE_SHIPPING_DPD_TEXT_UNITS;
           } else {
             //charge for shipping
-            $shipping_dpd_cost = ($shipping_num_boxes * $shipping) + MODULE_SHIPPING_DPD_HANDLING;
+            $shipping_dpd_cost = ($shipping + MODULE_SHIPPING_DPD_HANDLING);
 
           }
         }
@@ -196,7 +195,7 @@
 
       // Table structure for table `dpd_country_to_postal`
       xtc_db_query("DROP TABLE IF EXISTS dpd_country_to_postal");
-      xtc_db_query("CREATE TABLE dpd_country_to_postal (dpd_country char(2) NOT NULL default '', dpd_postal_reference int(11) NOT NULL default '0', PRIMARY KEY  (dpd_country))");
+      xtc_db_query("CREATE TABLE dpd_country_to_postal (dpd_country char(2) NOT NULL default '', dpd_postal_reference int(11) NOT NULL default '0', PRIMARY KEY  (dpd_country)) ENGINE=MyISAM");
 
       // Dumping data for table `dpd_country_to_postal`
       xtc_db_query("insert into dpd_country_to_postal (dpd_country, dpd_postal_reference) values ('AE', 26)");
@@ -354,7 +353,7 @@
 
       // Table structure for table `dpd_postal_to_weight`
       xtc_db_query("DROP TABLE IF EXISTS dpd_postal_to_weight");
-      xtc_db_query("CREATE TABLE dpd_postal_to_weight (dpd_postal_reference int(11) NOT NULL default '0', dpd_from_postal varchar(10) NOT NULL default '', dpd_to_postal varchar(10) NOT NULL default '', dpd_weight_ref char(3) NOT NULL default '', PRIMARY KEY  (dpd_postal_reference,dpd_from_postal))");
+      xtc_db_query("CREATE TABLE dpd_postal_to_weight (dpd_postal_reference int(11) NOT NULL default '0', dpd_from_postal varchar(10) NOT NULL default '', dpd_to_postal varchar(10) NOT NULL default '', dpd_weight_ref char(3) NOT NULL default '', PRIMARY KEY  (dpd_postal_reference,dpd_from_postal)) ENGINE=MyISAM");
 
       // Dumping data for table `dpd_postal_to_weight`
       // GERMANY
@@ -614,7 +613,7 @@
       
       // Table structure for table `dpd_weight`
       xtc_db_query("DROP TABLE IF EXISTS dpd_weight");
-      xtc_db_query("CREATE TABLE dpd_weight (dpd_weight_ref char(3) NOT NULL default '', dpd_weight_price_string text NOT NULL, dpd_free_shipping_over decimal(15,4) NOT NULL default '-1.0000', dpd_shipping_subsidized decimal(15,4) NOT NULL default '-1.0000', PRIMARY KEY  (dpd_weight_ref))");
+      xtc_db_query("CREATE TABLE dpd_weight (dpd_weight_ref char(3) NOT NULL default '', dpd_weight_price_string text NOT NULL, dpd_free_shipping_over decimal(15,4) NOT NULL default '-1.0000', dpd_shipping_subsidized decimal(15,4) NOT NULL default '-1.0000', PRIMARY KEY  (dpd_weight_ref)) ENGINE=MyISAM");
       
       // Dumping data for table `dpd_weight`
       xtc_db_query("insert into dpd_weight (dpd_weight_ref, dpd_weight_price_string, dpd_free_shipping_over, dpd_shipping_subsidized) values ('DE1', '0-5:3.07,5-8:4.19,8-10:4.86,10-15:6.54,15-20:8.44,20-25:9.97,25-32:13.04,32-40:15.34', '350.0000', '-1.0000')");

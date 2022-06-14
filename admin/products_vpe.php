@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: products_vpe.php 13331 2021-02-02 10:59:00Z GTB $
+   $Id: products_vpe.php 10392 2016-11-07 11:28:13Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,13 +23,11 @@
   }
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
-  $page = (isset($_GET['page']) ? (int)$_GET['page'] : 1);
-  
   if (xtc_not_null($action)) {
     switch ($action) {
       case 'insert':
       case 'save':
-        $products_vpe_id = ((isset($_GET['oID'])) ? (int)$_GET['oID'] : 0);
+        $products_vpe_id = xtc_db_prepare_input($_GET['oID']);
 
         $languages = xtc_get_languages();
         for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
@@ -39,51 +37,42 @@
           $sql_data_array = array('products_vpe_name' => xtc_db_prepare_input($products_vpe_name_array[$language_id]));
 
           if ($action == 'insert') {
-            if ($products_vpe_id == 0) {
-              $next_id_query = xtc_db_query("SELECT max(products_vpe_id) as products_vpe_id FROM " . TABLE_PRODUCTS_VPE);
+            if (!xtc_not_null($products_vpe_id)) {
+              $next_id_query = xtc_db_query("select max(products_vpe_id) as products_vpe_id from " . TABLE_PRODUCTS_VPE . "");
               $next_id = xtc_db_fetch_array($next_id_query);
               $products_vpe_id = $next_id['products_vpe_id'] + 1;
             }
-            $insert_sql_data = array(
-              'products_vpe_id' => $products_vpe_id,
-              'language_id' => $language_id
-            );
-            $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
+
+            $insert_sql_data = array('products_vpe_id' => $products_vpe_id,
+                                     'language_id' => $language_id);
+            $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
             xtc_db_perform(TABLE_PRODUCTS_VPE, $sql_data_array);
           } elseif ($action == 'save') {
-            $vpe_query = xtc_db_query("SELECT * 
-                                         FROM ".TABLE_PRODUCTS_VPE." 
-                                        WHERE language_id = '".$language_id."' 
-                                          AND products_vpe_id = '".$products_vpe_id."'");
-            if (xtc_db_num_rows($vpe_query) == 0) {
-              xtc_db_perform(TABLE_PRODUCTS_VPE, array('products_vpe_id' => $products_vpe_id, 'language_id' => $language_id));
-            }
-            xtc_db_perform(TABLE_PRODUCTS_VPE, $sql_data_array, 'update', "products_vpe_id = '" . $products_vpe_id . "' AND language_id = '" . $language_id . "'");
+            //BOF - web28 - 2010-07-11 - BUGFIX no entry stored for previous deactivated languages
+            $vpe_query = xtc_db_query("select * from ".TABLE_PRODUCTS_VPE." where language_id = '".$language_id."' and products_vpe_id = '".xtc_db_input($products_vpe_id)."'");
+            if (xtc_db_num_rows($vpe_query) == 0)
+              xtc_db_perform(TABLE_PRODUCTS_VPE, array ('products_vpe_id' => xtc_db_input($products_vpe_id), 'language_id' => $language_id));
+            //EOF - web28 - 2010-07-11 - BUGFIX no entry stored for previous deactivated languages
+            xtc_db_perform(TABLE_PRODUCTS_VPE, $sql_data_array, 'update', "products_vpe_id = '" . xtc_db_input($products_vpe_id) . "' and language_id = '" . $language_id . "'");
           }
         }
-        if (isset($_POST['default']) && $_POST['default'] == 'on') {
-          xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " 
-                           SET configuration_value = '" . $products_vpe_id . "' 
-                         WHERE configuration_key = 'DEFAULT_PRODUCTS_VPE_ID'");
+        if ($_POST['default'] == 'on') {
+          xtc_db_query("update " . TABLE_CONFIGURATION . " set configuration_value = '" . xtc_db_input($products_vpe_id) . "' where configuration_key = 'DEFAULT_PRODUCTS_VPE_ID'");
         }
-        xtc_redirect(xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $products_vpe_id));
+        xtc_redirect(xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $products_vpe_id));
         break;
       case 'deleteconfirm':
-        $oID = (int)$_GET['oID'];
-        $products_vpe_query = xtc_db_query("SELECT configuration_value 
-                                              FROM " . TABLE_CONFIGURATION . " 
-                                             WHERE configuration_key = 'DEFAULT_PRODUCTS_VPE_ID'");
+        $oID = xtc_db_prepare_input($_GET['oID']);
+        $products_vpe_query = xtc_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'DEFAULT_PRODUCTS_VPE_ID'");
         $products_vpe = xtc_db_fetch_array($products_vpe_query);
         if ($products_vpe['configuration_value'] == $oID) {
-          xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " 
-                           SET configuration_value = '' 
-                         WHERE configuration_key = 'DEFAULT_PRODUCTS_VPE_ID'");
+          xtc_db_query("update " . TABLE_CONFIGURATION . " set configuration_value = '' where configuration_key = 'DEFAULT_PRODUCTS_VPE_ID'");
         }
-        xtc_db_query("DELETE FROM " . TABLE_PRODUCTS_VPE . " WHERE products_vpe_id = '" . $oID . "'");
-        xtc_redirect(xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page));
+        xtc_db_query("delete from " . TABLE_PRODUCTS_VPE . " where products_vpe_id = '" . xtc_db_input($oID) . "'");
+        xtc_redirect(xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page']));
         break;
       case 'delete':
-        $oID = (int)$_GET['oID'];
+        $oID = xtc_db_prepare_input($_GET['oID']);
         $remove_status = true;
         if ($oID == DEFAULT_PRODUCTS_VPE_ID) {
           $remove_status = false;
@@ -128,42 +117,41 @@ require (DIR_WS_INCLUDES.'head.php');
                   <td class="dataTableHeadingContent" align="right"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</td>
                 </tr>
                 <?php
-                $products_vpe_query_raw = "SELECT *
-                                             FROM " . TABLE_PRODUCTS_VPE . " 
-                                            WHERE language_id = '" . (int)$_SESSION['languages_id'] . "' 
-                                         ORDER BY products_vpe_id";
-                $products_vpe_split = new splitPageResults($page, MAX_DISPLAY_SEARCH_RESULTS, $products_vpe_query_raw, $products_vpe_query_numrows);
+                $products_vpe_query_raw = "select products_vpe_id, products_vpe_name from " . TABLE_PRODUCTS_VPE . " where language_id = '" . (int)$_SESSION['languages_id'] . "' order by products_vpe_id";
+                $products_vpe_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $products_vpe_query_raw, $products_vpe_query_numrows);
                 $products_vpe_query = xtc_db_query($products_vpe_query_raw);
                 while ($products_vpe = xtc_db_fetch_array($products_vpe_query)) {
-                  if ((!isset($_GET['oID']) || (isset($_GET['oID']) && $_GET['oID'] == $products_vpe['products_vpe_id'])) && !isset($oInfo) && substr($action, 0, 3) != 'new') {
+                  if ((!isset($_GET['oID']) || (isset($_GET['oID']) && ($_GET['oID'] == $products_vpe['products_vpe_id']))) && !isset($oInfo) && (substr($action, 0, 3) != 'new')) {
                     $oInfo = new objectInfo($products_vpe);
                   }
-                  if (isset($oInfo) && is_object($oInfo) && $products_vpe['products_vpe_id'] == $oInfo->products_vpe_id) {
-                    echo '<tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id . '&action=edit') . '\'">' . "\n";
+                  if (isset($oInfo) && is_object($oInfo) && ($products_vpe['products_vpe_id'] == $oInfo->products_vpe_id) ) {
+                    echo '                  <tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id . '&action=edit') . '\'">' . "\n";
                   } else {
-                    echo '<tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $products_vpe['products_vpe_id']) . '\'">' . "\n";
+                    echo '                  <tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $products_vpe['products_vpe_id']) . '\'">' . "\n";
                   }
                     if (DEFAULT_PRODUCTS_VPE_ID == $products_vpe['products_vpe_id']) {
-                      echo '<td class="dataTableContent"><b>' . $products_vpe['products_vpe_name'] . ' (' . TEXT_DEFAULT . ')</b></td>' . "\n";
+                      echo '                <td class="dataTableContent"><b>' . $products_vpe['products_vpe_name'] . ' (' . TEXT_DEFAULT . ')</b></td>' . "\n";
                     } else {
-                      echo '<td class="dataTableContent">' . $products_vpe['products_vpe_name'] . '</td>' . "\n";
+                      echo '                <td class="dataTableContent">' . $products_vpe['products_vpe_name'] . '</td>' . "\n";
                     }
                     ?>
-                    <td class="dataTableContent" align="right"><?php if (isset($oInfo) && is_object($oInfo) && $products_vpe['products_vpe_id'] == $oInfo->products_vpe_id) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $products_vpe['products_vpe_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
+                   
+                    <td class="dataTableContent" align="right"><?php if (isset($oInfo) && is_object($oInfo) && ($products_vpe['products_vpe_id'] == $oInfo->products_vpe_id) ) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $products_vpe['products_vpe_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
+                   
                   </tr>
                   <?php
                 }
                 ?>
                 </table>
 
-                <div class="smallText pdg2 flt-l"><?php echo $products_vpe_split->display_count($products_vpe_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $page, TEXT_DISPLAY_NUMBER_OF_PRODUCTS_VPE); ?></div>
-                <div class="smallText pdg2 flt-r"><?php echo $products_vpe_split->display_links($products_vpe_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $page); ?></div>
+                <div class="smallText pdg2 flt-l"><?php echo $products_vpe_split->display_count($products_vpe_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_PRODUCTS_VPE); ?></div>
+                <div class="smallText pdg2 flt-r"><?php echo $products_vpe_split->display_links($products_vpe_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></div>
 
                 <?php
                 if (empty($action)) {
                 ?>
                   <div class="clear"></div>
-                  <div class="pdg2 flt-r smallText"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&action=new') . '">' . BUTTON_INSERT . '</a>'; ?></div>
+                  <div class="pdg2 flt-r smallText"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&action=new') . '">' . BUTTON_INSERT . '</a>'; ?></div>
 
                 <?php
                 }
@@ -176,7 +164,7 @@ require (DIR_WS_INCLUDES.'head.php');
               switch ($action) {
                 case 'new':
                   $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_NEW_PRODUCTS_VPE . '</b>');
-                  $contents = array('form' => xtc_draw_form('status', FILENAME_PRODUCTS_VPE, 'page=' . $page . '&action=insert'));
+                  $contents = array('form' => xtc_draw_form('status', FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&action=insert'));
                   $contents[] = array('text' => TEXT_INFO_INSERT_INTRO);
                   $products_vpe_inputs_string = '';
                   $languages = xtc_get_languages();
@@ -185,11 +173,11 @@ require (DIR_WS_INCLUDES.'head.php');
                   }
                   $contents[] = array('text' => '<br />' . TEXT_INFO_PRODUCTS_VPE_NAME . $products_vpe_inputs_string);
                   $contents[] = array('text' => '<br />' . xtc_draw_checkbox_field('default') . ' ' . TEXT_SET_DEFAULT);
-                  $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_INSERT . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page) . '">' . BUTTON_CANCEL . '</a>');
+                  $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_INSERT . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page']) . '">' . BUTTON_CANCEL . '</a>');
                   break;
                 case 'edit':
                   $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_EDIT_PRODUCTS_VPE . '</b>');
-                  $contents = array('form' => xtc_draw_form('status', FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id  . '&action=save'));
+                  $contents = array('form' => xtc_draw_form('status', FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id  . '&action=save'));
                   $contents[] = array('text' => TEXT_INFO_EDIT_INTRO);
                   $products_vpe_inputs_string = '';
                   $languages = xtc_get_languages();
@@ -199,23 +187,19 @@ require (DIR_WS_INCLUDES.'head.php');
                   $contents[] = array('text' => '<br />' . TEXT_INFO_PRODUCTS_VPE_NAME . $products_vpe_inputs_string);
                   if (DEFAULT_PRODUCTS_VPE_ID != $oInfo->products_vpe_id)
                     $contents[] = array('text' => '<br />' . xtc_draw_checkbox_field('default') . ' ' . TEXT_SET_DEFAULT);
-                  $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_UPDATE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id) . '">' . BUTTON_CANCEL . '</a>');
+                  $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_UPDATE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id) . '">' . BUTTON_CANCEL . '</a>');
                   break;
                 case 'delete':
                   $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_DELETE_PRODUCTS_VPE . '</b>');
-                  $contents = array('form' => xtc_draw_form('status', FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id  . '&action=deleteconfirm'));
+                  $contents = array('form' => xtc_draw_form('status', FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id  . '&action=deleteconfirm'));
                   $contents[] = array('text' => TEXT_INFO_DELETE_INTRO);
                   $contents[] = array('text' => '<br /><b>' . $oInfo->products_vpe_name . '</b>');
-                  if ($remove_status) {
-                    $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_DELETE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id) . '">' . BUTTON_CANCEL . '</a>');
-                  } else {
-                    $contents[] = array('align' => 'center', 'text' => '<br /><a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id) . '">' . BUTTON_CANCEL . '</a>');
-                  }
+                  if ($remove_status) $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_DELETE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id) . '">' . BUTTON_CANCEL . '</a>');
                   break;
                 default:
                   if (isset($oInfo) && is_object($oInfo)) {
                     $heading[] = array('text' => '<b>' . $oInfo->products_vpe_name . '</b>');
-                    $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id . '&action=edit') . '">' . BUTTON_EDIT . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $page . '&oID=' . $oInfo->products_vpe_id . '&action=delete') . '">' . BUTTON_DELETE . '</a>');
+                    $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id . '&action=edit') . '">' . BUTTON_EDIT . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, 'page=' . $_GET['page'] . '&oID=' . $oInfo->products_vpe_id . '&action=delete') . '">' . BUTTON_DELETE . '</a>');
                     $products_vpe_inputs_string = '';
                     $languages = xtc_get_languages();
                     for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
@@ -226,12 +210,12 @@ require (DIR_WS_INCLUDES.'head.php');
                   break;
               }
               if ( (xtc_not_null($heading)) && (xtc_not_null($contents)) ) {
-                echo '            <td class="boxRight">' . "\n";
-                $box = new box;
-                echo $box->infoBox($heading, $contents);
-                echo '            </td>' . "\n";
-              }
-            ?>
+              echo '            <td class="boxRight">' . "\n";
+              $box = new box;
+              echo $box->infoBox($heading, $contents);
+              echo '            </td>' . "\n";
+            }
+          ?>
           </tr>
         </table>
       </td>

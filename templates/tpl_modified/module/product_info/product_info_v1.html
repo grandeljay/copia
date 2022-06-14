@@ -3,23 +3,19 @@
 {config_load file="lang_`$language`.section" section="product_info"}
 <div itemscope itemtype="http://schema.org/Product">
   {$FORM_ACTION}
-  <div class="product_headline cf">
-    {if isset($MANUFACTURER_IMAGE) && $MANUFACTURER_IMAGE != ''}<div class="pd_manu_image"><a title="{$MANUFACTURER|onlytext}" href="{$MANUFACTURER_LINK}"><img src="{$MANUFACTURER_IMAGE}" alt="{$MANUFACTURER|onlytext}" /></a></div>{/if}
-    <h1 itemprop="name">{if $PRODUCTS_HEADING_TITLE != ''}{$PRODUCTS_HEADING_TITLE}{else}{$PRODUCTS_NAME}{/if}</h1>
-  </div>
-
+  <h1 itemprop="name">{$PRODUCTS_NAME}</h1>
   <div id="product_details">
     {if $PRODUCTS_IMAGE != ''}
     <div class="pd_imagebox">
       <div class="pd_big_image">
-        <a class="cbimages" title="{$PRODUCTS_NAME|onlytext}" href="{$PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img itemprop="image" src="{$PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" /></a>
+        <a class="cbimages" title="{$PRODUCTS_NAME|onlytext}" href="{$PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img itemprop="image" src="{$PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" /></a>
       </div>
       <div class="zoomtext">{#zoomtext#}</div>
-      {if isset($more_images) && count($more_images) > 0}
+      {if $more_images|@count > 0}
         {foreach item=more_images_data from=$more_images} 
         <div class="pd_small_image">
-          <a class="cbimages" title="{$PRODUCTS_NAME|onlytext}" href="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img class="unveil" src="{$tpl_path}css/images/loading.gif" data-src="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"thumbnail_images"}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" /></a>
-          <noscript><a title="{$PRODUCTS_NAME|onlytext}" href="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img src="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"thumbnail_images"}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" /></a></noscript>
+          <a class="cbimages" title="{$PRODUCTS_NAME|onlytext}" href="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img class="unveil" src="{$tpl_path}css/images/loading.gif" data-src="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"thumbnail_images"}" alt="{$PRODUCTS_NAME|onlytext}" /></a>
+          <noscript><a title="{$PRODUCTS_NAME|onlytext}" href="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img src="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"thumbnail_images"}" alt="{$PRODUCTS_NAME|onlytext}" /></a></noscript>
         </div>                          
         {/foreach}
         <br class="clearfix" />
@@ -31,8 +27,8 @@
       <div class="pd_infobox">
         <div class="pd_inforow_first"></div>
         {if $SHIPPING_NAME}<div class="pd_inforow"><strong>{#text_shippingtime#}</strong> {if $SHIPPING_IMAGE}<img class="pd_shipping_image" src="{$SHIPPING_IMAGE}" alt="{$SHIPPING_NAME}" />{/if} {$SHIPPING_NAME_LINK}</div>{/if}
-        {if $PRODUCTS_MODEL != ''}<div class="pd_inforow"><strong>{#model#}</strong> <span itemprop="sku">{$PRODUCTS_MODEL}</span></div>{/if}
-        {if $PRODUCTS_EAN != ''}<div class="pd_inforow"><strong>{#ean#}</strong> <span itemprop="gtin{$PRODUCTS_EAN|strlen}">{$PRODUCTS_EAN}</span></div>{/if}
+        {if $PRODUCTS_MODEL != ''}<div class="pd_inforow"><strong>{#model#}</strong> {$PRODUCTS_MODEL}<meta itemprop="model" content="{$PRODUCTS_MODEL}" /></div>{/if}  
+        {if $PRODUCTS_EAN != ''}<div class="pd_inforow"><strong>{#ean#}</strong> {$PRODUCTS_EAN}</div>{/if}  
         {if $PRODUCTS_RATING_COUNT > 1}
         <div class="pd_inforow" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
           <strong>{#info_reviews#}</strong> 
@@ -62,29 +58,24 @@
 
         <ul class="pd_iconlist">
           <li class="print">{$PRODUCTS_PRINT_LAYER}</li>
-          {if $smarty.session.customers_status.customers_status_write_reviews == 1}
-           <li class="vote">{$PRODUCTS_WRITE_REVIEW}</li>
-          {/if}
+          <li class="vote">{$PRODUCTS_WRITE_REVIEW}</li>
           {if isset($EXPRESS_LINK)}<li class="express">{$EXPRESS_LINK}</li>{/if}
           {if $ADD_CART_BUTTON_WISHLIST_TEXT}<li class="wishlist">{$ADD_CART_BUTTON_WISHLIST_TEXT}</li>{/if}
         </ul>
+        {if isset($KLARNA_PPBOX)}{$KLARNA_PPBOX}{/if}
       </div>
 
       <div class="pd_summarybox" itemprop="offers" itemscope itemtype="http://schema.org/Offer"> 
-        <meta itemprop="url" content="{$PRODUCTS_LINK}" />
         <meta itemprop="priceCurrency" content="{$smarty.session.currency}" />
-        {if $PRODUCTS_EXPIRES_C}<meta itemprop="priceValidUntil" content="{$PRODUCTS_EXPIRES_C}" />{/if}
         {if $PRODUCTS_QUANTITY <= 0 && $smarty.const.STOCK_CHECK == 'true'}<meta itemprop="availability" content="http://schema.org/OutOfStock" />{else}<meta itemprop="availability" content="http://schema.org/InStock" />{/if}
         {if $PRODUCTS_MANUFACTURERS_MODEL != ''}<meta itemprop="mpn" content="{$PRODUCTS_MANUFACTURERS_MODEL}" />{/if}
         <meta itemprop="itemCondition" content="http://schema.org/NewCondition" />
 
         <div class="pd_price{if $PRODUCTS_FSK18 == 'true'} pd_fsk_padding{/if}">
-          {if $PRODUCTS_FSK18 == 'true'}<div class="pd_fsk18"></div>{/if}
-          <div id="pd_puprice">
-            {foreach name=inner item=price_data from=$PRODUCTS_PRICE_ARRAY}
-              {include file="module/includes/price_info.html"}
-            {/foreach}
-          </div>
+        {if $PRODUCTS_FSK18 == 'true'}<div class="pd_fsk18"></div>{/if}
+        {foreach name=inner item=price_data from=$PRODUCTS_PRICE_ARRAY}
+          {include file="module/includes/price_info.html"}
+        {/foreach}
         </div>
         {if $PRODUCTS_PRICE_ARRAY.0.PRODUCTS_PRICE_FLAG != 'NotAllowed'}
           {if $PRODUCTS_VPE}<div class="pd_vpe">{$PRODUCTS_VPE}</div>{/if}
@@ -97,23 +88,18 @@
           {/if}
         {/if}
       
-        {if $PAYPALPLAN}
-          <br class="clearfix" />
-          {$PAYPALPLAN}
-        {/if}
-
         {if $ADD_CART_BUTTON != ''}
         <div class="addtobasket">
           <span class="addtobasket_input">{$ADD_QTY}</span>
           <span class="addtobasket_button">{$ADD_CART_BUTTON}</span>
-          {if isset($ADD_CART_BUTTON_EXPRESS) && !$PAYPALPLAN}
+          {if isset($ADD_CART_BUTTON_EXPRESS)}
             <br class="clearfix" />
             <span class="addtobasket_button">{$ADD_CART_BUTTON_EXPRESS}</span>
           {elseif $ACTIVATE_EXPRESS_LINK}
             <br class="clearfix" />
             <span class="express_info"><a href="{$ACTIVATE_EXPRESS_LINK}">{#checkout_express_activate#}</a></span>
           {/if}
-          {if $ADD_CART_BUTTON_PAYPAL && !$PAYPALPLAN}
+          {if $ADD_CART_BUTTON_PAYPAL}
             <br class="clearfix" />
             <span class="addtobasket_button">{$ADD_CART_BUTTON_PAYPAL}</span>
           {/if}
@@ -123,16 +109,6 @@
           {/if*}
         </div>
         {/if}
-
-        {if $PAYPAL_INSTALLMENT && !$PAYPALPLAN}
-          <br class="clearfix" />
-          {$PAYPAL_INSTALLMENT}
-        {/if}
-
-        {if $EASYCREDIT && !$PAYPALPLAN}
-          <br class="clearfix" />
-          {$EASYCREDIT}
-        {/if}
       
         {if $ADD_CART_BUTTON == '' && $PRODUCTS_FSK18 == 'true'}<div class="pd_inforow_message">{#products_fsk18_check#}</div>{/if}
         {if $ADD_CART_BUTTON == '' && $PRODUCTS_GIFT_FORBIDDEN == 'true'}<div class="pd_inforow_message">{#products_gift_forbidden#}</div>{/if}
@@ -140,6 +116,9 @@
 
       </div>
       <br class="clearfix" />
+      {if isset($XTB_REDIRECT_USER_TO) && $XTB_REDIRECT_USER_TO == 'product'}
+        <div class="xtb_booster_redirect_message"><strong>Sie haben die eBay Auktion gewonnen!</strong><br />Bitte w&auml;hlen Sie nun noch die gew&uuml;nschten Produkteigenschaften und legen Sie den Artikel danach in den Warenkorb, um mit der Zahlung fortzufahren und das Produkt versandfertig zu machen!</div>
+      {/if}
       {if isset($MODULE_product_options) && $MODULE_product_options != ''}
         {if $MODULE_product_options_template != 'multi_options_1.html' && $MODULE_product_options_template|strpos:"dropdown" === false}
           {$MODULE_product_options}
@@ -147,6 +126,7 @@
       {/if}      
     </div>  
     <br class="clearfix" />
+    {if isset($MANUFACTURER_IMAGE) && $MANUFACTURER_IMAGE != ''}<div class="pd_manu_image"><a title="{$MANUFACTURER|onlytext}" href="{$MANUFACTURER_LINK}"><img src="{$MANUFACTURER_IMAGE}" alt="{$MANUFACTURER|onlytext}" /></a></div>{/if}
   </div>
   {$FORM_END}
 

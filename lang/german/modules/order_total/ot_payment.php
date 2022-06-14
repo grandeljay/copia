@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_payment.php 12344 2019-10-30 11:14:09Z Tomcraft $
+   $Id: ot_payment.php 3481 2012-08-22 07:07:50Z dokuman $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -52,7 +52,7 @@ Sollen mehr Rabattstaffeln m&ouml;glich sein (Standard sind <b>3</b>), muss vor 
 Wenn schon im Bestellprozess bei der Zahlungsauswahl der entsprechende Rabatt angezeigt werden soll, die Option &quot;Anzeige bei den Zahlungsarten&quot; auf &quot;true&quot; stellen. <br/><br/>
 Weiter kann man mit der Option &quot;Anzeigeart im Bestellprozess bei der Zahlungsauswahl&quot; die Art der Darstellung einstellen:
 <p> -- default: Prozent oder Betrag, abh&auml;ngig von den Eingaben bei Rabattstaffel</p>
-<p> -- Preis: Es wird immer der tats&auml;chliche Betrag angezeigt</p>'
+<p> -- price: Es wird immer der tats&auml;chliche Betrag angezeigt</p>'
 );
 
 define('MODULE_ORDER_TOTAL_PAYMENT_TITLE', 'Rabatt &amp; Zuschlag auf Zahlungsarten');
@@ -64,13 +64,11 @@ define('MODULE_ORDER_TOTAL_PAYMENT_STATUS_DESC', 'Wollen Sie den Zahlungsartenra
 define('MODULE_ORDER_TOTAL_PAYMENT_SORT_ORDER_TITLE', '<hr>Sortierreihenfolge');
 define('MODULE_ORDER_TOTAL_PAYMENT_SORT_ORDER_DESC', 'Anzeigereihenfolge');
 
-if (defined('MODULE_ORDER_TOTAL_PAYMENT_NUMBER')) {
-  for ($j=1; $j<=MODULE_ORDER_TOTAL_PAYMENT_NUMBER; $j++) {
-    define('MODULE_ORDER_TOTAL_PAYMENT_PERCENTAGE' . $j . '_TITLE', '<hr>'.$j . '. Rabattstaffel');
-    define('MODULE_ORDER_TOTAL_PAYMENT_PERCENTAGE' . $j . '_DESC', 'Rabattierung (Mindestwert:Prozent)');
-    define('MODULE_ORDER_TOTAL_PAYMENT_TYPE' . $j . '_TITLE', $j . '. Zahlungsart');
-    define('MODULE_ORDER_TOTAL_PAYMENT_TYPE' . $j . '_DESC', 'Zahlungsarten, auf die Rabatt gegeben werden soll');
-  }
+for ($j=1; $j<=MODULE_ORDER_TOTAL_PAYMENT_NUMBER; $j++) {
+  define('MODULE_ORDER_TOTAL_PAYMENT_PERCENTAGE' . $j . '_TITLE', '<hr>'.$j . '. Rabattstaffel');
+  define('MODULE_ORDER_TOTAL_PAYMENT_PERCENTAGE' . $j . '_DESC', 'Rabattierung (Mindestwert:Prozent)');
+  define('MODULE_ORDER_TOTAL_PAYMENT_TYPE' . $j . '_TITLE', $j . '. Zahlungsart');
+  define('MODULE_ORDER_TOTAL_PAYMENT_TYPE' . $j . '_DESC', 'Zahlungsarten, auf die Rabatt gegeben werden soll');
 }
 
 define('MODULE_ORDER_TOTAL_PAYMENT_INC_SHIPPING_TITLE', '<hr>Inklusive Versandkosten');
@@ -98,7 +96,7 @@ define('MODULE_ORDER_TOTAL_PAYMENT_SHOW_IN_CHECKOUT_PAYMENT_TITLE', '<hr>Anzeige
 define('MODULE_ORDER_TOTAL_PAYMENT_SHOW_IN_CHECKOUT_PAYMENT_DESC', 'Anzeige im Bestellprozess bei der Zahlungsauswahl');
 
 define('MODULE_ORDER_TOTAL_PAYMENT_SHOW_TYPE_TITLE', '<hr>Anzeigeart bei den Zahlungsarten');
-define('MODULE_ORDER_TOTAL_PAYMENT_SHOW_TYPE_DESC', 'Anzeigeart im Bestellprozess bei der Zahlungsauswahl <br />-- default: Prozent oder Betrag, abh&auml;ngig von den Eingaben bei Rabattstaffel<br />-- Preis: Es wird immer der tats&auml;chliche Betrag angezeigt');
+define('MODULE_ORDER_TOTAL_PAYMENT_SHOW_TYPE_DESC', 'Anzeigeart im Bestellprozess bei der Zahlungsauswahl <br />-- default: Prozent oder Betrag, abh&auml;ngig von den Eingaben bei Rabattstaffel<br />-- price: es wird immer der tats&auml;chliche Betrag angezeigt');
 
 define('MODULE_ORDER_TOTAL_PAYMENT_NUMBER_TITLE', 'Anzahl Zahlarten');
 define('MODULE_ORDER_TOTAL_PAYMENT_NUMBER_DESC', 'Anzahl an Rabatt &amp; Zuschlag auf Zahlungsarten');

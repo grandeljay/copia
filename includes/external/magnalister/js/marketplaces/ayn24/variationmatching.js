@@ -35,9 +35,7 @@
             customVariationHeaderContainer: null, // header for custom variation
             customVariationHeaderSelect: null, //select inside customVariationHeaderContainer
             matchingHeadline: null,
-            matchingCustomHeadline: null,
-            matchingInput: null,
-            matchingCustomInput: null
+            matchingInput: null
         },
         variationValues: {},
         self: null,
@@ -68,9 +66,6 @@
             if (self.elements.form === null) {
                 self.elements.form = self.element.find('form').andSelf().filter('form');
             }
-
-            self.options.groupedShopVariations = JSON.parse(JSON.stringify(self.options.shopVariations));
-            self._flat_attributes(self.options.shopVariations);
 
             self.html.valuesBackup = self.elements.matchingInput.html();
             self._initCustomVariationContainer();
@@ -236,33 +231,19 @@
             return out;
         },
 
-        _getShopVariationsDropDownElement: function () {
-            var self = this,
-                counter = 1,
-                numberOfOptGroups = 2;
-
+        _getShopVariationsDropDownElement: function() {
             if (self.html.shopVariationsDropDown === '') {
                 self.html.shopVariationsDropDown = 
-                    '<select class="shopAttrSelector">' + self._render('<option value="{Code}">{Name}</option>',
-                        {0: {Code: 'null', Name: self.i18n.pleaseSelect}});
-
-                for (var property in self.options.groupedShopVariations) {
-                    if (self.options.groupedShopVariations.hasOwnProperty(property)) {
-                        if (counter++ <= numberOfOptGroups) {
-                            var options = self._render('<option value="{Code}">{Name}</option>',
-                                self.options.groupedShopVariations[property]);
-    
-                            self.html.shopVariationsDropDown += '<optgroup label="' + property +'"> '
-                                + options +
-                                '</optgroup>';
-                            continue;
-                        }
-                        self.html.shopVariationsDropDown += self._render('<option value="{Code}">{Name}</option>',
-                            self.options.groupedShopVariations[property]);
-                    }
-                }
-
-                self.html.shopVariationsDropDown += '</select>';
+                    '<select class="shopAttrSelector">'
+                    + self._render(
+                        '<option value="{Code}">{Name}</option>', $.extend(
+                            {0: {Code: 'null', Name: self.i18n.pleaseSelect}},
+                            self.options.shopVariations
+                        )
+                    )
+                    + '</select>'
+                ;
+                myConsole.log('_getShopVariationsDropDownElement()');
             }
             return $(self.html.shopVariationsDropDown);
         },
@@ -427,7 +408,6 @@
                     self.elements.matchingInput.find('select[id^=sel_' + data[i].id + ']').val(data[i].CurrentValues.Code).trigger('change');
                 }
             }
-            self._prefix_option();
         },
 
         _loadMPVariation: function(val) {

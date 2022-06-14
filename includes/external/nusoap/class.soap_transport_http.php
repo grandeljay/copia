@@ -57,8 +57,8 @@ class soap_transport_http extends nusoap_base {
 	* @param boolean $use_curl Whether to try to force cURL use
 	* @access public
 	*/
-	function __construct($url, $curl_options = NULL, $use_curl = false){
-		parent::__construct();
+	function soap_transport_http($url, $curl_options = NULL, $use_curl = false){
+		parent::nusoap_base();
 		$this->debug("ctor url=$url use_curl=$use_curl curl_options:");
 		$this->appendDebug($this->varDump($curl_options));
 		$this->setURL($url);
@@ -451,7 +451,7 @@ class soap_transport_http extends nusoap_base {
 	* @access   public
 	* @deprecated
 	*/
-	function sendHTTPS($data, $timeout, $response_timeout, $cookies) {
+	function sendHTTPS($data, $timeout=0, $response_timeout=30, $cookies) {
 		return $this->send($data, $timeout, $response_timeout, $cookies);
 	}
 	

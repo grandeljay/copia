@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: file_permissions.php 13213 2021-01-20 16:51:25Z GTB $
+   $Id: file_permissions.php 3119 2012-06-23 14:45:52Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -40,18 +40,18 @@ $writeableDirs = array(
   DIR_FS_ADMIN.'images/icons',
   DIR_FS_CATALOG.'cache',
   DIR_FS_CATALOG.'export',
+  DIR_FS_CATALOG.'export/easybill',
+  DIR_FS_CATALOG.'export/idealo_realtime',
   DIR_FS_EXTERNAL.'magnalister',
   DIR_FS_EXTERNAL.'shopgate/shopgate_library/config',
   DIR_FS_CATALOG.'images',
   DIR_FS_CATALOG.'images/banner',
   DIR_FS_CATALOG.'images/categories',
   DIR_FS_CATALOG.'images/content',
+  DIR_FS_CATALOG.'images/product_images/info_images',
   DIR_FS_CATALOG.'images/product_images/original_images',
   DIR_FS_CATALOG.'images/product_images/popup_images',
-  DIR_FS_CATALOG.'images/product_images/info_images',
-  DIR_FS_CATALOG.'images/product_images/midi_images',
   DIR_FS_CATALOG.'images/product_images/thumbnail_images',
-  DIR_FS_CATALOG.'images/product_images/mini_images',
   DIR_FS_CATALOG.'images/manufacturers',
   DIR_FS_CATALOG.'images/icons',
   DIR_FS_CATALOG.'import',

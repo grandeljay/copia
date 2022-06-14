@@ -1,10 +1,10 @@
 #  -----------------------------------------------------------------------------------------
-#  $Id: .htaccess 12728 2020-04-25 21:22:56Z Tomcraft $
+#  $Id: .htaccess 9957 2016-06-09 12:01:38Z GTB $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
 #
-#  Copyright (c) 2009 - 2020 [www.modified-shop.org]
+#  Copyright (c) 2009 - 2016 [www.modified-shop.org]
 #  -----------------------------------------------------------------------------------------
 #  based on: 
 #  (c) 2000-2001 The Exchange Project 
@@ -31,3 +31,5 @@
     Deny from all
   </IfModule>
 </Files>
+
+Deny From All

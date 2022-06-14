@@ -23,7 +23,7 @@
               <td>
                 <p>&nbsp;</p>
                 <p>&nbsp;</p>
-                <p class="small" style="text-decoration:underline;">{$ADDRESS_SMALL}</p>
+                <p class="small" style="text-decoration:underline;">{$store_name}</p>
                 <p class="normal">{$address_label_customer}</p>
                 <p>&nbsp;</p>
                 <p class="small">
@@ -39,19 +39,14 @@
                 </p>
                 <p class="large">{#invoice#}</p>
               </td>
-              <td width="20%">
-                <img src="{$logo_path}logo.gif" alt="{$store_name}" />
-                <p class="small">
-                {$ADDRESS_LARGE}
-                </p>
-              </td>
+              <td width="1"><img src="{$logo_path}logo.gif" alt="{$store_name}" /></td>
             </tr>
           </table>
           <br />
           <table class="small" style="border-top:1px solid; border-bottom:1px solid;" width="100%" border="0">
             <tr bgcolor="#f1f1f1">
               <td width="50%">
-                <p><strong>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}{#pickup_address#}{else}{#shipping_address#}{/if}</strong></p>
+                <p><strong>{#shipping_address#}</strong></p>
               </td>
               <td>
                 <p><strong>{if $address_label_payment}{#payment_address#}{/if}</strong></p>
@@ -115,19 +110,6 @@
           </table>
         </td>
       </tr>
-      {if isset($vat_info) && $vat_info != 0}
-      <tr>
-        <td>
-          <table style="border-bottom:1px solid;" width="100%" border="0" cellpadding="0" cellspacing="0">
-            <tr>
-              <td class="small">
-                <br /><br />{if $vat_info == 2}{#vat_info_2#}{else}{#vat_info#}{/if}
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      {/if}
       {if $COMMENTS}
       <tr>
         <td>
@@ -141,7 +123,7 @@
         </td>
       </tr>
       {/if}
-      {if is_array($PAYMENT_INFO) && count($PAYMENT_INFO) > 0}
+      {if count($PAYMENT_INFO) > 0}
       <tr>
         <td>
           <table style="border:1px solid;" width="100%" border="0" cellpadding="0" cellspacing="0">

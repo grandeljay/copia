@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: customers.php 13133 2021-01-08 13:12:31Z GTB $   
+   $Id: customers.php 10228 2016-08-10 16:37:45Z GTB $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -23,7 +23,6 @@ define('TABLE_HEADING_FIRSTNAME', 'Vorname');
 define('TABLE_HEADING_LASTNAME', 'Nachname');
 define('TABLE_HEADING_ACCOUNT_CREATED', 'erstellt am');
 define('TABLE_HEADING_ACTION', 'Aktion');
-define('TABLE_HEADING_EDIT','Edit');
 
 define('TEXT_DATE_ACCOUNT_CREATED', 'Zugang erstellt am:');
 define('TEXT_DATE_ACCOUNT_LAST_MODIFIED', 'letzte &Auml;nderung:');
@@ -68,17 +67,12 @@ define('TEXT_INFO_DELETE', '<b>Diesen Adressbucheintrag l&ouml;schen?</b>');
 define('TEXT_INFO_DELETE_DEFAULT', '<b>Dieser Adressbucheintrag kann nicht gel&ouml;scht werden!</b>'); 
 
 define('TABLE_HEADING_AMOUNT','Guthaben');
-define('WARNING_CUSTOMER_ALREADY_EXISTS', 'Kundengruppe kann nicht ge&auml;ndert werden. Diese E-Mail Adresse wird bereits f&uuml;r einen Kundenaccount verwendet.');
+define('WARNING_CUSTOMER_ALREADY_EXISTS', 'Kundengruppe kann nicht ge&auml;ndert werden. Diese E-Mail Adresse wird bereits für einen Kundenaccount verwendet.');
+
+define('TEXT_SORT_ASC','aufsteigend');
+define('TEXT_SORT_DESC','absteigend');
 
 define('TEXT_INFO_HEADING_STATUS_NEW_ORDER','Neue Bestellung');
 define('TEXT_INFO_PAYMENT','Zahlart:');
 define('TEXT_INFO_SHIPPING','Versandart:');
-define('TEXT_INFO_NEWSLETTER_AT_REGISTRATION', 'Newsletter bei Registrierung:');
-define('TEXT_INFO_NEWSLETTER_STATUS', 'Newsletter abonniert:');
-
-define('TEXT_ACTIVE_ELEMENT','Aktives Element');
-define('TEXT_MARKED_ELEMENTS','Markierte Elemente');
-define('TEXT_INFO_HEADING_DELETE_ELEMENTS', 'Elemente l&ouml;schen');
-define('TEXT_INFO_HEADING_STATUS_ELEMENTS', 'Elemente Kundengruppe');
-define('TEXT_DELETE_REVIEWS_ELEMENTS', 'Rezensionen l&ouml;schen');
 ?>

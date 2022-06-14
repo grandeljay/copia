@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: product_attributes.php 12763 2020-05-17 14:29:45Z GTB $
+   $Id: product_attributes.php 10170 2016-07-28 13:49:15Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,23 +27,11 @@ foreach(auto_include(DIR_FS_CATALOG.'includes/extra/modules/products_attributes_
 
 if ($product->getAttributesCount() > 0) {
 
-  $attrib_checked_array = array();
-  if (strpos($_GET['products_id'], '{') !== false) {
-    $attrib_array = preg_split('/[{}]/', $_GET['products_id'], null, PREG_SPLIT_NO_EMPTY);
-    array_shift($attrib_array);
-    for ($i=0, $n=count($attrib_array); $i<$n; $i+=2) {
-      $attrib_checked_array[$attrib_array[$i]] = $attrib_array[$i + 1];
-    }
-  }
-  
-  $products_price = $xtPrice->xtcGetPrice($product->data['products_id'], false, 1, $product->data['products_tax_class_id'], $product->data['products_price']);
-
   $module_smarty = new Smarty;
 
   $module_smarty->assign('tpl_path',DIR_WS_BASE.'templates/'.CURRENT_TEMPLATE.'/');
   
   $products_options_name_query = xtDBquery("SELECT distinct
-                                                   ".ADD_PRODUCT_OPTIONS_SELECT."
                                                    popt.products_options_id,
                                                    popt.products_options_name,
                                                    popt.products_options_sortorder
@@ -69,7 +57,7 @@ if ($product->getAttributesCount() > 0) {
     $products_options_data[$row] = array ('NAME' => $products_options_name['products_options_name'],
                                           'ID' => $products_options_name['products_options_id'],
                                           'SORTORDER' => $products_options_name['products_options_sortorder'],  //web28 - 2010-12-14  - add OPTIONS SORTORDER for using in template
-                                          'DATA' => array()
+                                          'DATA' => ''
                                           );
 
     $products_options_query = xtDBquery("SELECT pov.products_options_values_id,
@@ -82,21 +70,11 @@ if ($product->getAttributesCount() > 0) {
                                                    AND trim(pov.products_options_values_name) != ''
                                           WHERE pa.products_id = '".$product->data['products_id']."'
                                             AND pa.options_id = '".$products_options_name['products_options_id']."'                                            
-                                       ORDER BY pa.sortorder, pov.products_options_values_sortorder, pa.options_values_id
+                                       ORDER BY pa.sortorder, pa.options_values_id
                                         ");
     $col = 0;
     while ($products_options = xtc_db_fetch_array($products_options_query,true)) {
-      $price = 0;
-      
-      $checked = '0';
-      if (isset($attrib_checked_array[$products_options_name['products_options_id']])) {
-        if ($products_options['products_options_values_id'] == $attrib_checked_array[$products_options_name['products_options_id']]) {
-          $checked = '1';
-        }
-      } elseif ($col == 0) {
-        $checked = '1';
-      }
-      
+      $price = '';
       if ($_SESSION['customers_status']['customers_status_show_price'] == '0') {
         $products_options_data[$row]['DATA'][$col] = array ('ID' => $products_options['products_options_values_id'],
                                                             'TEXT' => $products_options['products_options_values_name'],
@@ -106,30 +84,26 @@ if ($product->getAttributesCount() > 0) {
                                                             'PLAIN_PRICE' => '',
                                                             'STOCK' => $products_options['attributes_stock'],
                                                             'SORTORDER' => $products_options['sortorder'],
-                                                            'PREFIX' => $products_options['price_prefix'],
-                                                            'CHECKED' => $checked,
+                                                            'PREFIX' => $products_options['price_prefix']
                                                             );
       } else {
         if ($products_options['options_values_price'] != '0.00') {
           $CalculateCurr = ($product->data['products_tax_class_id'] == 0) ? true : false; //FIX several currencies on product attributes
           $price = $xtPrice->xtcFormat($products_options['options_values_price'], false, $product->data['products_tax_class_id'],$CalculateCurr);
         }
-                
-        // product discount
-        if ($_SESSION['customers_status']['customers_status_public'] == '1'
-            && $_SESSION['customers_status']['customers_status_discount_attributes'] == 1
-            )
-        {
-          $discount = $xtPrice->xtcCheckDiscount($product->data['products_id']);
-          if ($discount != '0.00') {
-            $price -= $price / 100 * $discount;
-          }
+        
+        if (!isset($products_price)) {
+          $products_price = $xtPrice->xtcGetPrice($product->data['products_id'], false, 1, $product->data['products_tax_class_id'], $product->data['products_price']);
+        }
+        
+        if ($_SESSION['customers_status']['customers_status_discount_attributes'] == 1 && $products_options['price_prefix'] == '+') {
+          $price -= $price / 100 * $discount;
         }
 
-        $attr_price = $price;
+        $attr_price=$price;
 
         if ($products_options['price_prefix'] == "-") {
-          $attr_price = $price*(-1);
+          $attr_price=$price*(-1);
         }
 
         $full = $products_price + $attr_price;
@@ -142,8 +116,7 @@ if ($product->getAttributesCount() > 0) {
                                                             'PLAIN_PRICE' => $xtPrice->xtcFormat($price,false),
                                                             'STOCK' => $products_options['attributes_stock'],
                                                             'SORTORDER' => $products_options['sortorder'],
-                                                            'PREFIX' => $products_options['price_prefix'],
-                                                            'CHECKED' => $checked,
+                                                            'PREFIX' => $products_options['price_prefix']
                                                             );
 
         //if PRICE for option is 0 we don't need to display it
@@ -161,11 +134,7 @@ if ($product->getAttributesCount() > 0) {
   }
 
 
-  if ($product->data['options_template'] == '' 
-      || $product->data['options_template'] == 'default'
-      || !is_file(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/module/product_options/'.$product->data['options_template'])
-      )
-  {
+  if ($product->data['options_template'] == '' || $product->data['options_template'] == 'default') {
     $files = array_filter(auto_include(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/module/product_options/','html'), function($file) {
       return false === strpos($file, 'index.html');
     });

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: payone_install.php 10757 2017-06-07 09:21:11Z GTB $
+   $Id: payone_install.php 10200 2016-08-04 11:29:50Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,10 +10,10 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2013 Gambio GmbH - http://www.gambio.de
-
+  
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
@@ -24,7 +24,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_config` (
   `path` varchar(255) NOT NULL,
   `value` varchar(255) NOT NULL,
   PRIMARY KEY (`path`)
-)";
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_transactions` (
   `payone_transactions_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -37,7 +37,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_transactions` (
   `last_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`payone_transactions_id`),
   KEY `orders_id` (`orders_id`,`txid`)
-)";
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_txstatus` (
   `payone_txstatus_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -45,7 +45,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_txstatus` (
   `received` datetime NOT NULL,
   PRIMARY KEY (`payone_txstatus_id`),
   KEY `orders_id` (`orders_id`)
-);";
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_txstatus_data` (
   `payone_txstatus_data_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -54,7 +54,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_txstatus_data` (
   `value` varchar(255) NOT NULL,
   PRIMARY KEY (`payone_txstatus_data_id`),
   KEY `payone_txstatus_id` (`payone_txstatus_id`)
-);";
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_clearingdata` (
   `p1_clearingdata_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -69,7 +69,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_clearingdata` (
   `bankname` varchar(128) NOT NULL,
   PRIMARY KEY (`p1_clearingdata_id`),
   KEY `orders_id` (`orders_id`)
-);";
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_ac_cache` (
   `address_hash` varchar(32) NOT NULL,
@@ -88,7 +88,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_ac_cache` (
   `customermessage` varchar(255) NOT NULL,
   PRIMARY KEY (`address_hash`),
   KEY `address_book_id` (`address_book_id`)
-);";
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_cr_cache` (
   `address_hash` varchar(32) NOT NULL,
@@ -114,7 +114,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_cr_cache` (
   PRIMARY KEY (`address_hash`),
   KEY `address_book_id` (`address_book_id`),
   KEY `scoretype` (`scoretype`)
-);";
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_api_log` (
   `p1_api_log_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -126,7 +126,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_api_log` (
   `customers_id` int(11) NOT NULL,
   PRIMARY KEY (`p1_api_log_id`),
   KEY `event_id` (`event_id`)
-);";
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_transactions_log` (
   `p1_transactions_log_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -138,7 +138,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_transactions_log` (
   `customers_id` int(11) NOT NULL,
   PRIMARY KEY (`p1_transactions_log_id`),
   KEY `event_id` (`event_id`)
-);";
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_bankgroups` (
   `p1_bankgroups_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -146,7 +146,7 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_bankgroups` (
   `bank_code` varchar(32) NOT NULL,
   `bank_name` varchar(64) NOT NULL,
   PRIMARY KEY (`p1_bankgroups_id`)
-);";
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 
 $sql[] = "CREATE TABLE IF NOT EXISTS `payone_sepa_countries` (
   `p1_sepa_countries_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -155,22 +155,22 @@ $sql[] = "CREATE TABLE IF NOT EXISTS `payone_sepa_countries` (
   `countries_iban_code` varchar(2) NOT NULL,
   `countries_currency_code` varchar(4) NOT NULL,
   PRIMARY KEY (`p1_sepa_countries_id`)
-);";
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 
 
 $bankgroups = array(
   'eps' => array(
     'ARZ_OVB' => 'Volksbanken',
-    'ARZ_BAF' => 'Bank fÃ¼r Ã„rzte und Freie Berufe',
-    'ARZ_NLH' => 'NiederÃ¶sterreichische Landes-Hypo',
+    'ARZ_BAF' => 'Bank für Ärzte und Freie Berufe',
+    'ARZ_NLH' => 'Niederösterreichische Landes-Hypo',
     'ARZ_VLH' => 'Vorarlberger Landes-Hypo',
-    'ARZ_BCS' => 'Bankhaus Carl SpÃ¤ngler & Co. AG',
+    'ARZ_BCS' => 'Bankhaus Carl Spängler & Co. AG',
     'ARZ_HTB' => 'Hypo Tirol',
     'ARZ_HAA' => 'Hypo Alpe Adria',
     'ARZ_IKB' => 'Investkreditbank',
-    'ARZ_OAB' => 'Ã–sterreichische Apothekerbank',
+    'ARZ_OAB' => 'Österreichische Apothekerbank',
     'ARZ_IMB' => 'Immobank',
-    'ARZ_GRB' => 'GÃ¤rtnerbank',
+    'ARZ_GRB' => 'Gärtnerbank',
     'ARZ_HIB' => 'HYPO Investment',
     'BA_AUS' => 'Bank Austria',
     'BAWAG_BWG' => 'BAWAG',
@@ -180,7 +180,7 @@ $bankgroups = array(
     'SPARDAT_EBS' => 'Erste Bank',
     'SPARDAT_BBL' => 'Bank Burgenland',
     'RAC_RAC' => 'Raiffeisen',
-    'HRAC_OOS' => 'Hypo OberÃ¶sterreich',
+    'HRAC_OOS' => 'Hypo Oberösterreich',
     'HRAC_SLB' => 'Hypo Salzburg',
     'HRAC_STM' => 'Hypo Steiermark',
   ),
@@ -251,7 +251,7 @@ $sql_configuration_array = array(
 );
 
 
-// action
+// action                     
 if (count($sql) > 0) {
   foreach($sql as $query) {
     xtc_db_query($query);
@@ -267,7 +267,7 @@ if (count($bankgroups) > 0) {
       $sql_data_array['bank_name'] = $bank_name;
       xtc_db_perform('payone_bankgroups', $sql_data_array);
     }
-  }
+  }	
 }
 
 if (count($sepa_countries) > 0) {

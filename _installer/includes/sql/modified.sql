@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------------------
-#  $Id: modified.sql 13499 2021-04-01 16:14:59Z Tomcraft $
+#  $Id: modified.sql 10143 2016-07-26 11:05:50Z GTB $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -32,8 +32,8 @@
 
 DROP TABLE IF EXISTS address_book;
 CREATE TABLE address_book (
-  address_book_id INT(11) NOT NULL AUTO_INCREMENT,
-  customers_id INT(11) NOT NULL,
+  address_book_id INT NOT NULL AUTO_INCREMENT,
+  customers_id INT NOT NULL,
   entry_gender CHAR(1) NOT NULL,
   entry_company VARCHAR(64),
   entry_firstname VARCHAR(64) NOT NULL,
@@ -42,22 +42,22 @@ CREATE TABLE address_book (
   entry_suburb VARCHAR(32),
   entry_postcode VARCHAR(10) NOT NULL,
   entry_city VARCHAR(64) NOT NULL,
-  entry_state VARCHAR(64),
+  entry_state VARCHAR(32),
   entry_country_id INT DEFAULT 0 NOT NULL,
   entry_zone_id INT DEFAULT 0 NOT NULL,
   address_date_added DATETIME DEFAULT '0000-00-00 00:00:00',
   address_last_modified DATETIME DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (address_book_id),
   KEY idx_customers_id (customers_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS address_format;
 CREATE TABLE address_format (
-  address_format_id INT(11) NOT NULL AUTO_INCREMENT,
+  address_format_id INT NOT NULL AUTO_INCREMENT,
   address_format VARCHAR(128) NOT NULL,
   address_summary VARCHAR(48) NOT NULL,
   PRIMARY KEY (address_format_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS admin_access;
 CREATE TABLE admin_access (
@@ -99,6 +99,7 @@ CREATE TABLE admin_access (
   validcategories INT(1) NOT NULL DEFAULT 0,
   mail INT(1) NOT NULL DEFAULT 0,
   categories INT(1) NOT NULL DEFAULT 0,
+  new_attributes INT(1) NOT NULL DEFAULT 0,
   products_attributes INT(1) NOT NULL DEFAULT 0,
   manufacturers INT(1) NOT NULL DEFAULT 0,
   reviews INT(1) NOT NULL DEFAULT 0,
@@ -114,6 +115,7 @@ CREATE TABLE admin_access (
   banner_manager INT(1) NOT NULL DEFAULT 0,
   banner_statistics INT(1) NOT NULL DEFAULT 0,
   module_newsletter INT(1) NOT NULL DEFAULT 0,
+  start INT(1) NOT NULL DEFAULT 0,
   content_manager INT(1) NOT NULL DEFAULT 0,
   content_preview INT(1) NOT NULL DEFAULT 0,
   credits INT(1) NOT NULL DEFAULT 0,
@@ -125,10 +127,13 @@ CREATE TABLE admin_access (
   econda INT(1) NOT NULL DEFAULT 0,
   cleverreach INT(1) NOT NULL DEFAULT 0,
   shop_offline INT(1) NOT NULL DEFAULT 0,
+  blz_update INT(1) NOT NULL DEFAULT 0,
   removeoldpics INT(1) NOT NULL DEFAULT 0,
   janolaw INT(1) NOT NULL DEFAULT 0,
   haendlerbund INT(1) NOT NULL DEFAULT 0,
+  safeterms INT(1) NOT NULL DEFAULT 0,
   check_update INT(1) NOT NULL DEFAULT 0,
+  easymarketing INT(1) NOT NULL DEFAULT 0,
   it_recht_kanzlei INT(1) NOT NULL DEFAULT 0,
   payone_config INT(1) NOT NULL DEFAULT 0,
   payone_logs INT(1) NOT NULL DEFAULT 0,
@@ -141,12 +146,8 @@ CREATE TABLE admin_access (
   shipcloud INT(1) NOT NULL DEFAULT 0,
   trustedshops INT(1) NOT NULL DEFAULT 0,
   blacklist_logs INT(1) NOT NULL DEFAULT 0,
-  paypal_info INT(1) NOT NULL DEFAULT 0,
-  paypal_module INT(1) NOT NULL DEFAULT 0,
-  newsletter_recipients INT(1) NOT NULL DEFAULT 0,
-  semknox INT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (customers_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS banktransfer;
 CREATE TABLE banktransfer (
@@ -161,8 +162,8 @@ CREATE TABLE banktransfer (
   banktransfer_prz CHAR(2) DEFAULT NULL,
   banktransfer_fax CHAR(2) DEFAULT NULL,
   banktransfer_owner_email VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (orders_id)
-);
+  KEY idx_orders_id (orders_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS banktransfer_blz;
 CREATE TABLE banktransfer_blz (
@@ -170,21 +171,17 @@ CREATE TABLE banktransfer_blz (
   bankname varchar(255) NOT NULL DEFAULT '',
   prz char(2) NOT NULL DEFAULT '',
   PRIMARY KEY (blz)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS banners;
 CREATE TABLE banners (
-  banners_id INT(11) NOT NULL AUTO_INCREMENT,
-  banners_group_id INT(11) NOT NULL,
+  banners_id INT NOT NULL AUTO_INCREMENT,
   banners_title VARCHAR(64) NOT NULL,
   banners_url VARCHAR(255) NOT NULL,
-  banners_redirect INT(11) NOT NULL DEFAULT 1,
-  banners_image VARCHAR(255) NOT NULL,
-  banners_image_mobile VARCHAR(255) NOT NULL,
-  banners_group VARCHAR(32) NOT NULL,
+  banners_image VARCHAR(64) NOT NULL,
+  banners_group VARCHAR(10) NOT NULL,
   banners_html_text TEXT,
-  banners_sort INT(11) NOT NULL,
-  languages_id INT(11) NOT NULL,
+  languages_id INT(11) NOT NULL DEFAULT 0,
   expires_impressions INT(7) DEFAULT NULL,
   expires_date DATETIME DEFAULT NULL,
   date_scheduled DATETIME DEFAULT NULL,
@@ -192,18 +189,18 @@ CREATE TABLE banners (
   date_status_change DATETIME DEFAULT NULL,
   status INT(1) DEFAULT 1 NOT NULL,
   PRIMARY KEY (banners_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS banners_history;
 CREATE TABLE banners_history (
-  banners_history_id INT(11) NOT NULL AUTO_INCREMENT,
-  banners_id INT(11) NOT NULL,
+  banners_history_id INT NOT NULL AUTO_INCREMENT,
+  banners_id INT NOT NULL,
   banners_shown INT(5) NOT NULL DEFAULT 0,
   banners_clicked INT(5) NOT NULL DEFAULT 0,
   banners_history_date DATETIME NOT NULL,
   PRIMARY KEY (banners_history_id),
   KEY idx_banners_id (banners_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS campaigns;
 CREATE TABLE campaigns (
@@ -216,17 +213,15 @@ CREATE TABLE campaigns (
   PRIMARY KEY (campaigns_id),
   KEY idx_campaigns_name (campaigns_name),
   UNIQUE idx_campaigns_refID (campaigns_refID)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS campaigns_ip;
 CREATE TABLE campaigns_ip (
-  id INT(11) NOT NULL AUTO_INCREMENT,
   user_ip VARCHAR(50) NOT NULL,
   time DATETIME NOT NULL,
   campaign VARCHAR(32) NOT NULL,
-  PRIMARY KEY (id),
   KEY idx_campaign (campaign)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS carriers;
 CREATE TABLE carriers (
@@ -236,18 +231,15 @@ CREATE TABLE carriers (
   carrier_sort_order INT(11) NOT NULL,
   carrier_date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   carrier_last_modified DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (carrier_id),
-  UNIQUE idx_carrier_name (carrier_name)
-);
+  PRIMARY KEY (carrier_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS categories;
 CREATE TABLE categories (
-  categories_id INT(11) NOT NULL AUTO_INCREMENT,
-  categories_image VARCHAR(255) NOT NULL,
-  categories_image_mobile VARCHAR(255) NOT NULL,
-  categories_image_list VARCHAR(255) NOT NULL,
+  categories_id INT NOT NULL AUTO_INCREMENT,
+  categories_image VARCHAR(64),
   parent_id INT DEFAULT 0 NOT NULL,
-  categories_status INT(1) NOT NULL,
+  categories_status TINYINT (1) UNSIGNED DEFAULT 1 NOT NULL,
   categories_template VARCHAR(64),
   group_permission_0 TINYINT(1) NOT NULL,
   group_permission_1 TINYINT(1) NOT NULL,
@@ -261,56 +253,54 @@ CREATE TABLE categories (
   date_added DATETIME,
   last_modified DATETIME,
   PRIMARY KEY (categories_id),
-  KEY idx_categories_parent_id (parent_id),
-  KEY idx_categories_status (categories_status)
-);
+  KEY idx_categories_parent_id (parent_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS categories_description;
 CREATE TABLE categories_description (
   categories_id INT(11) NOT NULL,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT DEFAULT 1 NOT NULL,
   categories_name VARCHAR(255) NOT NULL,
   categories_heading_title VARCHAR(255) NOT NULL,
   categories_description text NOT NULL,
-  categories_meta_title text NOT NULL,
-  categories_meta_description text NOT NULL,
-  categories_meta_keywords text NOT NULL,
+  categories_meta_title VARCHAR(100) NOT NULL,
+  categories_meta_description VARCHAR(255) NOT NULL,
+  categories_meta_keywords VARCHAR(255) NOT NULL,
   PRIMARY KEY (categories_id, language_id),
   KEY idx_categories_name (categories_name)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS cm_file_flags;
 CREATE TABLE cm_file_flags (
   file_flag INT(11) NOT NULL,
   file_flag_name VARCHAR(32) NOT NULL,
   PRIMARY KEY (file_flag)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS configuration;
 CREATE TABLE configuration (
-  configuration_id INT(11) NOT NULL AUTO_INCREMENT,
-  configuration_key VARCHAR(128) NOT NULL,
+  configuration_id INT NOT NULL AUTO_INCREMENT,
+  configuration_key VARCHAR(64) NOT NULL,
   configuration_value text NOT NULL,
-  configuration_group_id INT(11) NOT NULL,
+  configuration_group_id INT NOT NULL,
   sort_order INT(5) NULL,
   last_modified DATETIME NULL,
   date_added DATETIME NOT NULL,
   use_function VARCHAR(255) NULL,
   set_function VARCHAR(255) NULL,
   PRIMARY KEY (configuration_id),
-  KEY idx_configuration_group_id (configuration_group_id),
-  UNIQUE idx_configuration_key (configuration_key)
-);
+  KEY idx_configuration_group_id (configuration_group_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS configuration_group;
 CREATE TABLE configuration_group (
-  configuration_group_id INT(11) NOT NULL AUTO_INCREMENT,
+  configuration_group_id INT NOT NULL AUTO_INCREMENT,
   configuration_group_title VARCHAR(64) NOT NULL,
   configuration_group_description VARCHAR(255) NOT NULL,
   sort_order INT(5) NULL,
   visible INT(1) DEFAULT 1 NULL,
   PRIMARY KEY (configuration_group_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS content_manager;
 CREATE TABLE content_manager (
@@ -318,58 +308,42 @@ CREATE TABLE content_manager (
   categories_id INT(11) NOT NULL DEFAULT 0,
   parent_id INT(11) NOT NULL DEFAULT 0,
   group_ids TEXT,
-  languages_id INT(11) NOT NULL,
+  languages_id INT(11) NOT NULL DEFAULT 0,
   content_title TEXT NOT NULL,
   content_heading TEXT NOT NULL,
-  content_text longtext NOT NULL,
+  content_text TEXT NOT NULL,
   sort_order INT(4) NOT NULL DEFAULT 0,
   file_flag INT(1) NOT NULL DEFAULT 0,
-  content_file VARCHAR(255) NOT NULL DEFAULT '',
+  content_file VARCHAR(64) NOT NULL DEFAULT '',
   content_status INT(1) NOT NULL DEFAULT 0,
   content_group INT(11) NOT NULL,
   content_delete INT(1) NOT NULL DEFAULT 1,
-  content_meta_title text NOT NULL,
-  content_meta_description text NOT NULL,
-  content_meta_keywords text NOT NULL,
+  content_meta_title TEXT,
+  content_meta_description TEXT,
+  content_meta_keywords TEXT,
   content_meta_robots VARCHAR(32) NOT NULL,
   content_active INT(1) NOT NULL DEFAULT '1',
   content_group_index int(4) NOT NULL DEFAULT '0',
   date_added DATETIME NOT NULL,
   last_modified DATETIME NULL,
   PRIMARY KEY (content_id),
-  KEY idx_content_group (content_group, languages_id)
-);
-
-DROP TABLE IF EXISTS content_manager_content;
-CREATE TABLE content_manager_content (
-  content_id INT(11) NOT NULL AUTO_INCREMENT,
-  content_manager_id INT(11) NOT NULL DEFAULT 0,
-  group_ids TEXT,
-  content_name VARCHAR(255) NOT NULL DEFAULT '',
-  content_file VARCHAR(255) NOT NULL,
-  content_link TEXT NOT NULL,
-  languages_id INT(11) NOT NULL,
-  content_read INT(11) NOT NULL DEFAULT 0,
-  file_comment TEXT NOT NULL,
-  PRIMARY KEY (content_id),
-  KEY idx_content_manager_id (content_manager_id)
-);
+  KEY idx_content_group (content_group)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS countries;
 CREATE TABLE countries (
-  countries_id INT(11) NOT NULL AUTO_INCREMENT,
+  countries_id INT NOT NULL AUTO_INCREMENT,
   countries_name VARCHAR(64) NOT NULL,
   countries_iso_code_2 CHAR(2) NOT NULL,
   countries_iso_code_3 CHAR(3) NOT NULL,
-  address_format_id INT(11) NOT NULL,
+  address_format_id INT NOT NULL,
   status INT(1) DEFAULT 1 NULL,
   required_zones INT(1) DEFAULT '0',
   PRIMARY KEY (countries_id),
   KEY idx_countries_name (countries_name),
-  KEY idx_status (status),
   UNIQUE idx_countries_iso_code_2 (countries_iso_code_2),
   UNIQUE idx_countries_iso_code_3 (countries_iso_code_3)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS coupon_email_track;
 CREATE TABLE coupon_email_track (
@@ -380,15 +354,16 @@ CREATE TABLE coupon_email_track (
   sent_lastname VARCHAR(32) DEFAULT NULL,
   emailed_to VARCHAR(255) DEFAULT NULL,
   date_sent DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (unique_id)
-);
+  PRIMARY KEY (unique_id),
+  UNIQUE idx_coupon_id (coupon_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS coupon_gv_customer;
 CREATE TABLE coupon_gv_customer (
   customer_id INT(5) NOT NULL DEFAULT 0,
   amount DECIMAL(8,4) NOT NULL DEFAULT 0.0000,
   PRIMARY KEY (customer_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS coupon_gv_queue;
 CREATE TABLE coupon_gv_queue (
@@ -401,7 +376,7 @@ CREATE TABLE coupon_gv_queue (
   release_flag CHAR(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (unique_id),
   KEY idx_customer_id (customer_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS coupon_redeem_track;
 CREATE TABLE coupon_redeem_track (
@@ -412,7 +387,7 @@ CREATE TABLE coupon_redeem_track (
   redeem_ip VARCHAR(50) NOT NULL DEFAULT '',
   order_id INT(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (unique_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS coupons;
 CREATE TABLE coupons (
@@ -433,20 +408,20 @@ CREATE TABLE coupons (
   date_modified DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (coupon_id),
   UNIQUE idx_coupon_code (coupon_code)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS coupons_description;
 CREATE TABLE coupons_description (
   coupon_id INT(11) NOT NULL DEFAULT 0,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT NOT NULL DEFAULT 1,
   coupon_name VARCHAR(32) NOT NULL DEFAULT '',
   coupon_description text,
   PRIMARY KEY (coupon_id, language_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS currencies;
 CREATE TABLE currencies (
-  currencies_id INT(11) NOT NULL AUTO_INCREMENT,
+  currencies_id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(32) NOT NULL,
   code CHAR(3) NOT NULL,
   symbol_left VARCHAR(12),
@@ -459,11 +434,11 @@ CREATE TABLE currencies (
   status INT(1) DEFAULT 1 NOT NULL,
   PRIMARY KEY (currencies_id),
   UNIQUE KEY idx_code (code)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers;
 CREATE TABLE customers (
-  customers_id INT(11) NOT NULL AUTO_INCREMENT,
+  customers_id INT NOT NULL AUTO_INCREMENT,
   customers_cid VARCHAR(32),
   customers_vat_id VARCHAR(20),
   customers_vat_id_status INT(2) DEFAULT 0 NOT NULL,
@@ -474,12 +449,12 @@ CREATE TABLE customers (
   customers_lastname VARCHAR(64) NOT NULL,
   customers_dob DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
   customers_email_address VARCHAR(255) NOT NULL,
-  customers_default_address_id INT(11) NOT NULL,
+  customers_default_address_id INT NOT NULL,
   customers_telephone VARCHAR(32) NOT NULL,
   customers_fax VARCHAR(32),
   customers_password VARCHAR(60) NOT NULL,
-  customers_password_time INT(11) DEFAULT 0 NOT NULL,
   customers_newsletter CHAR(1),
+  customers_newsletter_mode CHAR(1) DEFAULT '0' NOT NULL,
   member_flag CHAR(1) DEFAULT '0' NOT NULL,
   delete_user CHAR(1) DEFAULT '1' NOT NULL,
   account_type INT(1) NOT NULL DEFAULT 0,
@@ -487,47 +462,46 @@ CREATE TABLE customers (
   password_request_time DATETIME DEFAULT '0000-00-00 00:00:00',
   payment_unallowed VARCHAR(255) NOT NULL,
   shipping_unallowed VARCHAR(255) NOT NULL,
-  refferers_id INT(11) DEFAULT 0 NOT NULL,
+  refferers_id VARCHAR(32) DEFAULT '0' NOT NULL,
   customers_date_added DATETIME DEFAULT '0000-00-00 00:00:00',
   customers_last_modified DATETIME DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (customers_id),
-  KEY idx_customers_email_address (customers_email_address),
-  KEY idx_customers_default_address_id (customers_default_address_id)
-);
+  KEY idx_customers_email_address (customers_email_address)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_basket;
 CREATE TABLE customers_basket (
-  customers_basket_id INT(11) NOT NULL AUTO_INCREMENT,
-  customers_id INT(11) NOT NULL,
+  customers_basket_id INT NOT NULL AUTO_INCREMENT,
+  customers_id INT NOT NULL,
   products_id TINYTEXT NOT NULL,
   customers_basket_quantity INT(2) NOT NULL,
   final_price DECIMAL(15,4) NOT NULL,
   customers_basket_date_added DATETIME,
   PRIMARY KEY (customers_basket_id),
   KEY idx_customers_id (customers_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_basket_attributes;
 CREATE TABLE customers_basket_attributes (
-  customers_basket_attributes_id INT(11) NOT NULL AUTO_INCREMENT,
-  customers_id INT(11) NOT NULL,
+  customers_basket_attributes_id INT NOT NULL AUTO_INCREMENT,
+  customers_id INT NOT NULL,
   products_id TINYTEXT NOT NULL,
-  products_options_id INT(11) NOT NULL,
-  products_options_value_id INT(11) NOT NULL,
+  products_options_id INT NOT NULL,
+  products_options_value_id INT NOT NULL,
   PRIMARY KEY (customers_basket_attributes_id),
   KEY idx_customers_id (customers_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_info;
 CREATE TABLE customers_info (
-  customers_info_id INT(11) NOT NULL,
+  customers_info_id INT NOT NULL,
   customers_info_date_of_last_logon DATETIME,
   customers_info_number_of_logons INT(5),
   customers_info_date_account_created DATETIME,
   customers_info_date_account_last_modified DATETIME,
   global_product_notifications INT(1) DEFAULT 0,
   PRIMARY KEY (customers_info_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_ip;
 CREATE TABLE customers_ip (
@@ -540,18 +514,16 @@ CREATE TABLE customers_ip (
   customers_referer_url VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (customers_ip_id),
   KEY idx_customers_id (customers_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_login;
 CREATE TABLE customers_login (
-  customers_login_id INT(11) NOT NULL AUTO_INCREMENT,
   customers_ip varchar(50) DEFAULT NULL,
   customers_email_address varchar(255) DEFAULT NULL,
   customers_login_tries int(11) NOT NULL,
-  PRIMARY KEY (customers_login_id),
   KEY idx_customers_ip (customers_ip),
   KEY idx_customers_email_address (customers_email_address)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_memo;
 CREATE TABLE customers_memo (
@@ -562,20 +534,20 @@ CREATE TABLE customers_memo (
   memo_text TEXT NOT NULL,
   poster_id INT(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (memo_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_status;
 CREATE TABLE customers_status (
   customers_status_id INT(11) NOT NULL DEFAULT 0,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT NOT NULL DEFAULT 1,
   customers_status_name VARCHAR(32) NOT NULL DEFAULT '',
   customers_status_public INT(1) NOT NULL DEFAULT 1,
   customers_status_min_order INT(7) DEFAULT NULL,
   customers_status_max_order INT(7) DEFAULT NULL,
   customers_status_image VARCHAR(64) DEFAULT NULL,
-  customers_status_discount DECIMAL(5,2) DEFAULT 0.00,
+  customers_status_discount DECIMAL(4,2) DEFAULT 0.00,
   customers_status_ot_discount_flag CHAR(1) NOT NULL DEFAULT '0',
-  customers_status_ot_discount DECIMAL(5,2) DEFAULT 0.00,
+  customers_status_ot_discount DECIMAL(4,2) DEFAULT 0.00,
   customers_status_graduated_prices VARCHAR(1) NOT NULL DEFAULT '0',
   customers_status_show_price INT(1) NOT NULL DEFAULT 1,
   customers_status_show_price_tax INT(1) NOT NULL DEFAULT 1,
@@ -592,7 +564,7 @@ CREATE TABLE customers_status (
   customers_status_specials INT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (customers_status_id, language_id),
   UNIQUE idx_customers_status_name (customers_status_name, language_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS customers_status_history;
 CREATE TABLE customers_status_history (
@@ -603,92 +575,76 @@ CREATE TABLE customers_status_history (
   date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   customer_notified INT(1) DEFAULT 0,
   PRIMARY KEY (customers_status_history_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS database_version;
 CREATE TABLE database_version (
   id INT(11) NOT NULL AUTO_INCREMENT,
   version VARCHAR(32) NOT NULL,
   PRIMARY KEY (id)
-);
-
-DROP TABLE IF EXISTS email_content;
-CREATE TABLE email_content (
-  content_id INT(11) NOT NULL AUTO_INCREMENT,
-  email_id VARCHAR(64) NOT NULL DEFAULT 0,
-  group_ids TEXT,
-  content_name VARCHAR(255) NOT NULL DEFAULT '',
-  content_file VARCHAR(255) NOT NULL,
-  content_link TEXT NOT NULL,
-  languages_id INT(11) NOT NULL,
-  content_read INT(11) NOT NULL DEFAULT 0,
-  file_comment TEXT NOT NULL,
-  PRIMARY KEY (content_id),
-  KEY idx_email_id (email_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS geo_zones;
 CREATE TABLE geo_zones (
-  geo_zone_id INT(11) NOT NULL AUTO_INCREMENT,
-  geo_zone_name VARCHAR(255) NOT NULL,
+  geo_zone_id INT NOT NULL AUTO_INCREMENT,
+  geo_zone_name VARCHAR(32) NOT NULL,
   geo_zone_description VARCHAR(255) NOT NULL,
   geo_zone_info INT(1) DEFAULT 0,
   last_modified DATETIME NULL,
   date_added DATETIME NOT NULL,
   PRIMARY KEY (geo_zone_id),
   UNIQUE idx_geo_zone_name (geo_zone_name)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS languages;
 CREATE TABLE languages (
-  languages_id INT(11) NOT NULL AUTO_INCREMENT,
+  languages_id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(32) NOT NULL,
   code CHAR(5) NOT NULL,
-  image VARCHAR(64) NOT NULL,
+  image VARCHAR(64),
   directory VARCHAR(32),
   sort_order INT(3),
   language_charset text NOT NULL,
   status INT(1) NOT NULL DEFAULT 1,
   status_admin INT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (languages_id),
-  UNIQUE idx_code (code),
-  KEY idx_status (status)
-);
+  UNIQUE idx_code (code)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS manufacturers;
 CREATE TABLE manufacturers (
-  manufacturers_id INT(11) NOT NULL AUTO_INCREMENT,
+  manufacturers_id INT NOT NULL AUTO_INCREMENT,
   manufacturers_name VARCHAR(64) NOT NULL,
-  manufacturers_image VARCHAR(255) NOT NULL,
+  manufacturers_image VARCHAR(64),
   date_added DATETIME NULL,
   last_modified DATETIME NULL,
   PRIMARY KEY (manufacturers_id),
   KEY idx_manufacturers_name (manufacturers_name)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS manufacturers_info;
 CREATE TABLE manufacturers_info (
-  manufacturers_id INT(11) NOT NULL,
-  languages_id INT(11) NOT NULL,
+  manufacturers_id INT NOT NULL,
+  languages_id INT NOT NULL,
   manufacturers_description text,
-  manufacturers_meta_title text NOT NULL,
-  manufacturers_meta_description text NOT NULL,
-  manufacturers_meta_keywords text NOT NULL,
+  manufacturers_meta_title VARCHAR(100) NOT NULL,
+  manufacturers_meta_description VARCHAR(255) NOT NULL,
+  manufacturers_meta_keywords VARCHAR(255) NOT NULL,
   manufacturers_url VARCHAR(255) NOT NULL,
   url_clicked INT(5) NOT NULL DEFAULT 0,
   date_last_click DATETIME NULL,
   PRIMARY KEY (manufacturers_id, languages_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS module_backup;
 CREATE TABLE module_backup (
   configuration_id int(11) NOT NULL AUTO_INCREMENT,
-  configuration_key varchar(128) NOT NULL,
+  configuration_key varchar(64) NOT NULL,
   configuration_value text NOT NULL,
   last_modified datetime DEFAULT NULL,
   PRIMARY KEY (configuration_id),
   UNIQUE idx_configuration_key (configuration_key)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS newsfeed;
 CREATE TABLE newsfeed (
@@ -699,7 +655,7 @@ CREATE TABLE newsfeed (
   news_date INT( 11 ) NULL,
   PRIMARY KEY (news_id),
   UNIQUE idx_news_link (news_link)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS module_newsletter;
 CREATE TABLE module_newsletter (
@@ -711,7 +667,7 @@ CREATE TABLE module_newsletter (
   status INT(1) NOT NULL DEFAULT 0,
   body TEXT NOT NULL,
   PRIMARY KEY (newsletter_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS newsletter_recipients;
 CREATE TABLE newsletter_recipients (
@@ -730,22 +686,11 @@ CREATE TABLE newsletter_recipients (
   PRIMARY KEY (mail_id),
   KEY idx_mail_key (mail_key),
   UNIQUE idx_customers_email_address (customers_email_address)
-);
-
-DROP TABLE IF EXISTS newsletter_recipients_history;
-CREATE TABLE newsletter_recipients_history (
-  history_id INT(11) NOT NULL AUTO_INCREMENT,
-  customers_email_address VARCHAR(255) NOT NULL,
-  customers_action VARCHAR(32) NOT NULL,
-  ip_address varchar(50) DEFAULT NULL,
-  date_added datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (history_id),
-  KEY idx_customers_email_address (customers_email_address)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS newsletters;
 CREATE TABLE newsletters (
-  newsletters_id INT(11) NOT NULL AUTO_INCREMENT,
+  newsletters_id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(255) NOT NULL,
   content text NOT NULL,
   module VARCHAR(255) NOT NULL,
@@ -754,7 +699,7 @@ CREATE TABLE newsletters (
   status INT(1),
   locked INT(1) DEFAULT 0,
   PRIMARY KEY (newsletters_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS newsletters_history;
 CREATE TABLE newsletters_history (
@@ -762,18 +707,18 @@ CREATE TABLE newsletters_history (
   news_hist_cs INT(11) NOT NULL DEFAULT 0,
   news_hist_cs_date_sent date DEFAULT NULL,
   PRIMARY KEY (news_hist_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
-  orders_id INT(11) NOT NULL AUTO_INCREMENT,
-  customers_id INT(11) NOT NULL,
+  orders_id INT NOT NULL AUTO_INCREMENT,
+  customers_id INT NOT NULL,
   customers_cid VARCHAR(32),
   customers_vat_id VARCHAR(20),
   customers_status INT(11),
   customers_status_name VARCHAR(32) NOT NULL,
   customers_status_image VARCHAR(64),
-  customers_status_discount DECIMAL(5,2),
+  customers_status_discount DECIMAL(4,2),
   customers_name VARCHAR(128) NOT NULL,
   customers_firstname VARCHAR(64) NOT NULL,
   customers_lastname VARCHAR(64) NOT NULL,
@@ -783,7 +728,7 @@ CREATE TABLE orders (
   customers_suburb VARCHAR(32),
   customers_city VARCHAR(64) NOT NULL,
   customers_postcode VARCHAR(10) NOT NULL,
-  customers_state VARCHAR(64),
+  customers_state VARCHAR(32),
   customers_country VARCHAR(64) NOT NULL,
   customers_telephone VARCHAR(32) NOT NULL,
   customers_email_address VARCHAR(255) NOT NULL,
@@ -798,7 +743,7 @@ CREATE TABLE orders (
   delivery_suburb VARCHAR(32),
   delivery_city VARCHAR(64) NOT NULL,
   delivery_postcode VARCHAR(10) NOT NULL,
-  delivery_state VARCHAR(64),
+  delivery_state VARCHAR(32),
   delivery_country VARCHAR(64) NOT NULL,
   delivery_country_iso_code_2 CHAR(2) NOT NULL,
   delivery_address_format_id INT(5) NOT NULL,
@@ -811,7 +756,7 @@ CREATE TABLE orders (
   billing_suburb VARCHAR(32),
   billing_city VARCHAR(64) NOT NULL,
   billing_postcode VARCHAR(10) NOT NULL,
-  billing_state VARCHAR(64),
+  billing_state VARCHAR(32),
   billing_country VARCHAR(64) NOT NULL,
   billing_country_iso_code_2 CHAR(2) NOT NULL,
   billing_address_format_id INT(5) NOT NULL,
@@ -826,50 +771,48 @@ CREATE TABLE orders (
   account_type INT(1) DEFAULT 0 NOT NULL,
   payment_class VARCHAR(64) NOT NULL,
   shipping_method VARCHAR(128) NOT NULL,
-  shipping_class VARCHAR(64) NOT NULL,
+  shipping_class VARCHAR(32) NOT NULL,
   customers_ip VARCHAR(50) NOT NULL,
   language VARCHAR(32) NOT NULL,
   languages_id int(11) NOT NULL,
   afterbuy_success INT(1) DEFAULT 0 NOT NULL,
   afterbuy_id INT(32) DEFAULT 0 NOT NULL,
-  campaign VARCHAR(32) NOT NULL,
+  refferers_id VARCHAR(32) NOT NULL,
   conversion_type INT(1) DEFAULT 0 NOT NULL,
   orders_ident_key VARCHAR(128),
   PRIMARY KEY (orders_id),
   KEY idx_customers_id (customers_id),
-  KEY idx_orders_status (orders_status),
-  KEY idx_date_purchased (date_purchased),
-  KEY idx_payment_class (payment_class)
-);
+  KEY idx_orders_status (orders_status)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_products;
 CREATE TABLE orders_products (
-  orders_products_id INT(11) NOT NULL AUTO_INCREMENT,
-  orders_id INT(11) NOT NULL,
-  products_id INT(11) NOT NULL,
+  orders_products_id INT NOT NULL AUTO_INCREMENT,
+  orders_id INT NOT NULL,
+  products_id INT NOT NULL,
   products_model VARCHAR(64),
   products_ean VARCHAR(128),
   products_name VARCHAR(255) NOT NULL,
   products_price DECIMAL(15,4) NOT NULL,
   products_price_origin DECIMAL(15,4) NOT NULL,
-  products_discount_made DECIMAL(5,2) DEFAULT NULL,
+  products_discount_made DECIMAL(4,2) DEFAULT NULL,
   products_shipping_time VARCHAR(255) DEFAULT NULL,
   final_price DECIMAL(15,4) NOT NULL,
   products_tax DECIMAL(7,4) NOT NULL,
   products_quantity INT(2) NOT NULL,
   allow_tax INT(1) NOT NULL,
   products_order_description text,
-  products_weight DECIMAL(15,4) NOT NULL,
+  products_weight DECIMAL(6,3) NOT NULL,
   PRIMARY KEY (orders_products_id),
   KEY idx_orders_id (orders_id),
   KEY idx_products_id (products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_products_attributes;
 CREATE TABLE orders_products_attributes (
-  orders_products_attributes_id INT(11) NOT NULL AUTO_INCREMENT,
-  orders_id INT(11) NOT NULL,
-  orders_products_id INT(11) NOT NULL,
+  orders_products_attributes_id INT NOT NULL AUTO_INCREMENT,
+  orders_id INT NOT NULL,
+  orders_products_id INT NOT NULL,
   products_options VARCHAR(255) NOT NULL,
   products_options_values VARCHAR(255) NOT NULL,
   attributes_model VARCHAR(64),
@@ -883,13 +826,13 @@ CREATE TABLE orders_products_attributes (
   PRIMARY KEY (orders_products_attributes_id),
   KEY idx_orders_id (orders_id),
   KEY idx_orders_products_id (orders_products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_products_download;
 CREATE TABLE orders_products_download (
-  orders_products_download_id INT(11) NOT NULL AUTO_INCREMENT,
-  orders_id INT(11) NOT NULL DEFAULT 0,
-  orders_products_id INT(11) NOT NULL DEFAULT 0,
+  orders_products_download_id INT NOT NULL AUTO_INCREMENT,
+  orders_id INT NOT NULL DEFAULT 0,
+  orders_products_id INT NOT NULL DEFAULT 0,
   orders_products_filename VARCHAR(255) NOT NULL DEFAULT '',
   download_maxdays INT(2) NOT NULL DEFAULT 0,
   download_count INT(2) NOT NULL DEFAULT 0,
@@ -897,7 +840,7 @@ CREATE TABLE orders_products_download (
   PRIMARY KEY (orders_products_download_id),
   KEY idx_orders_id (orders_id),
   KEY idx_orders_products_id (orders_products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_recalculate;
 CREATE TABLE orders_recalculate (
@@ -909,43 +852,42 @@ CREATE TABLE orders_recalculate (
   tax_rate DECIMAL(7,4) NOT NULL DEFAULT '0.0000',
   class VARCHAR(32) NOT NULL DEFAULT '',
   PRIMARY KEY (orders_recalculate_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_status;
 CREATE TABLE orders_status (
   orders_status_id INT DEFAULT 0 NOT NULL,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT DEFAULT 1 NOT NULL,
   orders_status_name VARCHAR(64) NOT NULL,
   sort_order INT(11) DEFAULT 0 NOT NULL,
   PRIMARY KEY (orders_status_id, language_id),
   KEY idx_orders_status_name (orders_status_name)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_status_history;
 CREATE TABLE orders_status_history (
-  orders_status_history_id INT(11) NOT NULL AUTO_INCREMENT,
-  orders_id INT(11) NOT NULL,
+  orders_status_history_id INT NOT NULL AUTO_INCREMENT,
+  orders_id INT NOT NULL,
   orders_status_id INT(5) NOT NULL,
   date_added DATETIME NOT NULL,
   customer_notified INT(1) DEFAULT 0,
   comments text,
   comments_sent INT(1) DEFAULT 0,
-  PRIMARY KEY (orders_status_history_id),
-  KEY idx_orders_id (orders_id)
-);
+  PRIMARY KEY (orders_status_history_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_total;
 CREATE TABLE orders_total (
   orders_total_id INT unsigned NOT NULL AUTO_INCREMENT,
-  orders_id INT(11) NOT NULL,
+  orders_id INT NOT NULL,
   title VARCHAR(255) NOT NULL,
   text VARCHAR(255) NOT NULL,
   value DECIMAL(15,4) NOT NULL,
   class VARCHAR(32) NOT NULL,
-  sort_order INT(11) NOT NULL,
+  sort_order INT NOT NULL,
   PRIMARY KEY (orders_total_id),
   KEY idx_orders_id (orders_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS orders_tracking;
 CREATE TABLE orders_tracking (
@@ -956,7 +898,7 @@ CREATE TABLE orders_tracking (
   date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (tracking_id),
   KEY idx_orders_id (orders_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS payment_moneybookers;
 CREATE TABLE payment_moneybookers (
@@ -968,11 +910,11 @@ CREATE TABLE payment_moneybookers (
   mb_STATUS TINYINT(1) NOT NULL DEFAULT 0,
   mb_ORDERID INT(11) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (mb_TRID)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products;
 CREATE TABLE products (
-  products_id INT(11) NOT NULL AUTO_INCREMENT,
+  products_id INT NOT NULL AUTO_INCREMENT,
   products_ean VARCHAR(128),
   products_quantity INT(4) NOT NULL,
   products_shippingtime INT(4) NOT NULL,
@@ -983,20 +925,20 @@ CREATE TABLE products (
   group_permission_3 TINYINT(1) NOT NULL,
   group_permission_4 TINYINT(1) NOT NULL,
   products_sort INT(4) NOT NULL DEFAULT 0,
-  products_image VARCHAR(255) NOT NULL,
+  products_image VARCHAR(254) NOT NULL,
   products_price DECIMAL(15,4) NOT NULL,
-  products_discount_allowed DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  products_discount_allowed DECIMAL(4,2) DEFAULT 0.00 NOT NULL,
   products_date_added DATETIME NOT NULL,
   products_last_modified DATETIME,
   products_date_available DATETIME,
-  products_weight DECIMAL(15,4) NOT NULL,
-  products_status INT(1) NOT NULL,
-  products_tax_class_id INT(11) NOT NULL,
+  products_weight DECIMAL(6,3) NOT NULL,
+  products_status TINYINT(1) NOT NULL,
+  products_tax_class_id INT NOT NULL,
   product_template VARCHAR(64),
   options_template VARCHAR(64),
   manufacturers_id INT NULL,
   products_manufacturers_model varchar(64),
-  products_ordered INT(11) NOT NULL DEFAULT 0,
+  products_ordered INT NOT NULL DEFAULT 0,
   products_fsk18 INT(1) NOT NULL DEFAULT 0,
   products_vpe INT(11) NOT NULL,
   products_vpe_status INT(1) NOT NULL DEFAULT 0,
@@ -1006,16 +948,15 @@ CREATE TABLE products (
   PRIMARY KEY (products_id),
   KEY idx_products_date_added (products_date_added),
   KEY idx_products_model (products_model),
-  KEY idx_products_status (products_status),
-  KEY idx_manufacturers_id (manufacturers_id)
-);
+  KEY idx_products_status (products_status)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_attributes;
 CREATE TABLE products_attributes (
-  products_attributes_id INT(11) NOT NULL AUTO_INCREMENT,
-  products_id INT(11) NOT NULL,
-  options_id INT(11) NOT NULL,
-  options_values_id INT(11) NOT NULL,
+  products_attributes_id INT NOT NULL AUTO_INCREMENT,
+  products_id INT NOT NULL,
+  options_id INT NOT NULL,
+  options_values_id INT NOT NULL,
   options_values_price DECIMAL(15,4) NOT NULL,
   price_prefix CHAR(1) NOT NULL,
   attributes_model VARCHAR(64) NULL,
@@ -1029,38 +970,37 @@ CREATE TABLE products_attributes (
   PRIMARY KEY (products_attributes_id),
   KEY idx_products_id (products_id),
   KEY idx_options (options_id, options_values_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_attributes_download;
 CREATE TABLE products_attributes_download (
-  products_attributes_id INT(11) NOT NULL,
+  products_attributes_id INT NOT NULL,
   products_attributes_filename VARCHAR(255) NOT NULL DEFAULT '',
   products_attributes_maxdays INT(2) DEFAULT 0,
   products_attributes_maxcount INT(2) DEFAULT 0,
   PRIMARY KEY (products_attributes_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_content;
 CREATE TABLE products_content (
   content_id INT(11) NOT NULL AUTO_INCREMENT,
   products_id INT(11) NOT NULL DEFAULT 0,
   group_ids TEXT,
-  content_name VARCHAR(255) NOT NULL DEFAULT '',
-  content_file VARCHAR(255) NOT NULL,
+  content_name VARCHAR(32) NOT NULL DEFAULT '',
+  content_file VARCHAR(64) NOT NULL,
   content_link TEXT NOT NULL,
-  languages_id INT(11) NOT NULL,
+  languages_id INT(11) NOT NULL DEFAULT 0,
   content_read INT(11) NOT NULL DEFAULT 0,
   file_comment TEXT NOT NULL,
   PRIMARY KEY (content_id),
   KEY idx_products_id (products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_description;
 CREATE TABLE products_description (
   products_id INT(11) NOT NULL,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT NOT NULL DEFAULT 1,
   products_name VARCHAR(255) NOT NULL DEFAULT '',
-  products_heading_title VARCHAR(255) NOT NULL DEFAULT '',
   products_description text,
   products_short_description text,
   products_keywords VARCHAR(255) DEFAULT NULL,
@@ -1072,78 +1012,72 @@ CREATE TABLE products_description (
   products_order_description text,
   PRIMARY KEY (products_id, language_id),
   KEY idx_products_name (products_name)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_graduated_prices;
 CREATE TABLE products_graduated_prices (
-  price_id INT(11) NOT NULL AUTO_INCREMENT,
   products_id INT(11) NOT NULL DEFAULT 0,
   quantity INT(11) NOT NULL DEFAULT 0,
   unitprice DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
-  PRIMARY KEY (price_id),
   KEY idx_products_id (products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_images;
 CREATE TABLE products_images (
-  image_id INT(11) NOT NULL AUTO_INCREMENT,
-  products_id INT(11) NOT NULL,
-  image_nr SMALLINT(11) NOT NULL,
-  image_name VARCHAR(255) NOT NULL,
+  image_id INT NOT NULL AUTO_INCREMENT,
+  products_id INT NOT NULL,
+  image_nr SMALLINT NOT NULL,
+  image_name VARCHAR(254) NOT NULL,
   PRIMARY KEY (image_id),
   KEY idx_products_id (products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_notifications;
 CREATE TABLE products_notifications (
-  products_id INT(11) NOT NULL,
-  customers_id INT(11) NOT NULL,
+  products_id INT NOT NULL,
+  customers_id INT NOT NULL,
   date_added DATETIME NOT NULL,
   PRIMARY KEY (products_id, customers_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_options;
 CREATE TABLE products_options (
-  products_options_id INT(11) NOT NULL DEFAULT 0,
-  language_id INT(11) NOT NULL,
+  products_options_id INT NOT NULL DEFAULT 0,
+  language_id TINYINT NOT NULL DEFAULT 1,
   products_options_name VARCHAR(255) NOT NULL DEFAULT '',
   products_options_sortorder INT(11) NOT NULL,
   PRIMARY KEY (products_options_id, language_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_options_values;
 CREATE TABLE products_options_values (
-  products_options_values_id INT(11) NOT NULL DEFAULT 0,
-  language_id INT(11) NOT NULL,
+  products_options_values_id INT NOT NULL DEFAULT 0,
+  language_id TINYINT NOT NULL DEFAULT 1,
   products_options_values_name VARCHAR(255) NOT NULL DEFAULT '',
-  products_options_values_sortorder INT(11) NOT NULL,
   PRIMARY KEY (products_options_values_id, language_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_options_values_to_products_options;
 CREATE TABLE products_options_values_to_products_options (
-  products_options_values_to_products_options_id INT(11) NOT NULL AUTO_INCREMENT,
-  products_options_id INT(11) NOT NULL,
-  products_options_values_id INT(11) NOT NULL,
+  products_options_values_to_products_options_id INT NOT NULL AUTO_INCREMENT,
+  products_options_id INT NOT NULL,
+  products_options_values_id INT NOT NULL,
   PRIMARY KEY (products_options_values_to_products_options_id),
   KEY idx_products_options_id (products_options_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_tags;
 CREATE TABLE products_tags (
-  products_tags_id INT(11) NOT NULL AUTO_INCREMENT,
   products_id int(11) NOT NULL,
   options_id int(11) NOT NULL,
   values_id int(11) NOT NULL,
-  sort_order int(11) NOT NULL DEFAULT '0',
   products_options_id int(11) NOT NULL DEFAULT '0',
   products_options_values_id int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (products_tags_id),
   KEY idx_products_options_values (products_id,options_id,values_id),
   KEY idx_products_options_id (products_options_id),
   KEY idx_options_id (options_id),
   KEY idx_values_id (values_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_tags_options;
 CREATE TABLE products_tags_options (
@@ -1152,17 +1086,15 @@ CREATE TABLE products_tags_options (
   options_description text NOT NULL,
   options_content_group int(11) DEFAULT NULL,
   sort_order int(11) NOT NULL DEFAULT '0',
-  languages_id INT(11) NOT NULL,
+  languages_id int(11) NOT NULL,
   status int(1) NOT NULL DEFAULT '1',
   filter int(1) NOT NULL DEFAULT '1',
   last_modified datetime DEFAULT NULL,
   date_added datetime NOT NULL,
   products_options_id int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (options_id,languages_id),
-  KEY idx_products_options_id (products_options_id),
-  KEY idx_filter_multi (languages_id, filter, options_id, sort_order),
-  KEY idx_filter (filter)
-);
+  KEY idx_products_options_id (products_options_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_tags_values;
 CREATE TABLE products_tags_values (
@@ -1170,7 +1102,7 @@ CREATE TABLE products_tags_values (
   options_id int(11) NOT NULL,
   values_name varchar(128) NOT NULL,
   values_description text NOT NULL,
-  values_image varchar(255) NOT NULL,
+  values_image varchar(128) NOT NULL,
   values_content_group int(11) DEFAULT NULL,
   sort_order int(11) NOT NULL DEFAULT '0',
   languages_id int(11) NOT NULL,
@@ -1181,26 +1113,24 @@ CREATE TABLE products_tags_values (
   products_options_values_id int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (values_id,languages_id),
   KEY idx_options_id (options_id),
-  KEY idx_products_options_values_id (products_options_values_id),
-  KEY idx_filter_multi (languages_id, filter, options_id, sort_order),
-  KEY idx_filter (filter)
-);
+  KEY idx_products_options_values_id (products_options_values_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_to_categories;
 CREATE TABLE products_to_categories (
-  products_id INT(11) NOT NULL,
-  categories_id INT(11) NOT NULL,
+  products_id INT NOT NULL,
+  categories_id INT NOT NULL,
   PRIMARY KEY (products_id,categories_id),
   KEY idx_categories_id (categories_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_vpe;
 CREATE TABLE products_vpe (
   products_vpe_id INT(11) NOT NULL DEFAULT 0,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT NOT NULL DEFAULT 1,
   products_vpe_name VARCHAR(32) NOT NULL DEFAULT '',
   PRIMARY KEY (products_vpe_id, language_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_xsell;
 CREATE TABLE products_xsell (
@@ -1209,25 +1139,22 @@ CREATE TABLE products_xsell (
   products_xsell_grp_name_id INT(10) UNSIGNED NOT NULL DEFAULT 1,
   xsell_id INT(10) UNSIGNED NOT NULL DEFAULT 1,
   sort_order INT(10) UNSIGNED NOT NULL DEFAULT 1,
-  PRIMARY KEY (ID),
-  KEY idx_xsell_id (xsell_id),
-  KEY idx_products_id (products_id),
-  KEY idx_products_xsell_grp_name_id (products_xsell_grp_name_id)
-);
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_xsell_grp_name;
 CREATE TABLE products_xsell_grp_name (
   products_xsell_grp_name_id INT(10) NOT NULL,
   xsell_sort_order INT(10) NOT NULL DEFAULT 0,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT NOT NULL DEFAULT 1,
   groupname VARCHAR(255) NOT NULL DEFAULT '',
   PRIMARY KEY (products_xsell_grp_name_id, language_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS reviews;
 CREATE TABLE reviews (
-  reviews_id INT(11) NOT NULL AUTO_INCREMENT,
-  products_id INT(11) NOT NULL,
+  reviews_id INT NOT NULL AUTO_INCREMENT,
+  products_id INT NOT NULL,
   customers_id int,
   customers_name VARCHAR(64) NOT NULL,
   reviews_rating INT(1),
@@ -1237,36 +1164,36 @@ CREATE TABLE reviews (
   reviews_status INT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (reviews_id),
   KEY idx_products_id (products_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS reviews_description;
 CREATE TABLE reviews_description (
-  reviews_id INT(11) NOT NULL,
-  languages_id INT(11) NOT NULL,
+  reviews_id INT NOT NULL,
+  languages_id INT NOT NULL,
   reviews_text text NOT NULL,
   PRIMARY KEY (reviews_id, languages_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS sessions;
 CREATE TABLE sessions (
   sesskey VARCHAR(32) NOT NULL,
   expiry INT(11) unsigned NOT NULL,
-  value longtext NOT NULL,
+  value text NOT NULL,
   flag VARCHAR( 5 ) NULL DEFAULT NULL,
   PRIMARY KEY (sesskey),
   KEY idx_expiry (expiry)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS shipping_status;
 CREATE TABLE shipping_status (
   shipping_status_id INT DEFAULT 0 NOT NULL,
-  language_id INT(11) NOT NULL,
+  language_id TINYINT DEFAULT 1 NOT NULL,
   shipping_status_name VARCHAR(32) NOT NULL,
-  shipping_status_image VARCHAR(64) NOT NULL,
+  shipping_status_image VARCHAR(32) NOT NULL,
   sort_order INT(11) DEFAULT 0 NOT NULL,
   PRIMARY KEY (shipping_status_id, language_id),
   KEY idx_shipping_status_name (shipping_status_name)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS shop_configuration;
 CREATE TABLE shop_configuration (
@@ -1275,12 +1202,12 @@ CREATE TABLE shop_configuration (
   configuration_value TEXT NOT NULL,
   PRIMARY KEY (configuration_id),
   KEY idx_configuration_key (configuration_key)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS specials;
 CREATE TABLE specials (
-  specials_id INT(11) NOT NULL AUTO_INCREMENT,
-  products_id INT(11) NOT NULL,
+  specials_id INT NOT NULL AUTO_INCREMENT,
+  products_id INT NOT NULL,
   specials_quantity INT(4) NOT NULL,
   specials_new_products_price DECIMAL(15,4) NOT NULL,
   specials_date_added DATETIME,
@@ -1291,35 +1218,32 @@ CREATE TABLE specials (
   status INT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (specials_id),
   KEY idx_products_id (products_id),
-  KEY idx_status (status),
-  KEY idx_start_date (start_date),
-  KEY idx_expires_date (expires_date)
-);
+  KEY idx_status (status)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS tax_class;
 CREATE TABLE tax_class (
-  tax_class_id INT(11) NOT NULL AUTO_INCREMENT,
-  tax_class_title VARCHAR(255) NOT NULL,
+  tax_class_id INT NOT NULL AUTO_INCREMENT,
+  tax_class_title VARCHAR(32) NOT NULL,
   tax_class_description VARCHAR(255) NOT NULL,
   last_modified DATETIME NULL,
   date_added DATETIME NOT NULL,
   PRIMARY KEY (tax_class_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS tax_rates;
 CREATE TABLE tax_rates (
-  tax_rates_id INT(11) NOT NULL AUTO_INCREMENT,
-  tax_zone_id INT(11) NOT NULL,
-  tax_class_id INT(11) NOT NULL,
+  tax_rates_id INT NOT NULL AUTO_INCREMENT,
+  tax_zone_id INT NOT NULL,
+  tax_class_id INT NOT NULL,
   tax_priority INT(5) DEFAULT 1,
   tax_rate DECIMAL(7,4) NOT NULL,
   tax_description VARCHAR(255) NOT NULL,
   last_modified DATETIME NULL,
   date_added DATETIME NOT NULL,
   PRIMARY KEY (tax_rates_id),
-  KEY idx_tax_zone_id (tax_zone_id),
-  KEY idx_tax_class_id (tax_class_id)
-);
+  KEY idx_tax_zone_id (tax_zone_id)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS whos_online;
 CREATE TABLE whos_online (
@@ -1333,30 +1257,29 @@ CREATE TABLE whos_online (
   http_referer VARCHAR(255) NOT NULL,
   PRIMARY KEY (session_id),
   KEY idx_time_last_click (time_last_click)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS zones;
 CREATE TABLE zones (
-  zone_id INT(11) NOT NULL AUTO_INCREMENT,
-  zone_country_id INT(11) NOT NULL,
+  zone_id INT NOT NULL AUTO_INCREMENT,
+  zone_country_id INT NOT NULL,
   zone_code VARCHAR(32) NOT NULL,
   zone_name VARCHAR(64) NOT NULL,
   PRIMARY KEY (zone_id),
-  UNIQUE idx_country_code (zone_country_id, zone_code),
-  KEY idx_zone_country_id (zone_country_id)
-);
+  UNIQUE idx_country_code (zone_country_id, zone_code)
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS zones_to_geo_zones;
 CREATE TABLE zones_to_geo_zones (
- association_id INT(11) NOT NULL AUTO_INCREMENT,
- zone_country_id INT(11) NOT NULL,
+ association_id INT NOT NULL AUTO_INCREMENT,
+ zone_country_id INT NOT NULL,
  zone_id INT NULL,
  geo_zone_id INT NULL,
  last_modified DATETIME NULL,
  date_added DATETIME NOT NULL,
  PRIMARY KEY (association_id),
  KEY idx_geo_zone_id (geo_zone_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS personal_offers_by_customers_status_0;
 DROP TABLE IF EXISTS personal_offers_by_customers_status_1;
@@ -1375,19 +1298,19 @@ INSERT INTO address_format VALUES (7, '$firstname $lastname$cr$streets, $city$cr
 INSERT INTO address_format VALUES (8, '$firstname $lastname$cr$streets$cr$city$cr$state$cr$postcode$cr$country','$postcode / $country');
 
 # add entry for admin_access
-INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `removeoldpics`, `janolaw`, `haendlerbund`, `check_update`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `shopgate`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`, `paypal_info`, `paypal_module`, `newsletter_recipients`, `semknox`) VALUES ('1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `removeoldpics`, `janolaw`, `haendlerbund`, `check_update`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `shopgate`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`, `paypal_info`, `paypal_module`, `newsletter_recipients`, `semknox`) VALUES ('groups', 8, 8, 7, 7, 7, 7, 7, 7, 2, 5, 5, 5, 7, 8, 8, 8, 2, 2, 2, 2, 2, 8, 2, 2, 2, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 1, 2, 5, 8, 8, 3, 9, 9, 8, 5, 9, 9, 1, 9, 9, 9, 9, 5, 9, 9, 1, 5, 9, 9, 5, 9, 9, 5, 9);
+INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `new_attributes`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `start`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `blz_update`, `removeoldpics`, `janolaw`, `haendlerbund`, `safeterms`, `check_update`, `easymarketing`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `shopgate`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`) VALUES ('1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `new_attributes`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `start`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `blz_update`, `removeoldpics`, `janolaw`, `haendlerbund`, `safeterms`, `check_update`, `easymarketing`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `shopgate`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`) VALUES ('groups', 8, 8, 7, 7, 7, 7, 7, 7, 2, 5, 5, 5, 7, 8, 8, 8, 2, 2, 2, 2, 2, 8, 2, 2, 2, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 1, 5, 5, 1, 2, 5, 8, 8, 3, 9, 9, 8, 5, 5, 9, 9, 9, 1, 9, 9, 9, 9, 9, 5, 9, 9, 1, 5, 9, 9, 5);
 
 # banner
-INSERT INTO `banners` VALUES (1, 1, 'modified eCommerce Shopsoftware', 'http://www.modified-shop.org', 1, 'modified_banner.jpg', 'modified_banner_mobile.jpg', 'banner', '', 1, '1', NULL, NULL, NULL, NOW(), NULL, 1);
-INSERT INTO `banners` VALUES (2, 1, 'modified eCommerce Shopsoftware', 'http://www.modified-shop.org', 1, 'modified_banner.jpg', 'modified_banner_mobile.jpg', 'banner', '', 1, '2', NULL, NULL, NULL, NOW(), NULL, 1);
+INSERT INTO `banners` VALUES (1, 'modified eCommerce Shopsoftware', 'http://www.modified-shop.org', 'banner_modified-ecommerce-shopsoftware_en.jpg', 'banner', '', '1', NULL, NULL, NULL, NOW(), NULL, 1);
+INSERT INTO `banners` VALUES (2, 'modified eCommerce Shopsoftware', 'http://www.modified-shop.org', 'banner_modified-ecommerce-shopsoftware_de.jpg', 'banner', '', '2', NULL, NULL, NULL, NOW(), NULL, 1);
 
 # carriers
 INSERT INTO carriers VALUES (1, 'DHL', 'http://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=$2&idc=$1', '10', NOW(), '');
 INSERT INTO carriers VALUES (2, 'DPD', 'https://extranet.dpd.de/cgi-bin/delistrack?pknr=$1+&typ=1&lang=$2', '20', NOW(), '');
 INSERT INTO carriers VALUES (3, 'GLS', 'https://gls-group.eu/DE/de/paketverfolgung?match=$1', '30', NOW(), '');
 INSERT INTO carriers VALUES (4, 'UPS', 'http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=$1', '40', NOW(), '');
-INSERT INTO carriers VALUES (5, 'HERMES', 'https://tracking.hermesworld.com/?TrackID=$1', '50', NOW(), '');
+INSERT INTO carriers VALUES (5, 'HERMES', 'http://tracking.hlg.de/Tracking.jsp?TrackID=$1', '50', NOW(), '');
 INSERT INTO carriers VALUES (6, 'FEDEX', 'http://www.fedex.com/Tracking?action=track&tracknumbers=$1', '60', NOW(), '');
 INSERT INTO carriers VALUES (7, 'TNT', 'http://www.tnt.de/servlet/Tracking?cons=$1', '70', NOW(), '');
 INSERT INTO carriers VALUES (8, 'TRANS-O-FLEX', 'http://track.tof.de/trace/tracking.cgi?barcode=$1', '80', NOW(), '');
@@ -1416,8 +1339,8 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DEFAULT_CUSTOMERS_STATUS_ID_GUEST', '1', 1, 21, NULL, NOW(), 'xtc_get_customers_status_name', 'xtc_cfg_pull_down_customers_status_list(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DEFAULT_CUSTOMERS_STATUS_ID', '2', 1, 23, NULL, NOW(), 'xtc_get_customers_status_name', 'xtc_cfg_pull_down_customers_status_list(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ALLOW_ADD_TO_CART', 'false', 1, 24, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CURRENT_TEMPLATE', 'tpl_modified_responsive', 1, 26, NULL, NOW(), NULL, 'xtc_cfg_pull_down_template_sets(');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_SHORT_DATE_FORMAT', 'true', 1, 50, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CURRENT_TEMPLATE', 'tpl_modified', 1, 26, NULL, NOW(), NULL, 'xtc_cfg_pull_down_template_sets(');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_SHORT_DATE_FORMAT', 'true', '1', '50', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 
 # Constants for checkout options
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CHECKOUT_USE_PRODUCTS_SHORT_DESCRIPTION', 'true', 1, 40, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1425,8 +1348,8 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CHECKOUT_SHOW_PRODUCTS_IMAGES', 'true', 1, 42, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 
 # independent billingnumber and date
-#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IBN_BILLNR', '1', 1, 99, NULL, NOW(), NULL, NULL);
-#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IBN_BILLNR_FORMAT', '{n}-{d}-{m}-{y}', 1, 99, NULL, NOW(), NULL, NULL);
+#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IBN_BILLNR', '1', '1', '99', NULL, NOW(), NULL, NULL);
+#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IBN_BILLNR_FORMAT', '{n}-{d}-{m}-{y}', '1', '99', NULL, NOW(), NULL, NULL);
 
 # configuration_group_id 2, Minimum Values
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_FIRST_NAME_MIN_LENGTH', '2', 2, 1, NULL, NOW(), NULL, NULL);
@@ -1467,7 +1390,6 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_BESTSELLERS', '10', 3, 15, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_BESTSELLERS_DAYS', '100', 3, 15, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_ALSO_PURCHASED', '6', 3, 16, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_ALSO_PURCHASED_ORDERS', '100', 3, 16, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_PRODUCTS_IN_ORDER_HISTORY_BOX', '6', 3, 17, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_ORDER_HISTORY', '10', 3, 18, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_REVIEWS_VIEW', '5', 3, 19, NULL, NOW(), NULL, NULL);
@@ -1478,40 +1400,23 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_PRODUCTS_HISTORY', '6', 3, 25, NULL, NOW(), NULL, NULL);
 
 # configuration_group_id 4, Images Options
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IMAGE_QUALITY', '100', 4, 1, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IMAGE_MANIPULATOR', 'image_manipulator_GD2_advanced.php', 4, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'image_manipulator_GD2.php\', \'image_manipulator_GD2_advanced.php\', \'image_manipulator_GD1.php\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MO_PICS', '3', 4, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_NO_ENLARGE_UNDER_DEFAULT', 'false', 4, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_SHOW_NO_IMAGE', 'true', 4, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_MINI_WIDTH', '80', 4, 3, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_MINI_HEIGHT', '80', 4, 4, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_MIDI_WIDTH', '160', 4, 5, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_MIDI_HEIGHT', '160', 4, 6, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_THUMBNAIL_WIDTH', '240', 4, 7, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_THUMBNAIL_HEIGHT', '240', 4, 8, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_INFO_WIDTH', '520', 4, 9, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_INFO_HEIGHT', '520', 4, 10, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CONFIG_CALCULATE_IMAGE_SIZE', 'true', 4, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IMAGE_QUALITY', '100', 4, 2, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_THUMBNAIL_WIDTH', '160', 4, 7, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_THUMBNAIL_HEIGHT', '160', 4, 8, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_INFO_WIDTH', '230', 4, 9, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_INFO_HEIGHT', '230', 4, 10, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_POPUP_WIDTH', '800', 4, 11, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_POPUP_HEIGHT', '800', 4, 12, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_MINI_MERGE', '', 4, 15, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_MIDI_MERGE', '', 4, 16, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_THUMBNAIL_MERGE', '', 4, 17, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_INFO_MERGE', '', 4, 25, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_POPUP_MERGE', '', 4, 26, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_SHOW_NO_IMAGE', 'false', 4, 30, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_WIDTH', '985', 4, 31, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_HEIGHT', '370', 4, 32, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_MOBILE_WIDTH', '600', 4, 33, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_MOBILE_HEIGHT', '400', 4, 34, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_LIST_WIDTH', '225', 4, 35, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_LIST_HEIGHT', '170', 4, 36, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MANUFACTURER_IMAGE_SHOW_NO_IMAGE', 'false', 4, 50, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MANUFACTURER_IMAGE_WIDTH', '100', 4, 51, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MANUFACTURER_IMAGE_HEIGHT', '60', 4, 52, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'BANNERS_IMAGE_WIDTH', '985', 4, 60, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'BANNERS_IMAGE_HEIGHT', '400', 4, 61, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'BANNERS_IMAGE_MOBILE_WIDTH', '600', 4, 62, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'BANNERS_IMAGE_MOBILE_HEIGHT', '400', 4, 63, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_POPUP_MERGE', '', 4, 33, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MO_PICS', '3', '4', '3', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'IMAGE_MANIPULATOR', 'image_manipulator_GD2_advanced.php', '4', '3', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'image_manipulator_GD2.php\', \'image_manipulator_GD2_advanced.php\', \'image_manipulator_GD1.php\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_NO_ENLARGE_UNDER_DEFAULT', 'false', 4, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_IMAGE_SHOW_NO_IMAGE', 'false', 4, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_IMAGE_SHOW_NO_IMAGE', 'true', 4, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MANUFACTURER_IMAGE_SHOW_NO_IMAGE', 'false', 4, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(''true'', ''false''), ');
 
 # configuration_group_id 5, Customer Details
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACCOUNT_GENDER', 'true', 5, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1523,20 +1428,12 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACCOUNT_OPTIONS', 'account', 5, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'account\', \'guest\', \'both\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DELETE_GUEST_ACCOUNT', 'true', 5, 110, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GUEST_ACCOUNT_EDIT', 'false', 5, 120, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_PRIVACY_CHECK', 'true', 5, 130, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 
 # configuration_group_id 6, Module Options
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_PAYMENT_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_ORDER_TOTAL_INSTALLED', 'ot_subtotal.php;ot_shipping.php;ot_tax.php;ot_total.php', 6, 0, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_SHIPPING_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_SYSTEM_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_EXPORT_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CATEGORIES_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CHECKOUT_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_MAIN_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_ORDER_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_PRODUCT_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_SHOPPING_CART_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_XTCPRICE_INSTALLED', '', 6, 0, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DEFAULT_CURRENCY', 'EUR', 6, 0, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DEFAULT_LANGUAGE', 'de', 6, 0, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DEFAULT_ORDERS_STATUS_ID', '1', 6, 0, NULL, NOW(), NULL, NULL);
@@ -1562,7 +1459,6 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 #INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'COMPRESS_STYLESHEET_TIME', '', 6, 100, NULL, NOW(), NULL, NULL); # Tomcraft - 2016-06-06 - Obsolete since r7607 
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEWSFEED_LAST_READ', '', 6, 100, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEWSFEED_LAST_UPDATE', '', 6, 100, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEWSFEED_LAST_UPDATE_TRY', '', 6, 100, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_CHECK_SSL_SESSION_ID', 'False', 6, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_CHECK_USER_AGENT', 'False', 6, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_CHECK_IP_ADDRESS', 'False', 6, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
@@ -1577,16 +1473,13 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CHECK_CHEAPEST_SHIPPING_MODUL', 'false', 7, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHOW_SELFPICKUP_FREE', 'false', 7, 9, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 #INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHIPPING_DEFAULT_TAX_CLASS_METHOD', '1', 7, 7, NULL, NOW(), 'xtc_get_default_tax_class_method_name', 'xtc_cfg_pull_down_default_tax_class_methods(');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHOW_SHIPPING_MODULE_TITLE', 'standard', 7, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'shipping_default\', \'shipping_title\', \'shipping_custom\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CUSTOM_SHIPPING_TITLE', 'DE::Versandkosten||EN::Shipping costs', 7, 11, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;CUSTOM_SHIPPING_TITLE');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CAPITALIZE_ADDRESS_FORMAT', 'false', 7, 15, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 
 # configuration_group_id 8, Product Listing
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCT_LIST_FILTER', 'true', 8, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHOW_BUTTON_BUY_NOW', 'false', 8, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EXPECTED_PRODUCTS_SORT', 'desc', 8, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'asc\', \'desc\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EXPECTED_PRODUCTS_FIELD', 'date_expected', 8, 5, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'products_name\', \'date_expected\'),');
-#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_PAGINATION_LIST', 'true', 8, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),'); # Tomcraft - 2017-07-12 - Not used anymore since r10840, see: http://trac.modified-shop.org/ticket/1238
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_PAGINATION_LIST', 'true', 8, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CATEGORIES_SHOW_PRODUCTS_SUBCATS', 'false', 8, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_FILTER_INDEX', '3,12,27,all', 8, 100, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_FILTER_SPECIALS', '3,12,27,all', 8, 101, NULL, NOW(), NULL, NULL);
@@ -1597,10 +1490,9 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_CHECK', 'true', 9, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ATTRIBUTE_STOCK_CHECK', 'true', 9, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_LIMITED', 'true', 9, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_LIMITED_DOWNLOADS', 'false', 9, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_ALLOW_CHECKOUT', 'true', 9, 5, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_MARK_PRODUCT_OUT_OF_STOCK', '<span style="color:red">***</span>', 9, 6, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_REORDER_LEVEL', '5', 9, 7, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_ALLOW_CHECKOUT', 'true', 9, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_MARK_PRODUCT_OUT_OF_STOCK', '<span style="color:red">***</span>', 9, 5, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_REORDER_LEVEL', '5', 9, 6, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_CHECKOUT_UPDATE_PRODUCTS_STATUS', 'false', 9, 20, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_CHECK_SPECIALS', 'false', 9, 21, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ATTRIBUTES_VALID_CHECK', 'true', 9, 22, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1627,16 +1519,13 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 # configuration_group_id 12, E-Mail Options
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_TRANSPORT', 'mail', 12, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'sendmail\', \'smtp\', \'mail\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SENDMAIL_PATH', '/usr/sbin/sendmail', 12, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_SENDMAIL_OPTIONS', 'true', 12, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_MAIN_SERVER', 'localhost', 12, 3, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_BACKUP_SERVER', 'localhost', 12, 4, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_PORT', '25', 12, 5, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_USERNAME', 'Please Enter', 12, 6, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_PASSWORD', 'Please Enter', 12, 7, NULL, NOW(), NULL, 'xtc_cfg_password_field;SMTP_PASSWORD');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_AUTH', 'false', 12, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_SECURE', 'none', 12, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'none\', \'ssl\', \'tls\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_AUTO_TLS', 'false', 12, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_DEBUG', '0', 12, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'0\', \'1\', \'2\', \'3\', \'4\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SMTP_SECURE', '', 12, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'none\', \'ssl\', \'tls\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_LINEFEED', 'LF', 12, 9, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'LF\', \'CRLF\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_USE_HTML', 'true', 12, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_EMAIL_ADDRESS_CHECK', 'false', 12, 11, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1644,11 +1533,9 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_SQL_ERRORS', 'false', 12, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEND_EMAILS_DOUBLE_OPT_IN', 'true', 12, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEND_MAIL_ACCOUNT_CREATED', 'false', 12, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_EMAIL_SEND_COPY_TO_ADMIN', 'true', 12, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STATUS_EMAIL_SENT_COPY_TO_ADMIN', 'false', 12, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_WORD_WRAP', '50', 12, 18, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_SIGNATURE_ID', '11', 12, 19, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'EMAIL_SIGNATURE_ID\',');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_ARCHIVE_ADDRESS', '', 12, 40, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_ARCHIVE_ADDRESS');
 
 # Constants for images
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHOW_IMAGES_IN_EMAIL', 'false', '12', '15', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1676,7 +1563,7 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_NAME', 'DE::Verrechnungssystem||EN::Billingsystem', 12, 33, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_NAME');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_REPLY_ADDRESS', '', 12, 34, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_REPLY_ADDRESS');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_REPLY_ADDRESS_NAME', '', 12, 35, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_REPLY_ADDRESS_NAME');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_SUBJECT', 'DE::Ihre Bestellung {$nr} vom {$date}||EN::Your order {$nr} from {$date}', 12, 36, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_SUBJECT');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_SUBJECT', 'DE::Ihre Bestellung||EN::Your order', 12, 36, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_SUBJECT');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_FORWARDING_STRING', '', 12, 37, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_FORWARDING_STRING');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_SUBJECT_ORDER', 'DE::Ihre Bestellung {$nr} vom {$date}||EN::Your order {$nr} from {$date}', 12, 38, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_SUBJECT_ORDER');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_BILLING_ATTACHMENTS', '', 12, 39, NULL, NOW(), NULL, 'xtc_cfg_input_email_language;EMAIL_BILLING_ATTACHMENTS');
@@ -1698,7 +1585,7 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 
 # configuration_group_id 15, Sessions
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_WRITE_DIRECTORY', '/tmp', 15, 1, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_FORCE_COOKIE_USE', 'True', 15, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_FORCE_COOKIE_USE', 'False', 15, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_RECREATE', 'False', 15, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_LIFE_CUSTOMERS', '1440', 15, 20, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_LIFE_ADMIN', '7200', 15, 21, NULL, NOW(), NULL, NULL);
@@ -1720,10 +1607,10 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEO_URL_MOD_CLASS', 'seo_url_shopstat', 16, 13, NULL, NOW(), NULL, 'xtc_cfg_select_mod_seo_url(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CHECK_CLIENT_AGENT', 'true',16, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_BREADCRUMB_OPTION', 'name', 16, 15, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'name\', \'model\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_DESCRIPTION_LENGTH', '320', 16, 2, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_DESCRIPTION_LENGTH', '156', 16, 2, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_PRODUCTS_KEYWORDS_LENGTH', '255', 16, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_KEYWORDS_LENGTH', '255', 16, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_TITLE_LENGTH', '70', 16, 2, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_KEYWORDS_LENGTH', '180', 16, 2, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_TITLE_LENGTH', '55', 16, 2, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_STOP_WORDS', '#german:\r\nab,aber,abgerufen,abgerufene,abgerufener,abgerufenes,acht,alle,allein,allem,allen,aller,allerdings,allerlei,alles,allgemein,allmählich,allzu,als,alsbald,also,am,an,ander,andere,anderem,anderen,anderer,andererseits,anderes,anderm,andern,andernfalls,anders,anerkannt,anerkannte,anerkannter,anerkanntes,anfangen,anfing,angefangen,angesetze,angesetzt,angesetzten,angesetzter,ansetzen,anstatt,arbeiten,auch,auf,aufgehört,aufgrund,aufhören,aufhörte,aufzusuchen,aus,ausdrücken,ausdrückt,ausdrückte,ausgenommen,ausser,ausserdem,author,autor,außen,außer,außerdem,außerhalb,bald,bearbeite,bearbeiten,bearbeitete,bearbeiteten,bedarf,bedurfte,bedürfen,befragen,befragte,befragten,befragter,begann,beginnen,begonnen,behalten,behielt,bei,beide,beiden,beiderlei,beides,beim,beinahe,beitragen,beitrugen,bekannt,bekannte,bekannter,bekennen,benutzt,bereits,berichten,berichtet,berichtete,berichteten,besonders,besser,bestehen,besteht,beträchtlich,bevor,bezüglich,bietet,bin,bis,bisher,bislang,bist,bleiben,blieb,bloss,bloß,brachte,brachten,brauchen,braucht,bringen,bräuchte,bsp.,bzw,böden,ca.,da,dabei,dadurch,dafür,dagegen,daher,dahin,damals,damit,danach,daneben,dank,danke,danken,dann,dannen,daran,darauf,daraus,darf,darfst,darin,darum,darunter,darüber,darüberhinaus,das,dass,dasselbe,davon,davor,dazu,daß,dein,deine,deinem,deinen,deiner,deines,dem,demnach,demselben,den,denen,denn,dennoch,denselben,der,derart,derartig,derem,deren,derer,derjenige,derjenigen,derselbe,derselben,derzeit,des,deshalb,desselben,dessen,desto,deswegen,dich,die,diejenige,dies,diese,dieselbe,dieselben,diesem,diesen,dieser,dieses,diesseits,dinge,dir,direkt,direkte,direkten,direkter,doch,doppelt,dort,dorther,dorthin,drauf,drei,dreißig,drin,dritte,drunter,drüber,du,dunklen,durch,durchaus,durfte,durften,dürfen,dürfte,eben,ebenfalls,ebenso,ehe,eher,eigenen,eigenes,eigentlich,ein,einbaün,eine,einem,einen,einer,einerseits,eines,einfach,einführen,einführte,einführten,eingesetzt,einig,einige,einigem,einigen,einiger,einigermaßen,einiges,einmal,eins,einseitig,einseitige,einseitigen,einseitiger,einst,einstmals,einzig,ende,entsprechend,entweder,er,ergänze,ergänzen,ergänzte,ergänzten,erhalten,erhielt,erhielten,erhält,erneut,erst,erste,ersten,erster,eröffne,eröffnen,eröffnet,eröffnete,eröffnetes,es,etc,etliche,etwa,etwas,euch,euer,eure,eurem,euren,eurer,eures,fall,falls,fand,fast,ferner,finden,findest,findet,folgende,folgenden,folgender,folgendes,folglich,fordern,fordert,forderte,forderten,fortsetzen,fortsetzt,fortsetzte,fortsetzten,fragte,frau,frei,freie,freier,freies,fuer,fünf,für,gab,ganz,ganze,ganzem,ganzen,ganzer,ganzes,gar,gbr,geb,geben,geblieben,gebracht,gedurft,geehrt,geehrte,geehrten,geehrter,gefallen,gefiel,gefälligst,gefällt,gegeben,gegen,gehabt,gehen,geht,gekommen,gekonnt,gemacht,gemocht,gemäss,genommen,genug,gern,gesagt,gesehen,gestern,gestrige,getan,geteilt,geteilte,getragen,gewesen,gewissermaßen,gewollt,geworden,ggf,gib,gibt,gleich,gleichwohl,gleichzeitig,glücklicherweise,gmbh,gratulieren,gratuliert,gratulierte,gute,guten,gängig,gängige,gängigen,gängiger,gängiges,gänzlich,hab,habe,haben,haette,halb,hallo,hast,hat,hatte,hatten,hattest,hattet,heraus,herein,heute,heutige,hier,hiermit,hiesige,hin,hinein,hinten,hinter,hinterher,hoch,hundert,hätt,hätte,hätten,höchstens,ich,igitt,ihm,ihn,ihnen,ihr,ihre,ihrem,ihren,ihrer,ihres,im,immer,immerhin,important,in,indem,indessen,info,infolge,innen,innerhalb,ins,insofern,inzwischen,irgend,irgendeine,irgendwas,irgendwen,irgendwer,irgendwie,irgendwo,ist,ja,je,jede,jedem,jeden,jedenfalls,jeder,jederlei,jedes,jedoch,jemand,jene,jenem,jenen,jener,jenes,jenseits,jetzt,jährig,jährige,jährigen,jähriges,kam,kann,kannst,kaum,kein,keine,keinem,keinen,keiner,keinerlei,keines,keineswegs,klar,klare,klaren,klares,klein,kleinen,kleiner,kleines,koennen,koennt,koennte,koennten,komme,kommen,kommt,konkret,konkrete,konkreten,konkreter,konkretes,konnte,konnten,könn,können,könnt,könnte,könnten,künftig,lag,lagen,langsam,lassen,laut,lediglich,leer,legen,legte,legten,leicht,leider,lesen,letze,letzten,letztendlich,letztens,letztes,letztlich,lichten,liegt,liest,links,längst,längstens,mache,machen,machst,macht,machte,machten,mag,magst,mal,man,manche,manchem,manchen,mancher,mancherorts,manches,manchmal,mann,margin,mehr,mehrere,mein,meine,meinem,meinen,meiner,meines,meist,meiste,meisten,meta,mich,mindestens,mir,mit,mithin,mochte,morgen,morgige,muessen,muesst,muesste,muss,musst,musste,mussten,muß,mußt,möchte,möchten,möchtest,mögen,möglich,mögliche,möglichen,möglicher,möglicherweise,müssen,müsste,müssten,müßt,müßte,nach,nachdem,nacher,nachhinein,nacht,nahm,natürlich,neben,nebenan,nehmen,nein,neu,neue,neuem,neuen,neuer,neues,neun,nicht,nichts,nie,niemals,niemand,nimm,nimmer,nimmt,nirgends,nirgendwo,noch,nun,nur,nutzen,nutzt,nutzung,nächste,nämlich,nötigenfalls,nützt,ob,oben,oberhalb,obgleich,obschon,obwohl,oder,oft,ohne,per,pfui,plötzlich,pro,reagiere,reagieren,reagiert,reagierte,rechts,regelmäßig,rief,rund,sage,sagen,sagt,sagte,sagten,sagtest,sang,sangen,schlechter,schließlich,schnell,schon,schreibe,schreiben,schreibens,schreiber,schwierig,schätzen,schätzt,schätzte,schätzten,sechs,sect,sehe,sehen,sehr,sehrwohl,seht,sei,seid,sein,seine,seinem,seinen,seiner,seines,seit,seitdem,seite,seiten,seither,selber,selbst,senke,senken,senkt,senkte,senkten,setzen,setzt,setzte,setzten,sich,sicher,sicherlich,sie,sieben,siebte,siehe,sieht,sind,singen,singt,so,sobald,sodaß,soeben,sofern,sofort,sog,sogar,solange,solch,solche,solchem,solchen,solcher,solches,soll,sollen,sollst,sollt,sollte,sollten,solltest,somit,sondern,sonst,sonstwo,sooft,soviel,soweit,sowie,sowohl,spielen,später,startet,startete,starteten,statt,stattdessen,steht,steige,steigen,steigt,stets,stieg,stiegen,such,suchen,sämtliche,tages,tat,tatsächlich,tatsächlichen,tatsächlicher,tatsächliches,tausend,teile,teilen,teilte,teilten,titel,total,trage,tragen,trotzdem,trug,trägt,tun,tust,tut,txt,tät,ueber,um,umso,unbedingt,und,ungefähr,unmöglich,unmögliche,unmöglichen,unmöglicher,unnötig,uns,unse,unsem,unsen,unser,unsere,unserem,unseren,unserer,unseres,unserm,unses,unten,unter,unterbrach,unterbrechen,unterhalb,unwichtig,usw,vergangen,vergangene,vergangener,vergangenes,vermag,vermutlich,vermögen,verrate,verraten,verriet,verrieten,version,versorge,versorgen,versorgt,versorgte,versorgten,versorgtes,veröffentlichen,veröffentlicher,veröffentlicht,veröffentlichte,veröffentlichten,veröffentlichtes,viel,viele,vielen,vieler,vieles,vielleicht,vielmals,vier,vollständig,vom,von,vor,voran,vorbei,vorgestern,vorher,vorne,vorüber,völlig,wachen,waere,wann,war,waren,warst,warum,was,weder,weg,wegen,weil,weiter,weitere,weiterem,weiteren,weiterer,weiteres,weiterhin,weiß,welche,welchem,welchen,welcher,welches,wem,wen,wenig,wenige,weniger,wenigstens,wenn,wenngleich,wer,werde,werden,werdet,weshalb,wessen,wichtig,wie,wieder,wieso,wieviel,wiewohl,will,willst,wir,wird,wirklich,wirst,wo,wodurch,wogegen,woher,wohin,wohingegen,wohl,wohlweislich,wolle,wollen,wollt,wollte,wollten,wolltest,wolltet,womit,woraufhin,woraus,worin,wurde,wurden,während,währenddessen,wär,wäre,wären,würde,würden,z.B.,zahlreich,zehn,zeitweise,ziehen,zieht,zog,zogen,zu,zudem,zuerst,zufolge,zugleich,zuletzt,zum,zumal,zur,zurück,zusammen,zuviel,zwanzig,zwar,zwei,zwischen,zwölf,ähnlich,übel,über,überall,überallhin,überdies,übermorgen,übrig,übrigens\r\n\r\n#english:\r\na\'s,able,about,above,abroad,according,accordingly,across,actually,adj,after,afterwards,again,against,ago,ahead,ain\'t,all,allow,allows,almost,alone,along,alongside,already,also,although,always,am,amid,amidst,among,amongst,an,and,another,any,anybody,anyhow,anyone,anything,anyway,anyways,anywhere,apart,appear,appreciate,appropriate,are,aren\'t,around,as,aside,ask,asking,associated,at,available,away,awfully,back,backward,backwards,be,became,because,become,becomes,becoming,been,before,beforehand,begin,behind,being,believe,below,beside,besides,best,better,between,beyond,both,brief,but,by,c\'mon,c\'s,came,can,can\'t,cannot,cant,caption,cause,causes,certain,certainly,changes,clearly,co,co.,com,come,comes,concerning,consequently,consider,considering,contain,containing,contains,corresponding,could,couldn\'t,course,currently,dare,daren\'t,definitely,described,despite,did,didn\'t,different,directly,do,does,doesn\'t,doing,don\'t,done,down,downwards,during,each,edu,eg,eight,eighty,either,else,elsewhere,end,ending,enough,entirely,especially,et,etc,even,ever,evermore,every,everybody,everyone,everything,everywhere,ex,exactly,example,except,fairly,far,farther,few,fewer,fifth,first,five,followed,following,follows,for,forever,former,formerly,forth,forward,found,four,from,further,furthermore,get,gets,getting,given,gives,go,goes,going,gone,got,gotten,greetings,had,hadn\'t,half,happens,hardly,has,hasn\'t,have,haven\'t,having,he,he\'d,he\'ll,he\'s,hello,help,hence,her,here,here\'s,hereafter,hereby,herein,hereupon,hers,herself,hi,him,himself,his,hither,hopefully,how,howbeit,however,hundred,i\'d,i\'ll,i\'m,i\'ve,ie,if,ignored,immediate,in,inasmuch,inc,inc.,indeed,indicate,indicated,indicates,inner,inside,insofar,instead,into,inward,is,isn\'t,it,it\'d,it\'ll,it\'s,its,itself,just,k,keep,keeps,kept,know,known,knows,last,lately,later,latter,latterly,least,less,lest,let,let\'s,like,liked,likely,likewise,little,look,looking,looks,low,lower,ltd,made,mainly,make,makes,many,may,maybe,mayn\'t,me,mean,meantime,meanwhile,merely,might,mightn\'t,mine,minus,miss,more,moreover,most,mostly,mr,mrs,much,must,mustn\'t,my,myself,name,namely,nd,near,nearly,necessary,need,needn\'t,needs,neither,never,neverf,neverless,nevertheless,new,next,nine,ninety,no,no-one,nobody,non,none,nonetheless,noone,nor,normally,not,nothing,notwithstanding,novel,now,nowhere,obviously,of,off,often,oh,ok,okay,old,on,once,one,one\'s,ones,only,onto,opposite,or,other,others,otherwise,ought,oughtn\'t,our,ours,ourselves,out,outside,over,overall,own,particular,particularly,past,per,perhaps,placed,please,plus,possible,presumably,probably,provided,provides,que,quite,qv,rather,rd,re,really,reasonably,recent,recently,regarding,regardless,regards,relatively,respectively,right,round,said,same,saw,say,saying,says,second,secondly,see,seeing,seem,seemed,seeming,seems,seen,self,selves,sensible,sent,serious,seriously,seven,several,shall,shan\'t,she,she\'d,she\'ll,she\'s,should,shouldn\'t,since,six,so,some,somebody,someday,somehow,someone,something,sometime,sometimes,somewhat,somewhere,soon,sorry,specified,specify,specifying,still,sub,such,sup,sure,t\'s,take,taken,taking,tell,tends,th,than,thank,thanks,thanx,that,that\'ll,that\'s,that\'ve,thats,the,their,theirs,them,themselves,then,thence,there,there\'d,there\'ll,there\'re,there\'s,there\'ve,thereafter,thereby,therefore,therein,theres,thereupon,these,they,they\'d,they\'ll,they\'re,they\'ve,thing,things,think,third,thirty,this,thorough,thoroughly,those,though,three,through,throughout,thru,thus,till,to,together,too,took,toward,towards,tried,tries,truly,try,trying,twice,two,un,under,underneath,undoing,unfortunately,unless,unlike,unlikely,until,unto,up,upon,upwards,us,use,used,useful,uses,using,usually,v,value,various,versus,very,via,viz,vs,want,wants,was,wasn\'t,way,we,we\'d,we\'ll,we\'re,we\'ve,welcome,well,went,were,weren\'t,what,what\'ll,what\'s,what\'ve,whatever,when,whence,whenever,where,where\'s,whereafter,whereas,whereby,wherein,whereupon,wherever,whether,which,whichever,while,whilst,whither,who,who\'d,who\'ll,who\'s,whoever,whole,whom,whomever,whose,why,will,willing,wish,with,within,without,won\'t,wonder,would,wouldn\'t,yes,yet,you,you\'d,you\'ll,you\'re,you\'ve,your,yours,yourself,yourselves,zero', 16, 16, NULL, NOW(), NULL, 'xtc_cfg_textarea(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_GO_WORDS', '', 16, 17, NULL, NOW(), NULL, 'xtc_cfg_textarea(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_CAT_SHOP_TITLE', 'false', 16, 18, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1738,35 +1625,29 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 
 # configuration_group_id 17, Specialmodules
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_WYSIWYG', 'true', 17, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WYSIWYG_SKIN', 'moonocolor', 17, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'moono\', \'moonocolor\', \'moono-lisa\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_GIFT_SYSTEM', 'false', 17, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SECURITY_CODE_LENGTH', '10', 17, 4, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEW_SIGNUP_GIFT_VOUCHER_AMOUNT', '0', 17, 5, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEW_SIGNUP_DISCOUNT_COUPON', '', 17, 6, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_SHIPPING_STATUS', 'true', 17, 7, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_CONDITIONS_ON_CHECKOUT', 'true', 17, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SIGN_CONDITIONS_ON_CHECKOUT', 'false', 17, 9, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHOW_IP_LOG', 'false', 17, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SAVE_IP_LOG', 'false', 17, 11, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\', \'xxx\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_HEADQUARTER_ON_CHECKOUT', 'true', 17, 12, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GROUP_CHECK', 'false', 17, 13, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_SMALL_BUSINESS', 'false', 17, 14, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_NAVIGATOR', 'false', 17, 15, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'QUICKLINK_ACTIVATED', 'true', 17, 16, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_CROSS_SELLING', 'true', 17, 17, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_REVERSE_CROSS_SELLING', 'true', 17, 17, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_PRIVACY_ON_CHECKOUT', 'false', 17, 18, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_PRIVACY_CHECK', 'false', 17, 19, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_REVOCATION_ON_CHECKOUT', 'true', 17, 20, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT', 'false', 17, 21, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'REVOCATION_ID', '9', 17, 22, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'REVOCATION_ID\',');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHIPPING_STATUS_INFOS', '10', 17, 23, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'SHIPPING_STATUS_INFOS\',');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CHECK_FIRST_PAYMENT_MODUL', 'false', 17, 24, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'INVOICE_INFOS', '12', 17, 25, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'INVOICE_INFOS\',');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_BANNER_MANAGER_STATUS', 'true', 17, 26, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_STATUS', 'true', 17, 27, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_VOUCHER_AMOUNT', '0', 17, 28, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_DISCOUNT_COUPON', '', 17, 29, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WYSIWYG_SKIN', 'moonocolor', 17, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'moono\', \'moonocolor\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_GIFT_SYSTEM', 'false', 17, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SECURITY_CODE_LENGTH', '10', 17, 3, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEW_SIGNUP_GIFT_VOUCHER_AMOUNT', '0', 17, 4, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEW_SIGNUP_DISCOUNT_COUPON', '', 17, 5, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_SHIPPING_STATUS', 'true', 17, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_CONDITIONS_ON_CHECKOUT', 'false', 17, 7, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHOW_IP_LOG', 'false', 17, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SAVE_IP_LOG', 'false', 17, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\', \'xxx\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GROUP_CHECK', 'false', 17, 9, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_SMALL_BUSINESS', 'false', 17, 9, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_NAVIGATOR', 'false', 17, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'QUICKLINK_ACTIVATED', 'true', 17, 11, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACTIVATE_REVERSE_CROSS_SELLING', 'true', 17, 12, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_REVOCATION_ON_CHECKOUT', 'true', 17, 13, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT', 'false', 17, 13, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'REVOCATION_ID', '9', 17, 14, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'REVOCATION_ID\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHIPPING_STATUS_INFOS', '10', 17, 14, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'SHIPPING_STATUS_INFOS\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GOOGLE_RSS_FEED_REFID', '', 17, 15, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CHECK_FIRST_PAYMENT_MODUL', 'false', 17, 16, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'INVOICE_INFOS', '12', 17, 17, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'INVOICE_INFOS\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_BANNER_MANAGER_STATUS', 'true', 17, 18, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_STATUS', 'true', 17, 19, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 
 #configuration_group_id 18, VAT reg no
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACCOUNT_COMPANY_VAT_CHECK', 'true', 18, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1800,42 +1681,51 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 #INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'AFTERBUY_IGNORE_GROUPE', '', '21', '8', NULL , NOW(), NULL , NULL);
 
 #configuration_group_id 22, Search Options
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_MIN_LENGTH', '3', '22', '1', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_IN_DESC', 'true', '22', '2', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_IN_ATTR', 'true', '22', '3', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ADVANCED_SEARCH_DEFAULT_OPERATOR', 'and', '22', '4', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'and\', \'or\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_IN_MANU', 'true', '22', '4', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_IN_FILTER', 'true', '22', '5', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_AC_STATUS', 'true', '22', '10', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_AC_CATEGORIES', 'true', '22', '10', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SEARCH_AC_MIN_LENGTH', '3', '22', '11', NULL , NOW(), NULL , NULL);
 
 #configuration_group_id 23, econda
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_ECONDA_ACTIVE', 'false', 23, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_ECONDA_ID','', 23, 2, NULL, NOW(), NULL, NULL);
 
-#configuration_group_id 24, google analytics, motamo & facebook tracking
+#configuration_group_id 24, google analytics, piwik & facebook tracking
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_COUNT_ADMIN_ACTIVE', 'false', 24, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLEANALYTICS_ACTIVE', 'false', 24, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLEANALYTICS_ID','UA-XXXXXXX-X', 24, 3, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLEANALYTICS_UNIVERSAL', 'false', 24, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLEANALYTICS_DOMAIN','auto', 24, 3, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLEANALYTICS_DOMAIN','example.de', 24, 3, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLE_LINKID', 'false', 24, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLE_DISPLAY', 'false', 24, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLE_ECOMMERCE', 'false', 24, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_GOOGLEANALYTICS_GTAG', 'false', 24, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_PIWIK_ACTIVE', 'false', 24, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_PIWIK_LOCAL_PATH','www.example.com/matomo', 24, 5, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_PIWIK_LOCAL_PATH','www.domain.de/piwik', 24, 5, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_PIWIK_ID','1', 24, 6, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_PIWIK_GOAL','1', 24, 7, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_FACEBOOK_ACTIVE', 'false', 24, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_FACEBOOK_ID','', 24, 9, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GOOGLE_CERTIFIED_SHOPS_MERCHANT_ACTIVE', 'false', 24, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GOOGLE_SHOPPING_ID','', 24, 11, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'GOOGLE_TRUSTED_ID','', 24, 12, NULL, NOW(), NULL, NULL);
 
 #configuration_group_id 25, captcha
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_ACTIVE', 'newsletter,contact,password', 25, 1, NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(array(\'newsletter\' => \'Newsletter\', \'contact\' => \'Contact\', \'password\' => \'Password\', \'reviews\' => \'Reviews\', \'create_account\' => \'Registration\'), \',\',');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_LOGGED_IN', 'False', 25, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CAPTCHA_MOD_CLASS', 'modified_captcha', 25, 3, NULL, NOW(), NULL, 'xtc_cfg_select_mod_captcha(');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_LOGIN_NUM', '2', 25, 4, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_USE_COLOR', 'True', 25, 10, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_USE_SHADOW', 'False', 25, 11, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_CODE_LENGTH', '6', '25', '12', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_NUM_LINES', '70', '25', '13', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_MIN_FONT', '24', '25', '14', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_MAX_FONT', '28', '25', '15', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_BACKGROUND_RGB', '192,192,192', '25', '16', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_LINES_RGB', '220,148,002', '25', '17', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_CHARS_RGB', '112,112,112', '25', '18', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_WIDTH', '240', '25', '19', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_HEIGHT', '50', '25', '20', NULL, NOW(), NULL, NULL);
 
 #configuration_group_id 31, Moneybookers
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, '_PAYMENT_MONEYBOOKERS_EMAILID', '', 31, 1, NULL, NOW(), NULL, NULL);
@@ -1863,17 +1753,20 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRICE_PRECISION', '4', 1000, 11, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_TOP_MENU', 'true', 1000, 20, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_LANG_TABS', 'true', 1000, 26, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id ,configuration_key ,configuration_value ,configuration_group_id ,sort_order ,last_modified ,date_added ,use_function ,set_function) VALUES (NULL, 'MAX_DISPLAY_ORDER_RESULTS', '30', '1000', '-1', NULL , NOW(), NULL , NULL);
+INSERT INTO configuration (configuration_id ,configuration_key ,configuration_value ,configuration_group_id ,sort_order ,last_modified ,date_added ,use_function ,set_function) VALUES (NULL, 'MAX_DISPLAY_ORDER_RESULTS', '30', '1000', '30', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_THUMBS_IN_LIST', 'true', 1000, 32, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id ,configuration_key ,configuration_value ,configuration_group_id ,sort_order ,last_modified ,date_added ,use_function ,set_function) VALUES (NULL, 'USE_ADMIN_THUMBS_IN_LIST_STYLE', 'max-width:40px;max-height:40px;', '1000', '33', NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_LIST_PRODUCTS', '50', '1000', '51', NULL , NOW(), NULL , NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_LIST_CUSTOMERS', '100', '1000', '-1', NULL , NOW(), NULL , NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_LIST_CUSTOMERS', '100', '1000', '52', NULL , NOW(), NULL , NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_ROW_LISTS_ATTR_OPTIONS', '10', '1000', '53', NULL , NOW(), NULL , NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_ROW_LISTS_ATTR_VALUES', '50', '1000', '54', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WHOS_ONLINE_TIME_LAST_CLICK', '900', '1000', '60', NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WHOS_ONLINE_IP_WHOIS_SERVICE', 'http://www.utrace.de/?query=', '1000', '62', NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CONFIRM_SAVE_ENTRY', 'true', '1000', '70', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_FIXED_TOP', 'true', '1000', '23', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_FIXED_SEARCH', 'false', '1000', '24', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_COUPON_RESULTS', '30', '1000', '-1', NULL , NOW(), NULL , NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_STATS_RESULTS', '30', '1000', '55', NULL , NOW(), NULL , NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_COUPON_RESULTS', '30', '1000', '56', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_STATUSES_DISPLAY_DEFAULT', '', '1000', '90', NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(\'order_statuses\', \',\',');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_STATUSES_FOR_SALES_STATISTICS', '3', '1000', '100', NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(\'order_statuses\', \',\',');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MIN_GROUP_PRICE_STAFFEL', '2', '1000', '34', NULL , NOW(), NULL , NULL);
@@ -1883,9 +1776,6 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CSRF_TOKEN_SYSTEM', 'true', 1000, '114', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ADMIN_HEADER_X_FRAME_OPTIONS', 'true', 1000, '115', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ATTRIBUTE_MODEL_DELIMITER', '<br />', 1000, '116', NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ADMIN_SEARCH_IN_ATTR', 'false', '1000', '25', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ADMIN_SEARCH_IN_DESC', 'false', '1000', '25', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ADMIN_START_TAB_SELECTED', 'whos_online', '1000', '24', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'whos_online\', \'orders\', \'customers\', \'sales_report\', \'blog\'),');
 
 INSERT INTO configuration_group VALUES (1,'My Store','General information about my store',1,1);
 INSERT INTO configuration_group VALUES (2,'Minimum Values','The minimum values for functions / data',2,1);
@@ -1910,41 +1800,41 @@ INSERT INTO configuration_group VALUES (20,'Import/Export','Import/Export',20,1)
 INSERT INTO configuration_group VALUES (21,'Afterbuy','Afterbuy.de',21,1);
 INSERT INTO configuration_group VALUES (22,'Search Options','Additional Options for search function',22,1);
 INSERT INTO configuration_group VALUES (23,'Econda Tracking','Econda Tracking System',23,1);
-INSERT INTO configuration_group VALUES (24,'Motamo & Google Analytics Tracking','Settings for Motamo & Google Analytics Tracking',24,1); 
+INSERT INTO configuration_group VALUES (24,'PIWIK & Google Analytics Tracking','Settings for PIWIK & Google Analytics Tracking',24,1); 
 INSERT INTO configuration_group VALUES (25,'Captcha','Captcha Configuration',25,1);
-INSERT INTO configuration_group VALUES (31,'Skrill','Skrill System',31,1);
+INSERT INTO configuration_group VALUES (31,'Moneybookers','Moneybookers System',31,1);
 INSERT INTO configuration_group VALUES (40,'Popup Window Configuration','Popup Window Parameters',40,1);
 INSERT INTO configuration_group VALUES (1000,'Adminarea Options','Adminarea Configuration', 1000,1);
 
 # content manager - english
-INSERT INTO content_manager VALUES (1, 0, 0, '', 1, 'Payment & Shipping', 'Payment & Shipping', 'Put here your Payment & Shipping information.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (1, 0, 0, '', 1, 'Payment &amp; Shipping', 'Payment &amp; Shipping', 'Put here your Payment &amp; Shipping information.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (2, 0, 0, '', 1, 'Privacy Notice', 'Privacy Notice', 'Put here your Privacy Notice information.', 0, 1, '', 1, 2, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (3, 0, 0, '', 1, 'Conditions of Use', 'Conditions of Use', '<strong>Conditions of Use</strong><br /><br />Put here your Conditions of Use information.<br /><br /><ol><li>Scope of Application</li><li>Contract partner</li><li>Conclusion of the Contract</li><li>Right to cancel</li><li>Price and Delivery Costs</li><li>Shipment and delivery conditions</li><li>Payment methods</li><li>Reservation of title</li><li>Warranty</li><li>Information about online dispute resolution</li></ol>...<br />...<br />...<h2>Information about online dispute resolution</h2><p>The EU Commission provides on its website the following link to the ODR platform: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a></p><p>This platform shall be a point of entry for out-of-court resolutions of disputes arising from online sales and service contracts concluded between consumers and traders.</p><h2>Further informations</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (4, 0, 0, '', 1, 'Imprint', 'Imprint', 'Put here your Company information.<br /><br />DemoShop GmbH<br />Managing director: Max Muster und Fritz Beispiel<br /><br />Max Muster Straße 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />VAT ID No.: DE 000 111 222<br /><br />Platform of the EU Commission regarding online dispute resolution: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (5, 0, 0, '', 1, 'Index', 'Welcome', '{$greeting}<br /><br />This is the default installation of <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. All products shown are for demonstrational purposes. If you order products, they will be not be delivered nor billed.<br /><br />Should you be interested in the program, which forms the basis for this store, so please visit the website of <a href="https://www.modified-shop.org" rel="nofollow noopener" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />The text shown here may be edited in the admin area under <b>Content Manager</b> - entry Index.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (3, 0, 0, '', 1, 'Conditions of Use', 'Conditions of Use', '<strong>Conditions of Use</strong><br /><br />Put here your Conditions of Use information.<br /><br /><ol><li>Scope of Application</li><li>Contract partner</li><li>Conclusion of the Contract</li><li>Right to cancel</li><li>Price and Delivery Costs</li><li>Shipment and delivery conditions</li><li>Payment methods</li><li>Reservation of title</li><li>Warranty</li><li>Information about online dispute resolution</li></ol>...<br />...<br />...<h2>Information about online dispute resolution</h2><p>The EU Commission provides on its website the following link to the ODR platform: http://ec.europa.eu/consumers/odr.</p><p>This platform shall be a point of entry for out-of-court resolutions of disputes arising from online sales and service contracts concluded between consumers and traders.</p><h2>Further informations</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (4, 0, 0, '', 1, 'Imprint', 'Imprint', 'Put here your Company information.<br /><br />DemoShop GmbH<br />Managing director: Max Muster und Fritz Beispiel<br /><br />Max Muster Stra&szlig;e 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />VAT ID No.: DE 000 111 222<br /><br />Platform of the EU Commission regarding online dispute resolution: <a href="http//ec.europa.eu/consumers/odr" target="_blank">http//ec.europa.eu/consumers/odr</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (5, 0, 0, '', 1, 'Index', 'Welcome', '{$greeting}<br /><br />This is the default installation of <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. All products shown are for demonstrational purposes. If you order products, they will be not be delivered nor billed.<br /><br />Should you be interested in the program, which forms the basis for this store, so please visit the website of <a href="http://www.modified-shop.org" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />The text shown here may be edited in the admin area under <b>Content Manager</b> - entry Index.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (6, 0, 0, '', 1, 'Coupons', 'Coupons FAQ', '<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Buy Gift Vouchers/Coupons </strong></td></tr>\r\n<tr>\r\n<td class="main">If the shop provided gift vouchers or coupons, You can buy them alike all other products. As soon as You have bought and payed the coupon, the shop system will activate Your coupon. You will then see the coupon amount in Your shopping cart. Then You can send the coupon via e-mail by clicking the link "Send Coupon". </td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>How to dispatch Coupons </strong></td></tr>\r\n<tr>\r\n<td class="main">To dispatch a coupon, please click the link "Send Coupon" in Your shopping cart. To send the coupon to the correct person, we need the following details: Surname and realname of the recipient and a valid e-mail adress of the recipient, and the desired coupon amount (You can also use only parts of Your balance). Please provide also a short message for the recipient. Please check those information again before You click the "Send Coupon" button. You can change all information at any time before clicking the "Send Coupon" button. </td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>How to use Coupons to buy products. </strong></td></tr>\r\n<tr>\r\n<td class="main">As soon as You have a balance, You can use it to pay for Your orders. During the checkout process, You can redeem Your coupon. In case Your balance is less than the value of goods You ordered, You would have to choose Your preferred method of payment for the difference amount. In case Your balance is more than the value of goods You ordered, the remaining amount of Your balance will be saved for Your next order. </td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>How to redeem Coupons. </strong></td></tr>\r\n<tr>\r\n<td class="main">In case You have received a coupun via e-mail, You can: <br />1. Click on the link provided in the e-mail. If You do not have an account in this shop already, please create a personal account. <br />2. After having added a product to Your shopping cart, You can enter Your coupon code.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Problems?</strong></td></tr>\r\n<tr>\r\n<td class="main">If You have trouble or problems in using Your coupons, please check back with us via our e-mail: you@yourdomain.com. Please describe the encountered problem as detailed as possible! We need the following information to process Your request quickly: Your user id, the coupon code, error messages the shop system returned to You, and the name of the web browser You are using (e.g. "Internet Explorer 6" or "Firefox 1.5"). </td></tr></tbody></table>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (7, 0, 0, '', 1, 'Contact', 'Contact', 'Please enter your contact information.', 0, 1, 'contact_us.php', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (7, 0, 0, '', 1, 'Contact', 'Contact', 'Please enter your contact information.', 0, 1, '', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (8, 0, 0, '', 1, 'Sitemap', '', '', 0, 0, 'sitemap.php', 1, 8, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (9, 0, 0, '', 1, 'Right of revocation & revocation form', 'Right of revocation & revocation form', '<p><strong>Right of revocation<br /></strong><br />Add your right of revocation here.</p><p><strong>Revocation form</strong><br /><br />(Complete and return this form only if you wish to withdraw from the contract.)<br /><br />To<br />Max Mustermann / Muster GmbH<br />Musterstraße 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[enter the name, address and if appropriate, fax number and e-mail-address of the entrepreneur by the entrepreneur]:<br /><br />I/We* hereby give notice that I/We (*) withdraw from my/our (*) contract of sale of the following goods (*) / provision of the following service (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Ordered on ___________________ (*)/received on _______________________(*)<br /><br />Name of the consumer(s) ______________________________________<br />Address of the consumer(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; signature of the consumer(s) (only with message on paper)<br /><br />_____________________________________________________________________________________<br />(*) delete as applicable</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (9, 0, 0, '', 1, 'Right of revocation &amp; revocation form', 'Right of revocation &amp; revocation form', '<p><strong>Right of revocation<br /></strong><br />Add your right of revocation here.</p><p><strong>Revocation form</strong><br /><br />(Complete and return this form only if you wish to withdraw from the contract.)<br /><br />To<br />Max Mustermann / Muster GmbH<br />Musterstra&szlig;e 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[enter the name, address and if appropriate, fax number and e-mail-address of the entrepreneur by the entrepreneur]:<br /><br />I/We* hereby give notice that I/We (*) withdraw from my/our (*) contract of sale of the following goods (*) / provision of the following service (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Ordered on ___________________ (*)/received on _______________________(*)<br /><br />Name of the consumer(s) ______________________________________<br />Address of the consumer(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; signature of the consumer(s) (only with message on paper)<br /><br />_____________________________________________________________________________________<br />(*) delete as applicable</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (10, 0, 0, '', 1, 'Delivery time', 'Delivery time', 'The deadline for delivery begins when paying in advance on the day after the payment order to the remitting bank or for other payments on the day to run after the conclusion and ends with the expiry of the last day of the period. Falls on a Saturday, Sunday or a public holiday delivery nationally recognized, the last day of the period, as occurs, the next business day at the place of such a day.', 0, 1, '', 1, 10, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (11, 0, 0, '', 1, 'E-Mail Signature', '', '<b>Company</b><br />Address<br />Location<br />Homepage<br />E-mail:<br />Phone:<br />Fax:<br />CEO:<br />VAT Reg No:', 0, 1, '', 0, 11, 0, '', '', '', '', '0', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (12, 0, 0, '', 1, 'Invoice data', 'Company - Address - Code City', 'Company<br/>Address<br/>Code City<br/><br/>Phone: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>You can change this in the content manager.', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (13, 0, 0, '', 1, 'My quick purchase', 'My quick purchase', '<p>With &bdquo;My Quick purchase&ldquo; you can more easily and above all quickly place your order now.</p><p>You will find the button &bdquo;<strong>Activate my quick purchase</strong>&ldquo; on the detail page of every product below the Cart-Button, where you have to store the desired delivery method, payment method, shipping address and billing address to activate the function for the Quick purchase.<br />Afterwards you will find the button for &bdquo;<strong>My quick purchase</strong>&ldquo; ath the following locations:</p><ul><li>Product detail page</li><li>Shopping cart</li><li>Your Account &raquo; My Orders</li><li>Your Account &raquo; My Orders &raquo; Orders detail page</li></ul><p>To change the default settings for &bdquo;My quick purchase&ldquo;, go to &bdquo;Your Account&ldquo; &raquo; &bdquo;<strong>Display/change my quick purchase settings</strong>&ldquo;.</p>', 0, 1, '', 0, 13, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (13, 0, 0, '', 1, 'My quick purchase', 'My quick purchase', '<p>With &bdquo;My Quick purchase&ldquo; you can more easily and above all quickly place your order now.</p><p>You will find the button &bdquo;<strong>Activate my quick purchase</strong>&ldquo; on the detail page of every product below the Cart-Button, where you have to store the desired delivery method, payment method, shipping address and billing address to activate the function for the Quick purchase.<br />Afterwards you will find the button for &bdquo;<strong>My quick purchase</strong>&ldquo; ath the following locations:</p><ul><li>Product detail page</li><li>Shopping cart</li><li>Your Account &raquo; My Orders</li><li>Your Account &raquo; My Orders &raquo; Orders detail page</li></ul><p>To change the default settings for &bdquo;My quick purchase&ldquo;, go to &bdquo;Your Account&ldquo; &raquo; &bdquo;<strong>Display/change my quick purchase settings</strong>&ldquo;.</p>', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
 
 # content manager - german
-INSERT INTO content_manager VALUES (14, 0, 0, '', 2, 'Zahlung & Versand', 'Zahlung & Versand', 'Fügen Sie hier Ihre Informationen über Zahlung & Versand ein.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (15, 0, 0, '', 2, 'Privatsphäre und Datenschutz', 'Privatsphäre und Datenschutz', 'Fügen Sie hier Ihre Informationen über Privatsphäre und Datenschutz ein.', 0, 1, '', 1, 2, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (16, 0, 0, '', 2, 'Unsere AGB', 'Allgemeine Geschäftsbedingungen', '<strong>Allgemeine Geschäftsbedingungen</strong><br /><br />Fügen Sie hier Ihre allgemeinen Geschäftsbedingungen ein.<br /><br /><ol><li>Geltungsbereich</li><li>Vertragspartner</li><li>Angebot und Vertragsschluss</li><li>Widerrufsrecht, Widerrufsbelehrung, Widerrufsfolgen</li><li>Preise und Versandkosten</li><li>Lieferung</li><li>Zahlung</li><li>Eigentumsvorbehalt</li><li>Gewährleistung</li><li>Informationen zur Online-Streitbeilegung</li></ol>...<br />...<br />...<h2>Informationen zur Online-Streitbeilegung</h2><p>Die EU-Kommission stellt im Internet unter folgendem Link eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a></p><p>Diese Plattform dient als Anlaufstelle zur außergerichtlichen Beilegung von Streitigkeiten aus Online-Kauf- oder Dienstleistungsverträgen, an denen ein Verbraucher beteiligt ist.</p><h2>Weitere Informationen</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (17, 0, 0, '', 2, 'Impressum', 'Impressum', 'Fügen Sie hier Ihr Impressum ein.<br /><br />DemoShop GmbH<br />Geschäftsführer: Max Muster und Fritz Beispiel<br /><br />Max Muster Straße 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />UStid-Nr.: DE 000 111 222<br /><br />Plattform der EU-Kommission zur Online-Streitbeilegung: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (18, 0, 0, '', 2, 'Index', 'Willkommen', '{$greeting}<br /><br />Dies ist die Standardinstallation der <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. Alle dargestellten Produkte dienen zur Demonstration der Funktionsweise. Wenn Sie Produkte bestellen, so werden diese weder ausgeliefert, noch in Rechnung gestellt.<br /><br />Sollten Sie daran interessiert sein das Programm, welches die Grundlage für diesen Shop bildet, einzusetzen, so besuchen Sie bitte die Webseite der <a href="https://www.modified-shop.org" rel="nofollow noopener" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />Der hier dargestellte Text kann im Adminbereich unter <b>Content Manager</b> - Eintrag Index bearbeitet werden.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (19, 0, 0, '', 2, 'Gutscheine', 'Gutscheine - Fragen und Antworten', '<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Gutscheine kaufen </strong></td></tr>\r\n<tr>\r\n<td class="main">Gutscheine können, falls sie im Shop angeboten werden, wie normale Artikel gekauft werden. Sobald Sie einen Gutschein gekauft haben und dieser nach erfolgreicher Zahlung freigeschaltet wurde, erscheint der Betrag unter Ihrem Warenkorb. Nun können Sie über den Link " Gutschein versenden " den gewünschten Betrag per E-Mail versenden.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Wie man Gutscheine versendet</strong></td></tr>\r\n<tr>\r\n<td class="main">Um einen Gutschein zu versenden, klicken Sie bitte auf den Link "Gutschein versenden" in Ihrem Einkaufskorb. Um einen Gutschein zu versenden, benötigen wir folgende Angaben von Ihnen: Vor- und Nachname des Empfängers. Eine gültige E-Mail Adresse des Empfängers. Den gewünschten Betrag (Sie können auch Teilbeträge Ihres Guthabens versenden). Eine kurze Nachricht an den Empfänger. Bitte überprüfen Sie Ihre Angaben noch einmal vor dem Versenden. Sie haben vor dem Versenden jederzeit die Möglichkeit Ihre Angaben zu korrigieren.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Mit Gutscheinen einkaufen.</strong></td></tr>\r\n<tr>\r\n<td class="main">Sobald Sie über ein Guthaben verfügen, können Sie dieses zum Bezahlen Ihrer Bestellung verwenden. Während des Bestellvorganges haben Sie die Möglichkeit Ihr Guthaben einzulösen. Falls das Guthaben unter dem Warenwert liegt müssen Sie Ihre bevorzugte Zahlungsweise für den Differenzbetrag wählen. Übersteigt Ihr Guthaben den Warenwert, steht Ihnen das Restguthaben selbstverständlich für Ihre nächste Bestellung zur Verfügung.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Gutscheine verbuchen. </strong></td></tr>\r\n<tr>\r\n<td class="main">Wenn Sie einen Gutschein per E-Mail erhalten haben, können Sie den Betrag wie folgt verbuchen: <br />1. Klicken Sie auf den in der E-Mail angegebenen Link. Falls Sie noch nicht über ein persönliches Kundenkonto verfügen, haben Sie die Möglichkeit ein Konto zu eröffnen. <br />2. Nachdem Sie ein Produkt in den Warenkorb gelegt haben, können Sie dort Ihren Gutscheincode eingeben.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Falls es zu Problemen kommen sollte:</strong></td></tr>\r\n<tr>\r\n<td class="main">Falls es wider Erwarten zu Problemen mit einem Gutschein kommen sollte, kontaktieren Sie uns bitte per E-Mail: you@yourdomain.com. Bitte beschreiben Sie möglichst genau das Problem, wichtige Angaben sind unter anderem: Ihre Kundennummer, der Gutscheincode, Fehlermeldungen des Systems sowie der von Ihnen benutzte Browser (z.B. "Internet Explorer 6" oder "Firefox 1.5"). </td></tr></tbody></table>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (20, 0, 0, '', 2, 'Kontakt', 'Kontakt', 'Ihre Kontaktinformationen', 0, 1, 'contact_us.php', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (14, 0, 0, '', 2, 'Zahlung &amp; Versand', 'Zahlung &amp; Versand', 'F&uuml;gen Sie hier Ihre Informationen &uuml;ber Zahlung &amp; Versand ein.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (15, 0, 0, '', 2, 'Privatsph&auml;re und Datenschutz', 'Privatsph&auml;re und Datenschutz', 'F&uuml;gen Sie hier Ihre Informationen &uuml;ber Privatsph&auml;re und Datenschutz ein.', 0, 1, '', 1, 2, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (16, 0, 0, '', 2, 'Unsere AGB', 'Allgemeine Gesch&auml;ftsbedingungen', '<strong>Allgemeine Gesch&auml;ftsbedingungen</strong><br /><br />F&uuml;gen Sie hier Ihre allgemeinen Gesch&auml;ftsbedingungen ein.<br /><br /><ol><li>Geltungsbereich</li><li>Vertragspartner</li><li>Angebot und Vertragsschluss</li><li>Widerrufsrecht, Widerrufsbelehrung, Widerrufsfolgen</li><li>Preise und Versandkosten</li><li>Lieferung</li><li>Zahlung</li><li>Eigentumsvorbehalt</li><li>Gew&auml;hrleistung</li><li>Informationen zur Online-Streitbeilegung</li></ol>...<br />...<br />...<h2>Informationen zur Online-Streitbeilegung</h2><p>Die EU-Kommission stellt im Internet unter folgendem Link eine Plattform zur Online-Streitbeilegung bereit: http://ec.europa.eu/consumers/odr</p><p>Diese Plattform dient als Anlaufstelle zur au&szlig;ergerichtlichen Beilegung von Streitigkeiten aus Online-Kauf- oder Dienstleistungsvertr&auml;gen, an denen ein Verbraucher beteiligt ist.</p><h2>Weitere Informationen</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (17, 0, 0, '', 2, 'Impressum', 'Impressum', 'F&uuml;gen Sie hier Ihr Impressum ein.<br /><br />DemoShop GmbH<br />Gesch&auml;ftsf&uuml;hrer: Max Muster und Fritz Beispiel<br /><br />Max Muster Stra&szlig;e 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />UStid-Nr.: DE 000 111 222<br /><br />Plattform der EU-Kommission zur Online-Streitbeilegung: <a href="http//ec.europa.eu/consumers/odr" target="_blank">http//ec.europa.eu/consumers/odr</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (18, 0, 0, '', 2, 'Index', 'Willkommen', '{$greeting}<br /><br />Dies ist die Standardinstallation der <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. Alle dargestellten Produkte dienen zur Demonstration der Funktionsweise. Wenn Sie Produkte bestellen, so werden diese weder ausgeliefert, noch in Rechnung gestellt.<br /><br />Sollten Sie daran interessiert sein das Programm, welches die Grundlage f&uuml;r diesen Shop bildet, einzusetzen, so besuchen Sie bitte die Webseite der <a href="http://www.modified-shop.org" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />Der hier dargestellte Text kann im Adminbereich unter <b>Content Manager</b> - Eintrag Index bearbeitet werden.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (19, 0, 0, '', 2, 'Gutscheine', 'Gutscheine - Fragen und Antworten', '<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Gutscheine kaufen </strong></td></tr>\r\n<tr>\r\n<td class="main">Gutscheine k&ouml;nnen, falls sie im Shop angeboten werden, wie normale Artikel gekauft werden. Sobald Sie einen Gutschein gekauft haben und dieser nach erfolgreicher Zahlung freigeschaltet wurde, erscheint der Betrag unter Ihrem Warenkorb. Nun k&ouml;nnen Sie &uuml;ber den Link " Gutschein versenden " den gew&uuml;nschten Betrag per E-Mail versenden.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Wie man Gutscheine versendet</strong></td></tr>\r\n<tr>\r\n<td class="main">Um einen Gutschein zu versenden, klicken Sie bitte auf den Link "Gutschein versenden" in Ihrem Einkaufskorb. Um einen Gutschein zu versenden, ben&ouml;tigen wir folgende Angaben von Ihnen: Vor- und Nachname des Empf&auml;ngers. Eine g&uuml;ltige E-Mail Adresse des Empf&auml;ngers. Den gew&uuml;nschten Betrag (Sie k&ouml;nnen auch Teilbetr&auml;ge Ihres Guthabens versenden). Eine kurze Nachricht an den Empf&auml;nger. Bitte &uuml;berpr&uuml;fen Sie Ihre Angaben noch einmal vor dem Versenden. Sie haben vor dem Versenden jederzeit die M&ouml;glichkeit Ihre Angaben zu korrigieren.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Mit Gutscheinen einkaufen.</strong></td></tr>\r\n<tr>\r\n<td class="main">Sobald Sie &uuml;ber ein Guthaben verf&uuml;gen, k&ouml;nnen Sie dieses zum Bezahlen Ihrer Bestellung verwenden. W&auml;hrend des Bestellvorganges haben Sie die M&ouml;glichkeit Ihr Guthaben einzul&ouml;sen. Falls das Guthaben unter dem Warenwert liegt m&uuml;ssen Sie Ihre bevorzugte Zahlungsweise f&uuml;r den Differenzbetrag w&auml;hlen. &Uuml;bersteigt Ihr Guthaben den Warenwert, steht Ihnen das Restguthaben selbstverst&auml;ndlich f&uuml;r Ihre n&auml;chste Bestellung zur Verf&uuml;gung.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Gutscheine verbuchen. </strong></td></tr>\r\n<tr>\r\n<td class="main">Wenn Sie einen Gutschein per E-Mail erhalten haben, k&ouml;nnen Sie den Betrag wie folgt verbuchen: <br />1. Klicken Sie auf den in der E-Mail angegebenen Link. Falls Sie noch nicht &uuml;ber ein pers&ouml;nliches Kundenkonto verf&uuml;gen, haben Sie die M&ouml;glichkeit ein Konto zu er&ouml;ffnen. <br />2. Nachdem Sie ein Produkt in den Warenkorb gelegt haben, k&ouml;nnen Sie dort Ihren Gutscheincode eingeben.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Falls es zu Problemen kommen sollte:</strong></td></tr>\r\n<tr>\r\n<td class="main">Falls es wider Erwarten zu Problemen mit einem Gutschein kommen sollte, kontaktieren Sie uns bitte per E-Mail: you@yourdomain.com. Bitte beschreiben Sie m&ouml;glichst genau das Problem, wichtige Angaben sind unter anderem: Ihre Kundennummer, der Gutscheincode, Fehlermeldungen des Systems sowie der von Ihnen benutzte Browser (z.B. "Internet Explorer 6" oder "Firefox 1.5"). </td></tr></tbody></table>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (20, 0, 0, '', 2, 'Kontakt', 'Kontakt', 'Ihre Kontaktinformationen', 0, 1, '', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (21, 0, 0, '', 2, 'Sitemap', '', '', 0, 0, 'sitemap.php', 1, 8, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (22, 0, 0, '', 2, 'Widerrufsrecht & Widerrufsformular', 'Widerrufsrecht & Widerrufsformular', '<p><strong>Widerrufsrecht<br /></strong><br />Fügen Sie hier das Widerrufsrecht ein.</p><p><strong>Widerrufsformular</strong><br /><br />(Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte dieses Formular aus und senden Sie es zurück.)<br /><br />An<br />Max Mustermann / Muster GmbH<br />Musterstraße 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[hier ist der Name, die Anschrift und gegebenenfalls die Telefaxnummer und E-Mail-Adresse des Unternehmers durch den Unternehmer einzufügen]:<br /><br />Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Bestellt am ___________________ (*)/erhalten am _______________________(*)<br /><br />Name des/der Verbraucher(s) ______________________________________<br />Anschrift des/der Verbraucher(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Datum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)<br /><br />_____________________________________________________________________________________<br />(*) Unzutreffendes streichen</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (23, 0, 0, '', 2, 'Lieferzeit', 'Lieferzeit', 'Die Frist für die Lieferung beginnt bei Zahlung per Vorkasse am Tag nach Erteilung des Zahlungsauftrags an das überweisende Kreditinstitut bzw. bei anderen Zahlungsarten am Tag nach Vertragsschluss zu laufen und endet mit dem Ablauf des letzten Tages der Frist. Fällt der letzte Tag der Frist auf einen Samstag, Sonntag oder einen am Lieferort staatlich anerkannten allgemeinen Feiertag, so tritt an die Stelle eines solchen Tages der nächste Werktag.', 0, 1, '', 1, 10, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (24, 0, 0, '', 2, 'E-Mail Signatur', '', 'Firma<br />Adresse<br />Ort<br />Homepage<br />E-Mail:<br />Fon:<br />Fax:<br />USt-IdNr.:<br />Handelsregister<br />Geschäftsführer:', 0, 1, '', 0, 11, 0, '', '', '', '', '0', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (25, 0, 0, '', 2, 'Rechnungsdaten', 'Firma - Adresse - PLZ Stadt', 'Firma<br/>Adresse<br/>PLZ Stadt<br/><br/>Tel: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>Diese Daten können im Content Manager geändert werden.', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (26, 0, 0, '', 2, 'Mein Schnellkauf', 'Mein Schnellkauf', '<p>Mit &bdquo;Mein Schnellkauf&ldquo; können Sie Ihre Bestellung jetzt noch einfacher und vor allem schneller tätigen.</p><p>Sie finden auf der Detailseite eines jeden Artikels unterhalb des Warenkorb-Buttons die Schaltfläche &bdquo;<strong>Mein Schnellkauf aktivieren</strong>&ldquo;, wo Sie die für den Schnellkauf gewünschte Versandart, Bezahlart, Versandadresse und Rechnungsadresse hinterlegen müssen um die Funktion zu aktivieren.<br />Anschließend finden Sie an den folgenden Stellen im Shop den Button zur Bestellung mit &bdquo;<strong>Mein Schnellkauf</strong>&ldquo;:</p><ul><li>Artikel-Detailseite</li><li>Warenkorb</li><li>Mein Konto &raquo; Meine Bestellungen</li><li>Mein Konto &raquo; Meine Bestellungen &raquo; Detailseite der Bestellung</li></ul><p>Um die Voreinstellungen für &bdquo;Mein Schnellkauf&ldquo; zu ändern, gehen Sie auf &bdquo;Mein Konto&ldquo; &raquo; &bdquo;<strong>Mein Schnellkauf bearbeiten</strong>&ldquo;.</p>', 0, 1, '', 0, 13, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (22, 0, 0, '', 2, 'Widerrufsrecht &amp; Widerrufsformular', 'Widerrufsrecht &amp; Widerrufsformular', '<p><strong>Widerrufsrecht<br /></strong><br />F&uuml;gen Sie hier das Widerrufsrecht ein.</p><p><strong>Widerrufsformular</strong><br /><br />(Wenn Sie den Vertrag widerrufen wollen, dann f&uuml;llen Sie bitte dieses Formular aus und senden Sie es zur&uuml;ck.)<br /><br />An<br />Max Mustermann / Muster GmbH<br />Musterstra&szlig;e 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[hier ist der Name, die Anschrift und gegebenenfalls die Telefaxnummer und E-Mail-Adresse des Unternehmers durch den Unternehmer einzuf&uuml;gen]:<br /><br />Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag &uuml;ber den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Bestellt am ___________________ (*)/erhalten am _______________________(*)<br /><br />Name des/der Verbraucher(s) ______________________________________<br />Anschrift des/der Verbraucher(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Datum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)<br /><br />_____________________________________________________________________________________<br />(*) Unzutreffendes streichen</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (23, 0, 0, '', 2, 'Lieferzeit', 'Lieferzeit', 'Die Frist f&uuml;r die Lieferung beginnt bei Zahlung per Vorkasse am Tag nach Erteilung des Zahlungsauftrags an das &uuml;berweisende Kreditinstitut bzw. bei anderen Zahlungsarten am Tag nach Vertragsschluss zu laufen und endet mit dem Ablauf des letzten Tages der Frist. F&auml;llt der letzte Tag der Frist auf einen Samstag, Sonntag oder einen am Lieferort staatlich anerkannten allgemeinen Feiertag, so tritt an die Stelle eines solchen Tages der n&auml;chste Werktag.', 0, 1, '', 1, 10, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (24, 0, 0, '', 2, 'E-Mail Signatur', '', 'Firma<br />Adresse<br />Ort<br />Homepage<br />E-Mail:<br />Fon:<br />Fax:<br />USt-IdNr.:<br />Handelsregister<br />Gesch&auml;ftsf&uuml;hrer:', 0, 1, '', 0, 11, 0, '', '', '', '', '0', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (25, 0, 0, '', 2, 'Rechnungsdaten', 'Firma - Adresse - PLZ Stadt', 'Firma<br/>Adresse<br/>PLZ Stadt<br/><br/>Tel: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>Diese Daten k&ouml;nnen im Content Manager ge&auml;ndert werden.', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (26, 0, 0, '', 2, 'Mein Schnellkauf', 'Mein Schnellkauf', '<p>Mit &bdquo;Mein Schnellkauf&ldquo; k&ouml;nnen Sie Ihre Bestellung jetzt noch einfacher und vor allem schneller t&auml;tigen.</p><p>Sie finden auf der Detailseite eines jeden Artikels unterhalb des Warenkorb-Buttons die Schaltfl&auml;che &bdquo;<strong>Mein Schnellkauf aktivieren</strong>&ldquo;, wo Sie die f&uuml;r den Schnellkauf gew&uuml;nschte Versandart, Bezahlart, Versandadresse und Rechnungsadresse hinterlegen m&uuml;ssen um die Funktion zu aktivieren.<br />Anschlie&szlig;end finden Sie an den folgenden Stellen im Shop den Button zur Bestellung mit &bdquo;<strong>Mein Schnellkauf</strong>&ldquo;:</p><ul><li>Artikel-Detailseite</li><li>Warenkorb</li><li>Mein Konto &raquo; Meine Bestellungen</li><li>Mein Konto &raquo; Meine Bestellungen &raquo; Detailseite der Bestellung</li></ul><p>Um die Voreinstellungen f&uuml;r &bdquo;Mein Schnellkauf&ldquo; zu &auml;ndern, gehen Sie auf &bdquo;Mein Konto&ldquo; &raquo; &bdquo;<strong>Mein Schnellkauf bearbeiten</strong>&ldquo;.</p>', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
 
 # countries
 INSERT INTO countries VALUES (1,'Afghanistan','AF','AFG',1,1,0);
@@ -2096,7 +1986,7 @@ INSERT INTO countries VALUES (146,'Myanmar','MM','MMR',1,1,0);
 INSERT INTO countries VALUES (147,'Namibia','NA','NAM',1,1,0);
 INSERT INTO countries VALUES (148,'Nauru','NR','NRU',1,1,0);
 INSERT INTO countries VALUES (149,'Nepal','NP','NPL',1,1,0);
-INSERT INTO countries VALUES (150,'Netherlands','NL','NLD',5,1,0);
+INSERT INTO countries VALUES (150,'Netherlands','NL','NLD',1,1,0);
 INSERT INTO countries VALUES (151,'Netherlands Antilles','AN','ANT',1,1,0);
 INSERT INTO countries VALUES (152,'New Caledonia','NC','NCL',1,1,0);
 INSERT INTO countries VALUES (153,'New Zealand','NZ','NZL',1,1,0);
@@ -2182,7 +2072,6 @@ INSERT INTO countries VALUES (232,'Virgin Islands (U.S.)','VI','VIR',1,1,0);
 INSERT INTO countries VALUES (233,'Wallis and Futuna Islands','WF','WLF',1,1,0);
 INSERT INTO countries VALUES (234,'Western Sahara','EH','ESH',1,1,0);
 INSERT INTO countries VALUES (235,'Yemen','YE','YEM',1,1,0);
-#INSERT INTO countries VALUES (236,'Yugoslavia','YU','YUG',1,1,0);
 INSERT INTO countries VALUES (237,'Zaire','ZR','ZAR',1,1,0);
 INSERT INTO countries VALUES (238,'Zambia','ZM','ZMB',1,1,0);
 INSERT INTO countries VALUES (239,'Zimbabwe','ZW','ZWE',1,1,0);
@@ -2194,10 +2083,10 @@ INSERT INTO countries VALUES (242,'Kosovo','CS','SCG',1,1,0);
 INSERT INTO currencies VALUES (1,'Euro','EUR','','EUR',',','.','2','1.0000',NOW(),'1');
 INSERT INTO currencies VALUES (2,'United States Dollar','USD', '$', '', '.', ',', '2','1.2978',NOW(),'0');
 INSERT INTO currencies VALUES (3,'Schweizer Franken','CHF', 'CHF', '', '.', '', '2','1.2044',NOW(),'0');
-INSERT INTO currencies VALUES (4,'Great Britain Pound','GBP', '', '£', '.', ',', '2','0.8094',NOW(),'0');
+INSERT INTO currencies VALUES (4,'Great Britain Pound','GBP', '', '&pound;', '.', ',', '2','0.8094',NOW(),'0');
 
 # database Version
-INSERT INTO database_version(version) VALUES ('MOD_2.0.6.0');
+INSERT INTO database_version(version) VALUES ('MOD_2.0.1.0');
 
 # languages
 INSERT INTO languages VALUES (1,'English','en','icon.gif','english',2,'iso-8859-15',1,1);
@@ -2208,9 +2097,9 @@ INSERT INTO orders_status VALUES (1,1,'Pending', 1);
 INSERT INTO orders_status VALUES (1,2,'Offen', 1);
 INSERT INTO orders_status VALUES (2,1,'Processing', 2);
 INSERT INTO orders_status VALUES (2,2,'In Bearbeitung', 2);
-INSERT INTO orders_status VALUES (3,1,'Shipped', 3);
+INSERT INTO orders_status VALUES (3,1,'Delivered', 3);
 INSERT INTO orders_status VALUES (3,2,'Versendet', 3);
-INSERT INTO orders_status VALUES (4,1,'Canceled', 4);
+INSERT INTO orders_status VALUES (4,1,'Reversed', 4);
 INSERT INTO orders_status VALUES (4,2,'Storniert', 4);
 
 # shipping status
@@ -2223,7 +2112,7 @@ INSERT INTO shipping_status VALUES (3, 2, '2 Wochen', '', 3);
 
 # shop offline
 INSERT INTO shop_configuration (configuration_id, configuration_key, configuration_value) VALUES(NULL, 'SHOP_OFFLINE', '');
-INSERT INTO shop_configuration (configuration_id, configuration_key, configuration_value) VALUES(NULL, 'SHOP_OFFLINE_MSG', '<p style="text-align: center;"><span style="font-size: large;"><font face="Arial">Unser Shop ist aufgrund von Wartungsarbeiten im Moment nicht erreichbar.<br /></font><font face="Arial">Bitte besuchen Sie uns zu einem späteren Zeitpunkt noch einmal.<br /><br /><br /><br /></font></span><font><font><a href="login_admin.php"><font color="#808080">Login</font></a></font></font><span style="font-size: large;"><font face="Arial"><br /></font></span></p>');
+INSERT INTO shop_configuration (configuration_id, configuration_key, configuration_value) VALUES(NULL, 'SHOP_OFFLINE_MSG', '<p style="text-align: center;"><span style="font-size: large;"><font face="Arial">Unser Shop ist aufgrund von Wartungsarbeiten im Moment nicht erreichbar.<br /></font><font face="Arial">Bitte besuchen Sie uns zu einem sp&auml;teren Zeitpunkt noch einmal.<br /><br /><br /><br /></font></span><font><font><a href="login_admin.php"><font color="#808080">Login</font></a></font></font><span style="font-size: large;"><font face="Arial"><br /></font></span></p>');
 
 # USA
 INSERT INTO zones VALUES (NULL,223,'AL','Alabama');
@@ -3213,17 +3102,17 @@ INSERT INTO zones VALUES (NULL,10,'BA','Buenos Aires');
 INSERT INTO zones VALUES (NULL,10,'CT','Catamarca');
 INSERT INTO zones VALUES (NULL,10,'CC','Chaco');
 INSERT INTO zones VALUES (NULL,10,'CH','Chubut');
-INSERT INTO zones VALUES (NULL,10,'CD','Córdoba');
+INSERT INTO zones VALUES (NULL,10,'CD','C—rdoba');
 INSERT INTO zones VALUES (NULL,10,'CR','Corrientes');
-INSERT INTO zones VALUES (NULL,10,'ER','Entre Ríos');
+INSERT INTO zones VALUES (NULL,10,'ER','Entre R’os');
 INSERT INTO zones VALUES (NULL,10,'FO','Formosa');
 INSERT INTO zones VALUES (NULL,10,'JY','Jujuy');
 INSERT INTO zones VALUES (NULL,10,'LP','La Pampa');
 INSERT INTO zones VALUES (NULL,10,'LR','La Rioja');
 INSERT INTO zones VALUES (NULL,10,'MZ','Mendoza');
 INSERT INTO zones VALUES (NULL,10,'MN','Misiones');
-INSERT INTO zones VALUES (NULL,10,'NQ','Neuquén');
-INSERT INTO zones VALUES (NULL,10,'RN','Río Negro');
+INSERT INTO zones VALUES (NULL,10,'NQ','NeuquŽn');
+INSERT INTO zones VALUES (NULL,10,'RN','R’o Negro');
 INSERT INTO zones VALUES (NULL,10,'SA','Salta');
 INSERT INTO zones VALUES (NULL,10,'SJ','San Juan');
 INSERT INTO zones VALUES (NULL,10,'SL','San Luis');
@@ -3231,7 +3120,7 @@ INSERT INTO zones VALUES (NULL,10,'SC','Santa Cruz');
 INSERT INTO zones VALUES (NULL,10,'SF','Santa Fe');
 INSERT INTO zones VALUES (NULL,10,'SE','Santiago del Estero');
 INSERT INTO zones VALUES (NULL,10,'TF','Tierra del Fuego');
-INSERT INTO zones VALUES (NULL,10,'TM','Tucumán');
+INSERT INTO zones VALUES (NULL,10,'TM','Tucum‡n');
 
 #ID
 INSERT INTO zones VALUES (NULL,100,'AC','Aceh');

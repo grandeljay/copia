@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: order_total.php 12617 2020-03-03 14:57:09Z GTB $
+   $Id: order_total.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -50,7 +50,7 @@ class order_total {
       }
       unset($modules);
       
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         include_once(DIR_WS_LANGUAGES.$_SESSION['language'].'/modules/order_total/'.$value);
         include_once(DIR_WS_MODULES.'order_total/'.$value);
         $class = substr($value, 0, strrpos($value, '.'));
@@ -80,15 +80,9 @@ class order_total {
     if (MODULE_ORDER_TOTAL_INSTALLED) {
       reset($this->modules);
       $output_string = '';
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
-        if ($GLOBALS[$class]->enabled 
-            && isset($GLOBALS[$class]->credit_class) 
-            && $GLOBALS[$class]->credit_class
-            && method_exists($GLOBALS[$class], 'use_credit_amount')
-            && method_exists($GLOBALS[$class], 'credit_selection')
-            ) 
-        {
+        if ($GLOBALS[$class]->enabled && isset($GLOBALS[$class]->credit_class) && $GLOBALS[$class]->credit_class) {
           $use_credit_string = $GLOBALS[$class]->use_credit_amount();
           if ($selection_string == '') {
             $selection_string = $GLOBALS[$class]->credit_selection();
@@ -120,13 +114,9 @@ class order_total {
   function update_credit_account($i) {
     if (MODULE_ORDER_TOTAL_INSTALLED) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
-        if ($GLOBALS[$class]->enabled 
-            && isset($GLOBALS[$class]->credit_class) 
-            && $GLOBALS[$class]->credit_class
-            && method_exists($GLOBALS[$class], 'update_credit_account')
-            ) {
+        if (($GLOBALS[$class]->enabled && isset($GLOBALS[$class]->credit_class) && $GLOBALS[$class]->credit_class)) {
           $GLOBALS[$class]->update_credit_account($i);
         }
       }
@@ -142,14 +132,9 @@ class order_total {
   function collect_posts() {
     if (MODULE_ORDER_TOTAL_INSTALLED) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
-        if ($GLOBALS[$class]->enabled 
-            && isset($GLOBALS[$class]->credit_class) 
-            && $GLOBALS[$class]->credit_class
-            && method_exists($GLOBALS[$class], 'collect_posts')
-            )
-        {
+        if (($GLOBALS[$class]->enabled && isset($GLOBALS[$class]->credit_class) && $GLOBALS[$class]->credit_class)) {
           $post_var = 'c'.$GLOBALS[$class]->code;
           if (isset($_POST[$post_var]) && $_POST[$post_var]) {
             $_SESSION[$post_var] = $_POST[$post_var];
@@ -174,15 +159,10 @@ class order_total {
     if (MODULE_ORDER_TOTAL_INSTALLED) {
       $total_deductions = 0;
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
         $order_total = $this->get_order_total_main($class, $this->order_total);
-        if ($GLOBALS[$class]->enabled 
-            && isset($GLOBALS[$class]->credit_class) 
-            && $GLOBALS[$class]->credit_class
-            && method_exists($GLOBALS[$class], 'pre_confirmation_check')
-            )
-        {
+        if (($GLOBALS[$class]->enabled && isset($GLOBALS[$class]->credit_class) && $GLOBALS[$class]->credit_class)) {
           $total_deductions = $total_deductions + $GLOBALS[$class]->pre_confirmation_check($order_total);
           $order_total = $order_total - $GLOBALS[$class]->pre_confirmation_check($order_total);
         }
@@ -202,14 +182,9 @@ class order_total {
   function apply_credit() {
     if (MODULE_ORDER_TOTAL_INSTALLED) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
-        if ($GLOBALS[$class]->enabled 
-            && isset($GLOBALS[$class]->credit_class) 
-            && $GLOBALS[$class]->credit_class
-            && method_exists($GLOBALS[$class], 'apply_credit')
-            )
-        {
+        if (($GLOBALS[$class]->enabled && isset($GLOBALS[$class]->credit_class) && $GLOBALS[$class]->credit_class)) {
           $GLOBALS[$class]->apply_credit();
         }
       }
@@ -221,13 +196,9 @@ class order_total {
   function clear_posts() {
     if (MODULE_ORDER_TOTAL_INSTALLED) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
-        if ($GLOBALS[$class]->enabled 
-            && isset($GLOBALS[$class]->credit_class) 
-            && $GLOBALS[$class]->credit_class
-            )
-        {
+        if (($GLOBALS[$class]->enabled && isset($GLOBALS[$class]->credit_class) && $GLOBALS[$class]->credit_class)) {
           $post_var = 'c'.$GLOBALS[$class]->code;
           unset ($_SESSION[$post_var]);
         }
@@ -247,15 +218,12 @@ class order_total {
   }
 
   function process() {
-    global $xtPrice;
-        
     $order_total_array = array ();
     if (is_array($this->modules)) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
         if ($GLOBALS[$class]->enabled) {
-          $xtPrice->show_price_tax = 0;
           $GLOBALS[$class]->output = array();
           $GLOBALS[$class]->process();
 
@@ -266,7 +234,7 @@ class order_total {
                 'title' => $GLOBALS[$class]->output[$i]['title'], 
                 'text' => $GLOBALS[$class]->output[$i]['text'], 
                 'value' => $GLOBALS[$class]->output[$i]['value'], 
-                'sort_order' => ((isset($GLOBALS[$class]->output[$i]['sort_order'])) ? $GLOBALS[$class]->output[$i]['sort_order'] : $GLOBALS[$class]->sort_order)
+                'sort_order' => $GLOBALS[$class]->sort_order
                 );
             }
           }
@@ -281,7 +249,7 @@ class order_total {
     $output_string = '';
     if (is_array($this->modules)) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
         if ($GLOBALS[$class]->enabled) {
           $size = sizeof($GLOBALS[$class]->output);
@@ -299,7 +267,7 @@ class order_total {
     $arr_output = array();
     if (is_array($this->modules)) {
       reset($this->modules);
-      foreach ($this->modules as $value) {
+      while (list (, $value) = each($this->modules)) {
         $class = substr($value, 0, strrpos($value, '.'));
         if ($GLOBALS[$class]->enabled) {
           $size = sizeof($GLOBALS[$class]->output);
@@ -309,7 +277,6 @@ class order_total {
               'text' => $GLOBALS[$class]->output[$i]['text'],
               'value' => $GLOBALS[$class]->output[$i]['value'],
               'class' => $class,
-              'sort_order' => ((isset($GLOBALS[$class]->output[$i]['sort_order'])) ? $GLOBALS[$class]->output[$i]['sort_order'] : $GLOBALS[$class]->sort_order)
             );
           }
         }

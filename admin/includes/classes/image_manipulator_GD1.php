@@ -1,6 +1,6 @@
 <?php
 /* ----------------------------------------------------------------------------------------
-   $Id: image_manipulator_GD1.php 12527 2020-01-16 07:24:25Z GTB $   
+   $Id: image_manipulator_GD1.php 950 2005-05-14 16:45:21Z mz $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -23,9 +23,9 @@ class image_manipulation
 		$this->a = $this->correctImageOrientation($resource_file);	// image to be thumbnailed
 		$this->c = $transform;
 		$this->d = $destination_file;	// thumbnail saved to
-		$this->e = (((int)$compression != 0) ? (int)$compression : 80);	// compression ration for jpeg thumbnails
-		$this->m = (int)$max_width;
-		$this->n = (int)$max_height;
+		$this->e = $compression;	// compression ration for jpeg thumbnails
+		$this->m = $max_width;
+		$this->n = $max_height;
 
 		$this->compile();
 		if($this->c !== "")
@@ -42,14 +42,13 @@ class image_manipulation
 			$this->i = $this->h[0];
 			$this->j = $this->h[1];
 			$this->k = $this->h[2];
-		  
-		  if ($this->m == 0) $this->m = $this->i;
-		  if ($this->n == 0) $this->n = $this->j;
-		  
+		
+      //BOF -web28- 2011-03-27 - OPTION DO NOT ENLARGE SMALL PICTURES
       if(PRODUCT_IMAGE_NO_ENLARGE_UNDER_DEFAULT == 'false'){
         if($this->i < $this->m) {$this->m = $this->i;}
         if($this->j < $this->n) {$this->n = $this->j;}
       }
+      //EOF  -web28- 2011-03-27 - OPTION DO NOT ENLARGE SMALL PICTURES
 			
 			$this->o = ($this->i / $this->m);
 			$this->p = ($this->j / $this->n);

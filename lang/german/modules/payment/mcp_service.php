@@ -19,9 +19,9 @@ define('MODULE_PAYMENT_MCP_SERVICE_ACCESS_KEY_DESC','Access-Key von micropayment
 define('MODULE_PAYMENT_MCP_SERVICE_PROJECT_CODE_TITLE',' Projektcode');
 define('MODULE_PAYMENT_MCP_SERVICE_PROJECT_CODE_DESC','Projektcode von micropayment&trade;');
 define('MODULE_PAYMENT_MCP_SERVICE_PAYTEXT_TITLE',' Bezahltext');
-define('MODULE_PAYMENT_MCP_SERVICE_PAYTEXT_DESC','Dies wird auf der Rechnung bzw. als Titel im Bezahlfenster angezeigt. Mit dem Platzhalter #ORDER# k&ouml;nnen Sie die OrderID der Bestellung mit einf&uuml;gen. z.B. "Bestellung #ORDER#" w&uuml;rde "Bestellung 0000023" anzeigen.');
+define('MODULE_PAYMENT_MCP_SERVICE_PAYTEXT_DESC','Dies wird auf der Rechnung bzw. als Titel im Bezahlfenster angezeigt. Mit dem Platzhalter #ORDER# k&ouml;nnen sie die OrderID der Bestellung mit einf&uuml;gen. z.B. "Bestellung #ORDER#" w&uuml;rde "Bestellung 0000023" anzeigen.');
 define('MODULE_PAYMENT_MCP_SERVICE_THEME_TITLE',' Theme');
-define('MODULE_PAYMENT_MCP_SERVICE_THEME_DESC','Theme f&uuml;r das Bezahlfenster, Standard ist x1');
+define('MODULE_PAYMENT_MCP_SERVICE_THEME_DESC','Theme f&uuml;r das Bezahlfenster, Default ist x1');
 
 define('MODULE_PAYMENT_MCP_SERVICE_GFX_TITLE',' Logo-Code');
 define('MODULE_PAYMENT_MCP_SERVICE_GFX_DESC','Tragen Sie hier Ihren Logo-Code ein.');
@@ -49,7 +49,7 @@ define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_CANCELLED_ID_TITLE',' Bestellsta
 define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_CANCELLED_ID_DESC','Wenn eine Bestellung storniert wird, wird dieser Status gesetzt');
 
 define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_REFUNDED_ID_TITLE',' Bestellstatus: Refunded');
-define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_REFUNDED_ID_DESC','Wenn ein Refund ausgel&ouml;st wird, wird dieser Status gesetzt');
+define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_REFUNDED_ID_DESC','Wenn ein Refund ausgelöst wird, wird dieser Status gesetzt');
 
 define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_PAYMENT_REVIEW_ID_TITLE',' Bestellstatus: Bezahlung pr&uuml;fen');
 define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_PAYMENT_REVIEW_ID_DESC','Bei problemen, wird dieser Status gesetzt, damit Sie dies pr&uuml;fen k&ouml;nnen.');
@@ -60,7 +60,7 @@ define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_CONFLICT_ID_DESC','Sollte es zu 
 define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_PARTPAY_ID_TITLE',' Bestellstatus: Vorkasse - Teilzahlung');
 define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_PARTPAY_ID_DESC','Wenn ein Zahlungseingang bei Vorkasse gemeldet wird, die Bestellung aber nicht voll bezahlt ist, wird dieser Status gesetzt.');
 
-define('MODULE_PAYMENT_MCP_SERVICE_REFUND_COMMENT','Ein Refund wurde ausgel&ouml;st.');
+define('MODULE_PAYMENT_MCP_SERVICE_REFUND_COMMENT','Ein Refund wurde ausgelöst.');
 define('MODULE_PAYMENT_MCP_SERVICE_SUCCESS_TRANSACTION','Die Bestellung wurde bezahlt. Der Auth-Code ist: %s');
 define('MODULE_PAYMENT_MCP_SERVICE_ERROR_TERMINATED','Die Anfrage ist ung&uuml;ltig.');
 define('MODULE_PAYMENT_MCP_SERVICE_ERROR_UNKNOWN_ORDER_ID','Die Bestellung existiert nicht');
@@ -75,7 +75,7 @@ define('MODULE_PAYMENT_MCP_SERVICE_EXPIRE_DAYS_DESC','Wie lang kann eine Bestell
 
 define('MODULE_PAYMENT_MCP_SERVICE_NEW_VERSION','%s<div class="mcp_notice_register">Es steht eine neue micropayment&trade; Modul-Version mit neuen Funktionen und Features f&uuml;r Ihr Shopsystem zur Verf&uuml;gung. <a href="http://ecommerce.micropayment.de/modifiedshop/" target="_new">Zur neuen Modulversion.</a></div>');
 
-define('MODULE_PAYMENT_MCP_SERVICE_NO_ACCOUNT','%s<div class="mcp_notice_register">Damit die Bezahlmodule von Micropayment&trade; funktionieren, m&uuml;ssen Sie einen Account bei Micropayment&trade; anlegen und ein Projekt erstellen. <a href="https://%s.micropayment.de" target="blank">Klicken Sie hier um sich zu Registrieren.</a></div>');
+define('MODULE_PAYMENT_MCP_SERVICE_NO_ACCOUNT','%s<div class="mcp_notice_register">Damit die Bezahlmodule von Micropayment&trade; funktionieren, m&uuml;ssen Sie einen Account bei Micropayment&trade; anlegen und ein Projekt erstellen.<a href="https://%s.micropayment.de" target="blank">Klicken Sie hier um sich zu Registrieren.</a></div>');
 define('MODULE_PAYMENT_MCP_SERVICE_CSS','
 <style type="text/css">
 .mcp_notice_register {

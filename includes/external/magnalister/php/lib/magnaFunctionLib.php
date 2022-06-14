@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: magnaFunctionLib.php 6818 2016-07-26 10:54:59Z MaW $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -58,8 +58,6 @@ function html_image($image, $alt = "", $width = "", $height = "") {
 }
 
 function generateProductCategoryThumb($fName, $w, $h, $noImageIcon = false) {
-    // we will get the umlauts in image as html code from gambio shop so convert them
-    $fName = html_entity_decode($fName);
 	$retina = ML_RETINA_DISPLY;
 
 	if (!function_exists('imagecreatetruecolor')) {
@@ -158,13 +156,7 @@ function sanitizeProductDescription($str, $allowable_tags = '', $allowable_attri
 	$str = stripEvilBlockTags($str);
 
 	/* Convert Gambio-Tabs to H1-Headlines */
-	if (getDBConfigValue('gambio.tabs.display', 0, 'h1') == 'none') {
-		if (strpos($str, '[TAB:')) {
-			$str = substr($str, 0, strpos($str, '[TAB:'));
-		}
-	} else {
-		$str = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $str);
-	}
+	$str = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $str);
 
 	if (stripos($allowable_tags, '<br') === false) {
 		/* Convert (x)html breaks with or without atrributes to newlines. */
@@ -230,11 +222,7 @@ function substituteTemplate($tmplStr, $substitution) {
 			preg_replace(
 				'/(src|SRC|href|HREF|rev|REV)(\s*=\s*)(\'|")(#PICTURE1#)/',
 				'\1\2\3'.$substitution['#PICTURE1#'],
-				preg_replace(
-                    '/(url|URL)(\s*)(\()([\'"]{0,1})#PICTURE1#([\'"]{0,1})(\))/', 
-                    '\1\2\3\4'.$substitution['#PICTURE1#'].'\5\6', 
-                    $tmplStr
-                )
+				$tmplStr
 			)
 		);
 	}
@@ -468,17 +456,10 @@ function delete_double_customers() {
 }
 
 function delete_double_ot_lines() {
-	// for performance reasons, take only the last 7 days + no more than 50 magnalister orders
-	$iStartFrom = MagnaDB::gi()->fetchOne('SELECT MIN(orders_id) FROM '.TABLE_ORDERS.' 
-		WHERE UNIX_TIMESTAMP(date_purchased) >= (UNIX_TIMESTAMP() - (7 * 86400))');
-	$aMLorders = MagnaDB::gi()->fetchArray ('SELECT orders_id FROM '.TABLE_MAGNA_ORDERS.'
-		WHERE orders_id >= '.$iStartFrom.' 
-		ORDER BY orders_id DESC LIMIT 50', true);
-	if (count($aMLorders) == 0) return;
 	$doubleOTLines = MagnaDB::gi()->fetchArray ('
 		SELECT ot.orders_id, MAX(ot.orders_total_id) max_orders_total_id, COUNT(*) as cnt
-		 FROM '.TABLE_ORDERS_TOTAL.' ot
-		  WHERE ot.orders_id IN ('.implode(',', $aMLorders).')
+		 FROM '.TABLE_ORDERS_TOTAL.' ot, '.TABLE_MAGNA_ORDERS.' mo
+		  WHERE ot.orders_id=mo.orders_id
 		   GROUP BY ot.orders_id, ot.class, ot.title, ot.text
 		   HAVING cnt > 1');
 	if (empty($doubleOTLines) || !is_array($doubleOTLines)) {
@@ -566,44 +547,42 @@ function generateUniqueProductModels() {
 		}
 	}
 	# Varianten
-	if (MagnaDB::gi()->columnExistsInTable('attributes_model', TABLE_PRODUCTS_ATTRIBUTES)) {
-		MagnaDB::gi()->query('
-			UPDATE '.TABLE_PRODUCTS_ATTRIBUTES.'
-			   SET attributes_model=CONCAT(\'p\', products_id, \'_\', products_attributes_id)
-			 WHERE attributes_model=\'\' OR attributes_model IS NULL
-		');
-		$q = MagnaDB::gi()->query('
-		    SELECT attributes_model, COUNT(attributes_model) as cnt
-		      FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
-		     WHERE attributes_model <> \'\'
-		  GROUP BY attributes_model
-		    HAVING cnt > 1
-		');
-		$dblAttrModel = array();
-		while ($row = MagnaDB::gi()->fetchNext($q)) {
-			$dblAttrModel[] = $row['attributes_model'];
-		}
-	
-		$q = MagnaDB::gi()->query('
-			SELECT products_attributes_id, attributes_model
-			  FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
-			 WHERE attributes_model IN (\''.implode('\', \'', $dblAttrModel).'\')
-		');
-		$dblAttrModel = array();
-		while ($row = MagnaDB::gi()->fetchNext($q)) {
-			$dblAttrModel[$row['attributes_model']][] = $row['products_attributes_id'];
-		}
-		//echo print_m($dblProdModel);
-		if (!empty($dblAttrModel)) {
-			foreach ($dblAttrModel as $pMod => $pIDs) {
-				$i = 1;
-				foreach ($pIDs as $pID) {
-					MagnaDB::gi()->update(TABLE_PRODUCTS_ATTRIBUTES, array(
-						'attributes_model' => $pMod.'_'.($i++)
-					), array(
-						'products_attributes_id' => $pID
-					));
-				}
+	MagnaDB::gi()->query('
+		UPDATE '.TABLE_PRODUCTS_ATTRIBUTES.'
+		   SET attributes_model=CONCAT(\'p\', products_id, \'_\', products_attributes_id)
+		 WHERE attributes_model=\'\' OR attributes_model IS NULL
+	');
+	$q = MagnaDB::gi()->query('
+	    SELECT attributes_model, COUNT(attributes_model) as cnt
+	      FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
+	     WHERE attributes_model <> \'\'
+	  GROUP BY attributes_model
+	    HAVING cnt > 1
+	');
+	$dblAttrModel = array();
+	while ($row = MagnaDB::gi()->fetchNext($q)) {
+		$dblAttrModel[] = $row['attributes_model'];
+	}
+
+	$q = MagnaDB::gi()->query('
+		SELECT products_attributes_id, attributes_model
+		  FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
+		 WHERE attributes_model IN (\''.implode('\', \'', $dblAttrModel).'\')
+	');
+	$dblAttrModel = array();
+	while ($row = MagnaDB::gi()->fetchNext($q)) {
+		$dblAttrModel[$row['attributes_model']][] = $row['products_attributes_id'];
+	}
+	//echo print_m($dblProdModel);
+	if (!empty($dblAttrModel)) {
+		foreach ($dblAttrModel as $pMod => $pIDs) {
+			$i = 1;
+			foreach ($pIDs as $pID) {
+				MagnaDB::gi()->update(TABLE_PRODUCTS_ATTRIBUTES, array(
+					'attributes_model' => $pMod.'_'.($i++)
+				), array(
+					'products_attributes_id' => $pID
+				));
 			}
 		}
 	}
@@ -768,11 +747,8 @@ function magnaSKU2pID($sku, $mainOnly = false) {
 			$aID = magnaSKU2aID($skuOriginal);
 			if ($aID !== false) {
 				$pID = (int)MagnaDB::gi()->fetchOne('
-					SELECT products_id 
-					  FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
-					 WHERE products_attributes_id = \''.$aID.'\'
-					       AND products_id != 0
-					 LIMIT 1
+					SELECT products_id FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
+					 WHERE products_attributes_id = \''.$aID.'\' LIMIT 1
 				');
 				if ($pID > 0)  {
 					return $pID;
@@ -876,22 +852,22 @@ function magnaSKU2aID($sku, $pId = false, $multiple = false) {
 			$utf8Sku = magnalisterIsUTF8($sku) ? $sku : utf8_encode($sku);
 			if (preg_match('/(.*)_MLV([0-9]*)_([0-9]*)$/u', $utf8Sku, $match)) {
 				$pID = magnaSKU2pID($match[1]);
-				return MagnaDB::gi()->fetchOne(eecho('
+				return MagnaDB::gi()->fetchOne('
 					SELECT products_attributes_id
 					  FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
 					 WHERE products_id="'.$pID.'"
 						   AND options_id="'.$match[2].'"
 						   AND options_values_id="'.$match[3].'"
 					 LIMIT 1
-				', false));
+				');
 			} else if (MagnaDB::gi()->columnExistsInTable('attributes_model', TABLE_PRODUCTS_ATTRIBUTES)) {
-				$aID = MagnaDB::gi()->fetchOne(eecho('
+				$aID = MagnaDB::gi()->fetchOne('
 					SELECT products_attributes_id
 					  FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
 					 WHERE attributes_model = "'.MagnaDB::gi()->escape($sku).'"
-						   '.($pId > 0 ? 'AND products_id = "'.$pId.'"' : 'AND products_id != 0').'
+						   '.($pId > 0 ? 'AND products_id = "'.$pId.'"' : '').'
 					 LIMIT 1
-				', false));
+				');
 				if ($aID > 0) return $aID;
 			}
 		} while (false);
@@ -902,59 +878,36 @@ function magnaSKU2aID($sku, $pId = false, $multiple = false) {
 	if (strpos($sku, 'MLV') === 0) {
 		$skuTmp = str_replace('MLV', '', $sku);
 		$opt = explode('_', $skuTmp);
-	} else {
-		$multiVar = MagnaDB::gi()->fetchRow(eecho('
-			SELECT mv.products_id, mv.products_sku, mv.variation_attributes
-			  FROM '.TABLE_MAGNA_VARIATIONS.' mv, '.TABLE_PRODUCTS.' p
-			 WHERE (mv.'.mlGetVariationSkuField().'="'.MagnaDB::gi()->escape($sku).'" OR mv.variation_products_model="'.MagnaDB::gi()->escape($sku).'")
-			   AND mv.products_id = p.products_id AND mv.products_sku = p.products_model
-			 LIMIT 1
-		', false));
-
-		if (empty($multiVar)) {
-			// if products_model and _id don't match the product table
-			// look if at least one matches
-			$multiVar = MagnaDB::gi()->fetchRow(eecho('
-			SELECT mv.products_id, mv.products_sku, mv.variation_attributes
-			  FROM '.TABLE_MAGNA_VARIATIONS.' mv, '.TABLE_PRODUCTS.' p
-			 WHERE (mv.'.mlGetVariationSkuField().' = "'.MagnaDB::gi()->escape($sku).'" OR mv.variation_products_model = "'.MagnaDB::gi()->escape($sku).'")
-			   AND mv.products_id = p.products_id
-			 LIMIT 1
-			', false));
-
-            // Do not make (AND (mv.products_id = p.products_id OR mv.products_sku = p.products_model) its really slow...
-            if (empty($multiVar)) {
-                $multiVar = MagnaDB::gi()->fetchRow(eecho("
-                    SELECT mv.products_id, mv.products_sku, mv.variation_attributes
-                      FROM ".TABLE_MAGNA_VARIATIONS." mv, ".TABLE_PRODUCTS." p
-                     WHERE     (mv.".mlGetVariationSkuField()." = '".MagnaDB::gi()->escape($sku)."' OR mv.variation_products_model = '".MagnaDB::gi()->escape($sku)."')
-                           AND mv.products_sku = p.products_model
-                    LIMIT 1
-                ", false));
-            }
+	} else if (
+		($multiVar = MagnaDB::gi()->fetchRow(eecho('
+				SELECT products_id, products_sku, variation_attributes
+				  FROM '.TABLE_MAGNA_VARIATIONS.'
+				 WHERE ('.mlGetVariationSkuField().'="'.MagnaDB::gi()->escape($sku).'" OR variation_products_model="'.MagnaDB::gi()->escape($sku).'")
+				 LIMIT 1
+			', false))
+		)
+		&& !empty($multiVar)
+	) {
+		// if key type is product model try to fetch the actual product_id
+		if ('artNr' == getDBConfigValue('general.keytype', '0')) {
+			$iProductId = magnaSKU2pID($multiVar['products_sku'], true);
+			if ($iProductId > 0) {
+				$multiVar['products_id'] = $iProductId.''; // cast to string because ctype_digit() needs a string
+			}
 		}
-		if(!empty($multiVar)) {
-			// if key type is product model try to fetch the actual product_id
-			if ('artNr' == getDBConfigValue('general.keytype', '0')) {
-				$iProductId = magnaSKU2pID($multiVar['products_sku'], true);
-				if ($iProductId > 0) {
-					$multiVar['products_id'] = $iProductId.''; // cast to string because ctype_digit() needs a string
-				}
+		$multiVar['variation_attributes'] = explode('|', trim($multiVar['variation_attributes'], '|'));
+		#echo print_m($multiVar, '$multiVar');
+		if ($multiple) {
+			$i = 0;
+			while ($mV = array_shift($multiVar['variation_attributes'])) {
+				$opts[$i] = explode(',', $mV);
+				array_unshift($opts[$i], $multiVar['products_id']);
+				++$i;
 			}
-			$multiVar['variation_attributes'] = explode('|', trim($multiVar['variation_attributes'], '|'));
-			#echo print_m($multiVar, '$multiVar');
-			if ($multiple) {
-				$i = 0;
-				while ($mV = array_shift($multiVar['variation_attributes'])) {
-					$opts[$i] = explode(',', $mV);
-					array_unshift($opts[$i], $multiVar['products_id']);
-					++$i;
-				}
-			} else {
-				$multiVar['variation_attributes'] = array_shift($multiVar['variation_attributes']);
-				$opt = explode(',', $multiVar['variation_attributes']);
-				array_unshift($opt, $multiVar['products_id']);
-			}
+		} else {
+			$multiVar['variation_attributes'] = array_shift($multiVar['variation_attributes']);
+			$opt = explode(',', $multiVar['variation_attributes']);
+			array_unshift($opt, $multiVar['products_id']);
 		}
 	}
 
@@ -968,19 +921,20 @@ function magnaSKU2aID($sku, $pId = false, $multiple = false) {
 		    && ctype_digit($opt[0]) && ctype_digit($opt[1]) && ctype_digit($opt[2])
 		) {
 			/* Neue Version */
-			$aID[] = MagnaDB::gi()->fetchOne(eecho('
+			$aID[] = MagnaDB::gi()->fetchOne('
 			    SELECT products_attributes_id
 			      FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
 			     WHERE products_id="'.$opt[0].'"
 			           AND options_id="'.$opt[1].'"
 			           AND options_values_id="'.$opt[2].'"
 			     LIMIT 1
-			', false));
+			');
 		}
 	}
 	if (count($aID) == 1) {
 		$aID = $aID[0];
 	}
+
 	return empty($aID) ? false : $aID;
 }
 
@@ -1084,7 +1038,7 @@ function magnaSKU2GambioProp($sSku) {
 			", false), true);
 		}
 
-		if (is_array($mProductPropertiesCombisId) && (count($mProductPropertiesCombisId) === 1) && ((int)$mProductPropertiesCombisId[0] > 0)) {
+		if ((count($mProductPropertiesCombisId) === 1) && ((int)$mProductPropertiesCombisId[0] > 0)) {
 			return MagnaDB::gi()->fetchRow(eecho("
 			    SELECT CONCAT(p.products_model, '-', ppc.combi_model) AS SKU, ppc.*
 			      FROM products_properties_combis ppc
@@ -1220,7 +1174,7 @@ function magnaSKU2ProductOptions($sSku, $iLangId = false, $bMultiVariations = fa
 		}
 
 		foreach ($aOptions as $aOpt) {
-			$sProductOptionName = MagnaDB::gi()->fetchOne(eecho("
+			$sProductOptionName = MagnaDB::gi()->fetchOne("
 				SELECT products_options_name
 				  FROM ".TABLE_PRODUCTS_OPTIONS." po
 				 WHERE     products_options_id = '".$aOpt['options_id']."'
@@ -1238,9 +1192,9 @@ function magnaSKU2ProductOptions($sSku, $iLangId = false, $bMultiVariations = fa
 				 WHERE     products_options_id = '".$aOpt['options_id']."'
 				       AND products_options_name <> ''
 				 LIMIT 1
-			", false));
+			");
 
-			$sProductOptionValuesName = MagnaDB::gi()->fetchOne(eecho("
+			$sProductOptionValuesName = MagnaDB::gi()->fetchOne("
 				SELECT products_options_values_name
 				  FROM ".TABLE_PRODUCTS_OPTIONS_VALUES." pov
 				 WHERE     products_options_values_id = '".$aOpt['options_values_id']."'
@@ -1258,7 +1212,7 @@ function magnaSKU2ProductOptions($sSku, $iLangId = false, $bMultiVariations = fa
 				  WHERE     products_options_values_id = '".$aOpt['options_values_id']."'
 				        AND products_options_values_name <> ''
 				 LIMIT 1
-			", false));
+			");
 
 			$aReturn[] = array(
 				'id' => $aOpt['products_attributes_id'],
@@ -1435,8 +1389,9 @@ function renderPagination($currentPage, $pages, $baseURL, $type = 'link') {
 	return $html;
 }
 
-function renderCategoryPath($id, $from = 'category', $appendedText = '&nbsp;<span class="cp_next">&gt;</span>&nbsp;') {
+function renderCategoryPath($id, $from = 'category') {
 	$calculated_category_path_string = '';
+	$appendedText = '&nbsp;<span class="cp_next">&gt;</span>&nbsp;';
 	$calculated_category_path = MLProduct::gi()->generateCategoryPath($id, $from);
 	for ($i = 0, $n = sizeof($calculated_category_path); $i < $n; $i ++) {
 		for ($j = 0, $k = sizeof($calculated_category_path[$i]); $j < $k; $j ++) {
@@ -1455,14 +1410,7 @@ function renderCategoryPath($id, $from = 'category', $appendedText = '&nbsp;<spa
 function loadConfigForm($lang, $files, $replace = array()) {
 	$form = array();
 	foreach ($files as $file => $options) {
-                	$fC = file_get_contents(DIR_MAGNALISTER_FS.'config/'.$lang.'/'.$file);
-//			if(json_decode($fC, true) === null) {
-//				$pageURL = (@$_SERVER["HTTPS"] == "on") ? "https://" : "http://";
-//				$baseurlpart = explode('magnalister.php', $_SERVER["REQUEST_URI"]);
-//				$pageURL .= $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] != "80"?":" . $_SERVER["SERVER_PORT"]:'') . $baseurlpart[0];
-//				$pageURL .= DIR_MAGNALISTER_WS . 'config/' . $lang . '/' . $file;
-//				$fC = file_get_contents($pageURL);
-//			}
+		$fC = file_get_contents(DIR_MAGNALISTER_FS.'config/'.$lang.'/'.$file);
 		if (!empty($replace)) {
 			$fC = str_replace(array_keys($replace), array_values($replace), $fC);
 		}
@@ -1519,10 +1467,8 @@ function magna_wysiwyg($params, $value = '') {
 	}
 	$html .= '>'.str_replace('<', '&lt;', (string)$value).'</textarea>';
 
-	// tinyMceAlreadySet braucht man momentan nich, aber ggf falls wir die tinymce Version updaten
-	if ('tinyMCE' == getDBConfigValue('general.editor', 0, 'tinyMCE') && !defined('tinyMceAlreadySet')) {
+	if ('tinyMCE' == getDBConfigValue('general.editor', 0, 'tinyMCE')) {
 		$html .= '<script type="text/javascript" src="'.DIR_MAGNALISTER_WS.'js/tinymce/tinymce.min.js"></script>';
-		define('tinyMceAlreadySet', 'true');
 
 		ob_start();?>
 		<script type="text/javascript">/*<![CDATA[*/
@@ -2023,11 +1969,8 @@ function renderDateTimePicker($key, $default = false, $alwaysDalete = false, $cl
 
 /**
  *clean corrupted data from prepare tables
- * @deprecated since new productlist-filters. they should handle date correctlys
- * @bug queries dont take care about mpid.So prepare data will deleted for other mp's
  */
 function cleanPrepareData() {
-    return;
 	$aQueries = array();
 	$sIdent = (getDBConfigValue('general.keytype', '0') == 'artNr')
 		? 'products_model'
@@ -2093,31 +2036,13 @@ function cleanPrepareData() {
 }
 
 function magnaGetDefaultLanguageID() {
-    if (defined('DEFAULT_LANGUAGE')) {
-        $lID = MagnaDB::gi()->fetchOne("
-            SELECT `languages_id`
-              FROM ".TABLE_LANGUAGES." l
-             WHERE l.`code` = '".DEFAULT_LANGUAGE."'
-        ");
-    } else {
-        if (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-            $lID = MagnaDB::gi()->fetchOne("
-                SELECT `languages_id`
-                  FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c
-                 WHERE     l.`code` = c.`value`
-                       AND c.`key` = 'configuration/DEFAULT_LANGUAGE'
-                 LIMIT 1
-            ");
-        } else {
-            $lID = MagnaDB::gi()->fetchOne("
-                SELECT `languages_id`
-                  FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c 
-                 WHERE     l.`code` = c.`configuration_value` 
-                       AND c.`configuration_key` = 'DEFAULT_LANGUAGE'
-                LIMIT 1
-            ");
-        }
-	}
+	$lID = MagnaDB::gi()->fetchOne('
+		SELECT languages_id
+		  FROM '.TABLE_LANGUAGES.' l, '.TABLE_CONFIGURATION.' c
+		 WHERE c.configuration_key = \'DEFAULT_LANGUAGE\'
+		       AND c.configuration_value = l.code
+		 LIMIT 1
+	');
 	if ($lID == false) {
 		/* very bad fallback, but one fallback at least. */
 		$lID = MagnaDB::gi()->fetchOne('
@@ -2157,7 +2082,7 @@ function magnaGetLanguageIdByCountryIso($sCountryIso) {
  */
 function magnaGetTimezoneOffset($remote_tz, $origin_tz = null) {
 	if ($origin_tz === null) {
-		$origin_tz = @date('e');
+		$origin_tz = @date('T');
 	}
 	if (!class_exists('DateTimeZone')) {
 		global $_MagnaSession;
@@ -2258,20 +2183,31 @@ function mlLoadModuleLanguageDefines($sModulePath) {
 	}
 
 	// check for params and its an actual gambio with LanguageTextManager
-	if (SHOPSYSTEM == 'gambio' && class_exists('MainFactory') && (($sVersion = mlGetGambioShopSystemVersion()) !== false)) {
-		if (version_compare($sVersion, '2.1', '>=')) {
-			if (defined('DIR_FS_LANGUAGES')) {
-				$aReplace[] = DIR_FS_LANGUAGES;
+	if (SHOPSYSTEM == 'gambio' && class_exists('MainFactory') && MagnaDB::gi()->tableExists('version_history')) {
+			$sVersion = MagnaDB::gi()->fetchOne("
+				SELECT version
+				  FROM version_history
+				 WHERE     type IN ('service_pack', 'master_update')
+				".((MagnaDB::gi()->columnExistsInTable('installed', 'version_history'))
+					? 'AND installed = 1'
+					: 'AND (is_full_version = 0 OR (is_full_version = 1 AND history_id = 1))'
+				)."
+			  ORDER BY installation_date DESC
+				 LIMIT 1
+			");
+			if (version_compare($sVersion, '2.1', '>=')) {
+				if (defined('DIR_FS_LANGUAGES')) {
+					$aReplace[] = DIR_FS_LANGUAGES;
+				}
+				$aReplace[] = DIR_MAGNA_LANGUAGES;
+				$sSpecialModulePath = str_replace($aReplace, 'lang/', $sModulePath);
+				$oLTM = MainFactory::create_object('LanguageTextManager', array(), true);
+				if (is_object($oLTM) && method_exists($oLTM, 'init_from_lang_file')) {
+					$oLTM->init_from_lang_file($sSpecialModulePath, $_SESSION['languages_id']);
+					// return because defines are loaded
+					return;
+				}
 			}
-			$aReplace[] = DIR_MAGNA_LANGUAGES;
-			$sSpecialModulePath = str_replace($aReplace, 'lang/', $sModulePath);
-			$oLTM = MainFactory::create_object('LanguageTextManager', array(), true);
-			if (is_object($oLTM) && method_exists($oLTM, 'init_from_lang_file')) {
-				$oLTM->init_from_lang_file($sSpecialModulePath, $_SESSION['languages_id']);
-				// return because defines are loaded
-				return;
-			}
-		}
 	}
 
 	if (file_exists($sModulePath)) {
@@ -2289,38 +2225,4 @@ function mlShopBookAnAddOn($args) {
 	require_once(DIR_MAGNALISTER_INCLUDES.'lib/classes/ShopAddOns.php');
 
 	return ML_ShopAddOns::bookAddOn($args['SKU']);
-}
-
-/**
- *
- * @param string $sUnit
- * @return real|int
- * @throws Exception
- */
-function mlGetWeightRate($sUnit) {
-	switch (strtolower($sUnit)) {
-		case 'g': case 'gr' :case'gm':case'gram': return 1000;
-		case 'kg':case 'kilogram': return 1;
-		case 'oz':case 'ounce': return 35.273966;
-		case 'lb':case 'lbm' :case 'pound': return 2.204623;
-		case 'st': return 0.157473;
-		default : throw new Exception('unit is not supported');
-	}
-}
-
-/**
- *
- * @param type $fWeight
- * @param type $sUnitFrom unit should be converted from
- * @param type $sUnitTo unit should be converted to
- * @return type
- */
-function mlConvertWeight($fWeight, $sUnitFrom, $sUnitTo) {
-	try {
-		$fRateFrom = mlGetWeightRate($sUnitFrom);
-		$fRateTo = mlGetWeightRate($sUnitTo);
-		return $fWeight * $fRateTo / $fRateFrom;
-	} catch (Exception $oEx) {
-		return null;
-	}
 }

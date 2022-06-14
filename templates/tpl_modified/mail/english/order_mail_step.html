@@ -15,7 +15,7 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="5">
         <tr>
           <td valign="top">
-            <font size="2" face="Tahoma, Verdana, sans-serif">{if $GENDER == 'm'}Dear Mr.{elseif $GENDER == 'f'}Dear Ms./Mrs.{else}Hello{/if} {$NAME},<br />
+            <font size="2" face="Tahoma, Verdana, sans-serif">Dear {if $GENDER == 'm'}Mr {elseif $GENDER == 'f'}Mrs {/if}{$NAME},<br />
             <br />
             thank you for your order.<br />
             </font>
@@ -48,7 +48,7 @@
         <tr>
           <td valign="top">
             <font size="1" face="Tahoma, Verdana, sans-serif"><b>Your Comments:</b></font><br />
-            <font size="2" face="Tahoma, Verdana, sans-serif">{$COMMENTS|nl2br}</font>
+            <font size="2" face="Tahoma, Verdana, sans-serif">{$COMMENTS}</font>
           </td>
         </tr>
       </table>
@@ -71,7 +71,7 @@
         <tr>
           {if $address_label_payment!=$address_label_shipping}
           <td valign="top">
-            <font size="1" face="Tahoma, Verdana, sans-serif"><b>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}Pickupaddress{else}Shippingaddress{/if}</b></font><br />
+            <font size="1" face="Tahoma, Verdana, sans-serif"><b>Shippingaddress</b></font><br />
             <font size="2" face="Tahoma, Verdana, sans-serif">{$address_label_shipping}</font>
           </td>
           {/if}
@@ -95,8 +95,8 @@
           {if $smarty.const.SHOW_IMAGES_IN_EMAIL == 'true'}
           <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;" align="center"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Picture</strong></font></td>
           {/if}
-          <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Product</strong></font></td>
-          <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;white-space:nowrap" width="50"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Prod. No.</strong></font></td>
+          <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Produkt</strong></font></td>
+          <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;white-space:nowrap" width="50"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Art.-No.</strong></font></td>
           <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;" width="80" align="right"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Singleprice</strong></font></td>
           <td style="padding:10px 5px;border-top:1px solid #999;border-bottom:1px solid #999;" width="80" align="right"><font size="1" face="Tahoma, Verdana, sans-serif"><strong>Price</strong></font></td>
         </tr>
@@ -106,7 +106,7 @@
           {if $smarty.const.SHOW_IMAGES_IN_EMAIL == 'true'}
           <td style="border-bottom:1px dotted #999;" valign="top" width="60" align="center">
             {if $order_values.PRODUCTS_IMAGE neq ''}
-              <img src="{$img_path}{$order_values.PRODUCTS_IMAGE}" alt="{$order_values.PRODUCTS_NAME}" title="{$order_values.PRODUCTS_NAME}" style="{$smarty.const.SHOW_IMAGES_IN_EMAIL_STYLE}" />
+              <img src="{$img_path}{$order_values.PRODUCTS_IMAGE}" style="{$smarty.const.SHOW_IMAGES_IN_EMAIL_STYLE}" />
             {else}
               &nbsp;
             {/if}
@@ -119,7 +119,7 @@
             {if $order_values.PRODUCTS_SHIPPING_TIME neq ''}<div style="padding: 4px 0px 4px 0px;">Shipping time: {$order_values.PRODUCTS_SHIPPING_TIME}</div>{/if}
             </font>
           </td>
-          <td style="border-bottom:1px dotted #999;" valign="top"><font size="2" face="Tahoma, Verdana, sans-serif">{$order_values.PRODUCTS_MODEL}{$order_values.PRODUCTS_ATTRIBUTES_MODEL}</font></td>
+          <td style="border-bottom:1px dotted #999;" valign="top"><font size="2" face="Tahoma, Verdana, sans-serif">{$order_values.PRODUCTS_MODEL}</font></td>
           <td style="border-bottom:1px dotted #999;" valign="top" align="right"><font size="2" face="Tahoma, Verdana, sans-serif">{$order_values.PRODUCTS_SINGLE_PRICE}</font></td>
           <td style="border-bottom:1px dotted #999;" valign="top" align="right"><font size="2" face="Tahoma, Verdana, sans-serif">{$order_values.PRODUCTS_PRICE}</font></td>
         </tr>
@@ -166,16 +166,6 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="5">
   <tr>
     <td style="border-top: 1px dotted #999;"><font size="1" face="Tahoma, Verdana, sans-serif">{$AGB_HTML}</font></td>
-  </tr>
-</table>
-<br />
-{/if}
-
-{if $PRIVACY_POLICY_HTML neq ''}
-<br />
-<table width="100%" border="0" cellspacing="0" cellpadding="5">
-  <tr>
-    <td style="border-top: 1px dotted #999;"><font size="1" face="Tahoma, Verdana, sans-serif">{$PRIVACY_POLICY_HTML}</font></td>
   </tr>
 </table>
 <br />

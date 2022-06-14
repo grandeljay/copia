@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: functionLib.php 6797 2016-07-08 23:57:30Z MaW $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -464,10 +464,6 @@ function eechoIP($str, $print = false) {
 }
 
 function magnalisterIsUTF8($str) {
-    // if here are problems....
-    //if (function_exists('mb_detect_encoding')) {
-    //  return mb_detect_encoding($str, 'UTF-8') === 'UTF-8';
-    //}
     $len = strlen($str);
     for($i = 0; $i < $len; ++$i){
         $c = ord($str[$i]);
@@ -530,20 +526,16 @@ function charset_decode_utf_8($string) {
 	}
 	
 	// decode three byte unicode characters
-	$string = preg_replace_callback(
-		"/([\300-\337])([\200-\277])/",
-        function($matches) {
-            return "&#".((ord($matches[1])-224)*4096 + (ord($matches[2])-128)*64 + (ord($matches[3])-128)).";";
-        },
+	$string = preg_replace(
+		"/([\340-\357])([\200-\277])([\200-\277])/e",       
+		"'&#'.((ord('\\1')-224)*4096 + (ord('\\2')-128)*64 + (ord('\\3')-128)).';'",   
 		$string
 	);
 	
 	// decode two byte unicode characters
-	$string = preg_replace_callback(
-		"/([\300-\337])([\200-\277])/",
-		function($matches) {
-            return "&#".((ord($matches[1])-192)*64 + (ord($matches[2])-128)).";";
-        },
+	$string = preg_replace(
+		"/([\300-\337])([\200-\277])/e",
+		"'&#'.((ord('\\1')-192)*64+(ord('\\2')-128)).';'",
 		$string
 	);
 	
@@ -566,10 +558,8 @@ function fixHTMLUTF8Entities($str, $quoteStyle = ENT_NOQUOTES) {
 	$str = str_replace(array_keys($savelist), array_values($savelist), $str);
 	#exploreEncoding($str);
 	$str = htmlentities($str, $quoteStyle, 'UTF-8');
-	// don't move the following line, it must be here, I've tried out everything, breaks things when used where it normally should be
-	$str = str_replace(chr(194), '', $str); // Â created from nothing by utf8_encode
 	// fix double encoded entities
-	$str = preg_replace('/&amp;(([A-Z]{0,1}[a-z]{1,10}|#[0-9]{2,6});)/', '&$1', $str);
+	$str = preg_replace('/&amp;(([A-Z]{0,1}[a-z]{1,10}|#[0-9]{3,6});)/', '&$1', $str);
 	
 	return $str;
 }
@@ -585,54 +575,6 @@ function arrayEntitiesFixHTMLUTF8(&$array) {
 		if (!is_string($item)) continue;
 		$item = fixHTMLUTF8Entities($item);
 	}
-}
-
-/*
- * some people use html templates with plain umlauts.
- * Umlauts can make encoding problems, but if we encode everything,
- *  we see HTML source on the Item site.
- */
-function htmlEncodeUmlauts($str) {
-	$str =  magnalisterIsUTF8($str) ? $str : utf8_encode($str);
-// unicode table can be found here:
-// http://www.utf8-chartable.de/unicode-utf8-table.pl?unicodeinhtml=dec&htmlent=1
-	$aChars = array (
-		"\xc2\xa4" => '&euro;', // --> '&curren;'
-		"\xc3\xa4" => '&auml;',
-		"\xc3\x84" => '&Auml;',
-		"\xc3\xb6" => '&ouml;',
-		"\xc3\x96" => '&Ouml;',
-		"\xc3\xbc" => '&uuml;',
-		"\xc3\x9c" => '&Uuml;',
-		"\xc3\x9f" => '&szlig;',
-		"\xc3\xa0" => '&agrave;', 
-		"\xc3\x80" => '&Agrave;', 
-		"\xc3\xb2" => '&ograve;', 
-		"\xc3\x92" => '&Ograve;', 
-		"\xc3\xb9" => '&ugrave;', 
-		"\xc3\x99" => '&Ugrave;', 
-		"\xc3\x82" => '&Acirc;', // Â
-		"\xc3\x83" => '&Atilde;',// Ã
-		#"\x7e"     => '&#126;',  // ~ don't encode, can be used in CSS
-		"\xb7"     => '&#183;',  // ·
-		"\xc2\xab" => '&laquo;', // « 
-		"\xc2\xbb" => '&raquo;', // »
-		"\xc2\xb0" => '&deg;',   // °
-		"\xc2\xb1" => '&plusmn;',//
-		"\xc2\xb2" => '&sup2;',  //
-		"\xc2\xb3" => '&sup3;',  //
-		"\xa0"     => '&nbsp;', 
-		"\xc2\xae" => '&reg;', 
-		"\xc2\xa9" => '&copy;', 
-		"\x20\x19" => '&rsquo;', // ’ 
-		"\x00"     => '', 
-		"\xc2"     => '', // Â created from nothing by utf8_encode
-	);
-	$str = str_replace(array_keys($aChars), array_values($aChars), $str);
-	// fix double encoded entities
-	$str = preg_replace('/&amp;(([A-Z]{0,1}[a-z]{1,10}|#[0-9]{3,6});)/', '&$1', $str);
-
-	return $str;
 }
 
 function escape_string_for_regex($str) {
@@ -796,9 +738,7 @@ function hsv2rgb($hsv) {
 function serialize_fix($serialized) {
 	return preg_replace_callback(
 	    '!(?<=^|;)s:(\d+)(?=:"(.*?)";(?:}|a:|s:|b:|i:|o:|N;))!s',
-	     function($match) {
-             return 's:'.strlen($match[2]);
-         },
+	     create_function('$match', 'return \'s:\' . strlen($match[2]);'),
 	     $serialized
 	);
 }
@@ -909,27 +849,25 @@ function strip_tags_attributes($string, $allowtags = '', $allowattributes = '') 
     	return $string;
     }
     if (empty($allowattributes)) {
-        return preg_replace_callback("/<(\/?[a-zA-Z0-9]*)([^>]*)>/i",
-            function ($matches) {
-                return '<'.trim(trim(strtolower($matches[1])).' '.trim(preg_replace("/.*=(\"[^\"]*\"|'[^']*')/i", "", $matches[2]))).'>';
-            }
-            , $string);
+		return preg_replace_callback("/<(\/?[a-zA-Z0-9]*)([^>]*)>/i", create_function(
+		    '$matches',
+		    'return \'<\'.trim(trim(strtolower($matches[1])).\' \'.
+		            trim(preg_replace("/.*=(\"[^\"]*\"|\'[^\']*\')/i", "", $matches[2]))).\'>\';'
+		), $string);
     }
     if (!is_array($allowattributes)) {
         $allowattributes = explode(",", $allowattributes);
     }
-    array_walk($allowattributes, function(&$a) {
-        $a = trim($a);
-    });
+    array_walk($allowattributes, create_function('&$a', '$a = trim($a);'));
     if (is_array($allowattributes)) {
-        $allowattributes = "(?<!".implode(")(?<!",$allowattributes).")";;
+        $allowattributes = "(?<!".implode(")(?<!",$allowattributes).")";
     }
-
-	$string = preg_replace_callback("/<(\/?[a-zA-Z0-9]*)([^>]*)>/i", function($matches) use ($allowattributes) {
-        return '<'.trim(trim(strtolower($matches[1])).' '.
+	$string = preg_replace_callback("/<(\/?[a-zA-Z0-9]*)([^>]*)>/i", create_function(
+	    '$matches',
+	    'return \'<\'.trim(trim(strtolower($matches[1])).\' \'.
 	            trim(preg_replace("/(\s|\n|\t)*[^ =]*'.$allowattributes.'=(\"[^\"]*\"|\'[^\']*\')/i", "", $matches[2]))).
-	            '>';
-    }, $string);
+	            \'>\';'
+	), $string);
 
     return $string;
 }
@@ -951,7 +889,7 @@ function stripLinks($str, $sTarget = '') {
 		// strip the opening Link tag, then the next closing tag, one by one, until none found
 		// there can be everything between the tags
 		$iOldLength = $iLength;
-		$str = preg_replace("/(\<[aA] *)([0-9a-zA-Z;:\.#'\" =_-]*)(href *= *|HREF *= *)('|\")".$sTarget."([0-9a-zA-Z:\.\/\?\&;# =_+-]*)('|\")([0-9a-zA-Z;:\.#'\" =_+-]*\>)/", '', $str, 1);
+		$str = preg_replace("/(\<[aA] *)([0-9a-zA-Z;:\.#'\" =_-]*)(href *= *|HREF *= *)('|\")".$sTarget."([0-9a-zA-Z:\.\/\?\&;# =_-]*)('|\")([0-9a-zA-Z;:\.#'\" =_-]*\>)/", '', $str, 1);
 		$iLength = strlen($str);
 		if ($iLength == $iOldLength) break;
 		$str = preg_replace("/\<\/[aA]\>/", '', $str, 1);
@@ -1329,7 +1267,7 @@ function magnaGetAvailableLanguages() {
 	$handle = opendir(DIR_MAGNALISTER_FS.'lang/');
 	
 	while (false !== ($file = readdir($handle))) {
-		if ($file == '.' || $file == '..' || @is_dir($file)) continue;
+		if (@is_dir($file)) continue;
 		if (preg_match('/^(.*)\.php$/', $file, $match)) {
 			$langs[] = $match[1];
 		}
@@ -1402,7 +1340,7 @@ function mlFloatalize($sFloat) {
 
 	return $sFloat;
 }
-   
+
 function magnaPreparePlainTextMode() {
 	$iObLevel = ob_get_level();
 	$sOutHandler = ini_get('output_handler');
@@ -1415,64 +1353,4 @@ function magnaPreparePlainTextMode() {
 		header('Content-Encoding: none');
 		header('Content-Type: text/plain; charset="utf-8"');
 	}
-}
-
-/**
- * @param $sUrlString
- * @param $result
- * @return array
- */
-function parse_str_unlimited($sUrlString, &$result) {
-    $aArray = array();
-    if ($sUrlString != '') {
-        $aPairs = explode('&', $sUrlString);
-        $blIsUrlEncoded = (strpos($sUrlString, '%5B') !== false);
-        foreach ($aPairs as $sPair) {
-            $aKeyValue = explode('=', $sPair);
-            if (is_array($aKeyValue)) {
-                $mKey = isset($aKeyValue[0]) ? ($blIsUrlEncoded ? urldecode($aKeyValue[0]) : $aKeyValue[0]) : null;
-                $mValue = isset($aKeyValue[1]) ? ($blIsUrlEncoded ? urldecode($aKeyValue[1]) : $aKeyValue[1]) : null;
-                if (strpos($mKey, '[') !== false) {
-                    $aKeys = explode('[', $mKey);
-                    $aArray = mlSetArrayKeysOfEachUrlParameter($aKeys, $aArray, $mValue);
-                } else {
-                    $aArray[$mKey] = $mValue;
-                }
-            }
-        }
-    }
-    $result = $aArray;
-    return $result;
-}
-
-/**
- * for a string like this ml[material][]=asdf 
- * it fill array like this
- * array(
- *     material 
- *        => array(
- *               0 => asdf
- *           )
- * )
- * 
- * @param array $aKeys
- * @param array $aArray
- * @param mixed $mValue
- * @return array
- */
-function mlSetArrayKeysOfEachUrlParameter($aKeys, $aArray, $mValue) {
-    if (count($aKeys) > 0) {
-        $sKey = array_shift($aKeys);// get key in frist level of hirarchy of array, e.g. ml[first][second][third]
-        $sKey = str_replace(']', '', $sKey);
-        if ($sKey == '') {//dynamic key
-            $sKey = (is_array($aArray) && is_int(max(array_keys($aArray)))) ? (max(array_keys($aArray)) + 1) : 0;
-        }
-        if (!isset($aArray[$sKey])) {//if it is new key
-            $aArray[$sKey] = null;
-        }
-        $aArray[$sKey] = mlSetArrayKeysOfEachUrlParameter($aKeys, $aArray[$sKey], $mValue);
-        return $aArray;
-    } else {
-        return $mValue;
-    }
 }

@@ -1,25 +1,25 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: fedexeu.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: fedexeu.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on:
+   based on: 
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(fedexeu.php,v 1.01 2003/02/18); www.oscommerce.com
+   (c) 2002-2003 osCommerce(fedexeu.php,v 1.01 2003/02/18); www.oscommerce.com 
    (c) 2003	 nextcommerce (fedexeu.php,v 1.12 2003/08/24); www.nextcommerce.org
 
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   fedex_europe_1.02         	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
+   fedex_europe_1.02         	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
   class fedexeu {
@@ -32,10 +32,10 @@
       $this->code = 'fedexeu';
       $this->title = MODULE_SHIPPING_FEDEXEU_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_FEDEXEU_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_FEDEXEU_SORT_ORDER')) ? MODULE_SHIPPING_FEDEXEU_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_FEDEXEU_SORT_ORDER;
       $this->icon = DIR_WS_ICONS . 'shipping_fedexeu.gif';
-      $this->tax_class = ((defined('MODULE_SHIPPING_FEDEXEU_TAX_CLASS')) ? MODULE_SHIPPING_FEDEXEU_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_FEDEXEU_STATUS') && MODULE_SHIPPING_FEDEXEU_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_FEDEXEU_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_FEDEXEU_STATUS == 'True') ? true : false);
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_FEDEXEU_ZONE > 0) && is_object($order)) {
         $check_flag = false;
@@ -182,11 +182,11 @@
                                  'cost' => (MODULE_SHIPPING_FEDEXEU_HANDLING + $shipping_cost_2) * $shipping_num_boxes);
             }
           }
-        }
+        }  
       }
 
       $this->quotes = array('id' => $this->code,
-                            'module' => $this->title . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_FEDEXEU_TEXT_UNITS .')');
+                            'module' => $this->title . ' (' . $shipping_num_boxes . ' x ' . $shipping_weight . ' ' . MODULE_SHIPPING_FEDEXEU_TEXT_UNITS .')');
 
       $this->quotes['methods'] = $methods;
 

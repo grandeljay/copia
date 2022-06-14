@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: german.php 13367 2021-02-03 09:20:27Z GTB $
+   $Id: german.php 10240 2016-08-11 23:49:01Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,10 +10,10 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2013 Gambio GmbH - http://www.gambio.de
-
+  
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
@@ -27,7 +27,7 @@ define('ERROR_MUST_CONFIRM_MANDATE', 'Bitte best&auml;tigen Sie, dass Sie das SE
 
 // credit risk check
 define('CREDIT_RISK_HEADING', 'Bonit&auml;tspr&uuml;fung');
-defined('BUTTON_CONFIRM') OR define('BUTTON_CONFIRM', 'Ja, Pr&uuml;fung durchf&uuml;hren');
+define('BUTTON_CONFIRM', 'Ja, Pr&uuml;fung durchf&uuml;hren');
 define('BUTTON_NOCONFIRM', 'Nein, keine Pr&uuml;fung durchf&uuml;hren');
 define('TEXT_CREDIT_RISK_INFO', 'Es wird eine Bonit&auml;tsabfrage durchgef&uuml;hrt.');
 define('TEXT_CREDIT_RISK_COMFIRM', 'M&ouml;chten Sie dem zustimmen?');
@@ -116,8 +116,7 @@ define('paymenttype_invoice', 'Rechnung');
 define('paymenttype_prepay', 'Vorkasse');
 define('paymenttype_cod', 'Nachnahme');
 define('paymenttype_paypal', 'PayPal');
-define('paymenttype_paydirekt', 'PayDirekt');
-define('paymenttype_sofortueberweisung', 'Sofort.');
+define('paymenttype_sofortueberweisung', 'Sofort&uuml;berweisung');
 define('paymenttype_giropay', 'GiroPay');
 define('paymenttype_eps', 'EPS');
 define('paymenttype_pfefinance', 'Post-Finance EFinance');
@@ -134,7 +133,7 @@ define('addressaddition', 'Adresszusatz:');
 // installment
 define('TEXT_KLARNA_CONFIRM', 'Mit der Datenverarbeitung der f&uuml;r die Abwicklung des Rechnungskaufes und einer Identit&auml;ts- und Bonit&auml;tspr&uuml;fung erforderlichen Daten durch Klarna bin ich einverstanden. Meine %s kann ich jederzeit mit Wirkung f&uuml;r die Zukunft widerrufen. Es gelten die AGB des H&auml;ndlers.');
 define('TEXT_KLARNA_ERROR_CONDITIONS', 'Sofern Sie Rechnungsbedingungen von Klarna nicht akzeptieren, k&ouml;nnen wir Ihre Bestellung bedauerlicherweise nicht entgegennehmen!');
-define('TEXT_KLARNA_INVOICE', 'Weitere Informationen zum Rechnungskauf finden Sie in den');
+define('TEXT_KLARNA_INVOICE', 'Weitere Informationen zum Rechnungskauf finden sie in den');
 define('KLARNA_STOREID', 'Klarna SoreID');
 define('KLARNA_COUNTRIES', 'Klarna L&auml;nder');
 
@@ -185,7 +184,7 @@ define('TEXT_CARDCHECKNUM', 'Pr&uuml;fziffer:');
 define('TEXT_CHECK_DATA', 'Bitte &uuml;berpr&uuml;fen Sie Ihre Angaben.');
 
 // orders status
-define('ORDERS_STATUS_CONFIGURATION', 'Konfiguration Bestellstatus');
+define('ORDERS_STATUS_CONFIGURATION', 'Konfiguration der Bestellstati');
 define('ORDERS_STATUS_TMP', 'tempor&auml;rer Status');
 define('ORDERS_STATUS_PENDING', 'Zahlungseingang unsicher/erwartet');
 define('ORDERS_STATUS_PAID', 'Zahlung erfolgreich');
@@ -202,13 +201,12 @@ define('ORDERS_STATUS_REMINDER', 'Zahlung Erinnerung');
 define('ORDERS_STATUS_VAUTHORIZATION', 'Zahlung vAuth');
 define('ORDERS_STATUS_VSETTLEMENT', 'Zahlung vSettlement');
 define('ORDERS_STATUS_INVOICE', 'Zahlung Rechnung');
-define('ORDERS_STATUS_NONE', 'keine &Auml;nderung');
 define('TEXT_EXTERN_CALLBACK_URL', 'URL Statusweiterleitung');
 define('TEXT_EXTERN_CALLBACK_TIMEOUT', 'Timeout');
 
 // global
-defined('TEXT_YES') OR define('TEXT_YES', 'Ja');
-defined('TEXT_NO') OR define('TEXT_NO', 'Nein');
+define('TEXT_YES', 'Ja');
+define('TEXT_NO', 'Nein');
 define('ERROR_OCCURED', 'Fehler aufgetreten');
 define('BOX_PAYONE_CONFIG', 'PAYONE Konfiguration');
 define('BOX_PAYONE_LOGS', 'PAYONE API Log');
@@ -260,7 +258,7 @@ define('PG_PAYMENTTYPE_BILLSAFE', 'BillSAFE');
 define('PG_PAYMENTTYPE_COMMERZFINANZ', 'CommerzFinanz');
 define('PG_TYPE_ACTIVE', 'aktiv');
 define('PG_CHECK_CAV', 'Abfrage Kartenpr&uuml;fziffer');
-define('PG_PAYMENTTYPE_SOFORTUEBERWEISUNG', 'Sofort. (&Uuml;berweisung by Sofort.)');
+define('PG_PAYMENTTYPE_SOFORTUEBERWEISUNG', 'Sofort&uuml;berweisung (&Uuml;berweisung by SOFORT)');
 define('PG_PAYMENTTYPE_GIROPAY', 'GiroPay');
 define('PG_PAYMENTTYPE_EPS', 'EPS');
 define('PG_PAYMENTTYPE_PFEFINANCE', 'Post-Finance EFinance');

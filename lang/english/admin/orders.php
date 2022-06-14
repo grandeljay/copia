@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: orders.php 12773 2020-05-22 07:47:16Z GTB $   
+   $Id: orders.php 10326 2016-10-19 14:06:18Z Tomcraft $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -61,14 +61,25 @@ define('TABLE_HEADING_DATE_ADDED', 'Date Added');
 
 define('ENTRY_CUSTOMER', 'Customer:');
 define('ENTRY_SOLD_TO', 'SOLD TO:');
+define('ENTRY_STREET_ADDRESS', 'Street Address:');
+define('ENTRY_SUBURB', 'Suburb:');
+define('ENTRY_CITY', 'City:');
+define('ENTRY_POST_CODE', 'Post Code:');
+define('ENTRY_STATE', 'State:');
+define('ENTRY_COUNTRY', 'Country:');
 define('ENTRY_TELEPHONE', 'Telephone:');
+define('ENTRY_EMAIL_ADDRESS', 'E-Mail Address:');
 define('ENTRY_DELIVERY_TO', 'Delivery To:');
 define('ENTRY_SHIP_TO', 'SHIP TO:');
 define('ENTRY_SHIPPING_ADDRESS', 'Shipping Address:');
-define('ENTRY_PICKUP_ADDRESS', 'Pickup Address:');
 define('ENTRY_BILLING_ADDRESS', 'Billing Address:');
 define('ENTRY_PAYMENT_METHOD', 'Payment Method:');
 define('ENTRY_SHIPPING_METHOD', 'Shipping Method:');
+define('ENTRY_CREDIT_CARD_TYPE', 'Credit Card Type:');
+define('ENTRY_CREDIT_CARD_OWNER', 'Credit Card Owner:');
+define('ENTRY_CREDIT_CARD_NUMBER', 'Credit Card Number:');
+define('ENTRY_CREDIT_CARD_CVV', 'Security Code (CVV)):');
+define('ENTRY_CREDIT_CARD_EXPIRES', 'Credit Card Expires:');
 define('ENTRY_SUB_TOTAL', 'Sub-Total:');
 define('ENTRY_TAX', 'Tax:');
 define('ENTRY_SHIPPING', 'Shipping:');
@@ -105,7 +116,12 @@ define('WARNING_ORDER_NOT_UPDATED', 'Warning: Nothing to change. The order was n
 
 define('TABLE_HEADING_DISCOUNT','Discount');
 define('ENTRY_CUSTOMERS_GROUP','Customers Group:');
+define('ENTRY_CUSTOMERS_VAT_ID','VAT Reg No:');
 define('TEXT_VALIDATING','Not validated');
+
+// BOF - Tomcraft - 2009-10-03 - Paypal Express Modul
+define('TEXT_INFO_PAYPAL_DELETE', 'Delete PayPal Transaktion data also.');
+// EOF - Tomcraft - 2009-10-03 - Paypal Express Modul
 
 // BOF - Tomcraft - 2010-04-22 - Added a missing language definition
 define('TEXT_PRODUCTS', 'Products');
@@ -125,6 +141,7 @@ define('TEXT_ORDER_STATUS', 'Order Status:');
 
 define('TABLE_HEADING_ORDERS_ID', 'Ord-ID');
 define('TEXT_SHIPPING_TO', 'Shipping to');
+define('TEXT_SHIPPING_LANG', 'Language');
 
 define('TABLE_HEADING_COMMENTS_SENT', 'Comment is sent');
 
@@ -144,22 +161,13 @@ define('TEXT_SHIPCLOUD_RETURNS', 'Retour');
 define('TEXT_SHIPCLOUD_LETTER', 'Post Letter');
 define('TEXT_SHIPCLOUD_BOOKS', 'Post Book');
 define('TEXT_SHIPCLOUD_PARCEL_LETTER', 'Post Parcel Letter');
-define('TEXT_WEIGHT_PLACEHOLDER', 'Weight / Kg');
-define('TEXT_SHIPCLOUD_INSURANCE_NO', 'higher insurance no');
-define('TEXT_SHIPCLOUD_INSURANCE_YES', 'higher insurance yes');
-define('TEXT_SHIPCLOUD_BULK', 'Bulk');
-define('TEXT_SHIPCLOUD_PARCEL', 'Parcel');
-define('TEXT_SHIPCLOUD_DPAG_WARENPOST', 'Warenpost');
-define('TEXT_SHIPCLOUD_DPAG_WARENPOST_UNTRACKED', 'Warenpost (untracked)');
-define('TEXT_SHIPCLOUD_DPAG_WARENPOST_SIGNATURE', 'Warenpost (signature)');
 
 define('DOWNLOAD_LABEL', 'Download Label');
 define('CREATE_LABEL', 'Create Label');
 define('TEXT_DELETE_SHIPMENT_SUCCESS', 'shipcloud Label deleted.');
 define('TEXT_LABEL_CREATED', 'Label created.');
 define('TEXT_CARRIER_ERROR', 'Carrier not activated in your shipcloud account or invalid API key.');
-define('TEXT_CARRIER_PLACEHOLDER_1', 'Package description');
-define('TEXT_CARRIER_PLACEHOLDER_2', 'Shipment description');
+define('TEXT_CARRIER_PLACEHOLDER', 'description (optional)');
 
 define('TEXT_DOWNLOADS', 'Downloads');
 define('TABLE_HEADING_FILENAME', 'Filename');
@@ -176,6 +184,4 @@ define('TABLE_HEADING_DATE', 'Date');
 define('BUTTON_ORDER_MAIL_STEP', 'Send order mail');
 define('COMMENT_SEND_ORDER_MAIL_STEP' , 'Order mail is sent');
 define('SUCCESS_ORDER_MAIL_STEP_SEND', 'Order mail sent successfully');
-
-define('BILLPAY_ORDER_UPDATE_HIGH', 'Error: The new total value can not be higher then the old total value in billpay payments');
 ?>

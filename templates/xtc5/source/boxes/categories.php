@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: categories.php 11608 2019-03-22 09:54:17Z GTB $
+   $Id: categories.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,7 +25,7 @@
 include(DIR_FS_BOXES_INC . 'smarty_default.php');
 
 // set cache id
-$cache_id = md5($_SESSION['language'].$_SESSION['customers_status']['customers_status'].'-'.$cPath.(((defined('SPECIALS_CATEGORIES') && SPECIALS_CATEGORIES === true) || (defined('WHATSNEW_CATEGORIES') && WHATSNEW_CATEGORIES === true)) ? '-'.basename($PHP_SELF) : ''));
+$cache_id = md5($_SESSION['language'].$_SESSION['customers_status']['customers_status'].'-'.$cPath.((SPECIALS_CATEGORIES === true || WHATSNEW_CATEGORIES === true) ? '-'.basename($PHP_SELF) : ''));
 
 if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_categories.html', $cache_id) || !$cache) {
 
@@ -78,7 +78,7 @@ if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_categories.html', $cach
       $new_path = '';
       $id = explode('_', $cPath);
       reset($id);
-      foreach ($id as $key => $value) {
+      while (list ($key, $value) = each($id)) {
         unset ($prev_id);
         unset ($first_id);
         $categories_query = xtDBquery("SELECT c.categories_id,

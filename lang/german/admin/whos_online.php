@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: whos_online.php 10502 2016-12-14 16:25:46Z GTB $   
+   $Id: whos_online.php 3072 2012-06-18 15:01:13Z hhacker $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -33,5 +33,4 @@ define('TEXT_SHOPPING_CART_SUBTOTAL', 'Insgesamt');
 define('TEXT_NUMBER_OF_CUSTOMERS', 'Es sind zur Zeit %s Kunden online');
 define('TEXT_EMPTY_CART', 'Warenkorb des Kunden ist leer');
 define('TEXT_SESSION_IS_ENCRYPTED', '<hr><b>HINWEIS</b>:<br />Der Warenkorbinhalt kann nicht angezeigt werden.<br />Die Session ist mit Suhosin verschl&uuml;sselt<br />(suhosin.session.encrypt = On)<br />Zum Deaktivieren der Verschl&uuml;sselung wenden Sie sich an Ihren Provider.');
-define('TEXT_ACTIVATE_WHOS_ONLINE', 'Wer ist Online aktivieren:');
 ?>

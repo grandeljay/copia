@@ -1,6 +1,6 @@
 <?php
   /* -----------------------------------------------------------------------------------------
-   $Id: whats_new.php 12294 2019-10-23 09:15:59Z GTB $
+   $Id: whats_new.php 4583 2013-04-05 15:25:22Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -35,7 +35,14 @@ if (MAX_DISPLAY_NEW_PRODUCTS_DAYS != '0') {
 $current_prd =  (isset($_GET['products_id']) && (int)$_GET['products_id'] > 0) ? 'AND p.products_id != ' . (int)$_GET['products_id'] : '';
 
 // get random product data
-$whats_new_query = xtc_db_query("SELECT DISTINCT ".$product->default_select."
+$whats_new_query = xtc_db_query("SELECT DISTINCT p.products_id,
+                                                 p.products_image,                                              
+                                                 p.products_tax_class_id,
+                                                 p.products_vpe,
+                                                 p.products_vpe_status,
+                                                 p.products_vpe_value,
+                                                 p.products_price,
+                                                 pd.products_name
                                             FROM ".TABLE_PRODUCTS." p
                                             JOIN ".TABLE_PRODUCTS_DESCRIPTION." pd 
                                                  ON p.products_id = pd.products_id 
@@ -58,7 +65,7 @@ if (xtc_db_num_rows($whats_new_query) > 0) {
   $whats_new = xtc_db_fetch_array($whats_new_query);
   
   // set cache id
-  $cache_id = md5($_SESSION['currency'].$_SESSION['language'].$whats_new['products_id']);
+  $cache_id = md5($_SESSION['language'].$whats_new['products_id']);
   
   if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_whatsnew.html', $cache_id) || !$cache) {
     $box_smarty->assign('box_content', $product->buildDataArray($whats_new));

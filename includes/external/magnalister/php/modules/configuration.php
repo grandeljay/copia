@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: configuration.php 6548 2016-03-10 16:13:01Z MaW $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -68,28 +68,18 @@ if (isset($_POST['conf']['general.passphrase'])) {
 	if (!loadMaranonCacheConfig(true)) {
 		echo '<p class="errorBox">'.ML_ERROR_UNAUTHED.'</p>';
 	} else {
-        if (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-            $sqlConfigFieldKey = 'key';
-            $sqlConfigFieldValue = 'value';
-            $sqlConfigValuePassphrase = 'configuration/MAGNALISTER_PASSPHRASE';
-        } else {
-            $sqlConfigFieldKey = 'configuration_key';
-            $sqlConfigFieldValue = 'configuration_value';
-            $sqlConfigValuePassphrase = 'MAGNALISTER_PASSPHRASE';
-        }
-
 		if (MagnaDB::gi()->recordExists(TABLE_CONFIGURATION, array (
-            $sqlConfigFieldKey => $sqlConfigValuePassphrase
+			'configuration_key' => 'MAGNALISTER_PASSPHRASE'
 		))) {
 			MagnaDB::gi()->update(TABLE_CONFIGURATION, array (
-                $sqlConfigFieldValue => $_POST['conf']['general.passphrase']
+				'configuration_value' => $_POST['conf']['general.passphrase']
 			), array (
-                $sqlConfigFieldKey => $sqlConfigValuePassphrase
+				'configuration_key' => 'MAGNALISTER_PASSPHRASE'
 			));
 		} else {
 			MagnaDB::gi()->insert(TABLE_CONFIGURATION, array (
-                $sqlConfigFieldValue => $_POST['conf']['general.passphrase'],
-                $sqlConfigFieldKey => $sqlConfigValuePassphrase
+				'configuration_value' => $_POST['conf']['general.passphrase'],
+				'configuration_key' => 'MAGNALISTER_PASSPHRASE'
 			));
 		}
 	}
@@ -147,15 +137,9 @@ if (empty($passPhrase) || isset($_GET['welcome'])) {
 				})(jQuery);
 			/*]]>*/</script>
 		</div>';
-    if (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-        MagnaDB::gi()->delete(TABLE_CONFIGURATION, array (
-            'key' => 'configuration/MAGNALISTER_PASSPHRASE'
-        ));
-    } else {
-        MagnaDB::gi()->delete(TABLE_CONFIGURATION, array (
-            'configuration_key' => 'MAGNALISTER_PASSPHRASE'
-        ));
-    }
+	MagnaDB::gi()->delete(TABLE_CONFIGURATION, array (
+		'configuration_key' => 'MAGNALISTER_PASSPHRASE'
+	));
 } else {
 	$cG->setRequiredConfigKeys($requiredConfigKeys);
 }

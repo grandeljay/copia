@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: eustandardtransfer.php 11888 2019-07-12 10:44:00Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -24,20 +24,17 @@ class eustandardtransfer {
     $this->code = 'eustandardtransfer';
     $this->title = MODULE_PAYMENT_EUSTANDARDTRANSFER_TEXT_TITLE;
     $this->description = MODULE_PAYMENT_EUSTANDARDTRANSFER_TEXT_DESCRIPTION;
-    $this->sort_order = ((defined('MODULE_PAYMENT_EUSTANDARDTRANSFER_SORT_ORDER')) ? MODULE_PAYMENT_EUSTANDARDTRANSFER_SORT_ORDER : '');
+    $this->sort_order = MODULE_PAYMENT_EUSTANDARDTRANSFER_SORT_ORDER;
     $this->info = MODULE_PAYMENT_EUSTANDARDTRANSFER_TEXT_INFO;
-    $this->enabled = ((defined('MODULE_PAYMENT_EUSTANDARDTRANSFER_STATUS') && MODULE_PAYMENT_EUSTANDARDTRANSFER_STATUS == 'True') ? true : false);
-    
-    if ($this->check() > 0) {
-      $this->info_success = ((defined('MODULE_PAYMENT_EUSTANDARDTRANSFER_SUCCESS') && MODULE_PAYMENT_EUSTANDARDTRANSFER_SUCCESS == 'True') ? $this->description : $this->info);
-      if ((int) MODULE_PAYMENT_EUSTANDARDTRANSFER_ORDER_STATUS_ID > 0) {
-        $this->order_status = MODULE_PAYMENT_EUSTANDARDTRANSFER_ORDER_STATUS_ID;
-      }
-    }
-    
-		if (is_object($order)) {
-			$this->update_status();
+    $this->info_success = (MODULE_PAYMENT_EUSTANDARDTRANSFER_SUCCESS == 'True' ? $this->description : $this->info);
+    $this->enabled = ((MODULE_PAYMENT_EUSTANDARDTRANSFER_STATUS == 'True') ? true : false);
+
+		if ((int) MODULE_PAYMENT_EUSTANDARDTRANSFER_ORDER_STATUS_ID > 0) {
+			$this->order_status = MODULE_PAYMENT_EUSTANDARDTRANSFER_ORDER_STATUS_ID;
 		}
+
+		if (is_object($order))
+			$this->update_status();
   }
 
 	function update_status() {
@@ -103,19 +100,16 @@ class eustandardtransfer {
   }
 
   function success() {
-    global $last_order;
-    
-    $success = array(
+    $confirmation = array(
       array ('title' => $this->title.': ', 
              'class' => $this->code,
              'fields' => array(array('title' => '',
-                                     'field' => sprintf($this->info_success, $last_order)
+                                     'field' => $this->info_success
                                      )
                                )
              )
     );
-    
-    return $success;
+    return $confirmation;
   }
 
   function output_error() {

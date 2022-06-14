@@ -35,11 +35,6 @@ defined('MAGNA_DEV_PRODUCTLIST') OR define('MAGNA_DEV_PRODUCTLIST', true);
 defined('DIR_MAGNALISTER_FS') OR define('DIR_MAGNALISTER_FS', DIR_MAGNALISTER);
 defined('DIR_MAGNALISTER_WS') OR define('DIR_MAGNALISTER_WS', DIR_MAGNALISTER);
 
-// for Gambio 4.1 and newer
-if (TABLE_CONFIGURATION == 'gx_configurations') {
-    define('ML_GAMBIO_41_NEW_CONFIG_TABLE', true);
-}
-
 if (!array_key_exists('language', $_SESSION)) $_SESSION['language'] = 'english';
 
 function outOfOrder() {
@@ -79,11 +74,8 @@ function encodeClientVersion($arr) {
  * Diese Funktion ruft andere hier hinterlegte Funktionen auf. Sinn ist den zu
  * aendernden Code in Shop eigenen Scripten so gering wie moeglich zu halten.
  *
- * @param string $functionName Name der auszufuehrenden Funktion oder Aktion
- * @param array $arguments Assoziatives Array mit Parametern
- * @param array $includes
- * @param int $opts
- * @return bool
+ * @param $functionName	Name der auszufuehrenden Funktion oder Aktion
+ * @param $arguments	Assoziatives Array mit Parametern
  */
 function magnaExecute($functionName, $arguments = array(), $includes = array(), $opts = 0) {
  	global $magnaConfig;
@@ -494,13 +486,22 @@ if (isset($_GET['module']) && ($_GET['module'] == 'ajax') && isset($_GET['reques
 	if (file_exists(DIR_MAGNALISTER_FS_INCLUDES.'lib/MagnaDB.php')) {
 		require_once(DIR_MAGNALISTER_FS_INCLUDES.'lib/MLTables.php');
 		require_once(DIR_MAGNALISTER_FS_INCLUDES.'lib/MagnaDB.php');
-		include_once(DIR_MAGNALISTER_FS_INCLUDES.'identifyShop.php');
 		MagnaDB::gi();
 		//commerce:Seo v2
 		if (defined('DB_SERVER_CHARSET')) {
 			MagnaDB::gi()->setCharset(DB_SERVER_CHARSET);
-		}
-		if (SHOPSYSTEM == 'gambio' && (($sVersion = mlGetGambioShopSystemVersion()) !== false)) {
+		} elseif (SHOPSYSTEM == 'gambio' && MagnaDB::gi()->tableExists('version_history')) {
+			$sVersion = MagnaDB::gi()->fetchOne("
+				SELECT version
+				  FROM version_history
+				 WHERE     type IN ('service_pack', 'master_update')
+				".((MagnaDB::gi()->columnExistsInTable('installed', 'version_history'))
+					? 'AND installed = 1'
+					: 'AND (is_full_version = 0 OR (is_full_version = 1 AND history_id = 1))'
+				)."
+			  ORDER BY installation_date DESC
+				 LIMIT 1
+			");
 			if (version_compare($sVersion, '2.1', '>=')) {
 				MagnaDB::gi()->setCharset('utf8');
 			}
@@ -508,7 +509,6 @@ if (isset($_GET['module']) && ($_GET['module'] == 'ajax') && isset($_GET['reques
 			if (version_compare($sVersion, '2.5.2.1', '>=')) {
 				define('ML_GAMBIO_USE_IFRAME', true);
 			}
-			// Store information for Gambio updater - that ml will be updated when merchants update Gambio shopsystem
 			MagnaDB::gi()->insert(TABLE_MAGNA_CONFIG, array('mpID' => '0', 'mkey' => 'ShopSystemVersion', 'value' => $sVersion), true);
 		}
 	}
@@ -578,6 +578,7 @@ mlIsCacheDirWritable();
  * Global includes and initialisation
  */
 require_once(DIR_MAGNALISTER_FS_INCLUDES.'lib/classes/MLShop.php');
+include_once(DIR_MAGNALISTER_FS_INCLUDES.'identifyShop.php');
 if (defined('DIR_FS_CATALOG_ORIGINAL_IMAGES')) {
 	define('SHOP_FS_PRODUCT_IMAGES',  DIR_FS_CATALOG_ORIGINAL_IMAGES);
 	define('SHOP_FS_PRODUCT_THUMBNAILS',  DIR_FS_CATALOG_THUMBNAIL_IMAGES);
@@ -599,15 +600,22 @@ if (defined('DIR_FS_CATALOG_ORIGINAL_IMAGES')) {
 require_once(DIR_MAGNALISTER_FS_INCLUDES.'lib/json_wrapper.php');
 require_once(DIR_MAGNALISTER_FS_INCLUDES.'lib/MLTables.php');
 require_once(DIR_MAGNALISTER_FS_INCLUDES.'lib/MagnaDB.php');
-include_once(DIR_MAGNALISTER_FS_INCLUDES.'identifyShop.php');
 $magnaDB = MagnaDB::gi(); /* Database Connector */
 //commerce:Seo v2
 if (defined('DB_SERVER_CHARSET')) {
 	MagnaDB::gi()->setCharset(DB_SERVER_CHARSET);
-}
-if (SHOPSYSTEM == 'gambio' && (($sVersion = mlGetGambioShopSystemVersion()) !== false)) {
-    define('ML_GAMBIO_VERSION', $sVersion);
-
+} elseif (SHOPSYSTEM == 'gambio' && MagnaDB::gi()->tableExists('version_history')) {
+	$sVersion = MagnaDB::gi()->fetchOne("
+		SELECT version
+		  FROM version_history
+		 WHERE     type IN ('service_pack', 'master_update')
+		".((MagnaDB::gi()->columnExistsInTable('installed', 'version_history'))
+			? 'AND installed = 1'
+			: 'AND (is_full_version = 0 OR (is_full_version = 1 AND history_id = 1))'
+		)."
+	  ORDER BY installation_date DESC
+		 LIMIT 1
+	");
 	if (version_compare($sVersion, '2.1', '>=')) {
 		MagnaDB::gi()->setCharset('utf8');
 	}
@@ -629,20 +637,6 @@ $_dbUpdateErrors = null;
 if (MAGNA_SAFE_MODE || $_updatedSuccessfully || isset($_GET['dbupdate']) || !MagnaDB::gi()->tableExists(TABLE_MAGNA_CONFIG)) {
 	$_dbUpdateErrors = $mlUpdater->updateDatabase();
 }
-// DB Update trigger for Gambio Cloud
-if (MagnaDB::gi()->recordExists(TABLE_MAGNA_CONFIG, array(
-    'mpID' => 0,
-    'mkey' => 'trigger.dbupdate',
-    'value' => 'true',
-))) {
-    $_dbUpdateErrors = $mlUpdater->updateDatabase();
-    MagnaDB::gi()->update(TABLE_MAGNA_CONFIG, array(
-        'value' => 'false'
-    ), array(
-        'mpID' => 0,
-        'mkey' => 'trigger.dbupdate',
-    ));
-}
 unset($mlUpdater);
 #echo __FILE__.'{L'.__LINE__.'}';
 #die();
@@ -658,20 +652,11 @@ $_langISO = strtolower(magnaGetLanguageCode($_lang));
 @include_once(DIR_MAGNALISTER_FS.'lang/'.$_lang.'.php');
 
 if (!array_key_exists('languages_id', $_SESSION) || empty($_SESSION['languages_id'])) {
-    if (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-        $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-            SELECT `languages_id`
-              FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c
-             WHERE     l.`code` = c.`value`
-                   AND c.`key` = 'configuration/DEFAULT_LANGUAGE'
-        ");
-    } else {
-        $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne(
-            'SELECT languages_id '.
-            'FROM '.TABLE_LANGUAGES.' l, '.TABLE_CONFIGURATION.' c '.
-            'WHERE l.code=c.configuration_value '.
-            'AND c.configuration_key=\'DEFAULT_LANGUAGE\'');
-    }
+	$_SESSION['languages_id'] = MagnaDB::gi()->fetchOne(
+		'SELECT languages_id '.
+		'FROM '.TABLE_LANGUAGES.' l, '.TABLE_CONFIGURATION.' c '.
+		'WHERE l.code=c.configuration_value '.
+		'AND c.configuration_key=\'DEFAULT_LANGUAGE\'');
 }
 
 /* Title of page */
@@ -779,15 +764,13 @@ $requiredConfigKeys = array (
 	'general.callback.importorders',
 );
 
-/* Is magic_quotes on? (only old PHP versions) */
-if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-	if (get_magic_quotes_gpc()) {
-		/* Strip the added slashes */
-		$_REQUEST = arrayMap('stripslashes', $_REQUEST);
-		$_GET     = arrayMap('stripslashes', $_GET);
-		$_POST    = arrayMap('stripslashes', $_POST);
-		$_COOKIE  = arrayMap('stripslashes', $_COOKIE);
-	}
+/* Is magic_quotes on? */
+if (get_magic_quotes_gpc()) {
+	/* Strip the added slashes */
+	$_REQUEST = arrayMap('stripslashes', $_REQUEST);
+	$_GET     = arrayMap('stripslashes', $_GET);
+	$_POST    = arrayMap('stripslashes', $_POST);
+	$_COOKIE  = arrayMap('stripslashes', $_COOKIE);
 }
 
 /**
@@ -956,18 +939,6 @@ if (!isset($_SESSION['magnaRunOnce']) || isset($_GET['magnaRunOnce'])) {
 }
 
 $GLOBALS['MagnaAjax'] = (isset($_GET['kind']) && ($_GET['kind'] == 'ajax'));
-
-# prevent the "not yet booked" message if the mpID gets lost / access via ?module= for some reason
-if (    !array_key_exists('mp', $_GET)
-     &&  array_key_exists('module', $_GET)
-     &&  in_array($_GET['module'], $magnaConfig['maranon']['Marketplaces'])) {
-	foreach ($magnaConfig['maranon']['Marketplaces'] as $currMp => $currModule) {
-		if ($currModule == $_GET['module']) {
-			$_GET['mp'] = $currMp ;
-			break;
-		}
-	}
-}
 
 if (array_key_exists('mp', $_GET) && array_key_exists($_GET['mp'], $magnaConfig['maranon']['Marketplaces'])
 	&& ($mp = $magnaConfig['maranon']['Marketplaces'][$_GET['mp']])

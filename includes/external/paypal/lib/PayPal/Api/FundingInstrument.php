@@ -11,9 +11,9 @@ use PayPal\Common\PayPalModel;
  *
  * @package PayPal\Api
  *
- * @property \PayPal\Api\CreditCard credit_card
+ * @property \PayPal\Api\CreditCard      credit_card
  * @property \PayPal\Api\CreditCardToken credit_card_token
- * @property \PayPal\Api\Billing billing
+ * @property \PayPal\Api\Billing         billing
  */
 class FundingInstrument extends PayPalModel
 {
@@ -21,6 +21,7 @@ class FundingInstrument extends PayPalModel
      * Credit Card instrument.
      *
      * @param \PayPal\Api\CreditCard $credit_card
+     * @deprecated Please use #setPaymentCard instead
      *
      * @return $this
      */
@@ -34,6 +35,8 @@ class FundingInstrument extends PayPalModel
      * Credit Card instrument.
      *
      * @return \PayPal\Api\CreditCard
+     * @deprecated Please use #setPaymentCard instead
+     *
      */
     public function getCreditCard()
     {
@@ -88,6 +91,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Bank Account information.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\ExtendedBankAccount $bank_account
      *
@@ -101,6 +105,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Bank Account information.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\ExtendedBankAccount
      */
@@ -111,6 +116,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Vaulted bank account instrument.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\BankToken $bank_account_token
      *
@@ -124,6 +130,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Vaulted bank account instrument.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\BankToken
      */
@@ -134,6 +141,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * PayPal credit funding instrument.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\Credit $credit
      *
@@ -147,6 +155,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * PayPal credit funding instrument.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\Credit
      */
@@ -157,6 +166,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Incentive funding instrument.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\Incentive $incentive
      *
@@ -170,6 +180,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Incentive funding instrument.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\Incentive
      */
@@ -180,6 +191,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * External funding instrument.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\ExternalFunding $external_funding
      *
@@ -193,6 +205,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * External funding instrument.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\ExternalFunding
      */
@@ -203,6 +216,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Carrier account token instrument.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\CarrierAccountToken $carrier_account_token
      *
@@ -216,6 +230,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Carrier account token instrument.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\CarrierAccountToken
      */
@@ -226,6 +241,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Carrier account instrument
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\CarrierAccount $carrier_account
      *
@@ -239,6 +255,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Carrier account instrument
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\CarrierAccount
      */
@@ -249,6 +266,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Private Label Card funding instrument. These are store cards provided by merchants to drive business with value to customer with convenience and rewards.
+     *
      * @deprecated Not publicly available
      * @param \PayPal\Api\PrivateLabelCard $private_label_card
      *
@@ -262,6 +280,7 @@ class FundingInstrument extends PayPalModel
 
     /**
      * Private Label Card funding instrument. These are store cards provided by merchants to drive business with value to customer with convenience and rewards.
+     *
      * @deprecated Not publicly available
      * @return \PayPal\Api\PrivateLabelCard
      */

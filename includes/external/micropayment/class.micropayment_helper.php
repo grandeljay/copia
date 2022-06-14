@@ -1,10 +1,4 @@
 <?php
-/**
- *
- * @package    micropayment
- * @copyright  Copyright (c) 2015 Micropayment GmbH (http://www.micropayment.de)
- * @author     micropayment GmbH <shop-plugins@micropayment.de>
- */
 class micropayment_helper
 {
     static $infoServiceDone = false;
@@ -183,7 +177,7 @@ class micropayment_helper
               WHERE `configuration_key` = "'.self::CONFIG_NAME_REFRESH_INTERVAL.'"');
         $check = xtc_db_fetch_array($check);
 
-        if(!is_array($check) || (isset($check['result']) && $check['result'] != 1)) {
+        if($check['result'] != 1) {
             return false;
         } else {
             if (!$this->getConfig('MODULE_PAYMENT_MCP_SERVICE_ACCOUNT_ID')) {

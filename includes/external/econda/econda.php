@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: econda.php 12439 2019-12-02 17:40:51Z GTB $
+   $Id: econda.php ???? 2005-11-29 14:50:00Z mz $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com

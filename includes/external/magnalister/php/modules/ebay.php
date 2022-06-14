@@ -46,13 +46,6 @@ $authConfigKeys = array('ebay.token');
 $_magnaQuery['mode'] = getCurrentModulePage();
 $_magnaQuery['messages'] = array();
 
-
-if (array_key_exists('mode', $_GET) && ($_GET['mode'] == 'ajax')) {
-	include_once(DIR_MAGNALISTER_MODULES.'ebay/ebayajax.php');
-	require(DIR_WS_INCLUDES . 'application_bottom.php');
-	exit();
-}
-
 if (!allRequiredConfigKeysAvailable($requiredConfigKeys, $_MagnaSession['mpID'])) {
 	$_magnaQuery['mode'] = 'conf';
 }
@@ -107,7 +100,7 @@ if (!MagnaDB::gi()->recordExists(TABLE_CURRENCIES, array (
 $includes = array();
 # in prepare passiert categoriematching
 if ($_magnaQuery['mode'] == 'prepare') {
-	$includes[] = DIR_MAGNALISTER_MODULES.'ebay/pre_prepare.php';
+	$includes[] = DIR_MAGNALISTER_MODULES.'ebay/prepare.php';
 	
 } else if ($_magnaQuery['mode'] == 'checkin') {
 	$includes[] = DIR_MAGNALISTER_MODULES.'ebay/checkin.php';

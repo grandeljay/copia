@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalAdmin.php 12890 2020-09-21 14:08:35Z GTB $
+   $Id: PayPalAdmin.php 10066 2016-07-12 12:26:45Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -13,7 +13,6 @@
 
 // include needed classes
 require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalPayment.php');
-require_once(DIR_FS_CATALOG.'includes/classes/modified_api.php');
 
 
 // used classes
@@ -47,7 +46,7 @@ class PayPalAdmin extends PayPalPayment {
       $webProfileList = $webProfile->get_list($apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Profile', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
     
@@ -67,7 +66,6 @@ class PayPalAdmin extends PayPalPayment {
           'status' => (($this->get_config('PAYPAL_STANDARD_PROFILE') == $profile->getId()) ? true : false),
           'flow_config' => array(
             'landing_page_type' => ((is_object($flowConfig)) ? $flowConfig->getLandingPageType() : ''),
-            'user_action' => ((is_object($flowConfig)) ? $flowConfig->getUserAction() : ''),
           ),
           'input_fields' => array(
             'allow_note' => ((is_object($inputFields)) ? $inputFields->getAllowNote() : ''),
@@ -95,7 +93,6 @@ class PayPalAdmin extends PayPalPayment {
     // set FlowConfig
     $flowConfig = new FlowConfig();
     $flowConfig->setLandingPageType($config['flow_config']['landing_page_type']);
-    $flowConfig->setUserAction('commit');
 
     // set Presentation
     $presentation = new Presentation();
@@ -108,12 +105,14 @@ class PayPalAdmin extends PayPalPayment {
     if ($config['presentation']['locale_code'] != '') {
       $presentation->setLocaleCode(strtoupper($config['presentation']['locale_code']));
     }
-        
+    
+    $addess_override = (($config['input_fields']['address_override'] == '0') ? 1 : 0);
+    
     // set InputFields
     $inputFields = new InputFields();
     $inputFields->setAllowNote(0)
                 ->setNoShipping(0)
-                ->setAddressOverride(1);
+                ->setAddressOverride((int)$addess_override);
 
     // set WebProfile
     $webProfile = new WebProfile();
@@ -126,7 +125,7 @@ class PayPalAdmin extends PayPalPayment {
       $webProfile->create($apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Profile', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
   }
@@ -140,7 +139,6 @@ class PayPalAdmin extends PayPalPayment {
     // set FlowConfig
     $flowConfig = new FlowConfig();
     $flowConfig->setLandingPageType($config['flow_config']['landing_page_type']);
-    $flowConfig->setUserAction('commit');
 
     // set Presentation
     $presentation = new Presentation();
@@ -153,12 +151,14 @@ class PayPalAdmin extends PayPalPayment {
     if ($config['presentation']['locale_code'] != '') {
       $presentation->setLocaleCode(strtoupper($config['presentation']['locale_code']));
     }
-    
+
+    $addess_override = (($config['input_fields']['address_override'] == '0') ? 1 : 0);
+
     // set InputFields
     $inputFields = new InputFields();
     $inputFields->setAllowNote(0)
                 ->setNoShipping(0)
-                ->setAddressOverride(1);
+                ->setAddressOverride((int)$addess_override);
 
     // set WebProfile
     $webProfile = new WebProfile();
@@ -172,7 +172,7 @@ class PayPalAdmin extends PayPalPayment {
       $webProfile->update($apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Profile', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
       
       if ($ex instanceof \PayPal\Exception\PayPalConnectionException) {
@@ -209,10 +209,35 @@ class PayPalAdmin extends PayPalPayment {
       ),
       array(
         'config_key' => strtoupper($config['id']).'_ADDRESS', 
-        'config_value' => 1,
+        'config_value' => $addess_override,
       ),          
     );
     $this->save_config($sql_data_array);
+  }
+
+
+  function delete_profile($id) {
+
+    // auth
+    $apiContext = $this->apiContext();
+
+    // set WebProfile
+    $webProfile = new WebProfile();
+    $webProfile->setId($id);
+
+    try {
+      $webProfile->delete($apiContext);
+      $valid = true;
+    } catch (Exception $ex) {
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
+      $valid = false;
+    }
+    
+    if ($id == $this->get_config('PAYPAL_STANDARD_PROFILE')) {
+      $this->delete_config('PAYPAL_STANDARD_PROFILE');
+    }
+
+    $this->delete_config($id, 'config_value');
   }
 
 
@@ -228,7 +253,7 @@ class PayPalAdmin extends PayPalPayment {
       $WebhookList = $webhooks->getAll($apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
 
@@ -284,7 +309,7 @@ class PayPalAdmin extends PayPalPayment {
     try {
       $WebhookList = $webhook->create($apiContext);
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
     }    
 
     $sql_data_array = array();
@@ -312,7 +337,7 @@ class PayPalAdmin extends PayPalPayment {
       $WebhookList = $webhook->get($data['id'], $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
 
@@ -342,7 +367,7 @@ class PayPalAdmin extends PayPalPayment {
       $WebhookList->update($patchRequest, $apiContext);
       $success = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $success = false;
     }
        
@@ -379,7 +404,7 @@ class PayPalAdmin extends PayPalPayment {
       $WebhookList = $webhook->get($id, $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
 
@@ -416,7 +441,7 @@ class PayPalAdmin extends PayPalPayment {
       $WebhookList = $webhook->get($id, $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
 
@@ -424,7 +449,7 @@ class PayPalAdmin extends PayPalPayment {
       try {
         $WebhookList->delete($apiContext);
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       }
     }
 
@@ -447,7 +472,7 @@ class PayPalAdmin extends PayPalPayment {
       $WebhookList = $webhooks_event->availableEventTypes($apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Webhook', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
 
@@ -470,28 +495,6 @@ class PayPalAdmin extends PayPalPayment {
     return $list_array;    
   }
 
-  
-  function get_partner_details($mode) {
-    modified_api::reset();
-    $response = modified_api::request('paypal/onboarding/'.$mode);
-    
-    if ($response != null && is_array($response)) {
-      return $response;
-    }
-  }
-  
-  
-  function get_seller_nonce() {
-    return substr(hash('sha512', HTTP_SERVER.DIR_WS_CATALOG), 0, 100);
-  }
-  
-  
-  function getOnboardingLink($mode = 'live') {
-    $partner = $this->get_partner_details($mode);
-    if (is_array($partner)) {
-      return sprintf($partner['requestURL'], $partner['partnerID'], $partner['clientID'], $this->get_seller_nonce());    
-    }
-  }
   
 }
 ?>

@@ -57,13 +57,7 @@ class HoodProductSaver {
 	protected function insertPrepareData($data) {
 		// Filter JNH Tab
 		if (isset($data['Description'])) {
-			if (getDBConfigValue('gambio.tabs.display', 0, 'h1') == 'none') {
-				if (strpos($data['Description'], '[TAB:')) {
-					$data['Description'] = substr($data['Description'], 0, strpos($data['Description'], '[TAB:'));
-				}
-			} else {
-				$data['Description'] = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $data['Description']);
-			}
+			$data['Description'] = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $data['Description']);
 		}
 		
 		foreach (array('StoreCategory', 'StoreCategory2', 'StoreCategory3') as $shopCat) {
@@ -71,13 +65,7 @@ class HoodProductSaver {
 				$data[$shopCat] = 0;
 			}
 		}
-        /* {Hook} "hoodInsertPrepareData": Enables you to modify the prepared product data before it will be saved.<br>
-            Variables that can be used:
-            <ul>
-             <li><code>$aData</code>: The data of a product.</li>
-             <li>$this->mpID</code>: The ID of the marketplace.</li>
-            </ul>
-        */
+		
 		if (($hp = magnaContribVerify('hoodInsertPrepareData', 1)) !== false) {
 			require($hp);
 		}

@@ -1,5 +1,5 @@
 
-{if $GENDER == 'm'}Dear Mr.{elseif $GENDER == 'f'}Dear Ms./Mrs.{else}Hello{/if} {$NAME},
+Dear {$GENDER} {$LASTNAME},
 
 The voucher code you purchased has been activated!
 You may now redeem your voucher and/or send it to someone by e-mail.

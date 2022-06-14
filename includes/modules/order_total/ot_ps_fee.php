@@ -1,17 +1,16 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_ps_fee.php 12599 2020-02-27 07:30:01Z GTB $
+   $Id: ot_ps_fee.php,v 1.0 
 
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
+   XT-Commerce - community made shopping
+   http://www.xt-commerce.com
 
-   Copyright (c) 2009 - 2013 [www.modified-shop.org]
+   Copyright (c) 2003 XT-Commerce
    -----------------------------------------------------------------------------------------
    based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
    (c) 2002-2003 osCommerce(ot_ps_fee.php,v 1.02 2003/02/24); www.oscommerce.com
-   (C) 2001 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers ; http://www.themedia.at & http://www.oscommerce.at
-   (c) 2006 xt:Commerce (ot_ps_fee.php v 1.0); www.xt-commerce.de
+   (C) 2001 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers ; http://www.themedia.at & http://www.oscommerce.at
 
    Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
@@ -35,15 +34,15 @@
 
     function __construct() {
     	global $xtPrice;
-
+      
       $this->code = 'ot_ps_fee';
       $this->title = MODULE_ORDER_TOTAL_PS_FEE_TITLE;
       $this->description = MODULE_ORDER_TOTAL_PS_FEE_DESCRIPTION;
-      $this->enabled = ((defined('MODULE_ORDER_TOTAL_PS_FEE_STATUS') && MODULE_ORDER_TOTAL_PS_FEE_STATUS == 'true') ? true : false);
-      $this->sort_order = ((defined('MODULE_ORDER_TOTAL_PS_FEE_SORT_ORDER')) ? MODULE_ORDER_TOTAL_PS_FEE_SORT_ORDER : '');
+      $this->enabled = ((MODULE_ORDER_TOTAL_PS_FEE_STATUS == 'true') ? true : false);
+      $this->sort_order = MODULE_ORDER_TOTAL_PS_FEE_SORT_ORDER;
 
       $this->default_values = 'AT:3.00,DE:3.58,00:9.99';
-
+      
       $this->properties['button_update'] = '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_MODULES, 'set=' . 'ordertotal' . '&module=' . $this->code . '&action=update') . '">' . BUTTON_UPDATE. '</a>';
       $this->properties['button_reset'] = '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_MODULES, 'set=' . 'ordertotal' . '&module=' . $this->code . '&action=reset') . '">' . BUTTON_RESET. '</a>';
 
@@ -57,22 +56,17 @@
 
         //Will become true, if ps can be processed.
         $ps_country = false;
-
+        
         $product_id_array = $_SESSION['cart']->get_product_id_array();
-
-				$count_query = xtc_db_query("SELECT count(*) as count
-				                               FROM ".TABLE_PRODUCTS."
+        
+				$count_query = xtc_db_query("SELECT count(*) as count 
+				                               FROM ".TABLE_PRODUCTS."  
 				                              WHERE products_id IN ('".implode("', '", $product_id_array)."')
 				                                AND products_fsk18 = '1'");
 				$count = xtc_db_fetch_array($count_query);
 
         //check if payment method is ps. If yes, check if ps is possible.
-        if (isset($_SESSION['shipping'])
-            && is_array($_SESSION['shipping'])
-            && array_key_exists('id', $_SESSION['shipping'])
-            && $count['count'] > 0
-            )
-        {
+        if (isset($_SESSION['shipping']['id']) && $count['count'] > 0) {
           //process installed shipping modules
           $shipping_code = strtoupper(array_shift(explode('_',$_SESSION['shipping']['id'])));
           $shipping_code = ($shipping_code == 'FREEAMOUNT') ? 'FREEAMOUNT_FREE' : 'FEE_' . $shipping_code;
@@ -89,55 +83,44 @@
             }
             $i++;
           }
+        } else {
+          //PS selected, but no shipping module which offers PS
         }
-
+        
         if ($ps_country) {
           $ps_cost = $xtPrice->xtcCalculateCurr($ps_cost);
           $ps_tax = xtc_get_tax_rate(MODULE_ORDER_TOTAL_PS_FEE_TAX_CLASS, $order->delivery['country']['id'], $order->delivery['zone_id']);
           $ps_tax_description = xtc_get_tax_description(MODULE_ORDER_TOTAL_PS_FEE_TAX_CLASS, $order->delivery['country']['id'], $order->delivery['zone_id']);
 
-          if ($cod_tax > 0
-              && defined('MODULE_ORDER_TOTAL_TAX_STATUS')
-              && MODULE_ORDER_TOTAL_TAX_STATUS == 'true'
-              )
-          {
-            if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 1) {
-                $order->info['tax'] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
-                $order->info['tax_groups'][TAX_ADD_TAX . "$ps_tax_description"] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
-                $order->info['total'] += $ps_cost + (xtc_add_tax($ps_cost, $ps_tax)-$ps_cost);
-                $ps_cost_value = xtc_add_tax($ps_cost, $ps_tax);
-                $ps_cost= $xtPrice->xtcFormat($ps_cost_value, true);
-                $order->info['subtotal'] += $ps_cost_value;
-            }
-
-            if (($_SESSION['customers_status']['customers_status_show_price_tax'] == 0
-                 && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1
-                 ) || ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0
-                       && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 0
-                       && $order->delivery['country_id'] == STORE_COUNTRY
-                       )
-                )
-
-            {
-                $order->info['tax'] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
-                $order->info['tax_groups'][TAX_NO_TAX . "$ps_tax_description"] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
-                $ps_cost_value = $ps_cost;
-                $ps_cost = $xtPrice->xtcFormat($ps_cost, true);
-                $order->info['subtotal'] += $ps_cost_value;
-                $order->info['total'] += $ps_cost_value;
-            }
+          if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 1) {
+              $order->info['tax'] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
+              $order->info['tax_groups'][TAX_ADD_TAX . "$ps_tax_description"] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
+              $order->info['total'] += $ps_cost + (xtc_add_tax($ps_cost, $ps_tax)-$ps_cost);
+              $ps_cost_value = xtc_add_tax($ps_cost, $ps_tax);
+              $ps_cost= $xtPrice->xtcFormat($ps_cost_value, true);
           }
-
+          if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1) {
+              $order->info['tax'] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
+              $order->info['tax_groups'][TAX_NO_TAX . "$ps_tax_description"] += xtc_add_tax($ps_cost, $ps_tax)-$ps_cost;
+              $ps_cost_value = $ps_cost;
+              $ps_cost = $xtPrice->xtcFormat($ps_cost, true);
+              $order->info['subtotal'] += $ps_cost_value;
+              $order->info['total'] += $ps_cost_value;
+          }
           if (!$ps_cost_value) {
              $ps_cost_value = $ps_cost;
              $ps_cost = $xtPrice->xtcFormat($ps_cost, true);
-             $order->info['subtotal'] += $ps_cost_value;
              $order->info['total'] += $ps_cost_value;
           }
-
           $this->output[] = array('title' => $this->title . ':',
                                   'text' => $ps_cost,
                                   'value' => $ps_cost_value);
+        } else {
+//Following pse should be improved if we can't get the shipping modules disabled, who don't allow PS
+// as well as countries who do not have ps
+//          $this->output[] = array('title' => $this->title . ':',
+//                                  'text' => 'No PS for this module.',
+//                                  'value' => '');
         }
       }
     }
@@ -159,13 +142,13 @@
         foreach($installed_shipping_modules as $shipping_code) {
           $shipping_code = strtoupper($shipping_code);
           $shipping_code = ($shipping_code == 'FREEAMOUNT') ? 'FREEAMOUNT_FREE' : 'FEE_' . $shipping_code;
-          if(defined('MODULE_ORDER_TOTAL_PS_'.$shipping_code)) {
+          if(defined('MODULE_ORDER_TOTAL_PS_'.$shipping_code)) {           
             $modules[] = 'MODULE_ORDER_TOTAL_PS_'.$shipping_code;
           }
         }
       }
       $modules[] = 'MODULE_ORDER_TOTAL_PS_FEE_TAX_CLASS';
-
+      
       return $modules;
     }
 
@@ -181,16 +164,16 @@
       if (count($installed_shipping_modules) > 0) {
         foreach($installed_shipping_modules as $shipping_code) {
           $shipping_code = strtoupper($shipping_code);
-          $shipping_code = ($shipping_code == 'FREEAMOUNT') ? 'FREEAMOUNT_FREE' : 'FEE_' . $shipping_code;
-          if(!defined('MODULE_ORDER_TOTAL_PS_'.$shipping_code)) {
+          $shipping_code = ($shipping_code == 'FREEAMOUNT') ? 'FREEAMOUNT_FREE' : 'FEE_' . $shipping_code;          
+          if(!defined('MODULE_ORDER_TOTAL_PS_'.$shipping_code)) {            
             $sql_data_array = array(
-                'configuration_key' => 'MODULE_ORDER_TOTAL_PS_'.$shipping_code,
-                'configuration_value' => $this->default_values,
-                'configuration_group_id' => '6',
+                'configuration_key' => 'MODULE_ORDER_TOTAL_PS_'.$shipping_code, 
+                'configuration_value' => $this->default_values, 
+                'configuration_group_id' => '6', 
                 'sort_order' => '0',
                 'date_added' => 'now()'
                 );
-            xtc_db_perform(TABLE_CONFIGURATION, $sql_data_array);
+            xtc_db_perform(TABLE_CONFIGURATION, $sql_data_array);            
           }
           if ($reset) {
             $sql_data_array['configuration_value'] = $this->default_values;
@@ -199,17 +182,15 @@
         }
       }
     }
-
+    
     function reset() {
       $this->update(true);
     }
-
+    
     function get_installed_shipping_modules() {
       $module_keys = str_replace('.php','',MODULE_SHIPPING_INSTALLED);
       $installed_shipping_modules = explode(';',$module_keys);
-      //support for ot_shipping
-      $installed_shipping_modules[] = 'free';
-      return $installed_shipping_modules;
+      return $installed_shipping_modules;    
     }
 
     function remove() {

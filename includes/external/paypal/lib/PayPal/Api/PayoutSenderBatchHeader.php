@@ -88,7 +88,11 @@ class PayoutSenderBatchHeader extends PayPalModel
     }
 
     /**
-     * @deprecated This property is unused
+     * The batch status to update. You can change the `NEW` batch status to `PENDING` or `CANCEL`.
+     *
+     * @param string $batch_status
+     * 
+     * @return $this
      */
     public function setBatchStatus($batch_status)
     {
@@ -97,7 +101,9 @@ class PayoutSenderBatchHeader extends PayPalModel
     }
 
     /**
-     * @deprecated This property is unused
+     * The batch status to update. You can change the `NEW` batch status to `PENDING` or `CANCEL`.
+     *
+     * @return string
      */
     public function getBatchStatus()
     {

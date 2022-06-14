@@ -18,16 +18,12 @@
  * -----------------------------------------------------------------------------
  */
 require_once(DIR_MAGNALISTER_MODULES.'meinpaket/prepare/MeinpaketProductPrepareSaver.php');
-require_once(DIR_MAGNALISTER_MODULES.'meinpaket/MeinpaketHelper.php');
-require_once(DIR_MAGNALISTER_MODULES.'magnacompatible/MagnaCompatibleBase.php');
 
-class MeinpaketProductPrepare extends MagnaCompatibleBase
-{
+class MeinpaketProductPrepare {
 	protected $resources = array();
 	
-	protected $mpID= 0;
-	protected $marketplace = '';
-
+	protected $mpId = 0;
+	
 	protected $isAjax = false;
 	
 	protected $prepareSettings = array();
@@ -35,102 +31,57 @@ class MeinpaketProductPrepare extends MagnaCompatibleBase
 	protected $saver = null;
 	
 	public function __construct(&$resources) {
-		if (!empty($_POST['FullSerializedForm'])) {
-			$newPost = array();
-			parse_str_unlimited($_POST['FullSerializedForm'], $newPost);
-			$_POST = array_merge($_POST, $newPost);
-		}
-
-		parent::__construct($resources);
-
 		$this->resources = &$resources;
-		$this->specificResource = ucfirst($this->resources['session']['currentPlatform']);
-		$this->mpID = $this->resources['session']['mpID'];
-		$this->marketplace = $this->resources['session']['currentPlatform'];
-		$this->marketplaceName = $this->specificResource;
+		
+		$this->mpId = $this->resources['session']['mpID'];
+		
 		$this->isAjax = isset($_GET['kind']) && ($_GET['kind'] == 'ajax');
-		$this->prepareSettings['selectionName'] = isset($_GET['view']) ? $_GET['view'] : 'apply';
-		$this->resources['url']['mode'] = 'prepare';
-		$this->resources['url']['view'] = $this->prepareSettings['selectionName'];
-
+		
+		$this->prepareSettings['selectionName'] = 'prepare';
+		
 		$this->saver = new MeinpaketProductPrepareSaver($this->resources, $this->prepareSettings);
 	}
 	
 	protected function savePreparation() {
-		if (!array_key_exists('saveMatching', $_POST)) {
-			if (!isset($_POST['Action']) || $_POST['Action'] !== 'SaveMatching' || $_GET['where'] === 'varmatchView') {
-				return;
-			}
+		if (!array_key_exists('savePrepareData', $_POST)) {
+			return;
 		}
-
 		$pIds = MagnaDB::gi()->fetchArray('
 			SELECT pID FROM ' . TABLE_MAGNA_SELECTION . '
-			 WHERE mpID="' . $this->mpID . '" AND
+			 WHERE mpID="' . $this->mpId . '" AND
 				   selectionname="' . $this->prepareSettings['selectionName'] . '" AND
 				   session_id="' . session_id() . '"
 		', true);
-
-		$isSinglePrepare = 1 == count($pIds);
-
-		$variationThemeAttributes = array();
-		$shopVariations = $this->saveMatchingAttributes($this->saver, $isSinglePrepare, $variationThemeAttributes);
-		$itemDetails = $_POST;
-		unset($itemDetails['savePrepareData']);
-
-		if (isset($itemDetails['VariationConfiguration'])) {
-			$itemDetails['prepare']['VariationConfiguration'] = $itemDetails['VariationConfiguration'];
-			$itemDetails['prepare']['variation_theme'] = json_encode(array($itemDetails['prepare']['VariationConfiguration'] => $variationThemeAttributes));
+		if (isset($_POST['prepare']['ShippingDetails']['ShippingCost'])) {
+			$_POST['prepare']['ShippingDetails']['ShippingCost'] = mlFloatalize($_POST['prepare']['ShippingDetails']['ShippingCost']);
 		}
+		$this->saver->saveProperties($pIds, $_POST['prepare']);
 		
-		$itemDetails['prepare']['CategoryAttributes'] = $shopVariations;
-
-		if (isset($itemDetails['prepare']['ShippingDetails']['ShippingCost'])) {
-			$itemDetails['prepare']['ShippingDetails']['ShippingCost'] = mlFloatalize($itemDetails['prepare']['ShippingDetails']['ShippingCost']);
-		}
-
-		$this->saver->saveProperties($pIds, $itemDetails['prepare']);
-		$saveMatching = array_key_exists('saveMatching', $_POST);
-
-		if (count($this->saver->aErrors) === 0 || !$saveMatching) {
-			if (!$saveMatching) {
-				# stay on prepare product form
-				$_POST['prepare'] = 'prepare';
-			} else {
-				unset($_POST['prepare']);
-				MagnaDB::gi()->delete(TABLE_MAGNA_SELECTION, array(
-					'mpID' => $this->mpID,
-					'selectionname' => $this->prepareSettings['selectionName'],
-					'session_id' => session_id()
-				));
-
-				echo '<p class="successBox">'.ML_LABEL_SAVED_SUCCESSFULLY.'</p>';
-			}
-		} else {
-			# stay on prepare product form
-			$_POST['prepare'] = 'prepare';
-
-			if ($saveMatching) {
-				foreach ($this->saver->aErrors as $sError) {
-					echo '<div class="errorBox">' . $sError . '</div>';
-				}
-			}
-		}
+		//*
+		MagnaDB::gi()->delete(TABLE_MAGNA_SELECTION, array(
+			'mpID' => $this->mpId,
+			'selectionname' => $this->prepareSettings['selectionName'],
+			'session_id' => session_id()
+		));
+		//*/
+		
+		echo '<p class="successBox">'.ML_LABEL_SAVED_SUCCESSFULLY.'</p>';
 	}
-
+	
 	protected function deletePreparation() {
 		if (!array_key_exists('unprepare', $_POST)) {
 			return;
 		}
 		$pIds = MagnaDB::gi()->fetchArray('
 			SELECT pID FROM ' . TABLE_MAGNA_SELECTION . '
-			 WHERE mpID="' . $this->mpID . '" AND
+			 WHERE mpID="' . $this->mpId . '" AND
 				   selectionname="' . $this->prepareSettings['selectionName'] . '" AND
 				   session_id="' . session_id() . '"
 		', true);
 		$this->saver->deleteProperties($pIds);
 		//*
 		MagnaDB::gi()->delete(TABLE_MAGNA_SELECTION, array(
-			'mpID' => $this->mpID,
+			'mpID' => $this->mpId,
 			'selectionname' => $this->prepareSettings['selectionName'],
 			'session_id' => session_id()
 		));
@@ -142,81 +93,47 @@ class MeinpaketProductPrepare extends MagnaCompatibleBase
 	}
 	
 	protected function execPreparationView() {
-		if ($this->prepareSettings['selectionName'] === 'varmatch') {
-			$className = 'VariationMatching';
-		} else {
-			$className = 'ProductPrepareView';
-		}
+		require_once(DIR_MAGNALISTER_MODULES.'meinpaket/prepare/MeinpaketProductPrepareView.php');
 		
-		if (($class = $this->loadResource('prepare', $className)) === false) {
-			if ($this->isAjax) {
-				echo '{"error": "'.__METHOD__.'This is not supported"}';
-			} else {
-				echo __METHOD__.'This is not supported';
-			}
-			return;
-		}
-
-		$params = array();
-		foreach (array('mpID', 'marketplace', 'marketplaceName', 'resources') as $attr) {
-			if (isset($this->$attr)) {
-				$params[$attr] = &$this->$attr;
-			}
-		}
-
-		$cMDiag = new $class($params);
-
+		$cMDiag = new MeinpaketProductPrepareView($this->resources);
 		if ($this->isAjax) {
 			echo $cMDiag->renderAjax();
 		} else {
-			if ($className === 'VariationMatching') {
-				$html = $cMDiag->process();
-			} else {
-				$html = $cMDiag->process($this->saver->loadSelection());
-			}
-
+			$html = $cMDiag->process($this->saver->loadSelection());
 			echo $html;
 		}
 	}
 	
 	protected function execSelectionView() {
-        require_once(DIR_MAGNALISTER_MODULES.'meinpaket/prepare/MeinpaketPrepareCategoryView.php');
-        $pV = new MeinpaketPrepareCategoryView(
-            null,
-            $this->prepareSettings,
-            isset($_GET['sorting'])   ? $_GET['sorting']   : false,
-            isset($_POST['tfSearch']) ? $_POST['tfSearch'] : ''
-        );
-
-        if ($this->isAjax) {
-            echo $pV->renderAjaxReply();
-        } else {
-            echo $pV->printForm();
-        }
-    }
+                        require_once(DIR_MAGNALISTER_MODULES.'meinpaket/prepare/MeinpaketPrepareCategoryView.php');
+                        $pV = new MeinpaketPrepareCategoryView(
+                                null,
+                                $this->prepareSettings,
+                                isset($_GET['sorting'])   ? $_GET['sorting']   : false,
+                                isset($_POST['tfSearch']) ? $_POST['tfSearch'] : ''
+                        );
+                        if ($this->isAjax) {
+                                echo $pV->renderAjaxReply();
+                        } else {
+                                echo $pV->printForm();
+                        }
+            }
 	
 	protected function getSelectedProductsCount() {
 		return (int)MagnaDB::gi()->fetchOne('
 			SELECT COUNT(*)
 			  FROM '.TABLE_MAGNA_SELECTION.'
-			 WHERE mpID = '.$this->mpID.'
+			 WHERE mpID = '.$this->mpId.'
 			       AND selectionname = "'.$this->prepareSettings['selectionName'].'"
 			       AND session_id = "'.session_id().'"
 		');
 	}
 	        	
-    protected function processProductList()
-    {
-		if ($this->prepareSettings['selectionName'] === 'varmatch') {
-			$this->execPreparationView();
-			return;
-		}
-
-        require_once(DIR_MAGNALISTER_MODULES.'meinpaket/prepare/MeinpaketPrepareProductList.php');
+            protected function processProductList() {
+                        require_once(DIR_MAGNALISTER_MODULES.'meinpaket/prepare/MeinpaketPrepareProductList.php');
 		$o = new MeinpaketPrepareProductList();
-        echo  $o;
+                        echo  $o;
 	}
-
 	public function process() {
 		$this->savePreparation();
 		$this->deletePreparation();
@@ -229,56 +146,22 @@ class MeinpaketProductPrepare extends MagnaCompatibleBase
 				isset($_POST['prepare'])
 				|| (
 					isset($_GET['where'])
-					&& in_array($_GET['where'], array('prepareView', 'catMatchView', 'varmatchView'))
+					&& (
+						($_GET['where'] == 'prepareView')
+						|| ($_GET['where'] == 'catMatchView')
+					)
 				)
 			)
 			&& ($this->getSelectedProductsCount() > 0)
 		) {
 			$this->execPreparationView();
 		} else {
-			if (defined('MAGNA_DEV_PRODUCTLIST') && MAGNA_DEV_PRODUCTLIST === true ) {
-	            $this->processProductList();
-			} else {
-	            $this->execSelectionView();
-			}
+                                  if (defined('MAGNA_DEV_PRODUCTLIST') && MAGNA_DEV_PRODUCTLIST === true ) {  
+                                                $this->processProductList();
+                                  }else{
+                                                $this->execSelectionView();
+                                  }
 		}
 	}
 	
-	protected function saveMatchingAttributes($oProductSaver, $isSinglePrepare, &$variationThemeAttributes = null)
-	{
-		if (isset($_POST['Variations'])) {
-			parse_str_unlimited($_POST['Variations'], $params);
-			$_POST = $params;
-			if (isset($_POST['saveMatching'])) {
-				unset($_POST['saveMatching']);
-			}
-		}
-
-		$sIdentifier = $_POST['VariationConfiguration'];
-		$matching = $_POST['ml']['match'];
-		$savePrepare = isset($_POST['saveMatching']) ? $_POST['saveMatching'] : false;
-
-		if ($variationThemeAttributes !== null && isset($_POST['VariationConfiguration'])) {
-			if ($_POST['VariationConfiguration'] !== 'null') {
-				$variationThemes = json_decode($_POST['variationThemes'], true);
-				$variationThemeAttributes = $variationThemes[$_POST['VariationConfiguration']]['attributes'];
-			} else {
-				$variationThemeAttributes = 'null';
-			}
-		}
-
-		$oProductSaver->aErrors = array_merge(
-			$oProductSaver->aErrors,
-			MeinpaketHelper::gi()->saveMatching(
-				$sIdentifier,
-				$matching,
-				$savePrepare,
-				true,
-				$isSinglePrepare,
-				$variationThemeAttributes
-			)
-		);
-
-		return json_encode($matching['ShopVariation']);
-	}
 }

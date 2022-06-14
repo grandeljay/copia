@@ -99,11 +99,9 @@ class PayPalConfigManager
             return $this->configs[$searchKey];
         } else {
             $arr = array();
-            if ($searchKey !== '') {
-                foreach ($this->configs as $k => $v) {
-                    if (strpos($k, $searchKey)) {
-                        $arr[$k] = $v;
-                    }
+            foreach ($this->configs as $k => $v) {
+                if (strstr($k, $searchKey)) {
+                    $arr[$k] = $v;
                 }
             }
 
@@ -127,7 +125,7 @@ class PayPalConfigManager
             $arr = array();
             foreach ($this->configs as $key => $value) {
                 $pos = strpos($key, '.');
-                if (strpos($key, "acct")) {
+                if (strstr($key, "acct")) {
                     $arr[] = substr($key, 0, $pos);
                 }
             }

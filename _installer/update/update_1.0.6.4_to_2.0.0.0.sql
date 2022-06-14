@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------------------
-#  $Id: update_1.0.6.4_to_2.0.0.0.sql 12867 2020-08-19 14:45:04Z Tomcraft $
+#  $Id: update_1.0.5.0_to_1.0.6.0.sql 3813 2012-10-29 11:54:40Z Tomcraft1980 $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -206,7 +206,7 @@ CREATE TABLE module_backup (
   last_modified datetime DEFAULT NULL,
   PRIMARY KEY (configuration_id),
   UNIQUE idx_configuration_key (configuration_key)
-);
+) ENGINE=MyISAM;
 
 #Tomcraft - 2013-08-21 - Added hidden stock feature
 ALTER TABLE admin_access ADD stats_stock_warning INT(1) NOT NULL DEFAULT 0 AFTER stats_sales_report;
@@ -359,7 +359,7 @@ DELETE FROM configuration WHERE configuration_key = 'CC_NUMBER_MIN_LENGTH';
 #  carrier_date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 #  carrier_last_modified DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 #  PRIMARY KEY (carrier_id)
-#);
+#) ENGINE=MyISAM;
 
 # Moved to update_1.0.6.2_to_1.0.6.3.sql
 #INSERT INTO carriers (carrier_id, carrier_name, carrier_tracking_link, carrier_sort_order, carrier_date_added, carrier_last_modified) VALUES (1, 'DHL', 'http://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=$2&idc=$1', '10', NOW(), '');
@@ -382,7 +382,7 @@ DELETE FROM configuration WHERE configuration_key = 'CC_NUMBER_MIN_LENGTH';
 #  parcel_id VARCHAR(80) NOT NULL,
 #  PRIMARY KEY (tracking_id),
 #  KEY idx_orders_id (orders_id)
-#);
+#) ENGINE=MyISAM;
 
 # Moved to update_1.0.6.2_to_1.0.6.3.sql
 #ALTER TABLE admin_access ADD parcel_carriers INT(1) NOT NULL DEFAULT 0 AFTER protectedshops;
@@ -418,7 +418,7 @@ ALTER TABLE countries ADD UNIQUE idx_countries_iso_code_3 (countries_iso_code_3)
 ALTER TABLE coupon_gv_customer DROP INDEX customer_id;
 ALTER TABLE coupons_description DROP INDEX coupon_id;
 ALTER TABLE coupons_description ADD PRIMARY KEY (coupon_id, language_id);
-#ALTER TABLE coupon_email_track ADD UNIQUE idx_coupon_id (coupon_id);
+ALTER TABLE coupon_email_track ADD UNIQUE idx_coupon_id (coupon_id);
 ALTER TABLE customers_status DROP INDEX idx_orders_status_name;
 ALTER TABLE customers_status ADD UNIQUE idx_customers_status_name (customers_status_name, language_id);
 ALTER TABLE module_newsletter MODIFY title VARCHAR(255) NOT NULL;
@@ -501,7 +501,7 @@ CREATE TABLE newsfeed (
   news_date INT( 11 ) NULL,
   PRIMARY KEY (news_id),
   UNIQUE idx_news_link (news_link)
-);
+) ENGINE=MyISAM;
 ALTER TABLE admin_access ADD newsfeed INT(1) NOT NULL DEFAULT 0 AFTER shopgate;
 UPDATE admin_access SET newsfeed = 1 WHERE customers_id = 1 LIMIT 1;
 UPDATE admin_access SET newsfeed = 1 WHERE customers_id = 'groups' LIMIT 1;
@@ -658,7 +658,7 @@ CREATE TABLE products_tags (
   products_options_values_id int(11) NOT NULL DEFAULT '0',
   KEY idx_products_options_values (products_id,options_id,values_id),
   KEY idx_products_options_id (products_options_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_tags_options;
 CREATE TABLE products_tags_options (
@@ -675,7 +675,7 @@ CREATE TABLE products_tags_options (
   products_options_id int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (options_id,languages_id),
   KEY idx_products_options_id (products_options_id)
-);
+) ENGINE=MyISAM;
 
 DROP TABLE IF EXISTS products_tags_values;
 CREATE TABLE products_tags_values (
@@ -695,7 +695,7 @@ CREATE TABLE products_tags_values (
   PRIMARY KEY (values_id,languages_id),
   KEY idx_options_id (options_id),
   KEY idx_products_options_values_id (products_options_values_id)
-);
+) ENGINE=MyISAM;
 
 #WEB28 - 2015-08-11 - add attributes_vpe
 ALTER TABLE products_attributes ADD attributes_vpe_id int(11) NOT NULL AFTER attributes_ean;
@@ -750,16 +750,5 @@ INSERT INTO `content_manager` (`content_id`, `languages_id`, `content_title`, `c
 INSERT INTO `content_manager` (`content_id`, `languages_id`, `content_title`, `content_heading`, `content_text`, `sort_order`, `file_flag`, `content_file`, `content_status`, `content_group`, `content_delete`, `content_active`)
   SELECT MAX(content_id)+1, '2','Rechnungsdaten','Firma - Adresse - PLZ Stadt','Firma<br/>Adresse<br/>PLZ Stadt<br/><br/>Tel: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>Diese Daten k&ouml;nnen im Content Manager ge&auml;ndert werden.','0','1','','0',MAX(content_group),'0','0' FROM content_manager;
 UPDATE configuration SET configuration_value = (SELECT MAX(content_group) FROM content_manager) WHERE configuration_key = 'INVOICE_INFOS';
-
-#GTB - 2019-07-20 - update eustandardtransfer
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_STATUS' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_STATUS';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_BANKNAM' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_BANKNAM';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_BRANCH' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_BRANCH';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_ACCNAM' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_ACCNAM';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_ACCNUM' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_ACCNUM';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_ACCIBAN' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_ACCIBAN';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_BANKBIC' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_BANKBIC';
-UPDATE configuration SET configuration_key = 'MODULE_PAYMENT_EUSTANDARDTRANSFER_SORT_ORDER' WHERE configuration_key = 'MODULE_PAYMENT_EUTRANSFER_SORT_ORDER';
-
 
 # Keep an empty line at the end of this file for the db_updater to work properly

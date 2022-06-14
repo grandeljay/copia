@@ -96,15 +96,6 @@ class MLProduct {
 		}
 		return self::$instance;
 	}
-
-	/**
-	 * Gets the information if the shop has variations
-	 * (dummy, used in several scripts which come from the veyton version)
-	 * @return true
-	 */
-	public function hasMasterItems() {
-		return true;
-	}
 	
 	/**
 	 * Sets the internal options. The options affect the behavior of the
@@ -707,14 +698,13 @@ class MLProduct {
 		$variation['Price'] = array();
 		$variation['PriceReduced'] = array();
 		foreach ($this->priceConfig['values'] as $name => $config) {
-            $variation['Price'][$name] = $this->calcPrice($parentPrices[$name]['Price'] + $surcharge, $tax, $config);
-            // null means no special price
-            if ($parentPrices[$name]['Reduced'] !== null) {
-                $variation['PriceReduced'][$name] = $this->calcPrice($parentPrices[$name]['Reduced'] + $surcharge, $tax, $config);
-                if (($variation['PriceReduced'][$name] > $variation['Price'][$name]) || ($variation['PriceReduced'][$name] <= 0)) {
-                    unset($variation['PriceReduced'][$name]);
-                }
-            }
+			$variation['Price'][$name] = $this->calcPrice($parentPrices[$name]['Price'] + $surcharge, $tax, $config);
+			if ($parentPrices[$name]['Reduced'] > 0) {
+				$variation['PriceReduced'][$name] = $this->calcPrice($parentPrices[$name]['Reduced'] + $surcharge, $tax, $config);
+				if (($variation['PriceReduced'][$name] > $variation['Price'][$name]) || ($variation['PriceReduced'][$name] <= 0)) {
+					unset($variation['PriceReduced'][$name]);
+				}
+			}
 		}
 		if ($this->priceConfig['type'] == 'single') {
 			$variation['Price'] = current($variation['Price']);
@@ -848,7 +838,6 @@ class MLProduct {
 				'MarketplaceSku' => $vi['marketplace_sku'],
 				'Variation' => $this->translateProductsOptions($vi['variation_attributes']),
 				'Price' => $vi['variation_price'],
-				'Surcharge' => $vi['variation_price'],
 				'Quantity' => $vi['variation_quantity'],
 				'Status' => $vi['variation_status'],
 				'ShippingTimeId' => $vi['variation_shipping_time'],
@@ -863,13 +852,13 @@ class MLProduct {
 			if (!$onlyOffer) {
 				$v['EAN'] = $vi['variation_ean'];
 				
-				if ((float)$vi['variation_weight'] != 0) {
+				if ((float)$vi['variation_weight'] > 0) {
 					$weight = (float)$vi['variation_weight'];
 					$bweight = isset($parent['Weight']['Value']) ? $parent['Weight']['Value'] : 0.0;
 					$v['Weight'] = array();
 					if (($bweight + $weight) > 0) {
-						$v['Weight']['Unit'] = isset($parent['Weight']['Unit']) ? $parent['Weight']['Unit'] : 'kg';
-						$v['Weight']['Value'] = ($bweight + $weight);
+						$vi['Weight']['Unit'] = isset($parent['Weight']['Unit']) ? $parent['Weight']['Unit'] : 'kg';
+						$vi['Weight']['Value'] = ($bweight + $weight);
 					}
 				}
 				if (!empty($vi['variation_unit_of_measure']) && ((float)$vi['variation_volume'] > 0)) {
@@ -985,19 +974,14 @@ class MLProduct {
 			unset($v['VariationValueId']);
 
 			if ($v['PricePrefix'] == '=') {
-				$v['Surcharge'] = $v['Price'];
-			    $aPrices = $parent['Prices'];
+				$aPrices = $parent['Prices'];
 				foreach ($aPrices as &$aPrice) {
 					$aPrice['Price'] = 0.00;
-					$aPrice['Reduced'] = null;
+					$aPrice['Reduced'] = 0.00;
 				}
 				$this->calcPriceVariation($v, $v['Price'], $aPrices, $parent['TaxPercent']);
-            } elseif ($v['PricePrefix'] == '%') {
-                $v['Surcharge'] = (float)($parent['Price'] * ($v['Price'] / 100));
-                $this->calcPriceVariation($v, $v['Surcharge'], $parent['Prices'], $parent['TaxPercent']);
 			} else {
 				$vPriceSurcharge = $v['Price'] * (($v['PricePrefix'] == '+') ? 1 : -1);
-                $v['Surcharge'] = $vPriceSurcharge;
 				$this->calcPriceVariation($v, $vPriceSurcharge, $parent['Prices'], $parent['TaxPercent']);
 			}
 			unset($v['PricePrefix']);
@@ -1010,7 +994,7 @@ class MLProduct {
 					$weight = (float)$v['Weight'];
 					$bweight = 0.0;
 				} else {
-					$weight = (float)$v['Weight'] * (($v['WeightPrefix'] == '+') ? 1 : -1);
+					$weight = (float)$v['Weight'] * ($v['WeightPrefix'] == '+') ? 1 : -1;
 					$bweight = isset($parent['Weight']['Value']) ? $parent['Weight']['Value'] : 0.0;
 				}
 				$v['Weight'] = array();
@@ -1143,7 +1127,6 @@ class MLProduct {
 				'MarketplaceSku' => $parent['ProductsModel'].'-'.$combi['combi_model'], // '-' instead of '_', because Gambio expects '-' in its orders module.
 				'Variation' => $this->translateProductsProperties($combi['products_properties_combis_id']),
 				'Price' => $combi['combi_price'],
-				'Surcharge' => $combi['combi_price'],
 				'PriceReduced' => 0,
 				'Quantity' => $combi['combi_quantity'],
 				'Status' => true, // I can't find a status flag.
@@ -1241,34 +1224,9 @@ class MLProduct {
 			foreach ($combis as $combi) {
 				$v = array (
 					'VariationId' => $combi['products_properties_combis_id'],
-					'Image' => (array_key_exists('combi_image', $combi)) ? $combi['combi_image'] : '',
+					'Image' => $combi['combi_image'],
 					'Variation' => $this->translateProductsProperties($combi['products_properties_combis_id']),
 				);
-
-				// Since Gambio 4.1 Multiple Images for one Variation are supported
-                if (!MagnaDB::gi()->columnExistsInTable('combi_image', 'products_properties_combis')) {
-                    // product_image_list_combi -> products_properties_combis_id we get product_image_list_id
-                    // products_properties_combis -> products_properties_combis_id
-                    $imageListId = MagnaDB::gi()->fetchOne("
-                        SELECT product_image_list_id 
-                          FROM product_image_list_combi
-                         WHERE products_properties_combis_id = ".(int)MagnaDB::gi()->escape($combi['products_properties_combis_id'])."
-                    ");
-                    $variationImages = MagnaDB::gi()->fetchArray("
-                        SELECT * 
-                          FROM product_image_list_image
-                         WHERE product_image_list_id = ".(int)MagnaDB::gi()->escape($imageListId)."
-                      ORDER BY product_image_list_image_sort_order ASC
-                    ");
-
-                    $firstImage = current($variationImages);
-                    $v['Image'] = $firstImage['product_image_list_image_local_path'];
-
-                    $v['Images'] = array();
-                    foreach ($variationImages as $variationImage) {
-                        $v['Images'][] = $variationImage['product_image_list_image_local_path'];
-                    }
-                }
 
 				$attrs[] = $v;
 			}
@@ -1569,21 +1527,15 @@ $images = array (
 	protected function prepareParentPrices(&$product) {
 		foreach ($this->priceConfig['values'] as $name => $config) {
 			$price = is_array($product['Price']) ? $product['Price'][$name] : $product['Price'];
-			$product['Currency'] = is_array($product['Currency']) ? $product['Currency'] : array();
 			$product['Currency'][$name] = $config['Currency'];
 			$product['Prices'][$name] = array (
 				'Price' => $config['Group'] > 0
 					? $this->simpleprice->setCurrency($config['Currency'])->getGroupPrice($config['Group'], $product['ProductId'])
 					: $price,
 				'Reduced' => $config['UseSpecialOffer']
-					? $this->simpleprice->setCurrency($config['Currency'])->tryGetSpecialOffer($product['ProductId'])
-					: null
+					? $this->simpleprice->setCurrency($config['Currency'])->getSpecialOffer($product['ProductId'], $config['Group'])
+					: 0.0
 			);
-
-            // if special offer is not set
-            if ($product['Prices'][$name]['Reduced'] === false) {
-                $product['Prices'][$name]['Reduced'] = null;
-            }
 
 			if (($hp = magnaContribVerify('CustomizePrice', 1)) !== false) {
 				$product['Prices'][$name]['Price'] = $this->simpleprice->setCurrency($config['Currency'])->getCustomizedPrice($product['ProductId']);
@@ -1595,10 +1547,8 @@ $images = array (
 			}
 
 			// Make sure the reduced price is not greater than the normal price.
-			if (   $product['Prices'][$name]['Reduced'] !== null
-			    && ($product['Prices'][$name]['Reduced'] > $product['Prices'][$name]['Price'])
-            ) {
-				$product['Prices'][$name]['Reduced'] = null;
+			if ($product['Prices'][$name]['Reduced'] > $product['Prices'][$name]['Price']) {
+				$product['Prices'][$name]['Reduced'] = 0;
 			}
 		}
 	}
@@ -1612,7 +1562,6 @@ $images = array (
 	 * @return void
 	 */
 	protected function completeParentOffer(&$product) {
-		$product['PriceReduced'] = array();
 		$product['Price'] = array();
 		foreach ($this->priceConfig['values'] as $name => $config) {
 			// Price foo
@@ -1676,8 +1625,6 @@ $images = array (
 			'VpeValue' => 'products_vpe_value',
 			'VpeStatus' => 'products_vpe_status',
 			'ProductUrl' => '',
-			'MinOrderQuantity' => 'gm_min_order',
-			'PossibleAmountInterval' => 'gm_graduated_qty',
 		);
 		$descriptionFields = array ( // Some of these fields don't exist in every osC fork.
 			'Title' => 'products_name',
@@ -1809,13 +1756,7 @@ $images = array (
 		}
 		
 		// Filter JNH Tab
-		if (getDBConfigValue('gambio.tabs.display', 0, 'h1') == 'none') {
-			if (strpos($desc['Description'], '[TAB:')) {
-				$desc['Description'] = substr($desc['Description'], 0, strpos($desc['Description'], '[TAB:'));
-			}
-		} else {
-			$desc['Description'] = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $desc['Description']);
-		}
+		$desc['Description'] = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $desc['Description']);
 		
 		return $desc;
 	}
@@ -1977,7 +1918,7 @@ $images = array (
 		
 		$this->prepareParentPrices($product);
 		
-		$product['Variations'] = $this->fetchVariations($product, false);
+		$product['Variations'] = $this->fetchVariations($product, false);		
 		$product['VariationPictures'] = $this->fetchVariationImages($product);
 		$this->completeParentOffer($product);
 		
@@ -2093,13 +2034,7 @@ $images = array (
 		$finalProducts = array();
 		foreach ($products as &$product) {
 			// Filter JNH Tab
-			if (getDBConfigValue('gambio.tabs.display', 0, 'h1') == 'none') {
-				if (strpos($product['products_description'], '[TAB:')) {
-					$product['products_description'] = substr($product['products_description'], 0, strpos($product['products_description'], '[TAB:'));
-				}
-			} else {
-				$product['products_description'] = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $product['products_description']);
-			}
+			$product['products_description'] = preg_replace('/\[TAB:([^\]]*)\]/', '<h1>${1}</h1>', $product['products_description']);
 			
 			if ($product['products_image']) {
 				$product['products_allimages'] = array($product['products_image']);

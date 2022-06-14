@@ -25,7 +25,7 @@
         <td colspan="2"><div class="hr"></div></td>
       </tr>
       <tr>
-        <td><strong>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}{#pickup_address#}{else}{#shipping_address#}{/if}</strong><br />{$address_label_shipping}</td>
+        <td><strong>{#shipping_address#}</strong><br />{$address_label_shipping}</td>
         <td style="vertical-align:top; text-align:right;">{if $address_label_payment}<strong>{#payment_address#}</strong>{/if}<br />{$address_label_payment}</td>
       </tr>
     </table>
@@ -64,7 +64,7 @@
     {if $DELIVERY_DUTY_INFO}
     <div style="font-size:11px; margin: 10px 0; border:1px solid #a3a3a3;padding:5px;text-align: justify;">{#text_duty_info#}</div>
     {/if}
-    {if is_array($PAYMENT_INFO) && count($PAYMENT_INFO) > 0}
+    {if count($PAYMENT_INFO) > 0}
     <br/><br/>
     <table width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>

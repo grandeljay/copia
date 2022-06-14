@@ -2,7 +2,7 @@
     {if $language eq 'english'}
         We are waiting for your pre-payment. This page will refresh automatically.
     {elseif $language eq 'german'}
-        Wir warten auf Ihre Vorauszahlung. Diese Seite wird automatisch aktualisiert.
+        Wir warten auf Ihre Vorauszahlung. Diese Seite wird automatisch zu aktualisieren.
     {else}
         We are waiting for your pre-payment. This page will refresh automatically.<br>
         Message in <strong>{$language}</strong> is not translated.

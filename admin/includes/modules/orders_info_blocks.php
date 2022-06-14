@@ -1,6 +1,6 @@
 <?php
  /*-------------------------------------------------------------
-   $Id: orders_info_blocks.php 12543 2020-01-23 16:48:52Z GTB $
+   $Id: orders_info_blocks.php 10395 2016-11-07 13:18:38Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -60,9 +60,10 @@
                   <td class="main" valign="top"><b><?php echo CUSTOMERS_MEMO; ?></b></td>
                 <?php
                   // memo query
-                  $memo_query = xtc_db_query("SELECT count(*) AS count
-                                                FROM ".TABLE_CUSTOMERS_MEMO."
-                                               WHERE customers_id=".$order->customer['ID']);
+                  $memo_query = xtc_db_query("-- /admin/orders.php
+                                             SELECT count(*) AS count
+                                               FROM ".TABLE_CUSTOMERS_MEMO."
+                                              WHERE customers_id=".$order->customer['ID']);
                   $memo_count = xtc_db_fetch_array($memo_query);
                 ?>
                   <td class="main">
@@ -79,7 +80,7 @@
                 </tr>
                 <tr>
                   <td class="main"><b><?php echo ENTRY_EMAIL_ADDRESS; ?></b></td>
-                  <td class="main"><?php echo '<a href="' . xtc_href_link(FILENAME_MAIL, xtc_get_all_get_params(array('customer', 'action')).'customer='.$order->customer['email_address']) . '" style="font-size: 11px;">' . $order->customer['email_address'] . '</a>'; ?></td>
+                  <td class="main"><?php echo '<a href="mailto:' . $order->customer['email_address'] . '" style="font-size: 11px;">' . $order->customer['email_address'] . '</a>'; ?></td>
                 </tr>
                 <tr>
                   <td class="main"><b><?php echo ENTRY_CUSTOMERS_STATUS; ?></b></td>
@@ -100,17 +101,12 @@
               if ($order->delivery['name'] != $order->customer['name'] ||
                   $order->delivery['postcode'] != $order->customer['postcode'] ||
                   $order->delivery['city'] != $order->customer['city'] ||
-                  $order->delivery['street_address'] != $order->customer['street_address']
-                  )
-              {
+                  $order->delivery['street_address'] != $order->customer['street_address']) {
                 $address_add_class = ' bg_notice';
-                if (strpos($order->info['shipping_class'], 'selfpickup') !== false) {
-                  $address_add_class = ' bg_warning';
-                }
               }
               ?>
             <td class="main<?php echo $address_add_class; ?>" valign="top" style="border-right: 1px solid #a3a3a3;">
-              <b><?php echo ((strpos($order->info['shipping_class'], 'selfpickup') !== false) ? ENTRY_PICKUP_ADDRESS : ENTRY_SHIPPING_ADDRESS); ?></b><br />
+              <b><?php echo ENTRY_SHIPPING_ADDRESS; ?></b><br />
                <?php echo xtc_address_format($order->delivery['format_id'], $order->delivery, 1, '', '<br />'); ?>
             </td>
             <td valign="top" class="main">
@@ -138,7 +134,7 @@
                   ?>
                     <tr>
                       <td class="main"><b><?php echo ENTRY_SHIPPING_METHOD; ?></b></td>
-                      <td class="main"><?php echo get_shipping_name($order->info['shipping_class'], $order->info['shipping_method']) . ' ('.$order->info['shipping_class'].')'; ?></td>
+                      <td class="main"><?php echo get_shipping_name($order->info['shipping_method']) . ' ('.$order->info['shipping_class'].')'; ?></td>
                     </tr>
                   <?php
                   }
@@ -147,7 +143,7 @@
                   ?>
                     <tr>
                       <td class="main"><b><?php echo ENTRY_PAYMENT_METHOD; ?></b></td>
-                      <td class="main"><?php echo payment::payment_title($order->info['payment_method'], $order->info['order_id']) . ' ('.$order->info['payment_method'].')'; ?></td>
+                      <td class="main"><?php echo get_payment_name($order->info['payment_method'], $order->info['order_id']) . ' ('.$order->info['payment_method'].')'; ?></td>
                     </tr>
                   <?php
                   }
@@ -181,9 +177,8 @@
             echo '            <td class="dataTableContent" valign="top" align="right">'.$order->products[$i]['qty'].'&nbsp;x&nbsp;</td>'.PHP_EOL;
             echo '            <td class="dataTableContent" valign="top">'.PHP_EOL;
             echo '              <a href="'.HTTP_CATALOG_SERVER.DIR_WS_CATALOG.'product_info.php?products_id='.$order->products[$i]['id'].'" target="_blank">'.$order->products[$i]['name'].'</a>';
-            $attr_count = isset($order->products[$i]['attributes']) ? count($order->products[$i]['attributes']) : 0;
-            if ($attr_count > 0) {
-              for ($j = 0; $j < $attr_count; $j ++) {
+            if (isset($order->products[$i]['attributes']) && sizeof($order->products[$i]['attributes']) > 0) {
+              for ($j = 0, $k = sizeof($order->products[$i]['attributes']); $j < $k; $j ++) {
                 echo '<br /><nobr><i>&nbsp; - '.$order->products[$i]['attributes'][$j]['option'].': '.$order->products[$i]['attributes'][$j]['value'].'</i></nobr> ';
               }
             }
@@ -192,13 +187,13 @@
             echo ($order->products[$i]['model'] != '') ? $order->products[$i]['model'] : '<br />';
             // attribute models
             $attr_model_delimiter = defined('ATTRIBUTE_MODEL_DELIMITER') ? ATTRIBUTE_MODEL_DELIMITER : '<br />';
-            if ($attr_count > 0) {
-              for ($j = 0; $j < $attr_count; $j ++) {
+            if (isset($order->products[$i]['attributes']) && sizeof($order->products[$i]['attributes']) > 0) {
+              for ($j = 0, $k = sizeof($order->products[$i]['attributes']); $j < $k; $j ++) {
                 $model = $order->products[$i]['attributes'][$j]['attributes_model'];
                 if ($model == '') {
                   $model = xtc_get_attributes_model($order->products[$i]['id'], $order->products[$i]['attributes'][$j]['value'],$order->products[$i]['attributes'][$j]['option'], $lang);
                 }
-                echo (($model != '') ? $attr_model_delimiter . $model : '<br />');
+                echo (!empty($model) ? $attr_model_delimiter . $model : '<br />');
               }
             }
             echo '&nbsp;</td>'.PHP_EOL;
@@ -310,7 +305,7 @@
             }
           ?>
           <tr>
-            <td class="smallText" align="center"><?php echo xtc_draw_pull_down_menu('carrier_id', $carriers); ?></td>
+            <td class="smallText" align="center"><?php echo xtc_draw_pull_down_menu('carrier_id', $carriers, $carriers[0]); ?></td>
             <td class="smallText" align="center" colspan="2"><?php echo xtc_draw_input_field('parcel_id', '' ,'style="width: 99%"'); ?></td>
             <td class="smallText" align="center"><input class="button" type="submit" value="<?php echo BUTTON_INSERT; ?>"></td>
           </tr>
@@ -329,7 +324,8 @@
             <td class="smallText" align="center"><b><?php echo TABLE_HEADING_COMMENTS_SENT; ?></b></td>
           </tr>
           <?php
-            $orders_history_query = xtc_db_query("SELECT orders_status_id,
+            $orders_history_query = xtc_db_query("-- /admin/orders.php
+                                                  SELECT orders_status_id,
                                                          date_added,
                                                          customer_notified,
                                                          comments,
@@ -440,7 +436,7 @@
           <tr>
             <td>
               <div class="flt-l"> 
-                <a class="button" href="<?php echo xtc_href_link(FILENAME_ORDERS, 'oID='.$oID.((isset($_GET['page'])) ? '&page='.$_GET['page'] : '')); ?>"><?php echo BUTTON_BACK;?></a>
+                <a class="button" href="<?php echo xtc_href_link(FILENAME_ORDERS, 'page='.$_GET['page'].'&oID='.$oID); ?>"><?php echo BUTTON_BACK;?></a>
               </div>
               <div class="flt-r"> 
                 <?php

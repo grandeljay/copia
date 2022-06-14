@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: table_block.php 12771 2020-05-17 15:56:34Z GTB $
+   $Id: table_block.php 1797 2011-02-12 15:31:48Z franky-n-xtcm $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -32,7 +32,7 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
       if (isset($contents['form'])) {
         $tableBox_string .= $contents['form'] . "\n";
         $form_set = true;
-        array_shift($contents);
+        xtc_array_shift($contents);
       }
 
       $tableBox_string .= '<table class="contentTable"';
@@ -42,9 +42,6 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
       $tableBox_string .= '>' . "\n";
 
       for ($i = 0, $n = sizeof($contents); $i < $n; $i++) {
-        if (!is_array($contents[$i])) {
-          $contents[$i] = array();
-        }
         $tableBox_string .= '  <tr';
         if ($this->table_row_parameters != '') 
             $tableBox_string .= ' ' . $this->table_row_parameters;
@@ -82,7 +79,7 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
             } elseif ($this->table_data_parameters != '') {
                 $tableBox_string .= ' ' . $this->table_data_parameters;
             }
-            $tableBox_string .= '>' . ((isset($contents[$i]['text'])) ? $contents[$i]['text'] : '&nbsp;') . '</td>' . "\n";
+            $tableBox_string .= '>' . $contents[$i]['text'] . '</td>' . "\n";
         }
 
         $tableBox_string .= '  </tr>' . "\n";

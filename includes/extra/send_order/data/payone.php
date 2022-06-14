@@ -10,17 +10,17 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
-
+  
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
-
+  
   if (strpos($order->info['payment_method'], 'payone') !== false) {
     require_once (DIR_FS_EXTERNAL.'payone/classes/PayoneModified.php');
     require_once (DIR_FS_EXTERNAL.'payone/lang/'.$_SESSION['language'].'.php');
     $payone = new PayoneModified();
-
+  
     if ($order->info['payment_method'] == 'payone_elv' && empty($_SESSION['payone_elv']['sepa_mandate_id']) == false) {
       if (isset($_SESSION['payone_elv']['sepa_download_pdf']) && $_SESSION['payone_elv']['sepa_download_pdf'] == 'true') {
         $mandate_file = $payone->retrieveSepaMandate($_SESSION['payone_elv']['sepa_mandate_id']);
@@ -46,7 +46,7 @@
                                   CLEARING_TEXT . $clearing_data['orders_id'],
                                   '',
                                   CLEARING_OUTRO);
-
+                                
       $smarty->assign('PAYMENT_INFO_HTML', implode('<br/>', $payment_info_array));
       $smarty->assign('PAYMENT_INFO_TXT', implode("\n", $payment_info_array));
     }

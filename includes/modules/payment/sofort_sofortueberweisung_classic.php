@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: sofort_sofortueberweisung_classic.php 11759 2019-04-12 14:52:08Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,19 +10,17 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2010 Payment Network AG - http://www.payment-network.com
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-// include autoloader
-require_once(DIR_FS_EXTERNAL.'sofort/autoload.php');
-
 // include needed classes
 require_once(DIR_FS_EXTERNAL.'sofort/classes/sofortLibSofortueberweisungClassic.inc.php');
 require_once(DIR_FS_EXTERNAL.'sofort/classes/SofortLibPayment.php');
+require_once(DIR_FS_EXTERNAL.'sofort/core/fileLogger.php');
 
 class sofort_sofortueberweisung_classic extends SofortLibPayment {
 
@@ -32,8 +30,10 @@ class sofort_sofortueberweisung_classic extends SofortLibPayment {
     $this->SofortPayment();
 
     // logger
-    $this->logger = new Sofort\SofortLib\FileLogger();
+    $this->logger = new FileLogger();
     $this->logger->setLogfilePath(DIR_FS_LOG.'sofort_'.date('Y-m-d').'.log');
+    $this->logger->setErrorLogfilePath(DIR_FS_LOG.'sofort_error_'.date('Y-m-d').'.log');
+    $this->logger->setWarningsLogfilePath(DIR_FS_LOG.'sofort_warning_'.date('Y-m-d').'.log');
 	}
 
 
@@ -62,7 +62,7 @@ class sofort_sofortueberweisung_classic extends SofortLibPayment {
     $this->Sofortueberweisung->setCurrencyCode($this->data['currency']);
     $this->Sofortueberweisung->setSenderCountryId(strtoupper($order->billing['country']['iso_code_2']));
     $this->Sofortueberweisung->setLanguageCode(strtoupper($_SESSION['language_code']));
-    $this->Sofortueberweisung->setReason($this->shortenReason($this->data['reason_1']), $this->shortenReason($this->data['reason_2']));
+    $this->Sofortueberweisung->setReason($this->data['reason_1'], $this->data['reason_2']);
     $this->Sofortueberweisung->setOrderID($insert_id);
     $this->Sofortueberweisung->setCustomerID($_SESSION['customer_id']);
     $this->Sofortueberweisung->setSuccessUrl($this->data['success_url'], true);
@@ -101,6 +101,7 @@ class sofort_sofortueberweisung_classic extends SofortLibPayment {
     xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_PAYMENT_".strtoupper($this->code)."_PROJECT_ID', '',  '6', '4', now())");
     xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_PAYMENT_".strtoupper($this->code)."_PROJECT_PASS', '',  '6', '4', now())");
     xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_PAYMENT_".strtoupper($this->code)."_NOTIFY_PASS', '',  '6', '4', now())");
+    xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) values ('MODULE_PAYMENT_".strtoupper($this->code)."_KS_STATUS', 'False', '6', '3', 'xtc_cfg_select_option(array(\'True\', \'False\'), ', now())");
     xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) values ('MODULE_PAYMENT_".strtoupper($this->code)."_HASH_ALGORITHM', 'sha1',  '6', '6', 'xtc_cfg_select_option(array(\'md5\',\'sha1\',\'sha256\',\'sha512\'), ', now())");
 	}
 
@@ -113,11 +114,12 @@ class sofort_sofortueberweisung_classic extends SofortLibPayment {
 
 	function keys() {
 	  $keys = $this->keys_default();
-	  $keys[1] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_USER_ID';
-	  $keys[2] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_PROJECT_ID';
-	  $keys[3] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_PROJECT_PASS';
-	  $keys[4] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_NOTIFY_PASS';
-	  $keys[5] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_HASH_ALGORITHM';
+	  $keys[1] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_KS_STATUS';
+	  $keys[2] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_USER_ID';
+	  $keys[3] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_PROJECT_ID';
+	  $keys[4] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_PROJECT_PASS';
+	  $keys[5] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_NOTIFY_PASS';
+	  $keys[6] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_HASH_ALGORITHM';
 
     ksort($keys);
     $keys = array_values($keys);

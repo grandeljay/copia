@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: stats_sales_report.php 12824 2020-07-09 12:47:09Z GTB $
+   $Id: stats_sales_report.php 1687 2011-01-23 12:12:04Z franky-n-xtcm $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -106,18 +106,11 @@
   // customers status/group
   $srCgroup = (isset($_GET['cgroup']) && preg_match("/^[0-9\,]+$/", $_GET['cgroup'])) ? $_GET['cgroup'] : '';
   
-  // paymenttype
+   // paymenttype
   if (isset($_GET['payment']) && (xtc_not_null($_GET['payment'])) ) {
     $srPayment = $_GET['payment'];
   } else {
     $srPayment = '0';
-  }
-
-  // country
-  if (isset($_GET['country']) && (xtc_not_null($_GET['country'])) ) {
-    $srCountry = $_GET['country'];
-  } else {
-    $srCountry = '';
   }
 
   // sort
@@ -171,7 +164,7 @@
   $endDate = mktime(0, 0, 0, $eMon, $eDay + 1, $eYear);
   
   require(DIR_WS_CLASSES . 'sales_report.php');
-  $sr = new sales_report($srView, $startDate, $endDate, $srSort, $srStatus, $srFilter, $srPayment, $srCgroup, $srCountry);
+  $sr = new sales_report($srView, $startDate, $endDate, $srSort, $srStatus, $srFilter, $srPayment, $srCgroup);
   $startDate = $sr->startDate;
   $endDate = $sr->endDate;
   
@@ -310,10 +303,6 @@
                                   echo '<p class="pdg2 mrg0"><b>'.REPORT_STATUS_FILTER.'</b></p>'; 
                                   echo xtc_draw_pull_down_menu('status', $status_array, $srStatus);
                                   echo '</div>';
-                                ?>
-                              </td>
-                              <td class="menuBoxHeading txta-l">
-                                <?php
                                   echo '<div class="flt-l">'; 
                                   echo '<p class="pdg2 mrg0"><b>'.ENTRY_CUSTOMERS_STATUS.'</b></p>'; 
                                   echo xtc_draw_pull_down_menu('cgroup', $customers_statuses_array, $srCgroup);
@@ -349,14 +338,6 @@
                                 ?>
                               </td>
                               <td class="menuBoxHeading txta-l">
-                                <?php
-                                  echo '<div class="flt-l">'; 
-                                  echo '<p class="pdg2 mrg0"><b>'.ENTRY_COUNTRY.'</b></p>'; 
-                                  echo xtc_draw_pull_down_menu('country', array_merge(array(array('id' => '', 'text' => REPORT_ALL)), xtc_get_countries('', 1)), $srCountry, 'style="max-width:200px;"');
-                                  echo '</div>';
-                                ?>
-                              </td>
-                              <td class="menuBoxHeading txta-l">
                                 <?php 
                                   echo '<p class="pdg2 mrg0"><b>'.REPORT_SORT.'</b></p>'; 
                                   echo xtc_draw_pull_down_menu('sort', $sort_array, $srSort);
@@ -378,8 +359,6 @@
                           <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_ITEMS; ?></td>
                           <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_REVENUE;?></td>
                           <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_SHIPPING;?></td>
-                          <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_ADDITIONAL;?></td>
-                          <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_TOTAL;?></td>
                         </tr>
                         <?php
                       } // end of if $srExp < 2 csv export
@@ -388,7 +367,6 @@
                       $total_item = 0;
                       $total_total = 0;
                       $total_shipping = 0;
-                      $total_additional = 0;
         
                       while ($sr->actDate < $sr->endDate) {
                         $info = $sr->getNext($srDetail);
@@ -413,30 +391,26 @@
                                 <td class="dataTableContent"><?php echo xtc_date_short(date("Y-m-d H:i:s", $sr->showDate)) . " - " . xtc_date_short(date("Y-m-d H:i:s", $sr->showDateEnd)); ?></td>
                                <?php
                             }
-                            $total_order += (isset($info[0]['order']) ? $info[0]['order'] : 0);
-                            $total_item += (isset($info[$last]['totitem']) ? $info[$last]['totitem'] : 0);
-                            $total_total += (isset($info[$last]['totsum']) ? $info[$last]['totsum'] : 0);
-                            $total_shipping += (isset($info[0]['shipping']) ? $info[0]['shipping'] : 0);
-                            $total_additional += (isset($info[0]['additional']) ? $info[0]['additional'] : 0);
                             ?>
                             <td class="dataTableContent txta-r"><?php echo (isset($info[0]['order']) ? $info[0]['order'] : '&nbsp;'); ?></td>
                             <td class="dataTableContent txta-r"><?php echo (isset($info[$last]['totitem']) ? $info[$last]['totitem'] : '&nbsp;'); ?></td>
                             <td class="dataTableContent txta-r"><?php echo (isset($info[$last]['totsum']) ? $currencies->format($info[$last]['totsum']) : '&nbsp;' ); ?></td>
                             <td class="dataTableContent txta-r"><?php echo (isset($info[0]['shipping']) ? $currencies->format($info[0]['shipping']) : '&nbsp;' ); ?></td>
-                            <td class="dataTableContent txta-r"><?php echo (isset($info[0]['additional']) ? $currencies->format($info[0]['additional']) : '&nbsp;' ); ?></td>
-                            <td class="dataTableContent txta-r"><?php echo $currencies->format((isset($info[$last]['totsum']) ? $info[$last]['totsum'] : 0) + (isset($info[0]['shipping']) ? $info[0]['shipping'] : 0) + (isset($info[0]['additional']) ? $info[0]['additional'] : 0)); ?></td>
                           </tr>
                           <?php
+                            $total_order += (isset($info[0]['order']) ? $info[0]['order'] : 0);
+                            $total_item += (isset($info[$last]['totitem']) ? $info[$last]['totitem'] : 0);
+                            $total_total += (isset($info[$last]['totsum']) ? $info[$last]['totsum'] : 0);
+                            $total_shipping += (isset($info[0]['shipping']) ? $info[0]['shipping'] : 0);
                         } else {
                           // csv export
-                          header('Content-type: application/x-octet-stream');
+                          ('Content-type: application/x-octet-stream');
                           header('Content-disposition: attachment; filename=stats_sales_report.csv');
                           echo date(DATE_FORMAT, $sr->showDate) . SR_SEPARATOR1 . date(DATE_FORMAT, $sr->showDateEnd) . SR_SEPARATOR1;
                           echo $info[0]['order'] . SR_SEPARATOR1;
                           echo $info[$last]['totitem'] . SR_SEPARATOR1;
                           echo number_format($info[$last]['totsum'], 2, '.', '') . SR_SEPARATOR1;
-                          echo number_format($info[0]['shipping'], 2, '.', '') . SR_SEPARATOR1;
-                          echo number_format($info[0]['additional'], 2, '.', '') . "\n";
+                          echo number_format($info[0]['shipping'], 2, '.', '') . "\n";
                         }
                         if ($srDetail) {
                           for ($i = 0; $i <= $last; $i++) {
@@ -474,8 +448,6 @@
                                   }
                                   ?>
                                   <td class="dataTableContent">&nbsp;</td>
-                                  <td class="dataTableContent">&nbsp;</td>
-                                  <td class="dataTableContent">&nbsp;</td>
                                 </tr>
                                 <?php
                               } else {
@@ -512,8 +484,6 @@
                           <td class="dataTableHeadingContent txta-r"><?php echo $total_item; ?></td>
                           <td class="dataTableHeadingContent txta-r"><?php echo $currencies->format($total_total);?></td>
                           <td class="dataTableHeadingContent txta-r"><?php echo $currencies->format($total_shipping);?></td>
-                          <td class="dataTableHeadingContent txta-r"><?php echo $currencies->format($total_additional);?></td>
-                          <td class="dataTableHeadingContent txta-r"><?php echo $currencies->format($total_total + $total_shipping + $total_additional);?></td>
                         </tr>
                     </table>
                   </td>

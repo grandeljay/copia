@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: content_manager_products.php 13481 2021-04-01 08:22:55Z GTB $
+   $Id: content_manager_products.php 10389 2016-11-07 10:52:45Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -15,28 +15,24 @@ defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 if (!$action) {
   // products content
   // load products_ids into array
-  $products_id_query = xtc_db_query("SELECT DISTINCT pc.products_id,
-                                                     pd.products_name
-                                                FROM ".TABLE_PRODUCTS_CONTENT." pc
-                                                JOIN ".TABLE_PRODUCTS_DESCRIPTION." pd
-                                                     ON pd.products_id = pc.products_id
-                                                        AND pd.language_id = '".(int)$_SESSION['languages_id']."'
-                                            ORDER BY pd.products_name ASC");
-  $products_ids = array();
-  while ($products_id_data = xtc_db_fetch_array($products_id_query)) {
-    $products_ids[] = array(
-      'id' => $products_id_data['products_id'],
-      'name' => $products_id_data['products_name'],
-    );
-  }
+  $products_id_query=xtc_db_query("SELECT DISTINCT
+                                                   pc.products_id,
+                                                   pd.products_name
+                                              FROM ".TABLE_PRODUCTS_CONTENT." pc,
+                                                   ".TABLE_PRODUCTS_DESCRIPTION." pd
+                                             WHERE pd.products_id=pc.products_id
+                                               AND pd.language_id='".(int)$_SESSION['languages_id']."'");
+  $products_ids=array();
+  while ($products_id_data=xtc_db_fetch_array($products_id_query)) {
+    $products_ids[]=array('id'=>$products_id_data['products_id'],
+                        'name'=>$products_id_data['products_name']);
+  } // while
   ?>
   <div class="pageHeadingTaba pdg2 flt-l"><a onclick="this.blur();" href="<?php echo xtc_href_link(FILENAME_CONTENT_MANAGER); ?>"><?php echo HEADING_CONTENT; ?></a></div>
   <div class="pageHeadingTab pdg2 flt-l"><?php echo HEADING_PRODUCTS_CONTENT; ?></div>
-  <div class="pageHeadingTaba pdg2 flt-l"><a onclick="this.blur();" href="<?php echo xtc_href_link(FILENAME_CONTENT_MANAGER, 'set=content'); ?>"><?php echo HEADING_CONTENT_MANAGER_CONTENT; ?></a></div>
-  <div class="pageHeadingTaba pdg2 flt-l"><a onclick="this.blur();" href="<?php echo xtc_href_link(FILENAME_CONTENT_MANAGER, 'set=email'); ?>"><?php echo HEADING_EMAIL_CONTENT; ?></a></div>
   <div class="borderTab">
   <?php
-    $total_space_media_products = xtc_spaceUsed(DIR_FS_CATALOG.'media/products/');
+    $total_space_media_products = xtc_spaceUsed(DIR_FS_CATALOG.'media/products/'); // DokuMan - 2011-09-06 - sum up correct filesize avoiding global variable
     echo '<div class="main clear">'.USED_SPACE.xtc_format_filesize($total_space_media_products).'</div><br />';
   ?>
   <table class="tableCenter">
@@ -55,26 +51,31 @@ if (!$action) {
           </td>
         </tr>
         <?php
-        if (isset($_GET['pID']) && $_GET['pID'] != '') {
+        if ($_GET['pID']) {
           // display content elements
-          $content_query=xtc_db_query("SELECT *
+          $content_query=xtc_db_query("SELECT
+                                              content_id,
+                                              content_name,
+                                              content_file,
+                                              content_link,
+                                              languages_id,
+                                              file_comment,
+                                              content_read
                                          FROM ".TABLE_PRODUCTS_CONTENT."
-                                        WHERE products_id = '".(int)$_GET['pID']."'
+                                        WHERE products_id='".$_GET['pID']."'
                                      ORDER BY content_name");
-          $content_array = array();
+          $content_array='';
           while ($content_data = xtc_db_fetch_array($content_query)) {
-            $content_array[] = array(
-              'id' => $content_data['content_id'],
-              'name' => $content_data['content_name'],
-              'file' => $content_data['content_file'],
-              'link' => $content_data['content_link'],
-              'comment' => $content_data['file_comment'],
-              'languages_id' => $content_data['languages_id'],
-              'read' => $content_data['content_read'],
-            );
-          }
+            $content_array[]=array('id'=> $content_data['content_id'],
+                                 'name'=> $content_data['content_name'],
+                                 'file'=> $content_data['content_file'],
+                                 'link'=> $content_data['content_link'],
+                              'comment'=> $content_data['file_comment'],
+                         'languages_id'=> $content_data['languages_id'],
+                                 'read'=> $content_data['content_read']);
+          } // while content data
 
-          if ((int)$_GET['pID'] == $products_ids[$i]['id']) {
+          if ($_GET['pID']==$products_ids[$i]['id']){
             ?>
             <tr>
               <td class="dataTableContent"></td>
@@ -98,16 +99,14 @@ if (!$action) {
                       <td class="dataTableContent txta-c"><?php echo  $content_array[$ii]['id']; ?> </td>
                       <td class="dataTableContent txta-c">
                         <?php
-                          if ($content_array[$ii]['file'] != '') {
-                            $filename = DIR_FS_CATALOG . 'media/products/' . $content_array[$ii]['file'];
-                            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                            echo xtc_image('../' . DIR_WS_IMAGES . 'icons/filetype/icon_' . $ext . '.gif');
+                          if ($content_array[$ii]['file']!='') {
+                            echo xtc_image('../'. DIR_WS_IMAGES.'icons/filetype/icon_'.str_replace('.','',strstr($content_array[$ii]['file'],'.')).'.gif'); //web28 - 2010-09-03 - change path
                           } else {
-                            echo xtc_image('../' . DIR_WS_IMAGES . 'icons/filetype/icon_link.gif');
+                            echo xtc_image('../'. DIR_WS_IMAGES.'icons/filetype/icon_link.gif'); //web28 - 2010-09-03 - change path
                           }
                           for ($xx=0,$zz=sizeof($languages); $xx<$zz;$xx++){
-                            if ($languages[$xx]['id'] == $content_array[$ii]['languages_id']) {
-                              $lang_dir = $languages[$xx]['directory'];
+                            if ($languages[$xx]['id']==$content_array[$ii]['languages_id']) {
+                              $lang_dir=$languages[$xx]['directory'];
                               break;
                             }
                           }
@@ -146,12 +145,12 @@ if (!$action) {
                       </td>
                     </tr>
                     <?php
-                  }
+                  } // for content_array
                 echo '    </table>';
               echo '  </td>';
             echo '</tr>';
           }
-        }
+        } // for
       }
     ?>
   </table>
@@ -161,106 +160,73 @@ if (!$action) {
   switch ($action) {
     case 'edit_products_content':
     case 'new_products_content':
-      if ($action == 'edit_products_content' && isset($g_coID) && (int)$g_coID > 0) {
-        $content_query = xtc_db_query("SELECT *
-                                         FROM ".TABLE_PRODUCTS_CONTENT."
-                                        WHERE content_id = '".$g_coID."'
-                                        LIMIT 1");
-        $content = xtc_db_fetch_array($content_query);
-      } else {
-        $content = xtc_get_default_table_data(TABLE_PRODUCTS_CONTENT);
+      if ($action =='edit_products_content') {
+        $content_query=xtc_db_query("SELECT
+                                      content_id,
+                                      products_id,
+                                      group_ids,
+                                      content_name,
+                                      content_file,
+                                      content_link,
+                                      languages_id,
+                                      file_comment,
+                                      content_read
+                                     FROM ".TABLE_PRODUCTS_CONTENT."
+                                     WHERE content_id='".$g_coID."'
+                                     LIMIT 1"); //DokuMan - 2011-05-13 - added LIMIT 1
+        $content=xtc_db_fetch_array($content_query);
       }
-      
-      // get products names
-      $products_query = xtc_db_query("SELECT products_id,
-                                             products_name
-                                        FROM ".TABLE_PRODUCTS_DESCRIPTION."
-                                       WHERE language_id = '".(int)$_SESSION['languages_id']."'
-                                    ORDER BY products_name");
-      $products_array = array();
-      while ($products_data = xtc_db_fetch_array($products_query)) {
-        $products_array[] = array(
-          'id' => $products_data['products_id'],
-          'text' => $products_data['products_name'],
-        );
+      // get products names.
+      $products_query=xtc_db_query("SELECT
+                                           products_id,
+                                           products_name
+                                      FROM ".TABLE_PRODUCTS_DESCRIPTION."
+                                     WHERE language_id='".(int)$_SESSION['languages_id']."'
+                                  ORDER BY products_name"); // Tomcraft - 2010-09-15 - Added default sort order to products_name for product-content in content-manager
+      $products_array=array();
+      while ($products_data=xtc_db_fetch_array($products_query)) {
+        $products_array[]=array('id' => $products_data['products_id'],
+                              'text' => $products_data['products_name']);
       }
 
       // get languages
-      $languages_selected = $_SESSION['language_code'];
-      $languages_id = (int)$_SESSION['languages_id'];
-      
       $languages_array = array();
       for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-        if (isset($content) && $languages[$i]['id'] == $content['languages_id']) {
-          $languages_selected = $languages[$i]['code'];
-          $languages_id = $languages[$i]['id'];
+        if ($languages[$i]['id']==$content['languages_id']) {
+          $languages_selected=$languages[$i]['code'];
+          $languages_id=$languages[$i]['id'];
         }
-        $languages_array[] = array(
-          'id' => $languages[$i]['code'],
-          'text' => $languages[$i]['name'],
-        );
+        $languages_array[] = array('id' => $languages[$i]['code'],
+                                 'text' => $languages[$i]['name']);
       }
-
-      // get all content files
-      $files_array = array();
-      $files = new DirectoryIterator(DIR_FS_CATALOG.'media/products/');
-      foreach ($files as $file) {
-        if ($file->isDot() === false
-            && $file->isDir() === false
-            && !in_array($file->getExtension(), array('php', 'html'))
-            )
-        {
-          $files_array[] = $file->getFilename();
-        }
-      }
-      sort($files_array);
 
       // get used content files
-      $content_files_query = xtc_db_query("SELECT *
-                                             FROM ".TABLE_PRODUCTS_CONTENT."
-                                            WHERE content_file != ''
-                                         GROUP BY content_file
-                                         ORDER BY content_name");
-      $content_files = array();
-      while ($content_files_data = xtc_db_fetch_array($content_files_query)) {
-        $content_files[] = array(
-          'id' => $content_files_data['content_file'],
-          'text' => $content_files_data['content_name'],
-        );
-        if (in_array($content_files_data['content_file'], $files_array)) {
-          $key = array_search ($content_files_data['content_file'], $files_array);
-          unset($files_array[$key]);
-        }
+      $content_files_query=xtc_db_query("SELECT DISTINCT
+                                                         content_name,
+                                                         content_file
+                                                    FROM ".TABLE_PRODUCTS_CONTENT."
+                                                   WHERE content_file!=''");
+      $content_files=array();
+      while ($content_files_data=xtc_db_fetch_array($content_files_query)) {
+        $content_files[]=array('id' => $content_files_data['content_file'],
+                             'text' => $content_files_data['content_name']);
       }
-      
-      if (count($files_array) > 0) {
-        foreach ($files_array as $file) {
-          $content_files[] = array(
-            'id' => $file,
-            'text' => $file,
-          );
-        }
-      }      
-
-      $keep_filename_array = array(
-        array('id' => 1,'text' => YES),
-        array('id' => 0,'text' => NO),
-      );
 
       // add default value to array
       $default_array[]=array('id' => 'default','text' => TEXT_SELECT);
-      $default_value = 'default';
-      $content_files = array_merge($default_array,$content_files);
-      // mask for product content      
+      $default_value='default';
+      $content_files=array_merge($default_array,$content_files);
+      // mask for product content
+      
       ?>
       <div style="width:99%; margin:5px;">
       <div class="pageHeading"><br /><?php echo HEADING_PRODUCTS_CONTENT; ?><br /></div>
       <div class="main"><?php echo TEXT_CONTENT_DESCRIPTION; ?></div>
         <?php 
-        if ($action != 'new_products_content') {
-          echo xtc_draw_form('edit_content',FILENAME_CONTENT_MANAGER, xtc_get_all_get_params(array('action')) . 'action=edit_products_content&id=update_products&coID='.$g_coID,'post','enctype="multipart/form-data"').xtc_draw_hidden_field('coID',$g_coID);
+        if ($action !='new_products_content') {
+          echo xtc_draw_form('edit_content',FILENAME_CONTENT_MANAGER, xtc_get_all_get_params(array('action')) . 'action=edit_products_content&id=update_product&coID='.$g_coID,'post','enctype="multipart/form-data"').xtc_draw_hidden_field('coID',$g_coID);
         } else {
-          echo xtc_draw_form('edit_content',FILENAME_CONTENT_MANAGER, xtc_get_all_get_params(array('action')) . 'action=edit_products_content&id=insert_products','post','enctype="multipart/form-data"');
+          echo xtc_draw_form('edit_content',FILENAME_CONTENT_MANAGER, xtc_get_all_get_params(array('action')) . 'action=edit_products_content&id=insert_product','post','enctype="multipart/form-data"');
         }
         ?>
         <table class="tableConfig borderall">
@@ -283,7 +249,7 @@ if (!$action) {
                     <?php
                       for ($i=0;$n=sizeof($customers_statuses_array),$i<$n;$i++) {
                         $checked = false;
-                        if (strpos($content['group_ids'],'c_'.$customers_statuses_array[$i]['id'].'_group')) {
+                        if (strstr($content['group_ids'],'c_'.$customers_statuses_array[$i]['id'].'_group')) {
                           $checked = true;
                         }
                         echo xtc_draw_checkbox_field('groups[]', $customers_statuses_array[$i]['id'], $checked).' '.$customers_statuses_array[$i]['text'].'<br />';
@@ -315,10 +281,6 @@ if (!$action) {
             <td class="dataTableConfig col-left"><?php echo TEXT_UPLOAD_FILE; ?></td>
             <td class="dataTableConfig col-single-right"><?php echo xtc_draw_file_field('file_upload').' '.TEXT_UPLOAD_FILE_LOCAL; ?></td>
           </tr>
-          <tr>
-            <td class="dataTableConfig col-left"><?php echo TEXT_KEEP_FILENAME; ?></td>
-            <td class="dataTableConfig col-single-right"><?php echo draw_on_off_selection('keep_filename', $keep_filename_array, false, 'style="width: 155px"'); ?></td>
-          </tr>
           <?php
             if ($content['content_file']!='') {
               ?>
@@ -330,22 +292,11 @@ if (!$action) {
             }
           ?>          
         </table>
-
-        <?php 
-          foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/content_manager/products/','php') as $file) require ($file);
-        ?>    
-
         <div class="flt-r mrg5 pdg2">
           <?php echo '<input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_SAVE . '"/>'; ?>
         </div>
         <div class="flt-r mrg5 pdg2">
-          <?php
-          if (isset($_GET['last_action']) && isset($_GET['cPath'])) {
-            echo '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_CATEGORIES, xtc_get_all_get_params(array('set', 'last_action', 'action', 'coID', 'search')) . 'action='.$_GET['last_action']).'">'.BUTTON_BACK.'</a>';
-          } else {
-            echo '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_CONTENT_MANAGER, xtc_get_all_get_params(array('action'))).'">'.BUTTON_BACK.'</a>';
-          }
-          ?>
+          <a class="button" onclick="this.blur();" href="<?php echo xtc_href_link(FILENAME_CONTENT_MANAGER, xtc_get_all_get_params(array('action'))); ?>"><?php echo BUTTON_BACK; ?></a>
         </div>
       </form>
       </div>

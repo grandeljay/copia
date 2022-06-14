@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: split_page_results.php 12879 2020-09-10 09:13:55Z GTB $
+   $Id: split_page_results.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -26,13 +26,13 @@ class splitPageResults {
       $pos_from = strpos(strtoupper($sql_query), ' FROM', 0);
 
       $pos_group_by = strpos(strtoupper($sql_query), ' GROUP BY', $pos_from);
-      if (($pos_group_by < $pos_to) && ($pos_group_by !== false)) $pos_to = $pos_group_by;
+      if (($pos_group_by < $pos_to) && ($pos_group_by != false)) $pos_to = $pos_group_by;
 
       $pos_having = strpos(strtoupper($sql_query), ' HAVING', $pos_from);
-      if (($pos_having < $pos_to) && ($pos_having !== false)) $pos_to = $pos_having;
+      if (($pos_having < $pos_to) && ($pos_having != false)) $pos_to = $pos_having;
 
       $pos_order_by = strpos(strtoupper($sql_query), ' ORDER BY', $pos_from);
-      if (($pos_order_by < $pos_to) && ($pos_order_by !== false)) $pos_to = $pos_order_by;
+      if (($pos_order_by < $pos_to) && ($pos_order_by != false)) $pos_to = $pos_order_by;
 
       if (strpos($sql_query, 'DISTINCT') || strpos(strtoupper($sql_query), 'GROUP BY')) {
         $count_string = 'DISTINCT ' . xtc_db_input($count_key);
@@ -93,8 +93,8 @@ class splitPageResults {
 
             if ($parameters != '') {
                 if (substr($parameters, -1) == '&') $parameters = substr($parameters, 0, -1);
-                $pairs = explode('&', $parameters);                
-                foreach ($pairs as $pair) {
+                $pairs = explode('&', $parameters);
+                while (list(, $pair) = each($pairs)) {
                     list($key,$value) = explode('=', $pair);
                     $display_links .= xtc_draw_hidden_field(rawurldecode($key), rawurldecode($value));
                 }

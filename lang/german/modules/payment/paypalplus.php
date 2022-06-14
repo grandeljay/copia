@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypalplus.php 11836 2019-05-20 17:43:36Z Tomcraft $
+   $Id: paypalplus.php 10346 2016-10-26 13:17:10Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -13,13 +13,12 @@
 
 $lang_array = array(
   'MODULE_PAYMENT_PAYPALPLUS_TEXT_TITLE' => 'PayPal Plus',
-  'MODULE_PAYMENT_PAYPALPLUS_TEXT_ADMIN_TITLE' => 'PayPal Plus mit PayPal Express',
-  'MODULE_PAYMENT_PAYPALPLUS_TEXT_INFO' => 'Bitte w&auml;hlen Sie eine aus den hier aufgef&uuml;hrten Zahlarten durch Anklicken aus.',
-  'MODULE_PAYMENT_PAYPALPLUS_TEXT_DESCRIPTION' => 'PayPal Plus - die vier beliebtesten Bezahlmethoden deutscher K&auml;ufer: PayPal, Lastschrift, Kreditkarte und Rechnung.<br/>Mehr Infos zu PayPal Plus finden Sie <a target="_blank" href="https://www.paypal.com/de/webapps/mpp/paypal-plus">hier</a>.',
+  'MODULE_PAYMENT_PAYPALPLUS_TEXT_INFO' => 'Bitte w&auml;hlen Sie eine aus den hier aufgef&uuml;hrten Zahlarten durch anklicken aus.',
+  'MODULE_PAYMENT_PAYPALPLUS_TEXT_DESCRIPTION' => 'Sie werden nach dem "Best&auml;tigen" zu PayPal geleitet um hier Ihre Bestellung zu bezahlen.<br />Danach gelangen Sie zur&uuml;ck in den Shop und erhalten Ihre Bestell-Best&auml;tigung.<br />Jetzt schneller bezahlen mit unbegrenztem PayPal-K&auml;uferschutz - nat&uuml;rlich kostenlos.',
   'MODULE_PAYMENT_PAYPALPLUS_ALLOWED_TITLE' => 'Erlaubte Zonen',
   'MODULE_PAYMENT_PAYPALPLUS_ALLOWED_DESC' => 'Geben Sie <b>einzeln</b> die Zonen an, welche f&uuml;r dieses Modul erlaubt sein sollen. (z.B. AT,DE (wenn leer, werden alle Zonen erlaubt))',
-  'MODULE_PAYMENT_PAYPALPLUS_STATUS_TITLE' => 'PayPal Plus aktivieren',
-  'MODULE_PAYMENT_PAYPALPLUS_STATUS_DESC' => 'M&ouml;chten Sie Zahlungen per PayPal, Kreditkarte, Lastschrift und Kauf auf Rechnung akzeptieren?',
+  'MODULE_PAYMENT_PAYPALPLUS_STATUS_TITLE' => 'PayPal Modul aktivieren',
+  'MODULE_PAYMENT_PAYPALPLUS_STATUS_DESC' => 'M&ouml;chten Sie Zahlungen per PayPal akzeptieren?',
   'MODULE_PAYMENT_PAYPALPLUS_SORT_ORDER_TITLE' => 'Anzeigereihenfolge',
   'MODULE_PAYMENT_PAYPALPLUS_SORT_ORDER_DESC' => 'Reihenfolge der Anzeige. Kleinste Ziffer wird zuerst angezeigt',
   'MODULE_PAYMENT_PAYPALPLUS_ZONE_TITLE' => 'Zahlungszone',

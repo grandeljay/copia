@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_gv.php 12996 2020-12-03 09:36:13Z GTB $
+   $Id: ot_gv.php 2099 2011-08-17 18:22:16Z dokuman $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -38,17 +38,13 @@ class ot_gv {
     $this->description = MODULE_ORDER_TOTAL_GV_DESCRIPTION;
     $this->info = MODULE_ORDER_TOTAL_GV_USER_PROMPT;
     $this->user_prompt = MODULE_ORDER_TOTAL_GV_USER_PROMPT;
-    $this->enabled = ((defined('MODULE_ORDER_TOTAL_GV_STATUS') && MODULE_ORDER_TOTAL_GV_STATUS == 'true') ? true : false);
-    $this->sort_order = ((defined('MODULE_ORDER_TOTAL_GV_SORT_ORDER')) ? MODULE_ORDER_TOTAL_GV_SORT_ORDER : '');
-
-    if ($this->check() > 0) {
-      $this->include_shipping = MODULE_ORDER_TOTAL_GV_INC_SHIPPING;
-      $this->include_tax = MODULE_ORDER_TOTAL_GV_INC_TAX;
-      $this->calculate_tax = MODULE_ORDER_TOTAL_GV_CALC_TAX;
-      $this->credit_tax = MODULE_ORDER_TOTAL_GV_CREDIT_TAX;
-      $this->tax_class = MODULE_ORDER_TOTAL_GV_TAX_CLASS;
-    }
-    
+    $this->enabled = MODULE_ORDER_TOTAL_GV_STATUS;
+    $this->sort_order = MODULE_ORDER_TOTAL_GV_SORT_ORDER;
+    $this->include_shipping = MODULE_ORDER_TOTAL_GV_INC_SHIPPING;
+    $this->include_tax = MODULE_ORDER_TOTAL_GV_INC_TAX;
+    $this->calculate_tax = MODULE_ORDER_TOTAL_GV_CALC_TAX;
+    $this->credit_tax = MODULE_ORDER_TOTAL_GV_CREDIT_TAX;
+    $this->tax_class = MODULE_ORDER_TOTAL_GV_TAX_CLASS;
     $this->credit_class = true;
     $this->checkbox = '<input type="checkbox" onclick="submitFunction()" name="'.'c'.$this->code.'"> '.$this->user_prompt;
     
@@ -69,7 +65,6 @@ class ot_gv {
 
       $this->deduction = $od_amount * (-1);
 
-      $order->info['subtotal'] = $order->info['subtotal'] + $this->deduction;
       $order->info['total'] = $order->info['total'] + $this->deduction;
 
       if ($this->deduction < 0) {
@@ -163,7 +158,6 @@ class ot_gv {
   function apply_credit() {
     global $order, $coupon_no, $xtPrice;
     
-    $gv_amount = 0;
     if (isset ($_SESSION['cot_gv']) && $_SESSION['cot_gv'] == true) {
       $gv_query = xtc_db_query("SELECT amount 
                                   FROM ".TABLE_COUPON_GV_CUSTOMER." 
@@ -174,8 +168,7 @@ class ot_gv {
                        SET amount = '".$gv_amount."' 
                      WHERE customer_id = '".(int)$_SESSION['customer_id']."'");
     }
-    
-    return $gv_amount;
+    return $gv_payment_amount;
   }
 
   function collect_posts() {
@@ -244,14 +237,14 @@ class ot_gv {
         $ratio1 = number_format($od_amount / $amount, 2);
         $tod_amount = 0;
         reset($order->info['tax_groups']);
-        foreach ($order->info['tax_groups'] as $key => $value) {
+        while (list ($key, $value) = each($order->info['tax_groups'])) {
           $tax_rate = xtc_get_tax_rate_from_desc($key);
           $total_net += $tax_rate * $order->info['tax_groups'][$key];
         }
         if ($od_amount > $total_net)
           $od_amount = $total_net;
         reset($order->info['tax_groups']);
-        foreach ($order->info['tax_groups'] as $key => $value) {
+        while (list ($key, $value) = each($order->info['tax_groups'])) {
           $tax_rate = xtc_get_tax_rate_from_desc($key);
           $net = $tax_rate * $order->info['tax_groups'][$key];
           if ($net > 0) {
@@ -345,7 +338,6 @@ class ot_gv {
       'MODULE_ORDER_TOTAL_GV_STATUS', 
       'MODULE_ORDER_TOTAL_GV_SORT_ORDER', 
       'MODULE_ORDER_TOTAL_GV_QUEUE', 
-      'MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT',
       'MODULE_ORDER_TOTAL_GV_INC_SHIPPING', 
       'MODULE_ORDER_TOTAL_GV_INC_TAX', 
       'MODULE_ORDER_TOTAL_GV_CALC_TAX', 
@@ -358,12 +350,11 @@ class ot_gv {
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_STATUS', 'true', '6', '1','xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_SORT_ORDER', '80', '6', '2', now())");
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_QUEUE', 'true', '6', '3','xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_INC_SHIPPING', 'true', '6', '5', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_INC_TAX', 'true', '6', '6','xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_CALC_TAX', 'None', '6', '7','xtc_cfg_select_option(array(\'None\', \'Standard\', \'Credit Note\'), ', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function ,date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_INC_SHIPPING', 'true', '6', '5', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function ,date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_INC_TAX', 'true', '6', '6','xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function ,date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_CALC_TAX', 'None', '6', '7','xtc_cfg_select_option(array(\'None\', \'Standard\', \'Credit Note\'), ', now())");
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_TAX_CLASS', '0', '6', '0', 'xtc_get_tax_class_title', 'xtc_cfg_pull_down_tax_classes(', now())");
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_CREDIT_TAX', 'false', '6', '8','xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
-    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT', '', '6', '5', '', 'xtc_cfg_checkbox_unallowed_module(\'payment\', \'configuration[MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT]\',', now())");
+    xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, set_function ,date_added) VALUES ('', 'MODULE_ORDER_TOTAL_GV_CREDIT_TAX', 'false', '6', '8','xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
   }
 
   function remove() {

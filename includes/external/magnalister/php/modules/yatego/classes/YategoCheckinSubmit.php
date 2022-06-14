@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: YategoCheckinSubmit.php 3163 2013-09-09 10:28:26Z derpapst $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -40,8 +40,8 @@ class YategoCheckinSubmit extends ComparisonShoppingCheckinSubmit {
 		$imageWSPath = SHOP_URL_POPUP_IMAGES;
 		$images = array();
 		
-		if (!empty($product['Images'])) {
-			foreach($product['Images'] as $img) {
+		if (!empty($product['products_allimages'])) {
+			foreach($product['products_allimages'] as $img) {
 				if (file_exists($imageFSPath.$img)) {
 					$images[] = $imageWSPath.$img;
 				}
@@ -73,20 +73,20 @@ class YategoCheckinSubmit extends ComparisonShoppingCheckinSubmit {
 		$data['submit']['ShortDescription']	= short_str(
 			str_replace(
 				array("\r\n", "\r", "\n"), "\\n", 
-				sanitizeProductDescription($product['ShortDescription'])
+				sanitizeProductDescription($product['products_short_description'])
 			), 130
 		);
 		$data['submit']['Description']	= str_replace(
 			array("\r\n", "\r", "\n"), "\\n", 
 			sanitizeProductDescription(
-				$product['Description'],
+				$product['products_description'],
 				'<a><b><i><u><p><br><hr><h1><h2><h3><h4><h5><h6><ul><ol><li><span><font>'.
 				'<table><thead><tbody><tfoot><tr><td><th><colgroup><col>',
 				'_keep_all_'
 			)
 		);
 
-		$tax = $this->simpleprice->getTaxByClassID($product['TaxClass']);
+		$tax = $this->simpleprice->getTaxByClassID($product['products_tax_class_id']);
 
 		if(($tax - (int)$tax) > 0) {
 			$decimalPlaces = 2;
@@ -118,8 +118,11 @@ class YategoCheckinSubmit extends ComparisonShoppingCheckinSubmit {
 				 LIMIT 1
 			');
 		}
-		 if (isset($product['BasePrice']) && !empty($product['BasePrice'])) {
-			$data['submit']['BasePrice'] = $product['BasePrice'];
+		if (isset($product['products_vpe_status']) && !empty($product['products_vpe_status']) && $product['products_vpe_status'] == 1) {
+			$data['submit']['BasePrice'] = array (
+				'Unit' => $product['products_vpe_name'],
+				'Value' => $product['products_vpe_value'],
+			);
 		}
 	}
 

@@ -9,7 +9,7 @@
 define('MODULE_PAYMENT_MCP_SERVICE_STATUS_TITLE','Status');
 define('MODULE_PAYMENT_MCP_SERVICE_STATUS_DESC','Enable the micropayment&trade; module');
 define('MODULE_PAYMENT_MCP_SERVICE_SORT_ORDER_TITLE','Positioning');
-define('MODULE_PAYMENT_MCP_SERVICE_SORT_ORDER_DESC','Position in the list');
+define('MODULE_PAYMENT_MCP_SERVICE_SORT_ORDER_DESC','Position in the liste');
 define('MODULE_PAYMENT_MCP_SERVICE_ACCOUNT_ID_TITLE','<div style="color:#850000;font-style: italic;">The following configuration settings are used globally for all micropayment&trade; payment modules and only need to be configured once</div><br />Account-ID');
 define('MODULE_PAYMENT_MCP_SERVICE_ACCOUNT_ID_DESC','Account-ID from micropayment&trade;');
 define('MODULE_PAYMENT_MCP_SERVICE_ACCESS_KEY_TITLE','Access-Key');
@@ -76,7 +76,7 @@ define('MODULE_PAYMENT_MCP_SERVICE_ORDER_STATUS_PARTPAY_ID_DESC','this order has
 
 define('MODULE_PAYMENT_MCP_SERVICE_NEW_VERSION','%s<div class="mcp_notice_register">New version of micropayment&trade; Payment modules are avaiable. <a href="http://ecommerce.micropayment.de/modifiedshop/?lang=EN" target="_new">Click here for Download.</a></div>');
 
-define('MODULE_PAYMENT_MCP_SERVICE_NO_ACCOUNT','%s<div class="mcp_notice_register">In order to ensure functionality of the micropayment&trade; Payment modules, please first register an account and create a project. <a href="https://%s.micropayment.de" target="blank">Click here to register.</a></div>');
+define('MODULE_PAYMENT_MCP_SERVICE_NO_ACCOUNT','%s<div class="mcp_notice_register">In order to ensure functionality of the micropayment&trade; Payment modules, please first register an account and create a project.<a href="https://%s.micropayment.de" target="blank">Click here to register.</a></div>');
 define('MODULE_PAYMENT_MCP_SERVICE_CSS','
 <style type="text/css">
 .mcp_notice_register {

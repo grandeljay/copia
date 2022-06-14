@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: it_recht_kanzlei.php 11998 2019-07-23 16:07:31Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,10 +10,7 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-require_once(DIR_FS_CATALOG.'api/it-recht-kanzlei/classes/class.api_it_recht_kanzlei.php');
-$api_it_recht_kanzlei = new api_it_recht_kanzlei();
-
-define('MODULE_API_IT_RECHT_KANZLEI_TEXT_TITLE', 'IT-Recht Kanzlei AGB-Schnittstelle v'.$api_it_recht_kanzlei->modulversion);
+define('MODULE_API_IT_RECHT_KANZLEI_TEXT_TITLE', 'IT-Recht Kanzlei Auto Updater');
 define('MODULE_API_IT_RECHT_KANZLEI_TEXT_DESCRIPTION', 'IT-Recht Kanzlei - Auto Updater for automatic legal texts<br/><br/><b>Attention:</b> Before using the module, the assignment of the content pages has to be made.<hr noshade>');
 define('MODULE_API_IT_RECHT_KANZLEI_STATUS_TITLE', 'Status');
 define('MODULE_API_IT_RECHT_KANZLEI_STATUS_DESC', 'Module status');

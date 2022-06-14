@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: reviews.php 12757 2020-05-08 10:44:28Z GTB $
+   $Id: reviews.php 4209 2013-01-10 23:54:44Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -31,7 +31,7 @@ if ($product->isProduct() === true && $_SESSION['customers_status']['customers_s
     // display 'write a review' box
     $box_smarty->assign('REVIEWS_WRITE_REVIEW',BOX_REVIEWS_WRITE_REVIEW);
     $box_smarty->assign('REVIEWS_LINK', xtc_href_link(FILENAME_REVIEWS));
-    $box_smarty->assign('PRODUCTS_LINK', xtc_href_link(FILENAME_PRODUCT_REVIEWS_WRITE, 'products_id='.$product->data['products_id']));
+    $box_smarty->assign('PRODUCTS_LINK', xtc_href_link(FILENAME_PRODUCT_REVIEWS_WRITE, xtc_product_link($product->data['products_id'],$product->data['products_name'])));
   }
 } elseif ($_SESSION['customers_status']['customers_status_read_reviews'] == 1) {
 
@@ -45,12 +45,12 @@ if ($product->isProduct() === true && $_SESSION['customers_status']['customers_s
                            substring(rd.reviews_text, 1, 60) as reviews_text,
                            p.products_id,
                            p.products_image,
-                           pd.products_name,
-                           pd.products_heading_title
+                           pd.products_name
                       FROM ".TABLE_REVIEWS." r
                       JOIN ".TABLE_REVIEWS_DESCRIPTION." rd
                            ON r.reviews_id = rd.reviews_id
                               AND rd.languages_id = '" . (int)$_SESSION['languages_id'] . "'
+                              AND trim(rd.reviews_text) != ''
                       JOIN ".TABLE_PRODUCTS." p
                            ON p.products_id = r.products_id
                               ".$product_select."
@@ -83,7 +83,6 @@ if ($product->isProduct() === true && $_SESSION['customers_status']['customers_s
       $box_smarty->assign('REVIEWS_LINK', xtc_href_link(FILENAME_REVIEWS));
       $box_smarty->assign('PRODUCTS_IMAGE', $products_image);
       $box_smarty->assign('PRODUCTS_NAME', $reviews['products_name']);
-      $box_smarty->assign('PRODUCTS_HEADING_TITLE', $reviews['products_heading_title']);
       $box_smarty->assign('PRODUCTS_LINK', xtc_href_link(FILENAME_PRODUCT_REVIEWS_INFO, 'products_id=' . $reviews['products_id'] . '&reviews_id=' . $reviews['reviews_id']));
       $box_smarty->assign('REVIEWS', xtc_break_string(encode_htmlspecialchars($reviews['reviews_text']), 15, '-<br />'));
       $box_smarty->assign('REVIEWS_IMAGE', $review_image);

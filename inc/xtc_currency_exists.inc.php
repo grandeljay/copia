@@ -1,7 +1,7 @@
 <?php
 
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_currency_exists.inc.php 10500 2016-12-14 15:17:45Z GTB $   
+   $Id: xtc_currency_exists.inc.php 689 2007-09-27 18:01:51Z mzanier $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -18,12 +18,11 @@
 
 function xtc_currency_exists($code) {
 	$param ='/[^a-zA-Z]/';
-	$code = preg_replace($param,'',$code);
+	$code=preg_replace($param,'',$code);
 	$currency_code = xtc_db_query("SELECT code, 
 	                                      currencies_id 
 	                                 FROM " . TABLE_CURRENCIES . " 
 	                                WHERE code = '" . xtc_db_input($code) . "' 
-	                                  AND status = '1'
 	                                LIMIT 1");
 	if (xtc_db_num_rows($currency_code)) {
 		$curr = xtc_db_fetch_array($currency_code);

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: get_external_content.inc.php 12342 2019-10-30 10:37:40Z GTB $
+   $Id: get_external_content.inc.php 4202 2013-01-10 20:27:44Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware - community made shopping
    http://www.modified-shop.org
@@ -20,29 +20,21 @@
             curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             curl_setopt($ch, CURLOPT_HEADER, FALSE);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-      
       $data = curl_exec($ch);
-      curl_close($ch);
+              curl_close($ch);
 
-      if ($data && !check_valid_xml($data, $rss)) {
-        $data = '';
-      }
+      if ($data && !check_valid_xml($data, $rss))
+        $data='';
     }
-    
-    if ($data == '' && function_exists('file_get_contents')) {
-      $opts = array('http' => array('method' => "GET", 'header' => "Content-Type: text/html; charset=UTF-8", 'timeout' => $timeout));
+    if ($data=='' && function_exists('file_get_contents')) {
+      $opts = array('http' => array('method'=>"GET", 'header'=>"Content-Type: text/html; charset=UTF-8", 'timeout' => $timeout));
       $context = stream_context_create($opts); 
       $data = @file_get_contents($url, false, $context);
 
-      if ($data && !check_valid_xml($data, $rss)) {
-        $data = '';
-      }
+      if ($data && !check_valid_xml($data, $rss))
+        $data='';
     }
-    
-    if ($data == '' && function_exists('fopen')) {
+    if ($data=='' && function_exists('fopen')) {
       ini_set('default_socket_timeout', $timeout);  
       $fp = @fopen($url, 'r');
       if (is_resource($fp)) {
@@ -50,9 +42,8 @@
         fclose($fp);
       }
 
-      if ($data && !check_valid_xml($data, $rss)) {
-        $data = '';
-      }
+      if ($data && !check_valid_xml($data, $rss))
+        $data='';
     }
         
     return $data;

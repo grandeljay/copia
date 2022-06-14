@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalPayment.php 13171 2021-01-15 14:40:47Z GTB $
+   $Id: PayPalPayment.php 10364 2016-11-04 13:29:58Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -11,15 +11,10 @@
    ---------------------------------------------------------------------------------------*/
 
 
-// compatibillity
-defined('DIR_WS_BASE') OR define('DIR_WS_BASE', '');
-
-
 // database tables
 defined('TABLE_PAYPAL_PAYMENT') OR define('TABLE_PAYPAL_PAYMENT', 'paypal_payment');
 defined('TABLE_PAYPAL_CONFIG') OR define('TABLE_PAYPAL_CONFIG', 'paypal_config');
 defined('TABLE_PAYPAL_IPN') OR define('TABLE_PAYPAL_IPN', 'paypal_ipn');
-defined('TABLE_PAYPAL_INSTRUCTIONS') OR define('TABLE_PAYPAL_INSTRUCTIONS', 'paypal_instructions');
 
 
 // include needed functions
@@ -52,7 +47,6 @@ use PayPal\Api\Details;
 use PayPal\Api\Item; 
 use PayPal\Api\ItemList; 
 use PayPal\Api\Payer; 
-use PayPal\Api\PayerInfo; 
 use PayPal\Api\Payment; 
 use PayPal\Api\RedirectUrls; 
 use PayPal\Api\Transaction;
@@ -64,39 +58,31 @@ use PayPal\Api\BaseAddress;
 use PayPal\Api\ShippingAddress;
 use PayPal\Api\PotentialPayerInfo;
 
-use PayPal\Api\Currency;
-use PayPal\Api\Presentment;
-use PayPal\Api\CreditFinancing;
-
-use PayPal\Api\Plans;
-use PayPal\Api\BillingCycles;
-use PayPal\Api\Frequency;
-use PayPal\Api\PricingScheme;
-use PayPal\Api\PricingSchemes;
-use PayPal\Api\PaymentPreferences;
-use PayPal\Api\Taxes;
-use PayPal\Api\Product;
-
-use PayPal\Api\Subscriptions;
-use PayPal\Api\Subscriber;
-use PayPal\Api\Name;
-use PayPal\Api\ApplicationContext;
-use PayPal\Api\PaymentMethod;
-
 
 class PayPalPayment extends PayPalPaymentBase {
 
 
-  function __construct($class) {    
-    $this->loglevel = ((PayPalPaymentBase::check_install() === true) ? $this->get_config('PAYPAL_LOG_LEVEL') : 'INFO'); 
-    $this->LoggingManager = new LoggingManager(DIR_FS_LOG.'mod_paypal_%s_'.((defined('RUN_MODE_ADMIN')) ? 'admin_' : '').'%s.log', 'paypal', strtolower($this->loglevel));
-
+  function __construct($class) {
     PayPalPaymentBase::init($class);
+    
+    $config = array(
+      'LogEnabled' => ((defined('MODULE_PAYMENT_'.strtoupper($class).'_STATUS') && $this->get_config('PAYPAL_LOG_ENALBLED') == '1') ? true : false),
+      'SplitLogging' => true,
+      'LogLevel' => ((isset($this->loglevel)) ? $this->loglevel : 'FINE'),
+      'LogThreshold' => '2MB',
+      'FileName' => DIR_FS_LOG.'paypal_error_' .date('Y-m-d') .'.log',
+      'FileName.debug' => DIR_FS_LOG.'paypal_debug_' .date('Y-m-d') .'.log',
+      'FileName.fine' => DIR_FS_LOG.'paypal_fine_' .date('Y-m-d') .'.log',
+      'FileName.info' => DIR_FS_LOG.'paypal_info_' .date('Y-m-d') .'.log',
+      'FileName.warning' => DIR_FS_LOG.'paypal_warning_' .date('Y-m-d') .'.log',
+      'FileName.error' => DIR_FS_LOG.'paypal_error_' .date('Y-m-d') .'.log',
+    );
+    $this->LoggingManager = new LoggingManager($config);
   }
    
   
   function payment_redirect($cart = false, $approval = false, $order_exists = false) {
-    global $order, $xtPrice, $free_shipping, $total_weight, $total_count;
+    global $order, $xtPrice;
     
     // auth
     $apiContext = $this->apiContext();
@@ -104,10 +90,7 @@ class PayPalPayment extends PayPalPaymentBase {
     // set payment
     $payer = new Payer(); 
     $payer->setPaymentMethod('paypal');
-        
-    // set payer_info
-    $payer_info = new PayerInfo();
-
+  
     // set items
     $item = array();
 
@@ -171,75 +154,26 @@ class PayPalPayment extends PayPalPaymentBase {
           $this->details->setTax($this->details->getTax() + ($amount_total - $total));
         } 
       }
-      
-      // shipping cost
-      if ($_SESSION['cart']->get_content_type() != 'virtual') {
-        require_once(DIR_WS_CLASSES.'shipping.php');
-        require_once(DIR_WS_CLASSES.'product.php');
-        require_once(DIR_WS_CLASSES.'order.php');
-        require_once(DIR_FS_INC.'xtc_get_countries.inc.php');
-        
-        $order = new order();
-        
-        $countries_id = isset($_SESSION['customer_country_id']) ? $_SESSION['customer_country_id'] : STORE_COUNTRY;
-        if (isset($_SESSION['country'])) {
-          $countries_id = $_SESSION['country'];
-        }
-        
-        $country = xtc_get_countriesList($countries_id, true);
-        
-        $_SESSION['delivery_zone'] = $country['countries_iso_code_2'];        
-        $order->delivery['country']['iso_code_2'] = $country['countries_iso_code_2'];
-        $order->delivery['country']['title'] = $country['countries_name'];
-        $order->delivery['country']['id'] = $country['countries_id'];
-        $order->delivery['country_id'] = $country['countries_id'];
-        $order->delivery['zone_id'] = 0;
-        
-        $total_weight = $_SESSION['cart']->show_weight();
-        $total_count = $_SESSION['cart']->count_contents();
 
-        // load all enabled shipping modules
-        $shipping_modules = new shipping();
-
-        $free_shipping = false;
-        require_once (DIR_WS_MODULES.'order_total/ot_shipping.php');
-        include_once (DIR_WS_LANGUAGES.$_SESSION['language'].'/modules/order_total/ot_shipping.php');
-        $ot_shipping = new ot_shipping;
-        $ot_shipping->process();
-
-        $shipping_modules->quote();
-        $shipping_data = $shipping_modules->cheapest();
-        unset($_SESSION['delivery_zone']);
-        
-        if ($free_shipping === true) {
-          $shipping_data = array(
-            'cost' => 0,
-            'total' => 0
-          );
-        }
-        
-        if (is_array($shipping_data)) {
-          $shipping_cost = new Item(); 
-          $shipping_cost->setName($this->encode_utf8(PAYPAL_EXP_VORL))
-                        ->setCurrency($_SESSION['currency']) 
-                        ->setQuantity(1) 
-                        ->setPrice($shipping_data['total']); 
-
-          $i = count($item);
-          $item[$i] = $shipping_cost;
-
-          $this->amount->setTotal($this->amount->getTotal() + (double)$shipping_data['total']);
-          $this->details->setSubtotal($this->amount->getTotal() - $this->details->getTax() - $this->details->getShippingDiscount());
-        }
-      }
-      
+      $shipping_cost = $this->get_config('MODULE_PAYMENT_'.strtoupper($this->code).'_SHIPPING_COST');
+      if ((int)$shipping_cost > 0) {
+        $i = count($item);
+        $item[$i] = new Item(); 
+        $item[$i]->setName($this->encode_utf8(PAYPAL_EXP_VORL))
+                ->setCurrency($_SESSION['currency']) 
+                ->setQuantity(1) 
+                ->setPrice($shipping_cost); 
+        $this->amount->setTotal($this->amount->getTotal() + $shipping_cost);
+        $this->details->setSubtotal($this->amount->getTotal());
+      }    
+          
       // set amount 
       $this->amount->setCurrency($_SESSION['currency'])
                    ->setDetails($this->details); 
 
       // set redirect
-      $redirectUrls->setReturnUrl($this->link_encoding(xtc_href_link('callback/paypal/paypalcart.php', xtc_session_name().'='.xtc_session_id(), 'SSL')))
-                   ->setCancelUrl($this->link_encoding(xtc_href_link(FILENAME_SHOPPING_CART, 'payment_error='.$this->code.'&'.xtc_session_name().'='.xtc_session_id(), 'SSL')));
+      $redirectUrls->setReturnUrl($this->link_encoding(xtc_href_link('callback/paypal/paypalcart.php', '', 'SSL')))
+                   ->setCancelUrl($this->link_encoding(xtc_href_link(FILENAME_SHOPPING_CART, 'payment_error='.$this->code, 'SSL')));
 
     } else {
       
@@ -248,17 +182,12 @@ class PayPalPayment extends PayPalPaymentBase {
                        ->setCity($this->encode_utf8($order->delivery['city']))
                        ->setCountryCode($this->encode_utf8((($order_exists === false) ? $order->delivery['country']['iso_code_2'] : $order->delivery['country_iso_2'])))
                        ->setPostalCode($this->encode_utf8($order->delivery['postcode']))
-                       ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
-
-      if ($order->delivery['company'] != '') {
-        $shipping_address->setLine2($this->encode_utf8($order->delivery['company']));
-      }
+                       ->setState($this->encode_utf8((($order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
 
       if ($order->delivery['suburb'] != '') {
-        $shipping_address->setLine1($this->encode_utf8($order->delivery['street_address'].', '.$order->delivery['suburb']));
+        $shipping_address->setLine2($this->encode_utf8($order->delivery['suburb']));
       }
       
-      $subtotal = 0;
       for ($i = 0, $n = sizeof($order->products); $i < $n; $i ++) {
         $item[$i] = new Item(); 
         $item[$i]->setName($this->encode_utf8($order->products[$i]['name']))
@@ -266,23 +195,16 @@ class PayPalPayment extends PayPalPaymentBase {
                  ->setQuantity($order->products[$i]['qty']) 
                  ->setPrice($order->products[$i]['price'])
                  ->setSku(($order->products[$i]['model'] != '') ? $order->products[$i]['model'] : $order->products[$i]['id']); 
-        
-        if (isset($order->products[$i]['attributes'])) {
-          $attributes_string = '';
-          $order->products[$i]['attributes'] = array_values($order->products[$i]['attributes']);
-          for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j ++) {
-            $attributes_string .= $order->products[$i]['attributes'][$j]['option'].': '.$order->products[$i]['attributes'][$j]['value'].', ';
-          }
-          $item[$i]->setName($this->encode_utf8($order->products[$i]['name'].' - '.substr($attributes_string, 0, -2)));
-        }
-        
-        $subtotal += $order->products[$i]['price'] * $order->products[$i]['qty'];
-      }
+      }  
       
       // set totals
       if ($order_exists === false) {
-        $order_totals = $this->calculate_total(false);
-        $this->get_totals($order_totals, true, $subtotal);
+        if (!class_exists('order_total')) {
+          require_once(DIR_WS_CLASSES.'order_total.php');
+        }
+        $order_total_modules = new order_total();
+        $order_totals = $order_total_modules->process();
+        $this->get_totals($order_totals, true);
       } else {
         $this->get_totals($order->totals);
       }
@@ -293,53 +215,75 @@ class PayPalPayment extends PayPalPaymentBase {
 
       // set redirect
       if ($order_exists === false) {
-        $redirectUrls->setReturnUrl($this->link_encoding(xtc_href_link(FILENAME_CHECKOUT_PROCESS, xtc_session_name().'='.xtc_session_id(), 'SSL', false)))
-                     ->setCancelUrl($this->link_encoding(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code.'&'.xtc_session_name().'='.xtc_session_id(), 'SSL', false)));
+        $redirectUrls->setReturnUrl($this->link_encoding(xtc_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL')))
+                     ->setCancelUrl($this->link_encoding(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code, 'SSL')));
       } else {
-        $redirectUrls->setReturnUrl($this->link_encoding(xtc_href_link('callback/paypal/'.$this->code.'.php', 'oID='.$order->info['order_id'].'&key='.md5($order->customer['email_address']).'&'.xtc_session_name().'='.xtc_session_id(), 'SSL', false)))
-                     ->setCancelUrl($this->link_encoding(xtc_href_link('callback/paypal/'.$this->code.'.php', 'payment_error='.$this->code.'&oID='.$order->info['order_id'].'&key='.md5($order->customer['email_address']).'&'.xtc_session_name().'='.xtc_session_id(), 'SSL', false)));
+        $redirectUrls->setReturnUrl($this->link_encoding(xtc_href_link('callback/paypal/'.$this->code.'.php', 'oID='.$order->info['order_id'].'&key='.md5($order->customer['email_address']), 'SSL')))
+                     ->setCancelUrl($this->link_encoding(xtc_href_link('callback/paypal/'.$this->code.'.php', 'payment_error='.$this->code.'&oID='.$order->info['order_id'].'&key='.md5($order->customer['email_address']), 'SSL')));
       }
     }
-    
-    if ($this->amount->getTotal() == 0) {
-      return;
-    }
-    
+
     // set ItemList
     if ($this->get_config('PAYPAL_ADD_CART_DETAILS') == '0'
         || $this->check_discount() === true
         ) 
     { 
       $item = array();
-
       $item[0] = new Item(); 
       $item[0]->setName($this->encode_utf8(MODULE_PAYMENT_PAYPAL_TEXT_ORDER))
               ->setCurrency($_SESSION['currency']) 
               ->setQuantity(1) 
-              ->setPrice($this->details->getSubtotal());
+              ->setPrice($this->details->getSubtotal()); 
     
-      if (isset($shipping_cost) && is_object($shipping_cost)) {
-        $item[1] = $shipping_cost;
-        $item[0]->setPrice($this->details->getSubtotal() - (double)$shipping_cost->getPrice());
-      }    
+      if ($cart === true) {
+        $shipping_cost = $this->get_config('MODULE_PAYMENT_'.strtoupper($this->code).'_SHIPPING_COST');
+        if ((int)$shipping_cost > 0) {
+          $item[1] = new Item(); 
+          $item[1]->setName($this->encode_utf8(PAYPAL_EXP_VORL))
+                  ->setCurrency($_SESSION['currency']) 
+                  ->setQuantity(1) 
+                  ->setPrice($shipping_cost); 
+          $this->amount->setTotal($this->amount->getTotal() + $shipping_cost);
+          $this->details->setSubtotal($this->amount->getTotal());
+        }    
+      }
     }
     $itemList->setItems($item);
     
     // profile
-    $profile_data = $this->get_payment_profile_data();
-    
-    $profile_id = $profile_data['profile_id'];
-    $address_override = $profile_data['address_override'];
-        
+    $address_override = false;
+    $profile_id = $this->get_config('PAYPAL_'.strtoupper($this->code.'_'.$_SESSION['language_code']).'_PROFILE');
+    if ($profile_id == '') {
+      $profile_id = $this->get_config('PAYPAL_STANDARD_PROFILE');
+    }
+    if ($profile_id != '') {
+      if ($this->get_config(strtoupper($profile_id).'_TIME') < (time() - (3600 * 24))) {
+        $profile = $this->get_profile($profile_id);
+        $sql_data_array = array(
+          array(
+            'config_key' => strtoupper($profile_id).'_TIME', 
+            'config_value' => time(),
+          ),
+          array(
+            'config_key' => strtoupper($profile_id).'_ADDRESS', 
+            'config_value' => $profile[0]['input_fields']['address_override'],
+          ),          
+        );
+        $this->save_config($sql_data_array);
+        $address_override = (($profile[0]['input_fields']['address_override'] == '0') ? true : false);
+      } else {
+        $address_override = (($this->get_config(strtoupper($profile_id).'_ADDRESS') == '0') ? true : false);
+      }
+    }
+
     if (($cart === false 
          && $approval === false
-         && $address_override === false) 
-         || $order_exists === true
+         && $address_override === false) || ($order_exists === true)
         ) 
     {
       $itemList->setShippingAddress($shipping_address);
     }
-        
+    
     // set transaction
     $transaction = new Transaction(); 
     $transaction->setAmount($this->amount) 
@@ -358,7 +302,7 @@ class PayPalPayment extends PayPalPaymentBase {
     if (isset($profile_id) && $profile_id != '') {
       $payment->setExperienceProfileId($profile_id);
     }
-
+       
     try { 
     
       $payment->create($apiContext);
@@ -372,7 +316,7 @@ class PayPalPayment extends PayPalPaymentBase {
       }
       
     } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'getApprovalLink', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       
       unset($_SESSION['paypal']);
       if ($cart === true) {
@@ -395,7 +339,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Payment::get($_SESSION['paypal']['paymentId'], $apiContext);
   
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       
       unset($_SESSION['paypal']);
       xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code, 'SSL'));
@@ -442,16 +386,7 @@ class PayPalPayment extends PayPalPaymentBase {
                  ->setQuantity($order->products[$i]['qty']) 
                  ->setPrice($order->products[$i]['price'])
                  ->setSku(($order->products[$i]['model'] != '') ? $order->products[$i]['model'] : $order->products[$i]['id']); 
-
-        if (isset($order->products[$i]['attributes'])) {
-          $attributes_string = '';
-          $order->products[$i]['attributes'] = array_values($order->products[$i]['attributes']);
-          for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j ++) {
-            $attributes_string .= $order->products[$i]['attributes'][$j]['option'].': '.$order->products[$i]['attributes'][$j]['value'].', ';
-          }
-          $item[$i]->setName($this->encode_utf8($order->products[$i]['name'].' - '.substr($attributes_string, 0, -2)));
-        }
-      }
+      }  
     }
 
     $patch_items = new Patch();
@@ -460,59 +395,39 @@ class PayPalPayment extends PayPalPaymentBase {
                 ->setValue($item);
     $patches_array[] = $patch_items;
              
-
-    // set payer_info
-    $payer_info = new PayerInfo();
-
     // set payment address
     $payment_address = new Address();
     $payment_address->setLine1($this->encode_utf8($order->billing['street_address']))
                     ->setCity($this->encode_utf8($order->billing['city']))
-                    ->setState($this->encode_utf8(((isset($order->billing['state']) && $order->billing['state'] != '') ? xtc_get_zone_code($order->billing['country_id'], $order->billing['zone_id'], $order->billing['state']) : '')))
+                    ->setState($this->encode_utf8((($order->billing['state'] != '') ? xtc_get_zone_code($order->billing['country_id'], $order->billing['zone_id'], $order->billing['state']) : '')))
                     ->setPostalCode($this->encode_utf8($order->billing['postcode']))
                     ->setCountryCode($this->encode_utf8($order->billing['country']['iso_code_2']));
 
-    if ($order->billing['company'] != '') {
-      $payment_address->setLine2($this->encode_utf8($order->billing['company']));
-    }
-
     if ($order->billing['suburb'] != '') {
-      $payment_address->setLine1($this->encode_utf8($order->billing['street_address'].', '.$order->billing['suburb']));
+      $payment_address->setLine2($this->encode_utf8($order->billing['suburb']));
     }
 
-    $payer_info->setBillingAddress($payment_address)
-               ->setEmail($this->encode_utf8($order->customer['email_address']))
-               ->setFirstName($this->encode_utf8($order->billing['firstname']))
-               ->setLastName($this->encode_utf8($order->billing['lastname']));
-    
     $patch_payment = new Patch();
     $patch_payment->setOp('add')
-                  ->setPath('/payer/payer_info')
-                  ->setValue($payer_info);
+                  ->setPath('/potential_payer_info/billing_address')
+                  ->setValue($payment_address);
     $patches_array[] = $patch_payment;
 
     
     // set shipping address
     $shipping_address = new ShippingAddress();      
-    
-    if ($order->delivery === false) {
-      $order->delivery = $order->billing;
-    }
+
     $shipping_address->setRecipientName($this->encode_utf8($order->delivery['firstname'].' '.$order->delivery['lastname']))
                      ->setLine1($this->encode_utf8($order->delivery['street_address']))
                      ->setCity($this->encode_utf8($order->delivery['city']))
                      ->setCountryCode($this->encode_utf8($order->delivery['country']['iso_code_2']))
                      ->setPostalCode($this->encode_utf8($order->delivery['postcode']))
-                     ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
-
-    if ($order->delivery['company'] != '') {
-      $shipping_address->setLine2($this->encode_utf8($order->delivery['company']));
-    }
+                     ->setState($this->encode_utf8((($order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
 
     if ($order->delivery['suburb'] != '') {
-      $shipping_address->setLine1($this->encode_utf8($order->delivery['street_address'].', '.$order->delivery['suburb']));
+      $shipping_address->setLine2($this->encode_utf8($order->billdeliverying['suburb']));
     }
-    
+
     $patch_shipping = new Patch();
     $patch_shipping->setOp('add')
                    ->setPath('/transactions/0/item_list/shipping_address')
@@ -520,12 +435,12 @@ class PayPalPayment extends PayPalPaymentBase {
     $patches_array[] = $patch_shipping;
 
     $patchRequest->setPatches($patches_array);
-          
+                    
     try {
       // update payment
       $payment->update($patchRequest, $apiContext);      
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Patch', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       
       unset($_SESSION['paypal']);
       xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code, 'SSL'));
@@ -537,18 +452,9 @@ class PayPalPayment extends PayPalPaymentBase {
   
   function validate_payment_paypalcart() {
     
-    $error = false;
-    $check_query = xtc_db_query("SELECT * 
-                                   FROM ".TABLE_PAYPAL_PAYMENT."
-                                  WHERE payment_id = '".xtc_db_input($_SESSION['paypal']['paymentId'])."'");
-    if (xtc_db_num_rows($check_query) > 0) {
-      $error = true;
-    }
-    
     if (isset($_GET['paymentId']) 
         && isset($_GET['PayerID']) 
         && $_SESSION['paypal']['paymentId'] == $_GET['paymentId']
-        && $error == false
         ) 
     {
       // auth
@@ -560,7 +466,7 @@ class PayPalPayment extends PayPalPaymentBase {
         $valid = true;
     
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
         $valid = false;
       }
       
@@ -588,7 +494,6 @@ class PayPalPayment extends PayPalPaymentBase {
           
           // sendto
           $_SESSION['sendto'] = $this->get_shipping_address($_SESSION['customer_id'], $customer['delivery']);
-          $_SESSION['delivery_zone'] = $customer['delivery']['delivery_country']['iso_code_2'];
 
         } elseif (!isset($_SESSION['customer_id'])) {
           // redirect
@@ -614,19 +519,10 @@ class PayPalPayment extends PayPalPaymentBase {
 
   function validate_payment_paypal() {
     global $insert_id;
-    
-    $error = false;
-    $check_query = xtc_db_query("SELECT * 
-                                   FROM ".TABLE_PAYPAL_PAYMENT."
-                                  WHERE payment_id = '".xtc_db_input($_SESSION['paypal']['paymentId'])."'");
-    if (xtc_db_num_rows($check_query) > 0) {
-      $error = true;
-    }
-    
+ 
     if (isset($_GET['paymentId']) 
         && isset($_GET['PayerID']) 
         && $_SESSION['paypal']['paymentId'] == $_GET['paymentId']
-        && $error == false
         ) 
     {
        // auth
@@ -637,7 +533,7 @@ class PayPalPayment extends PayPalPaymentBase {
         $payment = Payment::get($_SESSION['paypal']['paymentId'], $apiContext);       
           
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
 
         // redirect
         unset($_SESSION['paypal']);
@@ -661,7 +557,7 @@ class PayPalPayment extends PayPalPaymentBase {
         $payment = Payment::get($_SESSION['paypal']['paymentId'], $apiContext);       
 
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       }
     
       // payer
@@ -672,19 +568,29 @@ class PayPalPayment extends PayPalPaymentBase {
       $execution->setPayerId($_SESSION['paypal']['PayerID']);
       
       // profile
-      $profile_data = $this->get_payment_profile_data();
-      $address_override = $profile_data['address_override'];
-
-      if ($address_override == true) {
-        // customer details    
-        $sql_data_array = $this->get_customer_data($payment);
-    
-        $sql_data_array['delivery']['delivery_country'] = $sql_data_array['delivery']['delivery_country']['title'];
-        unset($sql_data_array['delivery']['delivery_country_id']);
-        unset($sql_data_array['delivery']['delivery_zone_id']);
-              
-        if (count($sql_data_array) > 0) {
-          xtc_db_perform(TABLE_ORDERS, $sql_data_array['delivery'], 'update', "orders_id = '".$insert_id."'");
+      $profile_id = $this->get_config('PAYPAL_'.strtoupper($this->code.'_'.$_SESSION['language_code']).'_PROFILE');
+      if ($profile_id == '') {
+        $profile_id = $this->get_config('PAYPAL_STANDARD_PROFILE');
+      }
+      if ($profile_id != '') {
+        $address_override = '0';
+        if ($this->get_config(strtoupper($profile_id).'_TIME') < (time() - (3600 * 24))) {
+          $profile = $this->get_profile($profile_id);
+          $address_override = $profile[0]['input_fields']['address_override'];
+        } else {
+          $address_override = $this->get_config(strtoupper($profile_id).'_ADDRESS');
+        }
+        if ($address_override == '0') {
+          // customer details    
+          $sql_data_array = $this->get_customer_data($payment);
+      
+          $sql_data_array['delivery']['delivery_country'] = $sql_data_array['delivery']['delivery_country']['title'];
+          unset($sql_data_array['delivery']['delivery_country_id']);
+          unset($sql_data_array['delivery']['delivery_zone_id']);
+                
+          if (count($sql_data_array) > 0) {
+            xtc_db_perform(TABLE_ORDERS, $sql_data_array['delivery'], 'update', "orders_id = '".$insert_id."'");
+          }
         }
       }
       
@@ -693,7 +599,7 @@ class PayPalPayment extends PayPalPaymentBase {
         $payment->execute($execution, $apiContext);
         
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Execute', array('exception' => $ex));  
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');          
 
         $this->remove_order($insert_id);
         unset($_SESSION['paypal']);
@@ -720,15 +626,13 @@ class PayPalPayment extends PayPalPaymentBase {
         $payment = Payment::get($_SESSION['paypal']['paymentId'], $apiContext);
   
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
 
         $this->remove_order($insert_id);
         unset($_SESSION['paypal']);
         xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code, 'SSL'));
       }
-      
-      $this->save_payment_instructions($insert_id);
-      
+
       $status = $this->get_orders_status($payment);
       if ($status['status_id'] < 0) {
         $check_query = xtc_db_query("SELECT orders_status
@@ -738,10 +642,6 @@ class PayPalPayment extends PayPalPaymentBase {
         $status['status_id'] = $check['orders_status'];
       }
       $this->update_order($status['comment'], $status['status_id'], $insert_id);    
-
-      xtc_db_query("UPDATE ".TABLE_PAYPAL_PAYMENT." 
-                       SET transaction_id = '".xtc_db_input($status['transaction_id'])."'
-                     WHERE orders_id = '".$insert_id."'");
 
     } else {
       // redirect
@@ -780,7 +680,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Payment::get($_SESSION['paypal']['paymentId'], $apiContext);
       
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       
       $this->remove_order($insert_id);
       unset($_SESSION['paypal']);
@@ -794,55 +694,35 @@ class PayPalPayment extends PayPalPaymentBase {
     $patches_array = array();
     $patchRequest = new PatchRequest();
 
-    // set payer_info
-    $payer_info = new PayerInfo();
-
-    // set payment address
     $payment_address = new Address();
     $payment_address->setLine1($this->encode_utf8($order->billing['street_address']))
                     ->setCity($this->encode_utf8($order->billing['city']))
-                    ->setState($this->encode_utf8(((isset($order->billing['state']) && $order->billing['state'] != '') ? xtc_get_zone_code($order->billing['country_id'], $order->billing['zone_id'], $order->billing['state']) : '')))
+                    ->setState($this->encode_utf8((($order->billing['state'] != '') ? xtc_get_zone_code($order->billing['country_id'], $order->billing['zone_id'], $order->billing['state']) : '')))
                     ->setPostalCode($this->encode_utf8($order->billing['postcode']))
                     ->setCountryCode($this->encode_utf8(((isset($order->billing['country_iso_2'])) ? $order->billing['country_iso_2'] : $order->billing['country']['iso_code_2'])));
 
-    if ($order->billing['company'] != '') {
-      $payment_address->setLine2($this->encode_utf8($order->billing['company']));
-    }
-
     if ($order->billing['suburb'] != '') {
-      $payment_address->setLine1($this->encode_utf8($order->billing['street_address'].', '.$order->billing['suburb']));
+      $payment_address->setLine2($this->encode_utf8($order->billing['suburb']));
     }
 
-    $payer_info->setBillingAddress($payment_address)
-               ->setEmail($this->encode_utf8($order->customer['email_address']))
-               ->setFirstName($this->encode_utf8($order->billing['firstname']))
-               ->setLastName($this->encode_utf8($order->billing['lastname']));
-    
     $patch_payment = new Patch();
     $patch_payment->setOp('add')
-                  ->setPath('/payer/payer_info')
-                  ->setValue($payer_info);
+                  ->setPath('/potential_payer_info/billing_address')
+                  ->setValue($payment_address);
     $patches_array[] = $patch_payment;
 
     // set address
     $shipping_address = new ShippingAddress();      
-    
-    if ($order->delivery === false) {
-      $order->delivery = $order->billing;
-    }
+
     $shipping_address->setRecipientName($this->encode_utf8($order->delivery['firstname'].' '.$order->delivery['lastname']))
                      ->setLine1($this->encode_utf8($order->delivery['street_address']))
                      ->setCity($this->encode_utf8($order->delivery['city']))
                      ->setCountryCode($this->encode_utf8(((isset($order->delivery['country_iso_2'])) ? $order->delivery['country_iso_2'] : $order->delivery['country']['iso_code_2'])))
                      ->setPostalCode($this->encode_utf8($order->delivery['postcode']))
-                     ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
-
-    if ($order->delivery['company'] != '') {
-      $shipping_address->setLine2($this->encode_utf8($order->delivery['company']));
-    }
+                     ->setState($this->encode_utf8((($order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
 
     if ($order->delivery['suburb'] != '') {
-      $shipping_address->setLine1($this->encode_utf8($order->delivery['street_address'].', '.$order->delivery['suburb']));
+      $shipping_address->setLine2($this->encode_utf8($order->delivery['suburb']));
     }
 
     $patch_shipping = new Patch();
@@ -894,16 +774,7 @@ class PayPalPayment extends PayPalPaymentBase {
                  ->setQuantity($order->products[$i]['qty']) 
                  ->setPrice($order->products[$i]['price'])
                  ->setSku(($order->products[$i]['model'] != '') ? $order->products[$i]['model'] : $order->products[$i]['id']); 
-
-        if (isset($order->products[$i]['attributes'])) {
-          $attributes_string = '';
-          $order->products[$i]['attributes'] = array_values($order->products[$i]['attributes']);
-          for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j ++) {
-            $attributes_string .= $order->products[$i]['attributes'][$j]['option'].': '.$order->products[$i]['attributes'][$j]['value'].', ';
-          }
-          $item[$i]->setName($this->encode_utf8($order->products[$i]['name'].' - '.substr($attributes_string, 0, -2)));
-        }
-      }
+      }  
     }
 
     $patch_items = new Patch();
@@ -919,7 +790,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment->update($patchRequest, $apiContext);      
 
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Patch', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
 
       if ($order_exists === false) {
         unset($_SESSION['paypal']);
@@ -943,7 +814,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment->execute($execution, $apiContext);      
 
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Execute', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
 
       $this->remove_order($insert_id);
       unset($_SESSION['paypal']);
@@ -971,7 +842,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Payment::get($_SESSION['paypal']['paymentId'], $apiContext);
 
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
 
       $this->remove_order($insert_id);
       unset($_SESSION['paypal']);
@@ -988,12 +859,55 @@ class PayPalPayment extends PayPalPaymentBase {
       $status['status_id'] = $check['orders_status'];
     }
     $this->update_order($status['comment'], $status['status_id'], $insert_id);    
-
-    xtc_db_query("UPDATE ".TABLE_PAYPAL_PAYMENT." 
-                     SET transaction_id = '".xtc_db_input($status['transaction_id'])."'
-                   WHERE orders_id = '".$insert_id."'");
   }
-    
+  
+  
+  function get_orders_status($payment) {
+     // auth
+    $apiContext = $this->apiContext();
+
+    try {
+      // get transaction
+      $transactions = $payment->getTransactions();
+      $transaction = $transactions[0];
+      $relatedResources = $transaction->getRelatedResources();
+      $relatedResource = end($relatedResources);
+
+      if ($relatedResource->__isset('sale')) {
+        $resource = $relatedResource->getSale($relatedResource);
+      }
+      if ($relatedResource->__isset('capture')) {
+        $resource = $relatedResource->getCapture($relatedResource);
+      }
+      if ($relatedResource->__isset('order')) {
+        $resource = $relatedResource->getOrder($relatedResource);
+      }
+      if ($relatedResource->__isset('authorization')) {
+        $resource = $relatedResource->getAuthorization($relatedResource);
+      }
+      if ($relatedResource->__isset('refund')) {
+        $resource = $relatedResource->getRefund($relatedResource);
+      }
+            
+      switch ($resource->getState()) {
+        case 'completed':
+          $status_id = $this->order_status_success;
+          break;
+        default:
+          $status_id = $this->order_status_pending;
+          break;
+      }
+      
+      return array(
+        'status_id' => $status_id,
+        'comment' => 'Transaction ID: '.$resource->getId(),
+      );
+      
+    } catch (Exception $ex) {
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
+    }
+  }
+  
   
   function capture_payment($payment, $order_id = '', $total = '', $final = true) {    
     global $insert_id;
@@ -1045,7 +959,7 @@ class PayPalPayment extends PayPalPaymentBase {
           $resource->capture($capture, $apiContext);
           $success = true;
         } catch (Exception $ex) {
-          $this->LoggingManager->log('DEBUG', 'Capture', array('exception' => $ex));
+          $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
           $success = false;
 
           if (defined('RUN_MODE_ADMIN') && $ex instanceof \PayPal\Exception\PayPalConnectionException) {
@@ -1068,55 +982,7 @@ class PayPalPayment extends PayPalPaymentBase {
         }
       }
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Capture', array('exception' => $ex));
-    }
-  }
-
-
-  function get_orders_status($payment) {
-     // auth
-    $apiContext = $this->apiContext();
-
-    try {
-      // get transaction
-      $transactions = $payment->getTransactions();
-      $transaction = $transactions[0];
-      $relatedResources = $transaction->getRelatedResources();
-      $relatedResource = end($relatedResources);
-
-      if ($relatedResource->__isset('sale')) {
-        $resource = $relatedResource->getSale($relatedResource);
-      }
-      if ($relatedResource->__isset('capture')) {
-        $resource = $relatedResource->getCapture($relatedResource);
-      }
-      if ($relatedResource->__isset('order')) {
-        $resource = $relatedResource->getOrder($relatedResource);
-      }
-      if ($relatedResource->__isset('authorization')) {
-        $resource = $relatedResource->getAuthorization($relatedResource);
-      }
-      if ($relatedResource->__isset('refund')) {
-        $resource = $relatedResource->getRefund($relatedResource);
-      }
-            
-      switch ($resource->getState()) {
-        case 'completed':
-          $status_id = $this->order_status_success;
-          break;
-        default:
-          $status_id = $this->order_status_pending;
-          break;
-      }
-      
-      return array(
-        'status_id' => $status_id,
-        'comment' => 'Transaction ID: '.$resource->getId(),
-        'transaction_id' => $resource->getId(),
-      );
-      
-    } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Transactions', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
     }
   }
 
@@ -1139,7 +1005,7 @@ class PayPalPayment extends PayPalPaymentBase {
         $payment = Payment::get($orders['payment_id'], $apiContext);
         $valid = true;
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
         $valid = false;
       }
       
@@ -1159,7 +1025,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Sale::get($id, $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Sale', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
     
@@ -1171,7 +1037,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Authorization::get($id, $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Authorization', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
     
@@ -1183,7 +1049,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Capture::get($id, $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Capture', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
     
@@ -1195,7 +1061,7 @@ class PayPalPayment extends PayPalPaymentBase {
       $payment = Refund::get($id, $apiContext);
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Refund', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
     
@@ -1223,20 +1089,18 @@ class PayPalPayment extends PayPalPaymentBase {
 
         // customer details
         $payer = $payment->getPayer();
-        if (is_object($payer)) {
-          $payerinfo = $payer->getPayerInfo();
-        }
-        
+        $payerinfo = $payer->getPayerInfo();
+
         $payment_array = array(
           'id' => $payment->getId(),
-          'payment_method' => ((is_object($payer)) ? $payer->getPaymentMethod() : ''),
-          'email_address' => ((is_object($payerinfo)) ? $payerinfo->getEmail() : ''),
-          'account_status' => ((is_object($payer)) ? $payer->getStatus() : ''),
+          'payment_method' => $payer->getPaymentMethod(),
+          'email_address' => $payerinfo->getEmail(),
+          'account_status' => $payer->getStatus(),
           'intent' => $payment->getIntent(),
           'state' => $payment->getState(),
         );
       } catch (Exception $ex) {
-        $this->LoggingManager->log('DEBUG', 'Payment', array('exception' => $ex));
+        $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       }
     }
     
@@ -1251,18 +1115,24 @@ class PayPalPayment extends PayPalPaymentBase {
 
     // customer details
     $payer = $payment->getPayer();
-    if (is_object($payer)) {
-      $payerinfo = $payer->getPayerInfo();
-    }
+    $payerinfo = $payer->getPayerInfo();
+
     $customer_data = $this->get_customer_data($payment);
+
+    $message = '';
+    if (isset($_SESSION['pp_error']) && $_SESSION['pp_error'] != '') {
+      $message = $_SESSION['pp_error'];
+      unset($_SESSION['pp_error']);
+    }
         
     $payment_array = array(
       'id' => $payment->getId(),
-      'payment_method' => ((is_object($payer)) ? $payer->getPaymentMethod() : ''),
-      'email_address' => ((isset($payerinfo) && is_object($payerinfo)) ? $payerinfo->getEmail() : ''),
-      'account_status' => ((is_object($payer)) ? $payer->getStatus() : ''),
+      'payment_method' => $payer->getPaymentMethod(),
+      'email_address' => $payerinfo->getEmail(),
+      'account_status' => $payer->getStatus(),
       'intent' => $payment->getIntent(),
       'state' => $payment->getState(),
+      'message' => $message,
       'address' => $customer_data['plain'],
       'transactions' => array(),
     );
@@ -1313,7 +1183,7 @@ class PayPalPayment extends PayPalPaymentBase {
           $object = $resource->get($resource->getId(), $apiContext);
           $valid = true;
         } catch (Exception $ex) {
-          $this->LoggingManager->log('DEBUG', 'Transactions', array('exception' => $ex));
+          $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
           $valid = false;
         }
         
@@ -1411,16 +1281,12 @@ class PayPalPayment extends PayPalPaymentBase {
     try {
       // customer details
       $payer = $payment->getPayer();
-      if (is_object($payer)) {
-        $customer = $payer->getPayerInfo();
-      }
-      if (is_object($customer)) {
-        $address = $customer->getShippingAddress();
-      }
+      $customer = $payer->getPayerInfo();
+      $address = $customer->getShippingAddress();
       
       $valid = true;
     } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'Payer', array('exception' => $ex));
+      $this->LoggingManager->log(print_r($ex, true), 'DEBUG');
       $valid = false;
     }
         
@@ -1489,8 +1355,8 @@ class PayPalPayment extends PayPalPaymentBase {
       if ($address->getRecipientName() != '') {
         $name = explode(' ', $address->getRecipientName());
         $sql_data_array['delivery']['delivery_name'] = $address->getRecipientName();
-        $sql_data_array['delivery']['delivery_firstname'] = $sql_data_array['plain']['firstname'] = array_shift($name);
-        $sql_data_array['delivery']['delivery_lastname'] = $sql_data_array['plain']['lastname'] = implode(' ', $name);
+        $sql_data_array['delivery']['delivery_firstname'] = array_shift($name);
+        $sql_data_array['delivery']['delivery_lastname'] = implode(' ', $name);
       }
 
       $sql_data_array = array_map(array($this, 'decode_utf8'), $sql_data_array);
@@ -1500,366 +1366,5 @@ class PayPalPayment extends PayPalPaymentBase {
   }
     
     
-  function create_subscription() {
-    global $order;
-        
-    // auth
-    $apiContext = $this->apiContext();
-
-    $subscriber_name = new Name();
-    $subscriber_name->setGivenName($order->customer['firstname'])
-                    ->setSurname($order->customer['lastname']);
-    
-    $shipping_address_name = new Name();
-    $shipping_address_name->setFullName($order->delivery['firstname'].' '.$order->delivery['lastname']);
-    
-    $address = new Address();
-    $address->setAddressLine1($order->delivery['street_address'])
-            ->setAddressLine2($order->delivery['suburb'])
-            ->setAdminArea1('')
-            ->setAdminArea2($order->delivery['city'])
-            ->setPostalCode($order->delivery['postcode'])
-            ->setCountryCode($order->delivery['country']['iso_code_2']);
-            
-    $shipping_address = new ShippingAddress();
-    $shipping_address->setName($shipping_address_name)
-                     ->setAddress($address);
-    
-    $subscriber = new Subscriber();
-    $subscriber->setName($subscriber_name)
-               ->setEmailAddress($order->customer['email_address'])
-               ->setShippingAddress($shipping_address);
-    
-    $shipping_cost = 0;
-    $order_totals = $this->calculate_total(false);
-    foreach ($order_totals as $totals) {
-      if ($totals['code'] == 'ot_shipping') {
-        $shipping_cost = round($totals['value'], 2);
-      }
-    }
-    
-    $shipping_amount = new Currency();
-    $shipping_amount->setCurrencyCode('EUR')
-                    ->setValue($shipping_cost);
-    
-    $payment_method = new PaymentMethod();
-    $payment_method->setPayerSelected('PAYPAL')
-                   ->setPayeePreferred('IMMEDIATE_PAYMENT_REQUIRED');
-                   
-    $application_context = new ApplicationContext();
-    $application_context->setBrandName(STORE_NAME)
-                        ->setLocale($_SESSION['language_code'].'-'.strtoupper($_SESSION['language_code']))
-                        ->setShippingPreference('SET_PROVIDED_ADDRESS')
-                        ->setUserAction('SUBSCRIBE_NOW')
-                        ->setPaymentMethod($payment_method)
-                        ->setReturnUrl($this->link_encoding(xtc_href_link(FILENAME_CHECKOUT_PROCESS, xtc_session_name().'='.xtc_session_id(), 'SSL', false)))
-                        ->setCancelUrl($this->link_encoding(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code.'&'.xtc_session_name().'='.xtc_session_id(), 'SSL', false)));
-    
-    $subscriptions = new Subscriptions();
-    $subscriptions->setPlanId($_SESSION['cart']->plans[$order->products[0]['id']])
-                  ->setQuantity($order->products[0]['qty'])
-                  ->setShippingAmount($shipping_amount)
-                  ->setSubscriber($subscriber)
-                  ->setApplicationContext($application_context);
-            
-    try {
-      $payment = $subscriptions->create($apiContext);
-      
-      $_SESSION['paypal']['paymentId'] = $payment->getId();      
-      xtc_redirect($payment->getApprovalLink());
-    } catch (Exception $ex) {      
-      $this->LoggingManager->log('DEBUG', 'create_subscription', array('exception' => $ex));
-      xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code, 'SSL'));
-    }
-  }
-  
-
-  function cancel_subscription($oID) {    
-    $orders_query = xtc_db_query("SELECT p.*
-                                    FROM `paypal_subscription` p
-                                   WHERE p.orders_id = '".(int)$oID."'");
-    if (xtc_db_num_rows($orders_query) > 0) {
-      $orders = xtc_db_fetch_array($orders_query);
-
-      // auth
-      $apiContext = $this->apiContext();
-      
-      $subscriptions = new Subscriptions();
-    
-      try {
-        $subscriptions->cancel($orders['subscription_id'], $apiContext);
-        return  true;
-      } catch (Exception $ex) {       
-        $this->LoggingManager->log('DEBUG', 'cancel_subscription', array('exception' => $ex));
-        return false;
-      }
-    }
-    
-    return false;
-  }
-  
-  
-  function get_subscription_details($subscription_id) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $subscriptions = new Subscriptions();
-    
-    try {
-      $resonse = $subscriptions->get($subscription_id, $apiContext);
-      return  $resonse;
-    } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'get_subscription_details', array('exception' => $ex));
-    }
-  }
-
-
-  function create_plans($data) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $frequency = new Frequency();
-    $frequency->setIntervalUnit($data['paypal_plan_interval'])
-              ->setIntervalCount(1);
-    
-    $fixed_price = new Currency();
-    $fixed_price->setCurrencyCode(DEFAULT_CURRENCY)
-                ->setValue($data['paypal_plan_fixed_price']);
-
-    $setup_fee = new Currency();
-    $setup_fee->setCurrencyCode(DEFAULT_CURRENCY)
-              ->setValue($data['paypal_plan_setup_fee']);
-                   
-    $pricing_scheme = new PricingScheme();
-    $pricing_scheme->setFixedPrice($fixed_price);
-    
-    $billing_cycles[0] = new BillingCycles();
-    $billing_cycles[0]->setPricingScheme($pricing_scheme)
-                      ->setFrequency($frequency)
-                      ->setTenureType('REGULAR')
-                      ->setSequence(1)
-                      ->setTotalCycles($data['paypal_plan_cycle']);
-    
-    $payment_preferences = new PaymentPreferences();
-    $payment_preferences->setAutoBillOutstanding(true)
-                        ->setSetupFee($setup_fee)
-                        ->setSetupFeeFailureAction('CONTINUE')
-                        ->setPaymentFailureThreshold(3);
-    
-    $taxes = new Taxes();
-    $taxes->setPercentage($data['paypal_plan_tax'])
-          ->setInclusive($data['paypal_plan_tax_include'] == 1 ? true : false);
-          
-    $plans = new Plans();
-    $plans->setProductId(str_pad($data['products_id'], 6, 0, STR_PAD_LEFT))
-          ->setName($data['paypal_plan_name'])
-          ->setStatus($data['paypal_plan_status'])
-          ->setBillingCycles($billing_cycles)
-          ->setPaymentPreferences($payment_preferences)
-          ->setTaxes($taxes);
-    
-    try {
-      $resonse = $plans->create($apiContext);
-      
-      $sql_data_array = array(
-        'plan_id' => $resonse->getId(),
-        'products_id' => $data['products_id'],
-        'plan_status' => (($data['paypal_plan_status'] == 'ACTIVE') ? 1 : 0),
-        'plan_name' => $data['paypal_plan_name'],
-        'plan_interval' => $data['paypal_plan_interval'],
-        'plan_cycle' => $data['paypal_plan_cycle'],
-        'plan_price' => $data['paypal_plan_fixed_price'],
-        'plan_fee' => $data['paypal_plan_setup_fee'],
-        'plan_tax' => $data['paypal_plan_tax'],
-        'plan_tax_included' => $data['paypal_plan_tax_include'],
-      );
-      xtc_db_perform('paypal_plan', $sql_data_array);
-      
-      return true;
-    } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'create_plans', array('exception' => $ex));
-      return false;
-    }
-  }
-
-
-  function patch_plan($data) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $plans = new Plans();
-    $plans->setId($data['paypal_plan_id']);
-    
-    $patches_array = array();
-    $patchRequest = new PatchRequest();
-
-    $fixed_price = new Currency();
-    $fixed_price->setCurrencyCode(DEFAULT_CURRENCY)
-                ->setValue($data['paypal_plan_fixed_price']);
-
-    $pricing_scheme = new PricingScheme();
-    $pricing_scheme->setFixedPrice($fixed_price);
-
-    $billing_cycles = new BillingCycles();
-    $billing_cycles->setPricingScheme($pricing_scheme)
-                   ->setBillingCycleSequence(1);
-
-    $pricing_schemes = new PricingSchemes();
-    $pricing_schemes->addPricingSchemes($billing_cycles);
-
-    $setup_fee = new Currency();
-    $setup_fee->setCurrencyCode(DEFAULT_CURRENCY)
-              ->setValue($data['paypal_plan_setup_fee']);
-
-    $patch_setup_fee = new Patch();
-    $patch_setup_fee->setOp('replace')
-                    ->setPath('/payment_preferences/setup_fee')
-                    ->setValue($setup_fee);
-    $patches_array[] = $patch_setup_fee;
-
-    $patch_taxes = new Patch();
-    $patch_taxes->setOp('replace')
-                ->setPath('/taxes/percentage')
-                ->setValue($data['paypal_plan_tax']);
-    $patches_array[] = $patch_taxes;
-
-    $patchRequest->setPatches($patches_array);
-              
-    try {
-      // activate
-      if ($data['paypal_plan_status_old'] != 'ACTIVE') {
-        $plans->status_update('activate', $apiContext); 
-      }
-      
-      // patch
-      $plans->update($patchRequest, $apiContext);  
-      
-      // set correct status
-      if ($data['paypal_plan_status'] != 'ACTIVE') {
-        $plans->status_update('deactivate', $apiContext); 
-      }
-
-      // update price
-      if ($data['paypal_plan_fixed_price'] != $data['paypal_plan_fixed_price_old']) {
-        $plans->price_update($pricing_schemes, $apiContext);  
-      }
-      
-      $sql_data_array = array(
-        'plan_status' => (($data['paypal_plan_status'] == 'ACTIVE') ? 1 : 0),
-        'plan_price' => $data['paypal_plan_fixed_price'],
-        'plan_fee' => $data['paypal_plan_setup_fee'],
-        'plan_tax' => $data['paypal_plan_tax'],
-      );
-      xtc_db_perform('paypal_plan', $sql_data_array, 'update', "plan_id = '".xtc_db_input($data['paypal_plan_id'])."'");
-
-      return true;
-    } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'patch_plan', array('exception' => $ex));
-      return false;
-    }    
-  } 
-  
-  
-  function get_plan_details($id) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $plans = new Plans();
-    
-    try {
-      $resonse = $plans->get($id, $apiContext);
-      return $resonse;      
-    } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'get_plan_details', array('exception' => $ex));
-    }
-  }
-  
-
-  function get_all_plans($products_id) {
-    // auth
-    $apiContext = $this->apiContext();
-
-    $params = array(
-      'product_id' => str_pad($products_id, 6, 0, STR_PAD_LEFT),
-      'page_size' => 20,
-      'page' => 1
-    );
-    $plans = new Plans();
-    
-    try {
-      $resonse = $plans::all($params, $apiContext);
-      return $resonse;      
-    } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'get_all_plans', array('exception' => $ex));
-    }
-  } 
-
-  
-  function create_product($data) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $product = new Product();
-    $product->setId(str_pad($data['products_id'], 6, 0, STR_PAD_LEFT))
-            ->setName(substr($data['products_name'], 0, 126))
-           // ->setDescription(substr($data['products_description'], 0, 255))
-            ->setType($data['products_type']);
-        
-    try {
-      $resonse = $product->create($apiContext);
-      return true;
-    } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'create_product', array('exception' => $ex));
-      return false;
-    }
-  } 
-  
-  
-  function get_product($products_id) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $product = new Product();
-    $products_id = str_pad($products_id, 6, 0, STR_PAD_LEFT);
-    
-    try {
-      $resonse = $product->get($products_id, $apiContext);
-      return $resonse;
-      
-    } catch (Exception $ex) { 
-      $this->LoggingManager->log('DEBUG', 'get_product', array('exception' => $ex));
-    }
-  } 
-
-
-  function patch_product($data) {
-    // auth
-    $apiContext = $this->apiContext();
-    
-    $product = new Product();
-    $product->setId(str_pad($data['products_id'], 6, 0, STR_PAD_LEFT));
-    
-    $patches_array = array();
-    $patchRequest = new PatchRequest();
-
-    $patch_description = new Patch();
-    $patch_description->setOp('replace')
-                      ->setPath('/description')
-                      ->setValue(substr($data['products_description'], 0, 255));
-    $patches_array[] = $patch_description;
-
-    $patchRequest->setPatches($patches_array);
-          
-    try {
-      // update payment
-      $product->update($patchRequest, $apiContext);  
-      return true;   
-    } catch (Exception $ex) {
-      $this->LoggingManager->log('DEBUG', 'patch_product', array('exception' => $ex));
-      return false;
-    }    
-  } 
-
-
 }
 ?>

@@ -20,38 +20,33 @@
 
 defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 require_once(DIR_MAGNALISTER_MODULES . 'amazon/amazonFunctions.php');
-require_once(DIR_MAGNALISTER_MODULES . 'amazon/AmazonHelper.php');
 
 function amazonSanitizeDesc($str) {
-	$str = !magnalisterIsUTF8($str) ? utf8_encode($str) : $str;
 	# preg_replace could return NULL at 5.2.0 to 5.3.6 - "/(\s*<br[^>]*>\s*)*$/"
 	# tested at: http://3v4l.org/WGcod
 	if (version_compare(PHP_VERSION, '5.2.0', '>=') && version_compare(PHP_VERSION, '5.3.6', '<=')) {
 		@ini_set('pcre.backtrack_limit', '10000000');
 		@ini_set('pcre.recursion_limit', '10000000');
 	}
-	$str = str_replace(array('&nbsp;', html_entity_decode('&nbsp;', ENT_COMPAT, 'UTF-8')), ' ', $str);
+	$str = str_replace(array('&nbsp;', html_entity_decode('&nbsp;')), ' ', $str);
 	$str = sanitizeProductDescription(
 		$str,
-		'<p><br><ul><ol><li><strong><b><em><i>',
+		'',
 		'_keep_all_'
 	);
 	$str = str_replace(array('<br />', '<br/>'), '<br>', $str);
-	$str = str_replace(array("\n"), ' ', $str);
-	// $str = preg_replace('/(\s*<br[^>]*>\s*)*$/', ' ', $str);
+	$str = preg_replace('/(\s*<br[^>]*>\s*)*$/', '', $str);
 	$str = preg_replace('/\s\s+/', ' ', $str);
-	return AmazonHelper::gi()->truncateString($str, 2000);
+	return substr($str, 0, 2000);
 }
 
 function populateGenericData($pID, $edit = false) {
 	global $_MagnaSession;
 
-	$mpId = $_MagnaSession['mpID'];
 	$genericDataStructure = array(
 		'MainCategory' => '',
 		'ProductType' => '',
 		'BrowseNodes' => array(),
-		'variationTheme' => array(),
 		'ItemTitle' => '',
 		'Manufacturer' => '',
 		'Brand' => '',
@@ -60,30 +55,12 @@ function populateGenericData($pID, $edit = false) {
 		'Images' => array(),
 		'BulletPoints' => array('', '', '', '', ''),
 		'Description' => '',
-		'Keywords' => '',
+		'Keywords' => array('', '', '', '', ''),
 		'Attributes' => array(),
-		'LeadtimeToShip' => getDBConfigValue('amazon.leadtimetoship', $mpId, '0'),
-		'ConditionType' => getDBConfigValue('amazon.itemCondition', $mpId, '0'),
+		'LeadtimeToShip' => getDBConfigValue('amazon.leadtimetoship', $_MagnaSession['mpID'], '0'),
+		'ConditionType' => getDBConfigValue('amazon.itemCondition', $_MagnaSession['mpID'], '0'),
 		'ConditionNote' => '',
-		'B2BActive' => getDBConfigValue('amazon.b2b.active', $mpId, 'false'),
-		'B2BSellTo' => getDBConfigValue('amazon.b2b.sell_to', $mpId, 'b2b_b2c'),
-		'QuantityPriceType' => getDBConfigValue('amazon.b2b.discount_type', $mpId, ''),
-		'QuantityLowerBound1' => getDBConfigValue('amazon.b2b.discount_tier1.quantity', $mpId, '0'),
-		'QuantityPrice1' => getDBConfigValue('amazon.b2b.discount_tier1.discount', $mpId, '0'),
-		'QuantityLowerBound2' => getDBConfigValue('amazon.b2b.discount_tier2.quantity', $mpId, '0'),
-		'QuantityPrice2' => getDBConfigValue('amazon.b2b.discount_tier2.discount', $mpId, '0'),
-		'QuantityLowerBound3' => getDBConfigValue('amazon.b2b.discount_tier3.quantity', $mpId, '0'),
-		'QuantityPrice3' => getDBConfigValue('amazon.b2b.discount_tier3.discount', $mpId, '0'),
-		'QuantityLowerBound4' => getDBConfigValue('amazon.b2b.discount_tier4.quantity', $mpId, '0'),
-		'QuantityPrice4' => getDBConfigValue('amazon.b2b.discount_tier4.discount', $mpId, '0'),
-		'QuantityLowerBound5' => getDBConfigValue('amazon.b2b.discount_tier5.quantity', $mpId, '0'),
-		'QuantityPrice5' => getDBConfigValue('amazon.b2b.discount_tier5.discount', $mpId, '0'),
-		'ShopVariation' => array(),
 	);
-	if(getDBConfigValue(array('amazon.shipping.template.active', 'val'), $mpId, false)){
-		$aDefaultTemplate = getDBConfigValue(array($_MagnaSession['currentPlatform'] . '.shipping.template', 'defaults'), $mpId);
-		$genericDataStructure['ShippingTemplate'] = array_search('1', $aDefaultTemplate);
-	}
 	if ($pID === 0) {
 		if ($edit) {
 			$genericDataStructure['LeadtimeToShip'] = 'X';
@@ -91,7 +68,7 @@ function populateGenericData($pID, $edit = false) {
 		return $genericDataStructure;
 	}
 	$product = MLProduct::gi()->getProductByIdOld(
-		$pID, getDBConfigValue('amazon.lang', $mpId, $_SESSION['languages_id'])
+		$pID, getDBConfigValue('amazon.lang', $_MagnaSession['mpID'], $_SESSION['languages_id'])
 	);
 	if ($product === false) {
 		return $genericDataStructure;
@@ -105,12 +82,12 @@ function populateGenericData($pID, $edit = false) {
 	}
 	if (empty($genericDataStructure['Manufacturer'])) {
 		$genericDataStructure['Manufacturer'] = $genericDataStructure['Brand'] = getDBConfigValue(
-			'amazon.prepare.manufacturerfallback', $mpId, ''
+			'amazon.prepare.manufacturerfallback', $_MagnaSession['mpID'], ''
 		);
 	}
-	$mfrmd = getDBConfigValue('amazon.prepare.manufacturerpartnumber.table', $mpId, false);
+	$mfrmd = getDBConfigValue('amazon.prepare.manufacturerpartnumber.table', $_MagnaSession['mpID'], false);
 	if (is_array($mfrmd) && !empty($mfrmd['column']) && !empty($mfrmd['table'])) {
-		$pIDAlias = getDBConfigValue('amazon.prepare.manufacturerpartnumber.alias', $mpId);
+		$pIDAlias = getDBConfigValue('amazon.prepare.manufacturerpartnumber.alias', $_MagnaSession['mpID']);
 		if (empty($pIDAlias)) {
 			$pIDAlias = 'products_id';
 		}
@@ -130,9 +107,7 @@ function populateGenericData($pID, $edit = false) {
 	$genericDataStructure['EAN'] = $product[MAGNA_FIELD_PRODUCTS_EAN];
 	$genericDataStructure['Description'] = amazonSanitizeDesc($product['products_description']);
 
-    $trimFunc = function(&$v) {
-        $v = trim($v);
-    };
+	$trimFunc = create_function('&$v, $k', '$v = trim($v);');
 
 	$product['products_meta_description'] = explode(',', $product['products_meta_description']);
 	array_walk($product['products_meta_description'], $trimFunc);
@@ -141,20 +116,29 @@ function populateGenericData($pID, $edit = false) {
 	if (!empty($genericDataStructure['BulletPoints'])) {
 		foreach ($genericDataStructure['BulletPoints'] as &$bullet) {
 			$bullet = trim($bullet);
-            $bullet = !magnalisterIsUTF8($bullet) ? utf8_encode($bullet) : $bullet;
 			if (empty($bullet)) continue;
 			$bullet = substr($bullet, 0, strpos(wordwrap($bullet, 500, "\n", true) . "\n", "\n"));
 		}
 	}
 	$genericDataStructure['BulletPoints'] = array_pad($genericDataStructure['BulletPoints'], 5, '');
 
-	$genericDataStructure['Keywords'] =  trim($product['products_meta_keywords']);
-    $genericDataStructure['Keywords'] = substr($genericDataStructure['Keywords'], 0, strpos(wordwrap($genericDataStructure['Keywords'], 1000, "\n", true) . "\n", "\n"));
+	$product['products_meta_keywords'] = explode(',', $product['products_meta_keywords']);
+	array_walk($product['products_meta_keywords'], $trimFunc);
+	$genericDataStructure['Keywords'] = array_slice($product['products_meta_keywords'], 0, 5);
+	# Laenge auf 50 Zeichen beschraenken
+	if (!empty($genericDataStructure['Keywords'])) {
+		foreach ($genericDataStructure['Keywords'] as &$keyword) {
+			$keyword = trim($keyword);
+			if (empty($keyword)) continue;
+			$keyword = substr($keyword, 0, strpos(wordwrap($keyword, 50, "\n", true) . "\n", "\n"));
+		}
+	}
+	$genericDataStructure['Keywords'] = array_pad($genericDataStructure['Keywords'], 5, '');
 
 	$prepData = MagnaDB::gi()->fetchRow('
-		SELECT category, data, leadtimeToShip, ConditionType, ConditionNote, ShippingTemplate
+		SELECT category, data, leadtimeToShip, ConditionType, ConditionNote
 		  FROM ' . TABLE_MAGNA_AMAZON_APPLY . '
-		 WHERE mpID=\'' . $mpId . '\' AND
+		 WHERE mpID=\'' . $_MagnaSession['mpID'] . '\' AND
 		       ' . ((getDBConfigValue('general.keytype', '0') == 'artNr')
 			? 'products_model=\'' . MagnaDB::gi()->escape($product['products_model']) . '\''
 			: 'products_id = \'' . $pID . '\''
@@ -169,9 +153,6 @@ function populateGenericData($pID, $edit = false) {
 	# Folgende 3 Zeilen auskommentieren, falls die bereits gespeicherten Produktdaten zur Beantragung
 	# nicht ueberschrieben werden sollen.
 	if (!$edit) {
-		# Attributes matching shouldn't be reset
-		$dataForShopVariation = unserialize(base64_decode($dbData));
-		$genericDataStructure['ShopVariation'] = $dataForShopVariation['ShopVariation'];
 		$dbData = false;
 	}
 
@@ -180,10 +161,6 @@ function populateGenericData($pID, $edit = false) {
 		$prepData['category'] = unserialize($prepData['category']);
 		$dbData = base64_decode($dbData);
 		$dbData = unserialize($dbData);
-
-        if(isset($dbData['Keywords']) && is_array($dbData['Keywords'])){
-            $dbData['Keywords'] = implode(' ', $dbData['Keywords']);
-        }
 		if (is_array($prepData['category']) && !empty($prepData['category'])
 			&& is_array($dbData) && !empty($dbData)
 		) {
@@ -205,10 +182,6 @@ function populateGenericData($pID, $edit = false) {
 		$genericDataStructure['LeadtimeToShip'] = $prepData['leadtimeToShip'];
 		$genericDataStructure['ConditionType'] = $prepData['ConditionType'];
 		$genericDataStructure['ConditionNote'] = $prepData['ConditionNote'];
-		
-		if($prepData['ShippingTemplate'] !== null){
-			$genericDataStructure['ShippingTemplate'] = $prepData['ShippingTemplate'];
-		}
 	}
 
 	/* {Hook} "AmazonApply_populateGenericData": Enables you to extend or modifiy the product data.<br>
@@ -223,51 +196,9 @@ function populateGenericData($pID, $edit = false) {
 		require($hp);
 	}
 
+
 	//echo print_m($genericDataStructure);
 	return $genericDataStructure;
-}
-
-function validateB2BTierPrices(&$data) {
-	$quantityDiscountType = $data['QuantityPriceType'];
-	if ($data['B2BActive'] === 'true' && $quantityDiscountType !== '') {
-		$errors = array();
-		$previousQuantity = -1;
-		$previousPrice = -1;
-		$isPercent = $quantityDiscountType === 'percent';
-		for ($i = 1; $i < 6; $i++) {
-			$q = 'QuantityLowerBound'.$i;
-			$p = 'QuantityPrice'.$i;
-			$quantity = priceToFloat($data[$q]);
-			$price = priceToFloat($data[$p]);
-
-			if (($quantity > 0 && $price <= 0) || ($quantity <= 0 && $price > 0) || $quantity < 0 || $price < 0) {
-				$errors[] = $i;
-			} else if ($quantity > 0 && $price > 0) {
-				if ($i !== 1) {
-					if ($previousQuantity >= $quantity
-						|| ($isPercent && $previousPrice >= $price) || (!$isPercent && $previousPrice <= $price)
-					) {
-						$errors[] = $i;
-					}
-				}
-
-				$previousPrice = $price;
-				$previousQuantity = $quantity;
-			}
-		}
-
-		if (!empty($errors)) {
-			$result = '<p class="errorBox"><span class="error bold larger">' . ML_ERROR_LABEL . ':</span>';
-			foreach ($errors as $tier) {
-				$result .= '<br>' . sprintf(ML_AMAZON_CONF_QUANTITY_TIER_ERROR, $tier);
-			}
-
-			$result .= '</p>';
-			return $result;
-		}
-	}
-
-	return '';
 }
 
 $_url['view'] = 'apply';
@@ -299,24 +230,20 @@ if (!empty($_POST) && isset($_GET['kind']) && ($_GET['kind'] == 'ajax')) {
 /**
  * Daten speichern
  */
-if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_POST) && $_POST['Action'] === 'SaveMatching')) {
-	$postAction = isset($_POST['Action']);
-	$invalidAttributes = false;
-	if (isset($_GET['where']) && $_GET['where'] === 'varmatchView') {
-		if (isset($_POST['Variations'])) {
-			parse_str_unlimited($_POST['Variations'], $postVariables);
-			$_POST = $postVariables;
-		}
-	}
+if (array_key_exists('saveApplyData', $_POST)) {
 	$requiredData = array(
 		'MainCategory' => ML_LABEL_MAINCATEGORY,
+		#'ProductType' => ML_LABEL_SUBCATEGORY,
 		'BrowseNodes' => ML_AMAZON_LABEL_APPLY_BROWSENODES,
 		'ItemTitle' => ML_LABEL_PRODUCT_NAME,
 		'Manufacturer' => ML_GENERIC_MANUFACTURER_NAME,
 	);
 
-	$sMainCategory = $_POST['MainCategory'];
-	$sProductType = $_POST['ProductType'];
+	$itemDetails = $_POST;
+	unset($itemDetails['saveApplyData']);
+
+	$leadtimePost = $itemDetails['LeadtimeToShip'];
+	unset($itemDetails['LeadtimeToShip']);
 
 	$pIDs = MagnaDB::gi()->fetchArray('
 		SELECT pID FROM ' . TABLE_MAGNA_SELECTION . '
@@ -324,60 +251,6 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 		       selectionname=\'' . $applySetting['selectionName'] . '\' AND
 		       session_id=\'' . session_id() . '\'
 	', true);
-
-	$variationThemeAttributes = array();
-
-	if (isset($_POST['variationTheme'])) {
-		if ($_POST['variationTheme'] !== 'null') {
-			$variationThemes = json_decode($_POST['variationThemes'], true);
-			$variationThemeAttributes = $variationThemes[$_POST['variationTheme']]['attributes'];
-		} else {
-			$variationThemeAttributes = 'null';
-		}
-	}
-
-	$_POST['ShopVariation'] = AmazonHelper::gi()->saveMatching(
-		$sMainCategory,
-		$_POST['ml']['match'],
-		!$postAction,
-		true,
-		count($pIDs) == 1,
-		$variationThemeAttributes,
-		$sProductType
-	);
-
-	unset($_POST['ml']);
-
-	$itemDetails = $_POST;
-	unset($itemDetails['saveApplyData']);
-
-	$errors = (!$postAction ? (isset($errors) ? $errors: '') . validateB2BTierPrices($itemDetails) : '');
-	if (isset($itemDetails['Errors'])) {
-		if (!$postAction) {
-			$errors = $itemDetails['Errors'];
-			$_POST['apply'] = true;
-		}
-
-		$invalidAttributes = true;
-		unset($itemDetails['Errors']);
-	}
-
-	$leadtimePost = $itemDetails['LeadtimeToShip'];
-	unset($itemDetails['LeadtimeToShip']);
-
-	if (isset($itemDetails['variationTheme'])) {
-		$itemDetails['variationTheme'] = json_encode(array($itemDetails['variationTheme'] => $variationThemeAttributes));
-	} else {
-		$itemDetails['variationTheme'] = null;
-	}
-	foreach($itemDetails as $sKey => $sValue) {
-	    if(strpos($sKey, '__FromWebShop')){
-	        $sMainKey = str_replace('__FromWebShop', '', $sKey);
-            $itemDetails[$sMainKey] = null;
-            unset($itemDetails[$sKey]);
-        }
-    }
-
 	if (!empty($pIDs)) {
 		$missingItems = array();
 		$preparedTs = date('Y-m-d H:i:s');
@@ -417,17 +290,6 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 			unset($data['BrowseNodes']);
 			unset($data['ConditionType']);
 			unset($data['ConditionNote']);
-			$shippingTemplate = null;
-			if(isset($data['ShippingTemplate'])){
-				if(!isset($data['Attributes'])){
-					$data['Attributes'] = array();
-				}
-				$shippingTemplate = $data['ShippingTemplate'];
-				unset($data['ShippingTemplate']);
-			}
-
-			// recreate indexes from 0 (because if u select a top ten category you have index keys like 6 or 9)
-            $c['BrowseNodes'] = array_values($c['BrowseNodes']);
 
 			#echo print_m($missingItems);
 			$data = array(
@@ -436,7 +298,7 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 				'products_model' => $productModel,
 				'category' => base64_encode(serialize($c)),
 				'data' => base64_encode(serialize($data)),
-				'is_incomplete' => array_key_exists($pID, $missingItems) || $invalidAttributes ? 'true' : 'false',
+				'is_incomplete' => array_key_exists($pID, $missingItems) ? 'true' : 'false',
 				'leadtimeToShip' => $leadtimeToShip,
 				'topMainCategory' => $c['MainCategory'] == null ? '' : $c['MainCategory'],
 				'topProductType' => $c['ProductType'] == null ? '' : $c['ProductType'],
@@ -445,12 +307,7 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 				'ConditionType' => $c['ConditionType'],
 				'ConditionNote' => $c['ConditionNote'],
 				'PreparedTs' => $preparedTs,
-				'variation_theme' => $data['variationTheme']
 			);
-			
-			if ($shippingTemplate !== null) {
-				$data['ShippingTemplate'] = $shippingTemplate;
-			}
 			$where = (getDBConfigValue('general.keytype', '0') == 'artNr')
 				? array('products_model' => MagnaDB::gi()->escape($data['products_model']))
 				: array('products_id' => $data['products_id']);
@@ -460,7 +317,6 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 			foreach ($where as $key => $value) {
 				$swhere .= '`' . $key . '` = \'' . $value . '\' AND ';
 			}
-
 			$swhere = rtrim($swhere, ' AND ');
 
 			if (($count = (int)MagnaDB::gi()->fetchOne('SELECT count(*) FROM `' . TABLE_MAGNA_AMAZON_APPLY . '` ' . $swhere)) > 0) {
@@ -471,7 +327,7 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 			} else {
 				MagnaDB::gi()->insert(TABLE_MAGNA_AMAZON_APPLY, $data);
 			}
-			if (!array_key_exists($pID, $missingItems) && !$postAction && empty($errors)) {
+			if (!array_key_exists($pID, $missingItems)) {
 				MagnaDB::gi()->delete(TABLE_MAGNA_SELECTION, array(
 					'pID' => $pID,
 					'mpID' => $_MagnaSession['mpID'],
@@ -480,12 +336,7 @@ if (array_key_exists('saveApplyData', $_POST) || (array_key_exists('Action', $_P
 				));
 			}
 		}
-
-		if (!$postAction && isset($errors)) {
-			echo $errors;
-		}
-
-		if (!$postAction && !empty($missingItems) && $_GET['kind'] !== 'ajax') {
+		if (!empty($missingItems)) {
 			echo '
 				<p class="noticeBox">' . ML_AMAZON_TEXT_APPLY_DATA_INCOMPLETE . '</p>
 				<table class="datagrid">
@@ -667,70 +518,25 @@ if (array_key_exists('apply', $_POST) && (!empty($_POST['apply']))) {
 }
 
 if (($applyAction == 'singleapplication') || ($applyAction == 'multiapplication')) {
-	include_once(DIR_MAGNALISTER_MODULES.'amazon/application/applicationviews.php');
-} else if (isset($_GET['where']) && $_GET['where'] === 'varmatchView') {
-	if (isset($_POST['Action']) && $_POST['Action'] === 'DBMatchingColumns') {
-		$columns = MagnaDB::gi()->getTableCols($_POST['Table']);
-		$editedColumns = array();
-		foreach ($columns as $column) {
-			$editedColumns[$column] = $column;
-		}
+	include_once(DIR_MAGNALISTER_MODULES . 'amazon/application/applicationviews.php');
 
-		echo json_encode($editedColumns, JSON_FORCE_OBJECT);
-	} else {
-		if (isset($pIDs[0])) {
-			$pID = $pIDs[0];
-		} else {
-			$pID = MagnaDB::gi()->fetchOne('
-				SELECT pID FROM '.TABLE_MAGNA_SELECTION.'
-				 WHERE mpID=\''.$_MagnaSession['mpID'].'\' AND
-					   selectionname=\''.$applySetting['selectionName'].'\' AND
-					   session_id=\''.session_id().'\'
-			', true);
-		}
-
-		if (getDBConfigValue('general.keytype', '0') == 'artNr') {
-			$productModel = MagnaDB::gi()->fetchOne('
-                SELECT products_model
-                  FROM '.TABLE_PRODUCTS.'
-                 WHERE products_id=\''.$pID.'\' LIMIT 1
-            ');
-
-			if (!$productModel) {
-				$productModel = false;
-			}
-		} else {
-			$productModel = (int)$pID;
-		}
-
-		if (isset($_POST['SelectValue'])) {
-			$category = $_POST['SelectValue'];
-		} else {
-			$category = $_POST['MainCategory'];
-		}
-
-		$customIdentifier = !empty($_POST['CustomIdentifierValue']) ? $_POST['CustomIdentifierValue'] : '';
-		if (empty($customIdentifier)) {
-			$customIdentifier = !empty($_POST['ProductType']) ? $_POST['ProductType'] : '';
-		}
-
-		echo json_encode(AmazonHelper::gi()->getMPVariations($category, $productModel, true, null,$customIdentifier));
-	}
-} else if (defined('MAGNA_DEV_PRODUCTLIST') && MAGNA_DEV_PRODUCTLIST === true ) {
-	require_once(DIR_MAGNALISTER_MODULES.'amazon/prepare/AmazonApplyProductList.php');
-	$o = new AmazonApplyProductList();
-	echo $o;
 } else {
-	require_once(DIR_MAGNALISTER_MODULES . 'amazon/classes/ApplyCategoryView.php');
-
-	$aCV = new ApplyCategoryView(
-		$current_category_id, $applySetting,  /* $current_category_id is a global variable from xt:Commerce */
-		(isset($_GET['sorting']) ? $_GET['sorting'] : ''),
-		(isset($_POST['tfSearch']) ? $_POST['tfSearch'] : '')
-	);
-	if (isset($_GET['kind']) && ($_GET['kind'] == 'ajax')) {
-		echo $aCV->renderAjaxReply();
+	if (defined('MAGNA_DEV_PRODUCTLIST') && MAGNA_DEV_PRODUCTLIST === true) {
+		require_once(DIR_MAGNALISTER_MODULES . 'amazon/prepare/AmazonApplyProductList.php');
+		$o = new AmazonApplyProductList();
+		echo $o;
 	} else {
-		echo $aCV->printForm();
+		require_once(DIR_MAGNALISTER_MODULES . 'amazon/classes/ApplyCategoryView.php');
+
+		$aCV = new ApplyCategoryView(
+			$current_category_id, $applySetting, /* $current_category_id is a global variable from xt:Commerce */
+			(isset($_GET['sorting']) ? $_GET['sorting'] : ''),
+			(isset($_POST['tfSearch']) ? $_POST['tfSearch'] : '')
+		);
+		if (isset($_GET['kind']) && ($_GET['kind'] == 'ajax')) {
+			echo $aCV->renderAjaxReply();
+		} else {
+			echo $aCV->printForm();
+		}
 	}
 }

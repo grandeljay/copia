@@ -13,7 +13,7 @@
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
    (c) 2002-2003 osCommerce(ot_cod_fee.php,v 1.02 2003/02/24); www.oscommerce.com
    (C) 2001 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers ; http://www.themedia.at & http://www.oscommerce.at
-   (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com ($Id: payone_config.php 11740 2019-04-11 11:33:49Z GTB $)
+   (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com ($Id: payone_config.php 10226 2016-08-10 15:44:03Z GTB $)
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
@@ -32,14 +32,11 @@ if (!isset($_SESSION[$messages_ns])) {
 }
 
 // check new column
-$found = false;
-$check_query = xtc_db_query("SHOW COLUMNS FROM `payone_transactions`");
-while ($check = xtc_db_fetch_array($check_query)) {
-  if ($check['Field'] == 'type') {
-    $found = true;
-  }
-}
-if ($found === false) {
+$check_query = xtc_db_query("SELECT *
+                               FROM payone_transactions
+                              LIMIT 1");
+$check = xtc_db_fetch_array($check_query);
+if (!isset($check['type'])) {
   xtc_db_query("ALTER TABLE payone_transactions ADD type varchar(64) NOT NULL");
 }
 
@@ -457,7 +454,7 @@ function getOrdersStatus($include_hidden = false) {
 	           WHERE language_id = ".(int)$_SESSION['languages_id']." 
 	        ORDER BY sort_order ASC";
 	$result = xtc_db_query($query);
-	$status = array('0' => ORDERS_STATUS_NONE);
+	$status = array();
 	if ($include_hidden == true) {
 		$status[-1] = 'unsichtbar';
 	}
@@ -962,10 +959,10 @@ require (DIR_WS_INCLUDES.'head.php');
 											<label for="cr_confirmation"><?php echo CR_CONFIRMATION; ?></label>
 										</dt>
 										<dd>
-											<input type="radio" name="config[credit_risk][confirmation][active]" value="true" id="cr_confirmation_active" <?php echo $config['credit_risk']['confirmation']['active'] == 'true' ? 'checked="checked"' : '' ?>>
+											<input type="radio" name="config[credit_risk][confirmation][active]" value="true" id="cr_confirmation_active" <?php echo $config[credit_risk][confirmation][active] == 'true' ? 'checked="checked"' : '' ?>>
 											<label for="cr_confirmation_active"><?php echo TEXT_YES; ?></label><br>
 											
-											<input type="radio" name="config[credit_risk][confirmation][active]" value="false" id="cr_confirmation_inactive" <?php echo $config['credit_risk']['confirmation']['active'] == 'false' ? 'checked="checked"' : '' ?>>
+											<input type="radio" name="config[credit_risk][confirmation][active]" value="false" id="cr_confirmation_inactive" <?php echo $config[credit_risk][confirmation][active] == 'false' ? 'checked="checked"' : '' ?>>
 											<label for="cr_confirmation_inactive"><?php echo TEXT_NO; ?></label><br>
 										</dd>
                     </div>

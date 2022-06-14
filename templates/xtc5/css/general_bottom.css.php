@@ -18,20 +18,16 @@
 
   $css_array = array(
     DIR_TMPL_CSS.'thickbox.css',
-    DIR_TMPL_CSS.'cookieconsent.css',
-    DIR_TMPL_CSS.'jquery.alertable.css',
+    DIR_TMPL_CSS.'jquery.alerts.css', 
   );
   $css_min = DIR_TMPL_CSS.'tpl_plugins.min.css';
-  
-  $this_f_time = filemtime(DIR_FS_CATALOG.DIR_TMPL_CSS.'general_bottom.css.php');
 
   if (COMPRESS_STYLESHEET == 'true') {
     require_once(DIR_FS_BOXES_INC.'combine_files.inc.php');
-    $css_array = combine_files($css_array,$css_min,true,$this_f_time);
+    $css_array = combine_files($css_array,$css_min,true);
   }
   
   foreach ($css_array as $css) {
-    $css .= strpos($css,$css_min) === false ? '?v=' . filemtime(DIR_FS_CATALOG.$css) : '';
     echo '<link rel="stylesheet" property="stylesheet" href="'.DIR_WS_BASE.$css.'" type="text/css" media="screen" />'.PHP_EOL;
   }
 ?>

@@ -210,9 +210,8 @@ class HoodInventoryView {
 				$item['ItemTitleShort'] = (strlen($item['Title']) > $this->settings['maxTitleChars'] + 2) ? (fixHTMLUTF8Entities(substr($item['Title'], 0, $this->settings['maxTitleChars'])) . '&hellip;') : fixHTMLUTF8Entities($item['Title']);
 				$item['VariationAttributesText'] = '';
 				foreach ($item['Variation'] as $variation) {
-					$item['VariationAttributesText'] .= fixHTMLUTF8Entities($variation['Name'] . ': ' . $variation['Value']).'<br />';
+					$item['VariationAttributesText'] .= rtrim(fixHTMLUTF8Entities($variation['Name'] . ': ' . $variation['Value'].' , '), ', ');
 				}
-                $item['VariationAttributesText']= rtrim($item['VariationAttributesText'], '<br />');
 				$item['StartTime'] = strtotime($item['StartTime']);
 				$item['EndTime'] = ('-1' == $item['ListingDuration'] ? '&mdash;' : strtotime($item['EndTime']));
 				$item['LastSync'] = strtotime($item['LastSync']);
@@ -221,76 +220,8 @@ class HoodInventoryView {
 		}
 		$this->getShopDataForItems();
 	}
-
-    /**
-     * @param $aSkuEscapedList - ready for queries
-     * @param $aSku - List of the SKUs...
-     * @return mixed
-     */
-    protected function getVariationItemsForGambioProperties($aSkuEscapedList, $aSku) {
-        /*
-         * SKU, products_id, ShopQuantity, ShopPrice, ShopTitle, ShopVarText
-         */
-        if ('artNr' == getDBConfigValue('general.keytype', '0')) {
-            $sSelectSKU = "CONCAT(p.products_model, '-', ppc.combi_model)";
-            $aShopDataForVariationItems = MagnaDB::gi()->fetchArray(eecho("
-                SELECT DISTINCT ".$sSelectSKU." AS SKU,
-                       ppc.products_id AS products_id, '' AS variation_attributes,
-                       CAST(ppc.combi_quantity AS SIGNED) AS ShopQuantity,
-                       ppc.combi_price + p.products_price AS ShopPrice,
-                       pd.products_name AS ShopTitle,
-                       ppc.products_properties_combis_id
-                  FROM products_properties_combis ppc, ".TABLE_PRODUCTS." p, ".TABLE_PRODUCTS_DESCRIPTION." pd
-                 WHERE     ppc.products_id = p.products_id
-                       AND ppc.products_id = pd.products_id
-                       AND pd.language_id = '".$this->settings['language']."'
-                       AND ".$sSelectSKU." IN (".$aSkuEscapedList.")", false)
-            );
-        } else {
-            $aShopDataForVariationItems = array();
-            foreach ($aSku as $sku) {
-                $combisId = magnaSKU2aID($sku, false, true);
-                $aShopDataForVariationItems[] = MagnaDB::gi()->fetchRow("
-                    SELECT '$sku' AS SKU,
-                            ppc.products_id AS products_id, '' AS variation_attributes,
-                            CAST(ppc.combi_quantity AS SIGNED) AS ShopQuantity,
-                            ppc.combi_price + p.products_price AS ShopPrice,
-                            pd.products_name AS ShopTitle,
-                            ppc.products_properties_combis_id
-                      FROM products_properties_combis ppc, ".TABLE_PRODUCTS." p, ".TABLE_PRODUCTS_DESCRIPTION." pd
-                     WHERE      ppc.products_id=p.products_id
-                            AND ppc.products_id=pd.products_id
-                            AND pd.language_id='".$this->settings['language']."'
-                            AND ppc.products_properties_combis_id = '$combisId'"
-                );
-            }
-        }
-
-        foreach ($aShopDataForVariationItems as &$aShopDataForVariationItem) {
-            $aProperties = MagnaDB::gi()->fetchArray("
-                SELECT CONCAT(properties_name, ': ', values_name) AS ShopVarText
-                  FROM products_properties_index
-                 WHERE     products_id = '".$aShopDataForVariationItem['products_id']."'
-                       AND language_id = '".$this->settings['language']."'
-                       AND products_properties_combis_id = '".$aShopDataForVariationItem['products_properties_combis_id']."'
-            
-            ", true);
-
-            if (!empty($aProperties)) {
-                $aShopDataForVariationItem['ShopVarText'] = implode('<br />', $aProperties);
-            }
-
-            unset($aShopDataForVariationItem['products_properties_combis_id']);
-        }
-
-        return $aShopDataForVariationItems;
-    }
 	
 	protected function getVariationItems($sKUlist, $sKUarr) {
-        if (getDBConfigValue('general.options', '0', 'old') == 'gambioProperties') {
-            return $this->getVariationItemsForGambioProperties($sKUlist, $sKUarr);
-        }
-
 		$data = MagnaDB::gi()->fetchArray('
 			SELECT DISTINCT v.'.mlGetVariationSkuField().' AS SKU,
 			       v.products_id products_id,
@@ -304,23 +235,9 @@ class HoodInventoryView {
 			       AND pd.language_id=' . $this->settings['language'] . '
 			       AND v.'.mlGetVariationSkuField().' IN (' . $sKUlist . ')
 		');
-		$bEmpty = true;
-		$aLoaded = array();
-		if (!empty($data)) {
-			$bEmpty = false;
-			if (count($data) !== count($sKUarr)) {
-				$bEmpty = true;
-				foreach ($data as $product) {
-					$aLoaded[] = $product['SKU'];
-				}
-			}
-		}
-
-		if ($bEmpty) {
+		
+		if (empty($data)) {
 			foreach ($sKUarr as $sku) {
-				if (in_array($sku, $aLoaded)) {
-					continue;
-				}
 				$aId = magnaSKU2aID($sku);
 				if (empty($aId)) {
 					continue;
@@ -357,12 +274,13 @@ class HoodInventoryView {
 	private function getShopDataForItems() {
 		$sKUarr = array();
 		$sKUarrEsc = array();
+		$sKUlist = '';
 		foreach ($this->renderableData as $item) {
 			$sKUarr[] = $item['SKU'];
 			$sKUarrEsc[] = MagnaDB::gi()->escape($item['SKU']);
 		}
-		if (!empty($sKUarrEsc)) {
-			$sKUlist = "'".implode("', '", $sKUarrEsc)."'";
+		$sKUlist = "'".implode("', '", $sKUarrEsc)."'";
+		if (!empty($sKUlist)) {
 			if ('artNr' == getDBConfigValue('general.keytype', '0')) {
 				$shopDataForSimpleItems = MagnaDB::gi()->fetchArray('
 					SELECT DISTINCT p.products_model SKU, p.products_id products_id, 
@@ -402,7 +320,6 @@ class HoodInventoryView {
 		} else {
 			$shopDataForItemsBySKU = array();
 		}
-
 		foreach ($this->renderableData as &$item) {
 			if (isset($shopDataForItemsBySKU[$item['SKU']])) {
 				$item['ProductsID'] = $shopDataForItemsBySKU[$item['SKU']]['products_id'];

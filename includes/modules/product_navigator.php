@@ -1,6 +1,6 @@
 <?php
 /* ----------------------------------------------------------------------------------------------
-   $Id: product_navigator.php 12023 2019-07-27 10:01:28Z GTB $
+   $Id: product_navigator.php 10034 2016-07-06 06:51:20Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -45,8 +45,7 @@ $products_query = xtDBquery("SELECT p2c.products_id,
                                     ".PRODUCTS_CONDITIONS_P."
                                     ".$sorting);
 
-$i = $actual_key = 0;
-$p_data = array();
+$i = 0;
 while ($products_data = xtc_db_fetch_array($products_query, true)) {
 	$p_data[$i] = array ('pID' => $products_data['products_id'], 'pName' => $products_data['products_name']);
 	if ($products_data['products_id'] == $product->data['products_id']) {
@@ -63,20 +62,20 @@ if ($actual_key == 0) {
 	// aktuel key = first product
 } else {
 	$prev_id = $actual_key -1;
-	$prev_link = xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$p_data[$prev_id]['pID']);
+	$prev_link = xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($p_data[$prev_id]['pID'], $p_data[$prev_id]['pName']));
 	// check if prev id = first
 	if ($prev_id != 0)
-		$first_link = xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$p_data[0]['pID']);
+		$first_link = xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($p_data[0]['pID'], $p_data[0]['pName']));
 }
 // check if key = last
 if ($actual_key == (count($p_data) - 1)) {
 	// actual key is last
 } else {
 	$next_id = $actual_key +1;
-	$next_link = xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$p_data[$next_id]['pID']);
+	$next_link = xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($p_data[$next_id]['pID'], $p_data[$next_id]['pName']));
 	// check if next id = last
 	if ($next_id != (count($p_data) - 1))
-		$last_link = xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$p_data[(count($p_data) - 1)]['pID']);
+		$last_link = xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($p_data[(count($p_data) - 1)]['pID'], $p_data[(count($p_data) - 1)]['pName']));
 }
 $overview_link = xtc_href_link(FILENAME_DEFAULT, xtc_category_link($current_category_id));
 

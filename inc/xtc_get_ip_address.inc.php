@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_ip_address.inc.php 12731 2020-04-27 08:59:31Z GTB $   
+   $Id: xtc_get_ip_address.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -17,14 +17,13 @@
    
   function xtc_get_ip_address() {
     if (isset($_SERVER)) {
-      $tmp_ip = '';
       if (isset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']) && $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'] != '') {
         $tmp_ip = $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
       } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] != '') {
         $tmp_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
       } elseif (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'] != '') {
         $tmp_ip = $_SERVER['HTTP_CLIENT_IP'];
-      } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] != '') {
+      } else {
         $tmp_ip = $_SERVER['REMOTE_ADDR'];
       }
       $ip_array = explode(',', $tmp_ip);
@@ -42,8 +41,7 @@
       $ip_array = explode(',', $tmp_ip);
       $ip = trim($ip_array[0]);
     }
-    
-    $ip = preg_replace('/[^a-zA-Z0-9\.:]/', '', $ip);
+
     return $ip;
   }
 ?>

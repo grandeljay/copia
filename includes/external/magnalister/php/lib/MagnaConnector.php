@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: MagnaConnector.php 6767 2016-06-17 14:42:39Z masoud.khodaparast $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -345,11 +345,6 @@ class MagnaConnector {
 		$requestFields['CLIENTVERSION'] = LOCAL_CLIENT_VERSION;
 		$requestFields['CLIENTBUILDVERSION'] = CLIENT_BUILD_VERSION;
 		$requestFields['SHOPSYSTEM'] = SHOPSYSTEM;
-
-        if (defined('SHOPSYSTEM_GAMBIO_CLOUD') && SHOPSYSTEM_GAMBIO_CLOUD === true) {
-            $requestFields['SHOPSYSTEM'] = 'gambiocloud';
-        }
-
 	}
 
 	protected function decodeResponse($response, $timePerRequest) {
@@ -407,7 +402,7 @@ class MagnaConnector {
 			$msg = '';
 			if (isset($result['ERRORS'])) {
 				foreach ($result['ERRORS'] as $error) {
-					if (isset($error['ERRORLEVEL']) && $error['ERRORLEVEL'] == 'FATAL') {
+					if ($error['ERRORLEVEL'] == 'FATAL') {
 						$msg = $error['ERRORMESSAGE'];
 						break;
 					}
@@ -513,9 +508,6 @@ class MagnaConnector {
 		);
 		$this->setShortTimeCache($requestHash, $response);
 		
-		if (empty($response)) {
-			return array ('ERRORS' => array('Empty response from magnalister server'));
-		}
 		$result = $this->decodeResponse($response, $timePerRequest);
 		
 		$this->preprocessResult($result, $response, $timePerRequest);

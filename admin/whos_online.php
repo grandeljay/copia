@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: whos_online.php 13259 2021-01-31 10:44:32Z GTB $
+   $Id: whos_online.php 3571 2012-08-30 16:27:57Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -22,26 +22,6 @@
   require (DIR_FS_CATALOG.DIR_WS_CLASSES.'main.php');
   require (DIR_FS_CATALOG.DIR_WS_CLASSES.'xtcPrice.php');
   
-  $page = (isset($_GET['page']) ? (int)$_GET['page'] : 1);
-
-  $whosonline_status_array = array(
-    array('id' => '1','text'=> CFG_TXT_YES),
-    array('id' => '0','text'=> CFG_TXT_NO)
-  );
-  
-  if (!defined('MODULE_WHOS_ONLINE_STATUS')) {
-		xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) values ('MODULE_WHOS_ONLINE_STATUS', 'true',  '6', '0', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
-    define('MODULE_WHOS_ONLINE_STATUS', 'true');
-  }
-  
-  if (isset($_GET['action']) && $_GET['action'] == 'save') {
-    xtc_db_query("TRUNCATE " . TABLE_WHOS_ONLINE);
-    xtc_db_query("UPDATE ".TABLE_CONFIGURATION."
-                     SET configuration_value = '".(($_POST['whos_online'] == '1') ? 'true' : 'false')."'
-                   WHERE configuration_key = 'MODULE_WHOS_ONLINE_STATUS'");
-    xtc_redirect(xtc_href_link(basename($PHP_SELF)));
-  }
-
   $main = new main();
   
   //display per page
@@ -88,19 +68,6 @@
           }
           ?>
         </div>
-        <div class="main pdg2 flt-l" style="margin:5px 0 0 128px;">
-          <?php 
-          echo xtc_draw_form('whos_online', basename($PHP_SELF), 'action=save', 'post').PHP_EOL;
-          echo '<div class="flt-l" style="margin: 10px 0 0">'.PHP_EOL;
-          echo TEXT_ACTIVATE_WHOS_ONLINE.PHP_EOL;
-          echo '<div class="flt-r" style="margin: -6px 50px 0px 5px">'.PHP_EOL;
-          echo draw_on_off_selection('whos_online', $whosonline_status_array, ((MODULE_WHOS_ONLINE_STATUS == 'true') ? true : false)).PHP_EOL;
-          echo '<input style="margin-top: -23px;" type="submit" name="go" class="button" onclick="this.blur();" value="' . BUTTON_SAVE . '"/>';
-          echo '</div>'.PHP_EOL;
-          echo '</div>'.PHP_EOL;
-          echo '</form>';
-          ?>
-        </div>
           
         <table class="tableCenter">
           <tr>
@@ -128,17 +95,14 @@
                                                http_referer
                                           FROM " . TABLE_WHOS_ONLINE ."
                                       ORDER BY time_last_click desc";
-              $whos_online_split = new splitPageResults($page, $page_max_display_results, $whos_online_query_raw, $whos_online_query_numrows);
+              $whos_online_split = new splitPageResults($_GET['page'], $page_max_display_results, $whos_online_query_raw, $whos_online_query_numrows);
               $whos_online_query = xtc_db_query($whos_online_query_raw);                        
               while ($whos_online = xtc_db_fetch_array($whos_online_query)) {
                 $time_online = (time() - $whos_online['time_entry']);
                 if ((!isset($_GET['info']) || (isset($_GET['info']) && ($_GET['info'] == $whos_online['session_id']))) && !isset($info) ) {
-                  $info = array(
-                    'session_id' => $whos_online['session_id'],
-                    'ip' => $whos_online['ip_address'],
-                  );
+                  $info = $whos_online['session_id'];
                 }
-                if (isset($info) && $whos_online['session_id'] === $info['session_id']) {
+                if ($whos_online['session_id'] === $info) {
                   echo '              <tr class="dataTableRowSelected">' . "\n";
                   } elseif (($whos_online['session_id'] == '') || (substr($whos_online['session_id'],0,1) == '[')) {
                     echo '              <tr class="dataTableRow">' . "\n";
@@ -172,16 +136,16 @@
                                                                       } ?></td-->
                 <td class="dataTableContent txta-c"><?php echo date('H:i:s', $whos_online['time_entry']); ?></td>
                 <td class="dataTableContent txta-c"><?php echo date('H:i:s', $whos_online['time_last_click']); ?></td>
-                <td class="dataTableContent"><?php echo encode_htmlspecialchars($last_page_url); ?>&nbsp;</td>
-                <td class="dataTableContent"><?php echo encode_htmlspecialchars($whos_online['http_referer']); ?></td>
+                <td class="dataTableContent"><?php echo $last_page_url; ?>&nbsp;</td>
+                <td class="dataTableContent"><?php echo encode_htmlentities($whos_online['http_referer']); ?></td>
               </tr>
               <?php
                 }
               ?>
               </table>
                 
-              <div class="smallText pdg2 flt-l"><?php echo $whos_online_split->display_count($whos_online_query_numrows, $page_max_display_results, $page, TEXT_DISPLAY_NUMBER_OF_WHOS_ONLINE); ?></div>
-              <div class="smallText pdg2 flt-r"><?php echo $whos_online_split->display_links($whos_online_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $page); ?></div>
+              <div class="smallText pdg2 flt-l"><?php echo $whos_online_split->display_count($whos_online_query_numrows, $page_max_display_results, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_WHOS_ONLINE); ?></div>
+              <div class="smallText pdg2 flt-r"><?php echo $whos_online_split->display_links($whos_online_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></div>
               <?php echo draw_input_per_page($PHP_SELF,$cfg_max_display_results_key,$page_max_display_results); ?>
             </td>
           <?php
@@ -190,16 +154,11 @@
           if (isset($info)) {
             $heading[] = array('text' => '<strong>' . TABLE_HEADING_SHOPPING_CART . '</strong>');
             $session_data = '';
-            
-            //autoload new session addons 
-            require_once(DIR_FS_INC.'auto_include.inc.php');
-            foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/whos_online/','php') as $file) require ($file);
-            
             if (STORE_SESSIONS == 'mysql') {
-              $session_data = _sess_read($info['session_id']);
-            } elseif (STORE_SESSIONS == '') {
-              if ( (file_exists(xtc_session_save_path() . '/sess_' . $info['session_id'])) && (filesize(xtc_session_save_path() . '/sess_' . $info['session_id']) > 0) ) {
-                $session_data = file(xtc_session_save_path() . '/sess_' . $info['session_id']);
+              $session_data = _sess_read($info);
+            } else {
+              if ( (file_exists(xtc_session_save_path() . '/sess_' . $info)) && (filesize(xtc_session_save_path() . '/sess_' . $info) > 0) ) {
+                $session_data = file(xtc_session_save_path() . '/sess_' . $info);
                 $session_data = trim(implode('', $session_data));
               }
             }
@@ -218,7 +177,7 @@
               }
               if (sizeof($products) > 0) {
                 $contents[] = array('text' => xtc_draw_separator('pixel_black.gif', '100%', '1'));
-                $contents[] = array('align' => 'right', 'text'  => '<span style="nobr">'.TEXT_SHOPPING_CART_SUBTOTAL . ' ' . $xtPrice->xtcFormat($user_session['cart']->total, true). '</span>');
+                $contents[] = array('align' => 'right', 'text'  => '<span style="nobr">'.TEXT_SHOPPING_CART_SUBTOTAL . ' ' . $xtPrice->xtcFormat($user_session['cart']->total , true). '</span>');
               } else {
                 $contents[] = array('text' => TEXT_EMPTY_CART);
               }
@@ -226,7 +185,6 @@
             if ($user_session == 'ENCRYPTED') {
               $contents[] = array('text' => TEXT_SESSION_IS_ENCRYPTED);
             }
-            $contents[] = array('align' => 'center', 'text' => '<a class="button" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'action=edit&ip='.$info['ip']) . '">'.BUTTON_BLACKLIST.'</a><br/><br/>');
           }
           if ( (xtc_not_null($heading)) && (xtc_not_null($contents)) ) {
               echo '            <td class="boxRight" style="min-width:120px">' . "\n";

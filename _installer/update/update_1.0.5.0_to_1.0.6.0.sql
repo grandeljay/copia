@@ -58,7 +58,7 @@ UPDATE admin_access SET listproducts = 1 WHERE customers_id = 1 LIMIT 1;
 UPDATE admin_access SET listproducts = 3 WHERE customers_id = 'groups' LIMIT 1;
 
 #DokuMan - 2011-02-02 - added support for passwort+salt (SHA1)
-#ALTER TABLE customers MODIFY customers_password varchar(50) NOT NULL; # Not needed any more with the new /inc/xtc_validate_password.inc.php
+ALTER TABLE customers MODIFY customers_password varchar(50) NOT NULL;
 
 #DokuMan - 2011-02-03 - enlarge field for company names, firstname, lastname, street_address and city to 64 characters (instead of 32)
 ALTER TABLE address_book MODIFY entry_company VARCHAR(64);
@@ -351,7 +351,7 @@ CREATE TABLE IF NOT EXISTS banktransfer_blz (
   bankname varchar(255) NOT NULL DEFAULT '',
   prz char(2) NOT NULL DEFAULT '',
   PRIMARY KEY (blz)
-);
+) ENGINE=MyISAM;
 
 #DokuMan - 2011-07-26 - allow 5 characters, so language code like 'zh-CN' can be entered
 ALTER TABLE languages MODIFY code char(5) NOT NULL;
@@ -419,7 +419,7 @@ CREATE TABLE sessions (
   value text NOT NULL,
   flag VARCHAR(5) NULL DEFAULT NULL,
   PRIMARY KEY (sesskey)
-);
+) ENGINE=MyISAM;
 
 #DokuMan - 2012-08-21 - fix default value for customer group merchants
 UPDATE customers_status SET customers_status_add_tax_ot  = '1' WHERE customers_status_id = '3';

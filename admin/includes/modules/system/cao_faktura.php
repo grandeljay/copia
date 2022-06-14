@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: cao_faktura.php 12761 2020-05-13 13:39:09Z Tomcraft $
+   $Id: cao_faktura.php 10297 2016-09-23 10:25:04Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -19,9 +19,9 @@ class cao_faktura {
      $this->code = 'cao_faktura';
      $this->title = MODULE_CAO_FAKTURA_TEXT_TITLE;
      $this->description = MODULE_CAO_FAKTURA_TEXT_DESCRIPTION;
-     $this->sort_order = defined('MODULE_CAO_FAKTURA_SORT_ORDER') ? MODULE_CAO_FAKTURA_SORT_ORDER : '';
-     $this->enabled = ((defined('MODULE_CAO_FAKTURA_STATUS') && MODULE_CAO_FAKTURA_STATUS == 'true') ? true : false);
-  }
+     $this->sort_order = defined('MODULE_CAO_FAKTURA_SORT_ORDER') ? MODULE_CAO_FAKTURA_SORT_ORDER : 0;
+     $this->enabled = ((MODULE_CAO_FAKTURA_STATUS == 'true') ? true : false);
+   }
 
   function process($file) {
     if (isset($_POST['password']) && $_POST['password'] != '') {
@@ -50,7 +50,7 @@ class cao_faktura {
   }
     
   function install() {
-    xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CAO_FAKTURA_STATUS', 'false',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");  
+    xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CAO_FAKTURA_STATUS', 'true',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");  
     xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CAO_FAKTURA_EMAIL', '',  '6', '1', '', now())");  
     xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CAO_FAKTURA_PASSWORD', '',  '6', '1', '', now())");  
   }

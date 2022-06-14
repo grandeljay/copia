@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: trustedshops.php 11599 2019-03-21 16:05:39Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -16,12 +16,12 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
 class trustedshops {
   var $code, $title, $description, $enabled;
 
-  function __construct() {
+  function trustedshops() {
      $this->code = 'trustedshops';
      $this->title = MODULE_TRUSTEDSHOPS_TEXT_TITLE;
      $this->description = MODULE_TRUSTEDSHOPS_TEXT_DESCRIPTION;
-     $this->sort_order = defined('MODULE_TRUSTEDSHOPS_SORT_ORDER') ? MODULE_TRUSTEDSHOPS_SORT_ORDER : '';
-     $this->enabled = ((defined('MODULE_TRUSTEDSHOPS_STATUS') && MODULE_TRUSTEDSHOPS_STATUS == 'true') ? true : false);
+     $this->sort_order = defined('MODULE_TRUSTEDSHOPS_SORT_ORDER') ? MODULE_TRUSTEDSHOPS_SORT_ORDER : 0;
+     $this->enabled = ((MODULE_TRUSTEDSHOPS_STATUS == 'true') ? true : false);
    }
 
   function process($file) {

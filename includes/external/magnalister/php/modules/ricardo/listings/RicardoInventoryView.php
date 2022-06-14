@@ -11,7 +11,9 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id$
+ *
+ * (c) 2010 - 2014 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -168,12 +170,6 @@ $(document).ready(function() {
 				'Getter' => 'getQuantities',
 				'Field' => null,
 			),
-			'BidCount' => array(
-				'Label' => ML_RICARDO_LABEL_BID_COUNT,
-				'Sorter' => null,
-				'Getter' => 'getBidCount',
-				'Field' => null,
-			),
 			'LastModified' => array (
 				'Label' => ML_LAST_SYNC,
 				'Sorter' => 'lastmodified',
@@ -234,7 +230,7 @@ $(document).ready(function() {
 	 * @return string Rendered table cell.
 	 */
 	protected function getLastModified($item) {
-		if ($item['BidCount'] > 0 && $item['BuyingMode'] === 'auction') {
+		if ($item['BidCount'] > 0) {
 			return '<td title="' . ML_RICARDO_AUCTION_HAS_BIDS_TOOLTIP . '">' . ML_RICARDO_AUCTION_HAS_BIDS . '</td>';
 		}
 
@@ -320,14 +316,6 @@ $(document).ready(function() {
 		return '<td>' . $shopQuantity . ' / ' . $item['Quantity'] . '</td>';
 	}
 
-	protected function getBidCount($item) {
-		if ($item['BuyingMode'] === 'buy_it_now') {
-			$item['BidCount'] = '&mdash;';
-		}
-
-		return '<td>' . $item['BidCount'] . '</td>';
-	}
-
 	protected function postDelete() {
 		MagnaConnector::gi()->submitRequest(array(
 			'ACTION' => 'UploadItems'
@@ -372,7 +360,7 @@ $(document).ready(function() {
 				<div id="infodiag" class="dialog2" title="' . ML_LABEL_NOTE . '">' . ML_RICARDO_TEXT_CHECKIN_DELAY. '</div>';
 	}
 
-	protected function getInventory() {
+	private function getInventory() {
 		try {
 			$request = array(
 				'ACTION' => 'GetInventory',
@@ -464,10 +452,7 @@ $(document).ready(function() {
 			 	'Price' => $item['Price'],
 			 	'Currency' => isset($item['Currency']) ? $item['Currency'] : $this->mpCurrency,
 			))));
-			$addStyle = ($item['Title'] === '&mdash;' && $item['SKU'] !== '&mdash;')
-				|| ($item['BidCount'] > 0 && $item['BuyingMode'] === 'auction')
-				? 'style="color:#900;"'
-				: '';
+			$addStyle = ($item['Title'] === '&mdash;' && $item['SKU'] !== '&mdash;') ? 'style="color:#900;"' : '';
 			$html .= '
 				<tr class="'.(($oddEven = !$oddEven) ? 'odd' : 'even').'" '.$addStyle.'>
 					<td><input type="checkbox" name="SKUs[]" value="'.$item['SKU'].'">

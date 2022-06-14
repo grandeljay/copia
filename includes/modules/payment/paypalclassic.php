@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypalclassic.php 13437 2021-03-02 10:12:32Z GTB $
+   $Id: paypalclassic.php 9861 2016-05-25 07:05:22Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -54,21 +54,6 @@ class paypalclassic extends PayPalPayment {
 
 	function after_process() {
 		unset($_SESSION['paypal']);
-	}
-
-
-	function install() {
-	  parent::install();
-	  
-    include_once(DIR_FS_LANGUAGES.$_SESSION['language'].'/modules/payment/paypalcart.php');
-	  require_once(DIR_FS_CATALOG.'includes/modules/payment/paypalcart.php');
-	  $paypalcart = new paypalcart();
-	  if ($paypalcart->check() != 1) {
-	    $paypalcart->install();
-	    
-	    require_once(DIR_FS_INC.'update_module_configuration.inc.php');
-	    update_module_configuration('payment');
-	  }
 	}
 
 

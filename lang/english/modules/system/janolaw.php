@@ -18,7 +18,7 @@
    ---------------------------------------------------------------------------------------*/
 
 define('MODULE_JANOLAW_TEXT_TITLE', 'janolaw Terms Hosting-Service');
-define('MODULE_JANOLAW_TEXT_DESCRIPTION', '<a href="https://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><img src="images/janolaw/janolaw_185x35.png" border=0></a><br /><br />Germany\'s big legal rights portal janolaw offers customized solutions to your legal issues - from the lawyer hotline to individual contracts with attorney warranty. With the AGB hosting service for Internet stores, you can adjust the legal core documents Terms, Conditions, Disclaimer and Privacy Statement tailored to your store and update it continually through the janolaw team. More protection is not possible.<br /><br /><a href="https://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><strong><u>Click here for the offer<u></strong></a>');
+define('MODULE_JANOLAW_TEXT_DESCRIPTION', '<a href="http://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><img src="images/janolaw/janolaw_185x35.png" border=0></a><br /><br />Germany\'s big legal rights portal janolaw offers customized solutions to your legal issues - from the lawyer hotline to individual contracts with attorney warranty. With the AGB hosting service for Internet stores, you can adjust the legal core documents Terms, Conditions, Disclaimer and Privacy Statement tailored to your store and update it continually through the janolaw team. More protection is not possible.<br /><br /><a href="http://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><strong><u>Click here for the offer<u></strong></a>');
 define('MODULE_JANOLAW_USER_ID_TITLE', '<hr noshade>User-ID');
 define('MODULE_JANOLAW_USER_ID_DESC', 'Your User-ID');
 define('MODULE_JANOLAW_SHOP_ID_TITLE', 'Shop-ID');
@@ -61,8 +61,8 @@ define('MODULE_JANOLAW_PDF_REVOCATION_DESC', 'Save document and add a link to th
 define('MODULE_JANOLAW_MAIL_REVOCATION_TITLE', 'E-Mail Attachment');
 define('MODULE_JANOLAW_MAIL_REVOCATION_DESC', 'Send PDF as attachment with order confirmation?');
 
-define('MODULE_JANOLAW_TYPE_WITHDRAWAL_TITLE', 'Legal text Withdrawal form');
-define('MODULE_JANOLAW_TYPE_WITHDRAWAL_DESC', 'Please specify content of this legal text to be inserted<br/><br/><b>Important:</b> this works from version 3. The changes can be made at Janolaw.');
+define('MODULE_JANOLAW_TYPE_WITHDRAWL_TITLE', 'Legal text Withdrawal form');
+define('MODULE_JANOLAW_TYPE_WITHDRAWL_DESC', 'Please specify content of this legal text to be inserted<br/><br/><b>Important:</b> this works from version 3. The changes can be made at Janolaw.');
 define('MODULE_JANOLAW_PDF_WITHDRAWAL_TITLE', 'PDF as Download');
 define('MODULE_JANOLAW_PDF_WITHDRAWAL_DESC', 'Save document and add a link to the document?<br/><b>Important:</b> This only works with HTML version!');
 define('MODULE_JANOLAW_MAIL_WITHDRAWAL_TITLE', 'E-Mail Attachment');

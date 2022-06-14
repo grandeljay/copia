@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_setcookie.inc.php 12859 2020-08-05 10:07:19Z GTB $   
+   $Id: xtc_setcookie.inc.php 10020 2016-06-30 10:58:24Z GTB $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -15,19 +15,7 @@
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
-  function xtc_setcookie($name, $value = '', $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false, $samesite = 'None') {
-    if (version_compare(PHP_VERSION, '7.3', '>=')) {
-      $cookie_options = array (
-        'expires' => $expire,
-        'path' => $path,
-        'domain' => $domain,
-        'secure' => $secure,
-        'httponly' => $httponly,
-        'samesite' => $samesite
-      );
-      setcookie($name, $value, $cookie_options);   
-    } else {
-      setcookie($name, $value, $expire, $path, (xtc_not_null($domain) ? $domain : ''), $secure, $httponly);
-    }
+  function xtc_setcookie($name, $value = '', $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = false) {
+    setcookie($name, $value, $expire, $path, (xtc_not_null($domain) ? $domain : ''), $secure, $httponly);
   }
 ?>

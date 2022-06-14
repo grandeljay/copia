@@ -22,41 +22,38 @@
 
 <div class="twoColums">
   <div class="highlightbox plainleft">
-    {#text_information#|sprintf:$HEADQUARTER}
+    {#text_information#}
     {if $IP_LOG == 'true'}
     <p>{#text_ip#}&nbsp;<strong>{$CUSTOMERS_IP}</strong></p>
     {/if}
   </div>
 </div>
-
-{if $TEXT_AGB_CHECKOUT || isset($EXPRESS)}
-  <div class="twoColums last">
-    <div class="highlightbox plainright">
-      {if $TEXT_AGB_CHECKOUT}
-        {$TEXT_AGB_CHECKOUT}
-      {/if}
-    </div>
-    {if isset($EXPRESS)}
-    <div class="highlightbox plainright">
-      <h4>{#heading_checkout_express#}</h4>
-      {if isset($success_message)}
-        <div class="infomessage">{$success_message}</div>
-      {else}
-        {$FORM_ACTION}
-        <span style="float:right;margin-left:20px;">{$BUTTON_SUBMIT}</span>
-        {#text_express_checkout_information#} {if isset($EXPRESS_LINK)}{$EXPRESS_LINK}{/if}
-        {$FORM_END}
-      {/if}
-    </div>
+<div class="twoColums last">
+  <div class="highlightbox plainright">
+    {if $REVOCATION}
+      {$TEXT_AGB_CHECKOUT}
+    {/if}  
+  </div>
+  {if isset($EXPRESS)}
+  <div class="highlightbox plainright">
+    <h4>{#heading_checkout_express#}</h4>
+    {if isset($success_message)}
+      <div class="infomessage">{$success_message}</div>
+    {else}
+      {$FORM_ACTION}
+      <span style="float:right;margin-left:20px;">{$BUTTON_SUBMIT}</span>
+      {#text_express_checkout_information#} {if isset($EXPRESS_LINK)}{$EXPRESS_LINK}{/if}
+      {$FORM_END}
     {/if}
   </div>
-{/if}
+  {/if}
+</div>
 <br class="clearfix" />  
 
 {if $DELIVERY_LABEL}
 <div class="twoColums">
   <div class="highlightbox plainleft">
-    <h4>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}{#text_pickup_address#}{else}{#text_shipping_address#} <a class="midi" href="{$SHIPPING_ADDRESS_EDIT}">{#text_edit#}</a>{/if}</h4>
+    <h4>{#text_shipping_address#} <a class="midi" href="{$SHIPPING_ADDRESS_EDIT}">{#text_edit#}</a></h4>
     {$DELIVERY_LABEL} 
   </div>
 </div>
@@ -113,13 +110,6 @@
   </div>
 </div>
 {/if}
-{if $MODULE_gift_cart}
-<div class="twoColums">
-  <div class="highlightbox plainleft">
-    {$MODULE_gift_cart}
-  </div>
-</div>
-{/if}
 <br class="clearfix" /> 
 
 <br />
@@ -139,21 +129,9 @@
       <td class="ord_table_left ord_width40">{$data.qty}</td>
       {if $smarty.const.CHECKOUT_SHOW_PRODUCTS_IMAGES == 'true' && $data.image != ''}<td class="ord_table_left ord_width90">{$data.image}</td>{/if}
       <td class="ord_table_left">
-        {if isset($data.link_more)}<strong>{$data.name}</strong> {$data.link_more}{else}{$data.link}{/if}
+        {$data.link}
         {if $data.order_description}<div class="description">{$data.order_description}</div>{/if}
-        {if isset($data.products_tags)}
-          <div class="ol_tags_row">
-            {foreach item=module_data from=$data.products_tags}
-              <div class="ol_tags_item">     
-                <strong>{$module_data.OPTIONS_NAME}</strong>:       
-                {foreach name=inner item=item_data from=$module_data.DATA}
-                  {$item_data.VALUES_NAME}{if $smarty.foreach.inner.last}{else}, {/if}
-                {/foreach}
-              </div>
-            {/foreach} 
-          </div>
-        {/if}
-        {if is_array($data.attributes) && count($data.attributes) > 0}
+        {if $data.attributes != ''}
           <ul class="attributes_list">
             {foreach key=a_data item=attrib_data from=$data.attributes}
             <li><strong>{$attrib_data.option}:</strong> {$attrib_data.value}</li>
@@ -189,6 +167,6 @@
     <div class="dutyinfo">{#text_duty_info#}</div>
   {/if}
   
-  <div class="button_right">{$CHECKOUT_FORM}{if $MODULE_BUTTONS != ''}{$MODULE_BUTTONS}{/if}{$CHECKOUT_BUTTON}</div>
+  <div class="button_right">{$CHECKOUT_FORM}{if $MODULE_BUTTONS!=''}{$MODULE_BUTTONS}{/if}{$CHECKOUT_BUTTON}</div>
 
 </div>

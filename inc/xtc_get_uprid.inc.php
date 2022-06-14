@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_uprid.inc.php 11561 2019-03-20 16:36:11Z GTB $   
+   $Id: xtc_get_uprid.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -27,9 +27,9 @@
         $attributes_ids = '';
 
         reset($params);
-        foreach ($params as $option => $value) {
+        while (list($option, $value) = each($params)) {
           //new module support 
-          list($option, $value) = (class_exists('shoppingCartModules') ? $scModules->get_uprid(array($option, $value), $prid) : array($option, $value));
+          list($option, $value) = (class_exists('shoppingCartModules') ? $scModules->get_uprid(array($option, $value)) : array($option, $value));
           if (is_numeric($option) && is_numeric($value)) {
             $attributes_ids .= '{' . (int)$option . '}' . (int)$value;
           } else {

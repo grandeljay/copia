@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_create_random_value.inc.php 12433 2019-12-02 07:23:33Z GTB $   
+   $Id: xtc_create_random_value.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -14,11 +14,9 @@
 
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
- 
-  // include needed functions
-  require_once(DIR_FS_INC . 'xtc_rand.inc.php');
-  
-  function xtc_create_random_value($length, $type = 'mixed') {
+// include needed functions
+require_once(DIR_FS_INC . 'xtc_rand.inc.php');
+function xtc_create_random_value($length, $type = 'mixed') {
     if ( ($type != 'mixed') && ($type != 'chars') && ($type != 'digits')) return false;
 
     $rand_value = '';
@@ -28,16 +26,15 @@
       } else {
         $char = chr(xtc_rand(0,255));
       }
-      
       if ($type == 'mixed') {
-        if (preg_match('/^[a-z0-9]$/i', $char)) $rand_value .= $char;
+        if (preg_match('/^[a-z0-9]$/i', $char)) $rand_value .= $char; // Hetfield - 2009-08-19 - replaced deprecated function eregi with preg_match to be ready for PHP >= 5.3
       } elseif ($type == 'chars') {
-        if (preg_match('/^[a-z]$/i', $char)) $rand_value .= $char;
+        if (preg_match('/^[a-z]$/i', $char)) $rand_value .= $char; // Hetfield - 2009-08-19 - replaced deprecated function eregi with preg_match to be ready for PHP >= 5.3
       } elseif ($type == 'digits') {
-        if (preg_match('/^[0-9]$/', $char)) $rand_value .= $char;
+        if (preg_match('/^[0-9]$/', $char)) $rand_value .= $char; // Hetfield - 2009-08-19 - replaced deprecated function ereg with preg_match to be ready for PHP >= 5.3
       }
     }
 
     return $rand_value;
   }
-?>
+ ?>

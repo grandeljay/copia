@@ -14,13 +14,12 @@ use PayPal\Validation\NumericValidator;
  * @package PayPal\Api
  *
  * @property string currency
- * @property string currency_code
  * @property string value
  */
 class Currency extends PayPalModel
 {
     /**
-     * 3 letter currency code as defined by ISO 4217.
+     * 3 letter currency code
      *
      * @param string $currency
      * 
@@ -33,7 +32,7 @@ class Currency extends PayPalModel
     }
 
     /**
-     * 3 letter currency code as defined by ISO 4217.
+     * 3 letter currency code
      *
      * @return string
      */
@@ -43,30 +42,7 @@ class Currency extends PayPalModel
     }
 
     /**
-     * 3 letter currency code as defined by ISO 4217.
-     *
-     * @param string $currency
-     * 
-     * @return $this
-     */
-    public function setCurrencyCode($currency_code)
-    {
-        $this->currency_code = $currency_code;
-        return $this;
-    }
-
-    /**
-     * 3 letter currency code as defined by ISO 4217.
-     *
-     * @return string
-     */
-    public function getCurrencyCode()
-    {
-        return $this->currency_code;
-    }
-    
-    /**
-     * amount up to N digit after the decimals separator as defined in ISO 4217 for the appropriate currency code.
+     * amount upto 2 decimals represented as string
      *
      * @param string|double $value
      * 
@@ -75,13 +51,13 @@ class Currency extends PayPalModel
     public function setValue($value)
     {
         NumericValidator::validate($value, "Value");
-        $value = FormatConverter::formatToPrice($value, (($this->getCurrency() != '') ? $this->getCurrency() : $this->getCurrencyCode()));
+        $value = FormatConverter::formatToPrice($value, $this->getCurrency());
         $this->value = $value;
         return $this;
     }
 
     /**
-     * amount up to N digit after the decimals separator as defined in ISO 4217 for the appropriate currency code.
+     * amount upto 2 decimals represented as string
      *
      * @return string
      */

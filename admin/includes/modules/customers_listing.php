@@ -1,6 +1,6 @@
 <?php
  /*-------------------------------------------------------------
-   $Id: customers_listing.php 13459 2021-03-09 11:53:28Z Tomcraft $
+   $Id: customers_listing.php 10392 2016-11-07 11:28:13Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -14,15 +14,7 @@
   //display per page
   $cfg_max_display_results_key = 'MAX_DISPLAY_LIST_CUSTOMERS';
   $page_max_display_results = xtc_cfg_save_max_display_results($cfg_max_display_results_key);
-  
-  $form_action = 'action=multi_action';
-  if (isset($_POST['multi_customers']) && xtc_not_null($_POST['multi_customers'])) {
-    if (isset($_POST['multi_delete']) && xtc_not_null($_POST['multi_delete'])) {
-      $form_action = 'action=deleteconfirm';
-    } elseif (isset($_POST['multi_status']) && xtc_not_null($_POST['multi_status'])) {
-      $form_action = 'action=statusconfirm';
-    }
-  }
+
  ?>
 
         <div class="pageHeadingImage"><?php echo xtc_image(DIR_WS_ICONS.'heading/icon_customers.png'); ?></div>
@@ -33,31 +25,19 @@
         <div class="pageHeading flt-l" style="margin: 3px 40px;"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CREATE_ACCOUNT) . '">' . BUTTON_CREATE_ACCOUNT . '</a>'; ?></div>
 
         <?php echo xtc_draw_form('status', FILENAME_CUSTOMERS, '', 'get');
-          $select_data = array(
-            array('id' => '', 'text' => ((!isset($_GET['status']) || $_GET['status'] == '') ? TEXT_SELECT : TEXT_ALL_CUSTOMERS)), 
-          );
+          $select_data = array ();
+          $select_data = array (array ('id' => '', 'text' => TEXT_SELECT), array ('id' => '100', 'text' => TEXT_ALL_CUSTOMERS));
         ?>
-        <div class="main mrg5"><?php echo HEADING_TITLE_STATUS . ' ' . xtc_draw_pull_down_menu('status', array_merge($select_data, $customers_statuses_array), isset($_GET['status']) ? $_GET['status'] : '', 'onChange="this.form.submit();"'); ?></div>
+        <div class="main mrg5"><?php echo HEADING_TITLE_STATUS . ' ' . xtc_draw_pull_down_menu('status',xtc_array_merge($select_data, $customers_statuses_array), isset($_GET['status']) ? $_GET['status'] : '', 'onChange="this.form.submit();"'); ?></div>
         </form>
 
         <div class="clear"></div>
 
         <table class="tableCenter">
           <tr>
-          <?php 
-            if ($action == '' || strpos($action, 'multi') !== false) {
-              echo xtc_draw_form('multi_action_form', FILENAME_CUSTOMERS, xtc_get_all_get_params(array('action')) . $form_action, 'post', 'onsubmit="javascript:return CheckMultiForm()"');
-            }
-            ?>
             <td class="boxCenterLeft">
               <table class="tableBoxCenter collapse">
                 <tr class="dataTableHeadingRow">
-                  <td class="dataTableHeadingContent txta-c" style="width:4%">
-                    <?php 
-                      echo TABLE_HEADING_EDIT . '<br />'; 
-                      echo xtc_draw_checkbox_field('select_all', '1', false, '', 'onclick="javascript:CheckAll(this.checked);"');   
-                    ?>
-                  </td>
                   <td class="dataTableHeadingContent" style="width:40px;"><?php echo TABLE_HEADING_ACCOUNT_TYPE; ?></td>
                   <td class="dataTableHeadingContent" style="width:80px;"><?php echo TABLE_HEADING_CUSTOMERSCID.xtc_sorting(FILENAME_CUSTOMERS,'customers_cid'); ?></td>
                   <td class="dataTableHeadingContent"><?php echo TABLE_HEADING_LASTNAME.xtc_sorting(FILENAME_CUSTOMERS,'customers_lastname'); ?></td>
@@ -85,23 +65,33 @@
                 $search = '';
                 if (isset($_GET['search']) && (xtc_not_null($_GET['search']))) {
                   $keywords = xtc_db_input(xtc_db_prepare_input($_GET['search']));
-                  $search = "WHERE (c.customers_lastname LIKE '%".$keywords."%'
+                  $search = "AND (c.customers_lastname LIKE '%".$keywords."%'
+                                  OR c.customers_firstname LIKE '%".$keywords."%'
+                                  OR CONCAT(customers_firstname,' ',customers_lastname) LIKE '%".$keywords."%'
+                                  OR CONCAT(customers_lastname,' ',customers_firstname) LIKE '%".$keywords."%'
+                                  OR c.customers_email_address LIKE '%".$keywords."%'
+                                  OR a.entry_company LIKE '%".$keywords."%'
+                                 )";
+                  //BOF - web28 - 2010-05-29 added for ADMIN SEARCH BAR
+                  if(isset($_GET['asb']) && $_GET['asb'] == 'asb') {
+                    $search = "AND (c.customers_lastname LIKE '%".$keywords."%'
                                     OR c.customers_firstname LIKE '%".$keywords."%'
-                                    OR CONCAT(c.customers_firstname,' ',c.customers_lastname) LIKE '%".$keywords."%'
-                                    OR CONCAT(c.customers_lastname,' ',c.customers_firstname) LIKE '%".$keywords."%'
-                                    OR c.customers_email_address LIKE '%".$keywords."%'
-                                    OR c.customers_cid LIKE '%".$keywords."%'
-                                    OR ab.entry_company LIKE '%".$keywords."%'
-                                    OR ab1.entry_company LIKE '%".$keywords."%'
-                                    OR ab1.entry_firstname LIKE '%".$keywords."%'
-                                    OR ab1.entry_lastname LIKE '%".$keywords."%'
-                                    OR CONCAT(ab1.entry_firstname,' ',ab1.entry_lastname) LIKE '%".$keywords."%'
-                                    OR CONCAT(ab1.entry_lastname,' ',ab1.entry_firstname) LIKE '%".$keywords."%'
+                                    OR CONCAT(customers_firstname,' ',customers_lastname) LIKE '%".$keywords."%'
+                                    OR CONCAT(customers_lastname,' ',customers_firstname) LIKE '%".$keywords."%'
+                                    OR a.entry_company LIKE '%".$keywords."%'
                                    )";
+                  }
+                  //EOF - web28 - 2010-05-29 added for ADMIN SEARCH BAR
                 }
-                
-                if (isset($_GET['status']) && $_GET['status'] != '') {
-                  $search = "WHERE c.customers_status = '".(int)$_GET['status']."'";
+                //BOF - web28 - 2010-05-29 added for ADMIN SEARCH BAR
+                if (isset($_GET['search_email']) && (xtc_not_null($_GET['search_email']))) {
+                  $keywords = xtc_db_input(xtc_db_prepare_input($_GET['search_email']));
+                  $search = "AND (c.customers_email_address LIKE '%".$keywords."%')";
+                }
+                //EOF - web28 - 2010-05-29 added for ADMIN SEARCH BAR
+                if (isset($_GET['status']) && ($_GET['status'] != '100' || $_GET['status'] == '0')) {
+                  $status = xtc_db_prepare_input($_GET['status']);
+                  $search = "AND c.customers_status = '".$status."'";
                 }
 
                 if (isset($_GET['sorting']) && xtc_not_null($_GET['sorting'])) {
@@ -119,17 +109,18 @@
                       $sort = 'ORDER BY c.customers_lastname DESC';
                       break;
                     case 'customers_country' :
-                      $sort = 'ORDER BY ab.entry_country_id';
+                      $sort = 'ORDER BY a.entry_country_id';
                       break;
                     case 'customers_country-desc' :
-                      $sort = 'ORDER BY ab.entry_country_id DESC';
+                      $sort = 'ORDER BY a.entry_country_id DESC';
                       break;
                     case 'date_account_created' :
-                      $sort = 'ORDER BY c.customers_date_added';
+                      $sort = 'ORDER BY ci.customers_info_date_account_created';
                       break;
                     case 'date_account_created-desc' :
-                      $sort = 'ORDER BY c.customers_date_added DESC';
+                      $sort = 'ORDER BY ci.customers_info_date_account_created DESC';
                       break;
+                      // BOF - DokuMan - 2012-02-06 - added customers_cid
                     case 'customers_cid' :
                       $sort = 'ORDER BY c.customers_cid';
                       break;
@@ -144,95 +135,76 @@
                       break;
                   }
                 } else {
-                  $sort = 'ORDER BY c.customers_date_added DESC';
+                  $sort = 'ORDER BY ci.customers_info_date_account_created DESC'; // vr - 2010-02-22 - default sort order
                 }
 
-                $customers_query_raw = "SELECT c.customers_id,
+                // BOF - vr - 2010-02-22 - removed group by part to prevent folding of customers records with the same creation timestamp
+                $customers_query_raw = "-- admin/customers.php
+                                        SELECT c.customers_id,
                                                c.customers_cid,
                                                c.customers_vat_id,
                                                c.customers_vat_id_status,
                                                c.customers_status,
                                                c.customers_firstname,
                                                c.customers_lastname,
-                                               c.customers_newsletter,
                                                c.customers_email_address,
                                                c.customers_default_address_id,
-                                               c.customers_date_added as date_account_created,
-                                               c.customers_last_modified as date_account_last_modified,
                                                c.member_flag,
                                                c.account_type,
-                                               ab.entry_company,
-                                               ab.entry_country_id,
+                                               a.entry_company,
+                                               a.entry_country_id,
+                                               ci.customers_info_date_account_created as date_account_created,
+                                               ci.customers_info_date_account_last_modified as date_account_last_modified,
+                                               ci.customers_info_date_of_last_logon as date_last_logon,
+                                               ci.customers_info_number_of_logons as number_of_logons,
                                                cgc.amount
                                           FROM ".TABLE_CUSTOMERS." c
-                                          JOIN ".TABLE_ADDRESS_BOOK." ab
-                                               ON c.customers_id = ab.customers_id
-                                                  AND c.customers_default_address_id = ab.address_book_id
-                                          JOIN ".TABLE_ADDRESS_BOOK." ab1
-                                               ON c.customers_id = ab1.customers_id
+                                          JOIN ".TABLE_ADDRESS_BOOK." a
+                                               ON c.customers_id = a.customers_id
+                                     LEFT JOIN ".TABLE_CUSTOMERS_INFO." ci
+                                               ON ci.customers_info_id = c.customers_id
                                      LEFT JOIN ".TABLE_COUPON_GV_CUSTOMER." cgc
                                                ON c.customers_id = cgc.customer_id
+                                         WHERE c.customers_default_address_id = a.address_book_id
                                                ".$search."
-                                      GROUP BY c.customers_id
                                                ".$sort;
-
-                $customers_split = new splitPageResults($page, $page_max_display_results, $customers_query_raw, $customers_query_numrows, 'c.customers_id');
+                // EOF - vr - 2010-02-22 - removed group by part to prevent folding of customers records with the same creation timestamp
+                $customers_split = new splitPageResults($_GET['page'], $page_max_display_results, $customers_query_raw, $customers_query_numrows);
                 $customers_query = xtc_db_query($customers_query_raw);
                 while ($customers = xtc_db_fetch_array($customers_query)) {
-                  $umsatz_query = xtc_db_query("SELECT SUM(op.final_price) as ordersum
+                  // vr - 2012-10-27 moved info query into raw query
+                  // BOF - DokuMan - 2011-09-12 - optimize sql query for customers sales volume - thx to GTB
+                  $umsatz_query = xtc_db_query("-- admin/customers.php
+                                                SELECT SUM(op.final_price) as ordersum
                                                   FROM ".TABLE_ORDERS_PRODUCTS." op
                                                   JOIN ".TABLE_ORDERS." o ON o.orders_id = op.orders_id
-                                                 WHERE o.customers_id = '".(int)$customers['customers_id']."'");
+                                                 WHERE '".(int)$customers['customers_id']."' = o.customers_id");
                   $umsatz = xtc_db_fetch_array($umsatz_query);
+                  // EOF - DokuMan - 2011-09-12 - optimize sql query for customers sales volume - thx to GTB
 
                   if ((!isset($_GET['cID']) || (@$_GET['cID'] == $customers['customers_id'])) && !isset($cInfo)) {
-                    $country_query = xtc_db_query("SELECT countries_name 
-                                                     FROM ".TABLE_COUNTRIES." 
-                                                    WHERE countries_id = '".(int)$customers['entry_country_id']."'");
+                    $country_query = xtc_db_query("SELECT countries_name FROM ".TABLE_COUNTRIES." WHERE countries_id = '".(int)$customers['entry_country_id']."'");
                     $country = xtc_db_fetch_array($country_query);
-                    $customers = array_merge($customers, (array)$country);                    
-                    
-                    $reviews_query = xtc_db_query("SELECT count(*) as number_of_reviews 
-                                                     FROM ".TABLE_REVIEWS." 
-                                                     WHERE customers_id = '".(int)$customers['customers_id']."'");
-                    $reviews = xtc_db_fetch_array($reviews_query);
-                    $customers = array_merge($customers, (array)$reviews);
 
-                    $customers_info_query = xtc_db_query("SELECT customers_info_date_of_last_logon as date_last_logon,
-                                                                 customers_info_number_of_logons as number_of_logons 
-                                                            FROM ".TABLE_CUSTOMERS_INFO." 
-                                                           WHERE customers_info_id = '".(int)$customers['customers_id']."'");
-                    $customers_info = xtc_db_fetch_array($customers_info_query);
-                    $customers = array_merge($customers, (array)$customers_info);
-                    
-                    $newsletter_query = xtc_db_query("SELECT *
-                                                        FROM ".TABLE_NEWSLETTER_RECIPIENTS."
-                                                       WHERE customers_email_address = '".xtc_db_input($customers['customers_email_address'])."'
-                                                         AND mail_status = 1");
-                    $newsletter_status = array('newsletter_status' => xtc_db_num_rows($newsletter_query));
-                    $customers = array_merge($customers, $newsletter_status);
-                    
-                    $cInfo = new objectInfo($customers);
+                    $reviews_query = xtc_db_query("SELECT count(*) as number_of_reviews FROM ".TABLE_REVIEWS." WHERE customers_id = '".(int)$customers['customers_id']."'");
+                    $reviews = xtc_db_fetch_array($reviews_query);
+
+                    // vr - 2012-10-27 moved info query into raw query, $info is now part in $customers
+                    $customer_info = xtc_array_merge($country, $reviews);
+
+                    $cInfo_array = xtc_array_merge($customers, $customer_info);
+                    $cInfo = new objectInfo($cInfo_array);
                   }
 
                   if (isset($cInfo) && is_object($cInfo) && ($customers['customers_id'] == $cInfo->customers_id)) {
-                    echo '          <tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" data-event="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action', 'edit')).'cID='.$cInfo->customers_id.'&action=edit').'">'."\n";
+                    echo '          <tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\''.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action', 'edit')).'cID='.$cInfo->customers_id.'&action=edit').'\'">'."\n";
                   } else {
-                    echo '          <tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" data-event="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'edit', 'action')).'cID='.$customers['customers_id']).'">'."\n";
+                    echo '          <tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\''.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'edit', 'action')).'cID='.$customers['customers_id']).'\'">'."\n";
                   }
 
                   $account_type = ($customers['account_type'] == 1) ? TEXT_GUEST : TEXT_ACCOUNT;
-
-                  $is_checked = false;
-                  if (isset($_POST['multi_customers']) && is_array($_POST['multi_customers'])) {
-                    if (in_array($customers['customers_id'], $_POST['multi_customers'])) {
-                      $is_checked = true;
-                    }
-                  }
                   ?>
-                  <td class="dataTableContent txta-c">
-                   <?php if ($customers['customers_id'] != '1') echo xtc_draw_checkbox_field('multi_customers[]', $customers['customers_id'], $is_checked); ?>
-                  </td>
+
                   <td class="dataTableContent"><?php echo $account_type; ?></td>
                   <td class="dataTableContent"><?php echo $customers['customers_cid']; ?>&nbsp;</td>
                   <td class="dataTableContent"><?php echo $customers['customers_lastname']; ?></td>
@@ -250,7 +222,7 @@
                   <?php
                   }
                   ?>
-                  <td class="dataTableContent"><?php echo $customers_statuses_id_array[$customers['customers_status']]['text'] . ' (' . $customers['customers_status'] . ')' ; ?></td>
+                  <td class="dataTableContent"><?php echo $customers_statuses_id_array[$customers['customers_status']]['text'] . ' (' . $customers['customers_status'] . ')' ; ?></td><?php // web28 - 2011-10-31 - change  $customers_statuses_array  to $customers_statuses_id_array ?>
                   <?php
                     if (ACCOUNT_COMPANY_VAT_CHECK == 'true' && ACCOUNT_COMPANY == 'true') {
                       echo '<td class="dataTableContent">';
@@ -291,51 +263,28 @@
                     }
                   ?>
                   <td class="dataTableContent txta-r"><?php echo xtc_date_short($customers['date_account_created']); ?>&nbsp;</td>
-                  <td class="dataTableContent txta-r"><?php if (isset($cInfo) && is_object($cInfo) && ($customers['customers_id'] == $cInfo->customers_id)) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array('cID')) . 'cID=' . $customers['customers_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
+                  <td class="dataTableContent txta-r"><?php if (isset($cInfo) && is_object($cInfo) && ($customers['customers_id'] == $cInfo->customers_id) ) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array('cID')) . 'cID=' . $customers['customers_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
                 </tr>
                 <?php
                   }
                 ?>
               </table>
+              <div class="smallText pdg2 flt-l"><?php echo $customers_split->display_count($customers_query_numrows, $page_max_display_results, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_CUSTOMERS); ?></div>
+              <div class="smallText pdg2 flt-r"><?php echo $customers_split->display_links($customers_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $_GET['page'], xtc_get_all_get_params(array('page', 'info', 'x', 'y', 'cID'))); ?></div>
+              <?php echo draw_input_per_page($PHP_SELF,$cfg_max_display_results_key,$page_max_display_results); ?>
+              <?php
+              if (isset($_GET['search'])) {
+              ?>
+                <div class="clear"></div>
+                <div class="smallText pdg2 flt-r"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS) . '">' . BUTTON_RESET . '</a>'; ?></div>
+              <?php
+              }
+              ?>
             </td>
               <?php
                 $heading = array ();
                 $contents = array ();
                 switch ($action) {
-                  case 'multi_action':                    
-                    if (isset($_POST['multi_delete']) && xtc_not_null($_POST['multi_delete'])) {
-                      $heading[]  = array('text' => '<b>' . TEXT_INFO_HEADING_DELETE_ELEMENTS . '</b>');
-                      if (isset($_POST['multi_customers']) && is_array($_POST['multi_customers'])) {
-                        foreach ($_POST['multi_customers'] AS $customers_id) {
-                          $customer_query = xtc_db_query("SELECT customers_firstname,
-                                                                 customers_lastname
-                                                            FROM ".TABLE_CUSTOMERS."
-                                                           WHERE customers_id = '".(int)$customers_id."'");
-                          $customer = xtc_db_fetch_array($customer_query);
-                          $contents[] = array('text' => xtc_draw_checkbox_field('multi_customers_confirm[]', $customers_id, true) . '&nbsp;' . $customer['customers_firstname'].' '.$customer['customers_lastname']);
-                        }
-                      }
-                      $contents[] = array ('text' => '<br />'.xtc_draw_checkbox_field('delete_reviews', 'on', true).' '.TEXT_DELETE_REVIEWS_ELEMENTS);
-                      $contents[] = array('align' => 'center', 'text' => '<input class="button" type="submit" name="multi_delete_confirm" value="' . BUTTON_DELETE . '"> <a class="button" href="' . xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id) . '">' . BUTTON_CANCEL . '</a>');
-                    }
-                    
-                    if (isset($_POST['multi_status']) && xtc_not_null($_POST['multi_status'])) {
-                      $heading[]  = array('text' => '<b>' . TEXT_INFO_HEADING_STATUS_ELEMENTS . '</b>');
-                      if (isset($_POST['multi_customers']) && is_array($_POST['multi_customers'])) {
-                        foreach ($_POST['multi_customers'] AS $customers_id) {
-                          $customer_query = xtc_db_query("SELECT customers_firstname,
-                                                                 customers_lastname
-                                                            FROM ".TABLE_CUSTOMERS."
-                                                           WHERE customers_id = '".(int)$customers_id."'");
-                          $customer = xtc_db_fetch_array($customer_query);
-                          $contents[] = array('text' => xtc_draw_checkbox_field('multi_customers_confirm[]', $customers_id, true) . '&nbsp;' . $customer['customers_firstname'].' '.$customer['customers_lastname']);
-                        }
-                      }
-                      $contents[] = array ('text' => '<br />'.xtc_draw_pull_down_menu('customers_status', $customers_statuses_array));
-                      $contents[] = array ('align' => 'center', 'text' => '<br /><input type="submit" class="button" value="'.BUTTON_UPDATE.'"><a class="button" href="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id).'">'.BUTTON_CANCEL.'</a>');
-                    }
-                    break;
-                
                   case 'confirm' :
                     $heading[] = array ('text' => '<b>'.TEXT_INFO_HEADING_DELETE_CUSTOMER.'</b>');
 
@@ -354,7 +303,8 @@
                     require_once (DIR_FS_INC.'xtc_get_address_format_id.inc.php');
                     require_once (DIR_FS_INC.'xtc_count_customer_address_book_entries.inc.php');
 
-                    $addresses_query = xtc_db_query("SELECT address_book_id,
+                    $addresses_query = xtc_db_query("-- admin/customers.php
+                                                     SELECT address_book_id,
                                                             entry_firstname as firstname,
                                                             entry_lastname as lastname,
                                                             entry_company as company,
@@ -408,13 +358,7 @@
 
                   case 'editstatus' :
                     if ($_GET['cID'] != 1) {
-                      $customers_history_query = xtc_db_query("SELECT new_value, 
-                                                                      old_value, 
-                                                                      date_added, 
-                                                                      customer_notified 
-                                                                 FROM ".TABLE_CUSTOMERS_STATUS_HISTORY." 
-                                                                WHERE customers_id = '".xtc_db_input($_GET['cID'])."' 
-                                                             ORDER BY customers_status_history_id desc");
+                      $customers_history_query = xtc_db_query("SELECT new_value, old_value, date_added, customer_notified FROM ".TABLE_CUSTOMERS_STATUS_HISTORY." WHERE customers_id = '".xtc_db_input($_GET['cID'])."' ORDER BY customers_status_history_id desc");
                       $heading[] = array ('text' => '<b>'.TEXT_INFO_HEADING_STATUS_CUSTOMER.'</b>');
                       $contents = array ('form' => xtc_draw_form('customers', FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id.'&action=statusconfirm'));
                       $contents[] = array ('text' => '<br />'.xtc_draw_pull_down_menu('customers_status', $customers_statuses_array, $cInfo->customers_status));
@@ -466,11 +410,6 @@
                   default :
                     if (isset($cInfo) && is_object($cInfo)) {
                       $heading[] = array ('text' => '<b>'.$cInfo->customers_firstname.' '.$cInfo->customers_lastname.'</b>');
-                      //Multi Element Actions
-                      $contents[] = array('align' => 'center', 'text' => '<div style="padding-top: 5px; font-weight: bold; width: 100%;">' . TEXT_MARKED_ELEMENTS . '</div>');
-                      $contents[] = array('align' => 'center', 'text' => '<input type="submit" class="button" name="multi_status" value="' . BUTTON_STATUS . '"> <input type="submit" class="button" name="multi_delete" value="' . BUTTON_DELETE . '">');
-
-                      $contents[] = array('align' => 'center', 'text' => '<div style="padding-top: 5px; font-weight: bold; width: 100%; border-top: 1px solid #aaa; margin-top: 5px;">' . TEXT_ACTIVE_ELEMENT . '</div>');
                       if ($cInfo->customers_id != 1 || ($cInfo->customers_id == 1 && $_SESSION['customer_id'] == 1)) {
                         $contents[] = array ('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id.'&action=edit').'">'.BUTTON_EDIT.'</a>');
                       }
@@ -483,29 +422,47 @@
                       if (($cInfo->customers_id != 1 || ($cInfo->customers_id == 1 && $_SESSION['customer_id'] == 1)) && $cInfo->customers_status == 0) {
                         $contents[] = array ('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_ACCOUNTING, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id).'">'.BUTTON_ACCOUNTING.'</a>');
                       }
-                      if (($cInfo->customers_id != 1 || ($cInfo->customers_id == 1 && $_SESSION['customer_id'] == 1))) {
+                      if ($cInfo->customers_id != 1) {
                         $contents[] = array ('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id.'&action=address_book').'">'.TEXT_INFO_HEADING_ADRESS_BOOK.'</a>');
                       }
                       $contents[] = array ('align' => 'center',
                                            'text' => '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_ORDERS, 'cID='.$cInfo->customers_id).'">'.BUTTON_ORDERS.'</a>
-                                                      <a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_MAIL, xtc_get_all_get_params(array('customer')).'customer='.$cInfo->customers_email_address).'">'.BUTTON_EMAIL.'</a>'
+                                                      <a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_MAIL, 'selected_box=tools&customer='.$cInfo->customers_email_address).'">'.BUTTON_EMAIL.'</a>'
                                            );
                       $contents[] = array ('align' => 'center',
                                            'text' => '<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id.'&action=iplog').'">'.BUTTON_IPLOG.'</a>
                                                       <a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_CUSTOMERS, xtc_get_all_get_params(array ('cID', 'action')).'cID='.$cInfo->customers_id.'&action=new_order').'">'.BUTTON_NEW_ORDER.'</a>'
                                           );
-                      if (ACTIVATE_GIFT_SYSTEM == 'true' && $cInfo->customers_status != DEFAULT_CUSTOMERS_STATUS_ID_GUEST) {
-                        $contents[] = array ('align' => 'center', 'text' => '<a class="button" href="'.xtc_href_link(FILENAME_GV_MAIL, 'cID='.$cInfo->customers_id).'">'.BUTTON_SEND_COUPON.'</a>');
+
+                      if ($action == 'iplog') {
+                        $info_query = xtc_db_query("SELECT
+                                                          customers_info_date_account_created as date_account_created,
+                                                          customers_info_date_account_last_modified as date_account_last_modified,
+                                                          customers_info_date_of_last_logon as date_last_logon,
+                                                          customers_info_number_of_logons as number_of_logons
+                                                     FROM ".TABLE_CUSTOMERS_INFO." WHERE customers_info_id = '".$cInfo->customers_id."'");
+                        $info = xtc_db_fetch_array($info_query);
+
+                        $country_query = xtc_db_query("SELECT countries_name FROM ".TABLE_COUNTRIES." WHERE countries_id = '".(int)$cInfo->entry_country_id."'");
+                        $country = xtc_db_fetch_array($country_query);
+
+                        $reviews_query = xtc_db_query("SELECT COUNT(*) as number_of_reviews FROM ".TABLE_REVIEWS." WHERE customers_id = '".(int)$cInfo->customers_id."'");
+                        $reviews = xtc_db_fetch_array($reviews_query);
+
+                        $contents[] = array ('text' => '<br />'.TEXT_DATE_ACCOUNT_CREATED.' '.xtc_datetime_short($info['date_account_created']));
+                        $contents[] = array ('text' => '<br />'.TEXT_DATE_ACCOUNT_LAST_MODIFIED.' '.xtc_datetime_short($info['date_account_last_modified']));
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_DATE_LAST_LOGON.' '.xtc_datetime_short($info['date_last_logon']));
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_NUMBER_OF_LOGONS.' '.$info['number_of_logons']);
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_COUNTRY.' '.$country['countries_name']);
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_NUMBER_OF_REVIEWS.' '.$reviews['number_of_reviews']);
+                      } else {
+                        $contents[] = array ('text' => '<br />'.TEXT_DATE_ACCOUNT_CREATED.' '.xtc_datetime_short($cInfo->date_account_created));
+                        $contents[] = array ('text' => '<br />'.TEXT_DATE_ACCOUNT_LAST_MODIFIED.' '.xtc_datetime_short($cInfo->date_account_last_modified));
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_DATE_LAST_LOGON.' '.xtc_datetime_short($cInfo->date_last_logon));
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_NUMBER_OF_LOGONS.' '.$cInfo->number_of_logons);
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_COUNTRY.' '.$cInfo->countries_name);
+                        $contents[] = array ('text' => '<br />'.TEXT_INFO_NUMBER_OF_REVIEWS.' '.$cInfo->number_of_reviews);
                       }
-                      
-                      $contents[] = array ('text' => '<br />'.TEXT_DATE_ACCOUNT_CREATED.' '.xtc_datetime_short($cInfo->date_account_created));
-                      $contents[] = array ('text' => TEXT_DATE_ACCOUNT_LAST_MODIFIED.' '.xtc_datetime_short($cInfo->date_account_last_modified));
-                      $contents[] = array ('text' => TEXT_INFO_DATE_LAST_LOGON.' '.xtc_datetime_short($cInfo->date_last_logon));
-                      $contents[] = array ('text' => TEXT_INFO_NUMBER_OF_LOGONS.' '.$cInfo->number_of_logons);
-                      $contents[] = array ('text' => TEXT_INFO_NEWSLETTER_AT_REGISTRATION.' '.(($cInfo->customers_newsletter == 1) ? CFG_TXT_YES : CFG_TXT_NO));
-                      $contents[] = array ('text' => TEXT_INFO_NEWSLETTER_STATUS.' '.(($cInfo->newsletter_status != 0) ? CFG_TXT_YES : CFG_TXT_NO));
-                      $contents[] = array ('text' => TEXT_INFO_COUNTRY.' '.$cInfo->countries_name);
-                      $contents[] = array ('text' => TEXT_INFO_NUMBER_OF_REVIEWS.' '.$cInfo->number_of_reviews);
                     }
 
                     if ($action == 'iplog') {
@@ -522,51 +479,13 @@
                     }
                     break;
                 }
-
+                // display right box
                 if ((xtc_not_null($heading)) && (xtc_not_null($contents))) {
                   echo '            <td class="boxRight">'."\n";
                   $box = new box;
                   echo $box->infoBox($heading, $contents);
                   echo '          </td>'."\n";
                 }
-                
-                if ($action == '' || strpos($action, 'multi') !== false) {
-                  echo '</form>';
-                }
               ?>
-          </tr>
-          <tr>
-            <td>
-              <!-- PAGINATION-->
-              <div class="smallText pdg2 flt-l"><?php echo $customers_split->display_count($customers_query_numrows, $page_max_display_results, $page, TEXT_DISPLAY_NUMBER_OF_CUSTOMERS); ?></div>
-              <div class="smallText pdg2 flt-r"><?php echo $customers_split->display_links($customers_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $page, xtc_get_all_get_params(array('page', 'info', 'x', 'y', 'cID'))); ?></div>
-              <?php echo draw_input_per_page($PHP_SELF,$cfg_max_display_results_key,$page_max_display_results); ?>
-              <?php
-              if (isset($_GET['search'])) {
-              ?>
-                <div class="clear"></div>
-                <div class="smallText pdg2 flt-r"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS) . '">' . BUTTON_RESET . '</a>'; ?></div>
-              <?php
-              }
-              ?>
-            </td>
-            <td>&nbsp;</td>
           </tr>
         </table>
-        <script>
-          var action = false;
-          $('.dataTableRow, .dataTableRowSelected, .dataTableRow a, .dataTableRowSelected a, .dataTableRow .ChkBox, .dataTableRowSelected .ChkBox').on('change, click', function (e) {          
-            if (this.nodeName == 'A' || this.nodeName == 'INPUT') {
-              action = true;
-            }
-            if (action === false && this.nodeName == 'TR') {
-              var loc = $(this).data('event');
-              if (loc !== undefined) {
-                window.location.href = loc;
-              }
-            }
-            if (this.nodeName == 'TR') {
-              action = false;
-            }
-          });
-        </script>

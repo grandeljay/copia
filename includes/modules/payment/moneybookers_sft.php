@@ -36,7 +36,7 @@ if (file_exists('includes/classes/class.moneybookers.php')) {
 
 class moneybookers_sft extends fcnt_moneybookers {
 
-	var $images='pink.svg';
+	var $images='sofort.gif';
 
 	// class constructor
 	function __construct() {
@@ -58,7 +58,7 @@ class moneybookers_sft extends fcnt_moneybookers {
 		$accepted = '';
 		$icons = explode(',', $this->images);
 		foreach ($icons as $key => $val)
-			$accepted .= xtc_image('../images/icons/moneybookers/'. $val) . ' ';
+			$accepted .= xtc_image(DIR_WS_ICONS .'moneybookers/'. $val) . ' ';
 
 
 

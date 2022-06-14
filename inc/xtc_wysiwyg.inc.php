@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_wysiwyg.inc.php 13088 2020-12-16 12:22:55Z GTB $
+   $Id: xtc_wysiwyg.inc.php 9462 2016-03-03 11:39:46Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,19 +20,22 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
 
     $wysiwig_type = 'ckeditor';
 
-    $filemanagerurl = DIR_WS_ADMIN. 'includes/modules/filemanager/dialog.php?fldr=';
+    $filemanagerurl = DIR_WS_ADMIN. 'includes/modules/kcfinder/browse.php?opener=ckeditor&cms=modifiedshop&lang='.$lang;
     $js_src = DIR_WS_MODULES .'ckeditor/ckeditor.js';
-    $file_path = '&type=2';
-    $image_path = '&type=1';
-    $media_path = '&type=3';
+    $file_path = '&opener=ckeditor&type=files';
+    $image_path = '&opener=ckeditor&type=images';
+    $flash_path = '&opener=ckeditor&type=flash';
+    $media_path = '&opener=ckeditor&type=flash';
 
     $default_editor_width = '\'100%\''; //kama 850, moono 870;
     $default_editor_height = '400';
 
     $sid = ''; //'&'.session_name() . '=' . session_id();
 
+    $view = '&view=thumbnail';
+
     $editor = '&editor='. $wysiwig_type;
-    $language = '&lang='. $_SESSION['language_code'];
+    $language = '&language='. $_SESSION['language_code'];
 
     //Einrückung für Code
     $codetab = '            ';  
@@ -40,13 +43,6 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
     //Custom config
     $customConfig = array();
     //$customConfig['customConfig'] = "customConfig : '../ckeditor/custom/ckeditor_config.js',";
-
-    //skin  - muss für jede CKEditor Version separat aktualisiert werden
-    $customConfig['skin'] = "skin: '".(defined('WYSIWYG_SKIN') ? WYSIWYG_SKIN : moonocolor)."',";
-
-    //Eingabeoptionen
-    $customConfig['enterMode'] = "enterMode: CKEDITOR.ENTER_BR,";
-    $customConfig['shiftEnterMode'] = "shiftEnterMode: CKEDITOR.ENTER_P,";
 
     //extraPlugins
     $customConfig['extraPlugins'] = "extraPlugins: '',";
@@ -62,7 +58,6 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
     
     //Upload Tab entfernen
     //$customConfig['removeDialogTabs'] = "removeDialogTabs: 'image:Link;link:Link',";
-    $customConfig['removeDialogTabs'] = "removeDialogTabs: 'image:Upload',";
     
     //toolbarGroups
     $customConfig['toolbarGroups'] ="
@@ -96,15 +91,13 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
 
     //Smiley Path Frontend
     $customConfig['smiley_path'] =  "smiley_path : '".DIR_WS_CATALOG."images/smiley/',";
-        
+    
     //Filebrowser settings
     $filebrowser_settings = PHP_EOL .
-                $codetab.'
-                filebrowserBrowseUrl : "'.$filemanagerurl.$editor.$file_path.$language.$sid.'",
-                filebrowserImageBrowseUrl : "'.$filemanagerurl.$editor.$image_path.$language.$sid.'",
-                filebrowserFlashBrowseUrl : "'.$filemanagerurl.$editor.$media_path.$language.$sid.'",
-                filebrowserUploadUrl : "'.$filemanagerurl.$editor.$file_path.$language.$sid.'",
-                filebrowserWindowWidth : "980",
+                $codetab.'filebrowserBrowseUrl : "'.$filemanagerurl.$language.$editor.$flash_path.$sid.'",
+                filebrowserImageBrowseUrl : "'.$filemanagerurl.$language.$editor.$image_path.$sid.$view.'",
+                filebrowserFlashBrowseUrl : "'.$filemanagerurl.$language.$editor.$flash_path.$sid.'",
+                filebrowserWindowWidth : "960",
                 filebrowserWindowHeight : "640",';
 
     $add_init = '';
@@ -113,7 +106,7 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
     switch($type) {
         // WYSIWYG editor content manager textarea named cont
         case 'content_manager':
-            $editorName = 'content_text_'.$addonType.'_'.$langID;
+            $editorName = 'content_text['.$addonType.']['.$langID.']';
             $default_editor_height = 400;
             break;
             
@@ -125,18 +118,18 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
             
         // WYSIWYG editor categories_description textarea named categories_description[langID]
         case 'categories_description':
-            $editorName = 'categories_description_'.$langID;
+            $editorName = 'categories_description['.$langID.']';
             $default_editor_height = 300;
             break;
             
         // WYSIWYG editor products_description textarea named products_description_langID
         case 'products_description':
-            $editorName = 'products_description_'.$langID;
+            $editorName = 'products_description['.$langID.']';
             $default_editor_height = 400;
             break;
         // WYSIWYG editor products short description textarea named products_short_description_langID
         case 'products_short_description':
-            $editorName = 'products_short_description_'.$langID;
+            $editorName = 'products_short_description['.$langID.']';
             $default_editor_height = 300;
             break;
             
@@ -166,15 +159,9 @@ function xtc_wysiwyg($type, $lang, $langID = '',$addonType='')
             
         // WYSIWYG editor categories_description textarea named manufacturers_description[langID]
         case 'manufacturers_description':
-            $editorName = 'manufacturers_description_'.$langID;
+            $editorName = 'manufacturers_description['.$langID.']';
             $default_editor_height = 400;
             break;
-
-        // WYSIWYG editor banner_manager textarea
-        case 'banner_manager':
-          $editorName = 'html_text[' . $langID . ']';
-          $default_editor_height = 200;
-          break;
     }
     
     $html = '';

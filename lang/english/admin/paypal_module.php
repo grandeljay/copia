@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypal_module.php 11018 2017-12-06 13:58:54Z GTB $
+   $Id: paypal_module.php 10343 2016-10-26 11:54:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -12,7 +12,7 @@
 
 
 $lang_array = array(
-  'TEXT_PAYPAL_MODULE_HEADING_TITLE' => 'PayPal Products',
+  'TEXT_PAYPAL_MODULE_HEADING_TITLE' => 'PayPal Modules',
   
   'TABLE_HEADING_MODULES' => 'Module',
   'TABLE_HEADING_FILENAME' => 'Module name (for internal usage)',
@@ -41,15 +41,6 @@ $lang_array = array(
 
   'TEXT_PAYPAL_MODULE_SHIPPING_COST' => 'provisional shipping costs',
   'TEXT_PAYPAL_MODULE_SHIPPING_COST_INFO' => 'Amount for provisional shipping costs.',
-
-  'TEXT_PAYPAL_MODULE_UPSTREAM_PRODUCT' => 'Show at product',
-  'TEXT_PAYPAL_MODULE_UPSTREAM_PRODUCT_INFO' => 'Show details for Installment at product?',
-
-  'TEXT_PAYPAL_MODULE_UPSTREAM_CART' => 'Show at cart',
-  'TEXT_PAYPAL_MODULE_UPSTREAM_CART_INFO' => 'Show details for Installment at cart?',
-
-  'TEXT_PAYPAL_MODULE_UPSTREAM_PAYMENT' => 'Show at checkout',
-  'TEXT_PAYPAL_MODULE_UPSTREAM_PAYMENT_INFO' => 'Show details for Installment during checkout?',
 );
 
 

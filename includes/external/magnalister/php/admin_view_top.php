@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: admin_view_top.php 6246 2015-11-18 12:01:13Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -98,7 +98,7 @@ echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset='.$_SESSION['language_charset'].'">
 		<title>'.(defined('TITLE') ? TITLE.' :: ' : '').'magnalister'.$_mainTitle.'</title>
-		'.((file_exists(DIR_WS_INCLUDES.'stylesheet.css')) ? '<link rel="stylesheet" type="text/css" href="includes/stylesheet.css" />' : '').''."\n";
+		<link rel="stylesheet" type="text/css" href="includes/stylesheet.css" />'."\n";
 }
 /* Force IE into Standards Mode */
 if (MLBrowserDetect::gi()->compare('Browser', 'msie', '==')) {
@@ -111,9 +111,6 @@ if (!isset($_GET['module']) || ($_GET['module'] != 'nojs')) {
 		<link rel="stylesheet" type="text/css" href="<?php echo DIR_MAGNALISTER_WS; ?>css/jqueryui/jquery-ui-1.9.1.custom.css" />
 		<link rel="stylesheet" type="text/css" href="<?php echo DIR_MAGNALISTER_WS; ?>css/magnalister.css?<?php echo CLIENT_BUILD_VERSION?>" />
 <?php
-    if (SHOPSYSTEM == 'commerceseo') {
-        echo '<link rel="stylesheet" type="text/css" href="'.DIR_MAGNALISTER_WS.'css/commerceSEOV3.css?'.CLIENT_BUILD_VERSION.'" />';
-    }
 			if (isset($_pageCSS) && ($_pageCSS = trim($_pageCSS)) && !empty($_pageCSS)) {
 				echo '
 		<style type="text/css">
@@ -322,11 +319,7 @@ echo '		<script type="text/javascript" src="'.$js.'"></script>'."\n";
 					// prevent multiple clicks on the button.
 					var executed = false;
 					return function (e) {
-                        if ($(e.target).data('disabled') == 'yes' && $(e.target).hasClass('update')) {
-                            $('<div title="<?php echo ML_MESSAGE_BEFORE_UPDATE_TITLE; ?>"><?php echo ML_MESSAGE_UPDATE_DISABLED_GAMBIOCLOUD; ?></div>').jDialog();
-                            return;
-                        }
-                        if ($(e.target).data('disabled') == 'yes' && !$(e.target).hasClass('update')) {
+						if ($(e.target).data('disabled') == 'yes') {
 							$('<div title="<?php echo ML_LABEL_NOTE; ?>"><?php echo ML_POPUP_NOT_AVAILABLE; ?></div>').jDialog();
 							return;
 						}
@@ -335,47 +328,8 @@ echo '		<script type="text/javascript" src="'.$js.'"></script>'."\n";
 							return;
 						}
 						executed = true;
-						var popupTitle = '';
-						var popupText  = '';
-						if ($(e.target).data('href').search('update') > 0) {
-							popupTitle = '<?php echo ML_MESSAGE_BEFORE_UPDATE_TITLE ?>';
-							popupText  = '<?php echo ML_MESSAGE_BEFORE_UPDATE_TEXT ?>';
-							
-						} else if($(e.target).data('href').search('ImportOrders') > 0) {
-							popupTitle = '<?php echo ML_MESSAGE_BEFORE_IMPORT_ORDERS_TITLE ?>';
-							popupText  = '<?php echo ML_MESSAGE_BEFORE_IMPORT_ORDERS_TEXT ?>';
-						} else if($(e.target).data('href').search('SyncOrderStatus') > 0) {
-							popupTitle = '<?php echo ML_MESSAGE_BEFORE_SYNC_ORDERSTATUS_TITLE ?>';
-							popupText  = '<?php echo ML_MESSAGE_BEFORE_SYNC_ORDERSTATUS_TEXT ?>';
-						} else if($(e.target).data('href').search('SyncInventory') > 0) {
-							popupTitle = '<?php echo ML_MESSAGE_BEFORE_SYNC_INVENTORY_TITLE ?>';
-							popupText  = '<?php echo ML_MESSAGE_BEFORE_SYNC_INVENTORY_TEXT ?>';
-						} else if($(e.target).data('href').search('SyncEbayListingDetails') > 0) {
-							popupTitle = '<?php echo ML_MESSAGE_BEFORE_SYNC_EBAY_DETAILS_TITLE ?>';
-							popupText  = '<?php echo ML_MESSAGE_BEFORE_SYNC_EBAY_DETAILS_TEXT ?>';
-						} else {
-						// Fallback for whichever new button: "Note: Synchronizing data with the magnalister Server"
-							popupTitle = '<?php echo ML_LABEL_NOTE ?>';
-							popupText  = '<?php echo ML_STATUS_FILTER_SYNC_ITEM ?>';
-						}
-						$('<div></div>').html(popupText).jDialog({
-							title: popupTitle,
-							buttons: {
-								'<?php echo ML_BUTTON_LABEL_ABORT; ?>': function() {
-									window.location.href = '<?php $sUrl1 = strpos($_SERVER['REQUEST_URI'], 'update=true') ? substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], 'update=true') -1) : $_SERVER['REQUEST_URI']; echo strpos($sUrl1, 'do=') ? substr($sUrl1, 0, strpos($sUrl1, 'do=') -1) : $sUrl1 ?>';
-									jQuery(this).dialog('close');
-								},
-								'<?php echo ML_BUTTON_LABEL_OK; ?>': function() {
-									$.blockUI(blockUILoading);
-									window.location.href = $(e.target).data('href');
-									jQuery(this).dialog('close');
-								}
-							}
-						});
-						//} else {
-						//	$.blockUI(blockUILoading);
-						//	window.location.href = $(e.target).data('href');
-						//}
+						$.blockUI(blockUILoading);
+						window.location.href = $(e.target).data('href');
 					}
 				})());
 				/*.on('dblclick', function (e) {
@@ -510,7 +464,6 @@ $globalButtons = array (
 		'title' => ML_LABEL_IMPORT_ORDERS,
 		'icon' => 'cart',
 		'link' => array('do' => 'ImportOrders'),
-        'disabled' => $_MagnaSession['currentPlatform'] == 'googleshopping' ? 'yes' : 'no',
 	),
 	array (
 		'title' => ML_LABEL_SYNC_ORDERSTATUS,
@@ -522,12 +475,11 @@ $globalButtons = array (
 		'icon' => 'sync',
 		'link' => array('do' => 'SyncInventory', 'MLDEBUG' => 'true'),
 	),
-    array (
-        'title' => ML_LABEL_UPDATE,
-        'icon' => 'update'.((defined('SHOPSYSTEM_GAMBIO_CLOUD') && SHOPSYSTEM_GAMBIO_CLOUD === true) ? 'inactive' : ' '),
-        'link' => array('update' => 'true'),
-        'disabled' => (defined('SHOPSYSTEM_GAMBIO_CLOUD') && SHOPSYSTEM_GAMBIO_CLOUD === true) ? 'yes' : 'no',
-    ),
+	array (
+	 	'title' => ML_LABEL_UPDATE,
+		'icon' => 'update',
+		'link' => array('update' => 'true'),
+	),
 );
 
 if ($_MagnaSession['currentPlatform'] == 'ebay') {

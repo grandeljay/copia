@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: invoice_number.php 12884 2020-09-14 07:44:45Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -24,8 +24,8 @@ if (!class_exists('invoice_number')) {
             $this->properties['btn_edit'] = MODULE_INVOICE_NUMBER_TEXT_BTN;
             $this->title = MODULE_INVOICE_NUMBER_TEXT_TITLE;
             $this->description = MODULE_INVOICE_NUMBER_TEXT_DESCRIPTION;
-            $this->sort_order = ((defined('MODULE_INVOICE_NUMBER_SORT_ORDER')) ? MODULE_INVOICE_NUMBER_SORT_ORDER : '');
-            $this->enabled = ((defined('MODULE_INVOICE_NUMBER_STATUS') && MODULE_INVOICE_NUMBER_STATUS == 'True') ? true : false);
+            $this->sort_order = MODULE_INVOICE_NUMBER_SORT_ORDER;
+            $this->enabled = ((MODULE_INVOICE_NUMBER_STATUS == 'True') ? true : false);
             if ($this->enabled) {
                 $this->description .= '<p>'.MODULE_INVOICE_NUMBER_STATUS_DESC .': '.MODULE_INVOICE_NUMBER_STATUS_INFO.'</p>';
             }
@@ -55,7 +55,7 @@ if (!class_exists('invoice_number')) {
 
         function install() 
         {
-            xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) values ('MODULE_INVOICE_NUMBER_STATUS', 'False',  '6', '1', 'xtc_cfg_select_option(array(\'True\', \'False\'), ', now())");
+            xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_INVOICE_NUMBER_STATUS', 'True',  '6', '1', now())");
             xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_INVOICE_NUMBER_IBN_BILLNR', '1',  '6', '1', now())");
             xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_INVOICE_NUMBER_IBN_BILLNR_FORMAT', '100{n}-{d}-{m}-{y}',  '6', '1', now())");
             $this->install_db();
@@ -69,23 +69,13 @@ if (!class_exists('invoice_number')) {
 
         function keys() 
         {
-            return array('MODULE_INVOICE_NUMBER_STATUS','MODULE_INVOICE_NUMBER_IBN_BILLNR','MODULE_INVOICE_NUMBER_IBN_BILLNR_FORMAT');
+            return array('MODULE_INVOICE_NUMBER_IBN_BILLNR','MODULE_INVOICE_NUMBER_IBN_BILLNR_FORMAT');
         }
         
         function install_db() 
         {
-            $db_table_rows = array();
-            $query_result = xtc_db_query("SHOW COLUMNS FROM ".TABLE_ORDERS." LIKE 'ibn_bill%'");
-            while ($row = xtc_db_fetch_array($query_result)) {
-              $db_table_rows[] = $row['Field'];
-            }
-            if(!in_array('ibn_billnr', $db_table_rows)) {
-                xtc_db_query("ALTER TABLE `" . TABLE_ORDERS . "` ADD `ibn_billnr` VARCHAR(32);");
-            }
-            if(!in_array('ibn_billdate', $db_table_rows)) {
-                xtc_db_query("ALTER TABLE `" . TABLE_ORDERS . "` ADD `ibn_billdate` DATE NOT NULL;");
-            }
-
+            xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD `ibn_billnr` VARCHAR(32);");
+            xtc_db_query("ALTER TABLE " . TABLE_ORDERS . " ADD `ibn_billdate` DATE NOT NULL;");
         }
         
         function uninstall_db() 

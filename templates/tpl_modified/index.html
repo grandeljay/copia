@@ -4,7 +4,7 @@
 <div id="layout_navbar">
   <div id="layout_navbar_inner">
     {if isset($box_INFOBOX)}<div id="customers_group">{$box_INFOBOX}</div>{/if}
-    {if isset($box_LANGUAGES) && trim($box_LANGUAGES) != ''}<div id="languages">{$box_LANGUAGES}</div>{/if}
+    {if isset($box_LANGUAGES) && $box_LANGUAGES != ''}<div id="languages">{$box_LANGUAGES}</div>{/if}
     <ul class="topnavigation"> 
       {if isset($account)}
         <li class="first"><a href="{$account}">{#link_account#}</a></li>
@@ -62,7 +62,7 @@
           </ul>
         </div>
       {/if}
-      {if isset($BANNER) && $BANNER != ''}<div class="content_banner cf">{$BANNER}</div>{/if}
+      {if isset($BANNER)}<div class="content_banner cf">{$BANNER}</div>{/if}
       {if isset($main_content)}{$main_content}{/if}
       {if isset($box_BESTSELLERS)}{$box_BESTSELLERS}{/if}
     </div>
@@ -130,3 +130,19 @@
   </div>
   <div class="mod_copyright">{$smarty.const.TITLE} &copy; {$smarty.now|date_format:"%Y"} | Template &copy; 2009-{$smarty.now|date_format:"%Y"} by <span class="cop_magenta">mod</span><span class="cop_grey">ified eCommerce Shopsoftware</span></div>
 </div>
+
+
+{if ($smarty.const.TRACKING_COUNT_ADMIN_ACTIVE == 'true' && $smarty.session.customers_status.customers_status_id == '0') || $smarty.session.customers_status.customers_status_id != '0'}
+  {if $smarty.const.TRACKING_PIWIK_ACTIVE == 'true'}
+    {piwik url=$smarty.const.TRACKING_PIWIK_LOCAL_PATH id=$smarty.const.TRACKING_PIWIK_ID goal=$smarty.const.TRACKING_PIWIK_GOAL}
+  {/if}
+  {if $smarty.const.TRACKING_GOOGLEANALYTICS_ACTIVE == 'true'}
+    {googleanalytics account=$smarty.const.TRACKING_GOOGLEANALYTICS_ID}
+  {/if}
+  {if $smarty.const.TRACKING_FACEBOOK_ACTIVE == 'true'}
+    {facebook id=$smarty.const.TRACKING_FACEBOOK_ID}
+  {/if}
+{/if}
+{if $smarty.const.GOOGLE_CERTIFIED_SHOPS_MERCHANT_ACTIVE == 'true'}
+  {googlecertificate subaccount=$smarty.const.GOOGLE_SHOPPING_ID account=$smarty.const.GOOGLE_TRUSTED_ID}
+{/if}

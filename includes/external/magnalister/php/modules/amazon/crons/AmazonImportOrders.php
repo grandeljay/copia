@@ -11,7 +11,9 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id$
+ *
+ * (c) 2010 - 2011 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -20,6 +22,9 @@ defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 
 require_once(DIR_MAGNALISTER_MODULES.'magnacompatible/crons/MagnaCompatibleImportOrders.php');
 
+/**
+ *
+ */
 class AmazonImportOrders extends MagnaCompatibleImportOrders {
 	
 	public function __construct($mpID, $marketplace) {
@@ -41,10 +46,6 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 			'key' => 'orderstatus.fba',
 			'default' => '',
 		);
-        $keys['OrderStatusMfnPrime'] = array (
-            'key' => 'orderstatus.mfnprime',
-            'default' => '',
-        );
 		
 		$keys['ShippingMethodName']['default'] = 'amazon';
 		$keys['PaymentMethodName']['default'] = 'amazon';
@@ -57,14 +58,6 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 			'key' => 'orderimport.fbashippingmethod.name',
 			'default' => 'amazon',
 		);
-        $keys['ShippingMethodMFNPrime'] = array (
-            'key' => 'orderimport.mfnprimeshippingmethod',
-            'default' => 'textfield',
-        );
-        $keys['ShippingMethodNameMFNPrime'] = array (
-            'key' => 'orderimport.mfnprimeshippingmethod.name',
-            'default' => 'amazon',
-        );
 		$keys['PaymentMethodFBA'] = array (
 			'key' => 'orderimport.fbapaymentmethod',
 			'default' => 'textfield',
@@ -73,14 +66,6 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 			'key' => 'orderimport.fbapaymentmethod.name',
 			'default' => 'amazon',
 		);
-        $keys['AmazonPromotionsDiscountProductSKU'] = array (
-            'key' => 'orderimport.amazonpromotionsdiscount.products_sku',
-            'default' => '__AMAZON_DISCOUNT__',
-        );
-        $keys['AmazonPromotionsDiscountShippingSKU'] = array (
-            'key' => 'orderimport.amazonpromotionsdiscount.shipping_sku',
-            'default' => '__AMAZON_SHIPPING_DISCOUNT__',
-        );
 		return $keys;
 	}
 	
@@ -90,9 +75,6 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 		if ($this->config['ShippingMethodFBA'] == 'textfield') {
 			$this->config['ShippingMethodFBA'] = trim($this->config['ShippingMethodNameFBA']);
 		}
-        if ($this->config['ShippingMethodMFNPrime'] == 'textfield') {
-            $this->config['ShippingMethodMFNPrime'] = trim($this->config['ShippingMethodNameMFNPrime']);
-        }
 		if (empty($this->config['ShippingMethodFBA'])) {
 			$k = $this->getConfigKeys();
 			$this->config['ShippingMethodFBA'] = $k['ShippingMethodNameFBA']['default'];
@@ -105,10 +87,6 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 			$this->config['PaymentMethodFBA'] = $k['PaymentMethodNameFBA']['default'];
 		}
 	}
-
-    protected function getPastTimeOffset() {
-        return 60 * 60 * 24 * 14;
-    }
 	
 	protected function getOrdersStatus() {
 		return ($this->o['orderInfo']['FulfillmentChannel'] == 'AFN')
@@ -117,7 +95,7 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 	}
 	
 	/**
-	 * Returns the payment method for the current order.
+	 * Returs the payment method for the current order.
 	 * @return string
 	 */
 	protected function getPaymentMethod() {
@@ -127,29 +105,21 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 	}
 	
 	/**
-	 * Returns the shipping method for the current order.
+	 * Returs the shipping method for the current order.
 	 * @return string
 	 */
 	protected function getShippingMethod() {
-        switch ($this->o['orderInfo']['FulfillmentChannel']) {
-            case 'AFN': {
-                return $this->config['ShippingMethodFBA'];
-            }
-            case 'MFN-Prime': {
-                return $this->config['ShippingMethodMFNPrime'];
-            }
-            default: {
-                return $this->config['ShippingMethod'];
-            }
-        }
+		return ($this->o['orderInfo']['FulfillmentChannel'] == 'AFN')
+			? $this->config['ShippingMethodFBA']
+			: $this->config['ShippingMethod'];
 	}
 
 	private function getMarketplaceTitle() {
-		switch ($this->o['orderInfo']['FulfillmentChannel']) {
-			case 'AFN':       return $this->marketplaceTitle.'FBA'; break;
-			case 'MFN-Prime': return $this->marketplaceTitle.' Prime'; break;
-			default:          return $this->marketplaceTitle; break;
-		}
+		return $this->marketplaceTitle.(
+		($this->o['orderInfo']['FulfillmentChannel'] == 'AFN')
+			? 'FBA'
+			: ''
+		);
 	}
 	
 	protected function generateOrderComment() {
@@ -187,18 +157,6 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 		$this->p['products_name'] = str_replace('GiftWrapType', ML_AMAZON_LABEL_GIFT_PAPER, $this->p['products_name']);
 		parent::insertProduct();
 	}
-
-	/*
-	 * remove 'blacklisted-' from customer's e-mail address
-	 * if configured so (not recommended)
-	 */
-	protected function insertCustomer() {
-		if (!getDBConfigValue(array($this->marketplace . '.mailaddress.blacklist', 'val'), $this->mpID, true)) {
-			if ($this->verbose) echo __FUNCTION__.": amazon.mailaddress.blacklist == false\n";
-			$this->o['customer']['customers_email_address'] = str_replace('blacklisted-', '', $this->o['customer']['customers_email_address']);
-		}
-		return parent::insertCustomer();
-	}
 	
 	/**
 	 * Returns true if the stock of the imported and identified item has to be reduced.
@@ -214,44 +172,5 @@ class AmazonImportOrders extends MagnaCompatibleImportOrders {
 		$aContent['#SHOPURL#'] = ''; /* @deprecated: amazon desperately hates this. */
 		return $aContent;
 	}
-
-	protected function sendPromoMail() {
-		if (($this->config['MailSend'] != 'true') || (get_class($this->db) == 'MagnaTestDB')) {
-			// echo print_m($this->generatePromoMailContent());
-			return;
-		}
-		// mail addresses for Amazon customers have a 'blacklisted-' added by us,
-		// by default. Therefore, if the merchant wishes to send an e-mail, we have to
-		// remove this prefix.
-		sendSaleConfirmationMail(
-			$this->mpID,
-			str_replace('blacklisted-', '', $this->o['customer']['customers_email_address']),
-			$this->generatePromoMailContent()
-		);
-	}
-
-	/*
-	 * remove 'blacklisted-' from customer's e-mail address
-	 * (for the order data)
-	 * if configured so (not recommended)
-	 *
-	 * (could be done in insertCustomer, but for the case the order of inserting data
-	 *  will change, it's safer here)
-	 */
-	protected function doBeforeInsertOrder() {
-		if (!getDBConfigValue(array($this->marketplace . '.mailaddress.blacklist', 'val'), $this->mpID, true)) {
-			if ($this->verbose) echo __FUNCTION__.": amazon.mailaddress.blacklist == false\n";
-			$this->o['order']['customers_email_address'] = str_replace('blacklisted-', '', $this->o['order']['customers_email_address']);
-		}
-	}
-
-    protected function doBeforeInsertOrdersProducts() {
-        if ($this->p['products_model'] == '__AMAZON_DISCOUNT__') {
-            $this->p['products_model'] = $this->config['AmazonPromotionsDiscountProductSKU'];
-        }
-        if ($this->p['products_model'] == '__AMAZON_SHIPPING_DISCOUNT__') {
-            $this->p['products_model'] = $this->config['AmazonPromotionsDiscountShippingSKU'];
-        }
-    }
 	
 }

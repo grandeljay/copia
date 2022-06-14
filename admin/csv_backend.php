@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: csv_backend.php 13072 2020-12-15 07:17:20Z GTB $
+   $Id: csv_backend.php 5750 2013-09-13 13:26:51Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,11 +25,10 @@
     case 'upload':
       $upload_file=xtc_db_prepare_input($_POST['file_upload']);
       $accepted_file_upload_files_extensions = array("txt","csv","tsv");
-      $accepted_file_upload_files_mime_types = array("text/plain","text/csv","text/comma-separated-values","text/tab-separated-values");
+      $accepted_file_upload_files_mime_types = array("text/plain","text/comma-separated-values","text/tab-separated-values");
       if ($upload_file = &xtc_try_upload('file_upload',DIR_FS_CATALOG.'import/','644',$accepted_file_upload_files_extensions,$accepted_file_upload_files_mime_types)) {
         ${$upload_file_name} = $upload_file->filename;
       }
-      xtc_redirect(xtc_href_link(FILENAME_CSV_BACKEND));
     break;
 
     case 'import':
@@ -94,7 +93,7 @@ require (DIR_WS_INCLUDES.'head.php');
             $configuration_query = xtc_db_query("select configuration_key,configuration_id, configuration_value, use_function,set_function from " . TABLE_CONFIGURATION . " where configuration_group_id = '20' order by sort_order");
 
             while ($configuration = xtc_db_fetch_array($configuration_query)) {
-              if (isset($_GET['gID']) && $_GET['gID'] == 6) {
+              if ($_GET['gID'] == 6) {
                 switch ($configuration['configuration_key']) {
                   case 'MODULE_PAYMENT_INSTALLED':
                     if ($configuration['configuration_value'] != '') {
@@ -140,21 +139,20 @@ require (DIR_WS_INCLUDES.'head.php');
                 $cfgValue = $configuration['configuration_value'];
               }
 
-              if ((!isset($_GET['cID']) || $_GET['cID'] == $configuration['configuration_id']) && !isset($cInfo) && substr($action, 0, 3) != 'new') {
+              if (((!$_GET['cID']) || (@$_GET['cID'] == $configuration['configuration_id'])) && (!$cInfo) && (substr($action, 0, 3) != 'new')) {
                 $cfg_extra_query = xtc_db_query("select configuration_key,configuration_value, date_added, last_modified, use_function, set_function from " . TABLE_CONFIGURATION . " where configuration_id = '" . $configuration['configuration_id'] . "'");
                 $cfg_extra = xtc_db_fetch_array($cfg_extra_query);
 
-                $cInfo_array = array_merge($configuration, $cfg_extra);
+                $cInfo_array = xtc_array_merge($configuration, $cfg_extra);
                 $cInfo = new objectInfo($cInfo_array);
               }
-              
               if ($configuration['set_function']) {
                 eval('$value_field = ' . $configuration['set_function'] . '"' . encode_htmlspecialchars($configuration['configuration_value']) . '");');
               } else {
                 $value_field = xtc_draw_input_field($configuration['configuration_key'], $configuration['configuration_value'],'size=40');
               }
 
-              if (strpos($value_field,'configuration_value')) $value_field=str_replace('configuration_value',$configuration['configuration_key'],$value_field);
+              if (strstr($value_field,'configuration_value')) $value_field=str_replace('configuration_value',$configuration['configuration_key'],$value_field);
 
               echo '<tr>
                       <td class="dataTableConfig col-left">'.constant(strtoupper($configuration['configuration_key'].'_TITLE')).'</td>

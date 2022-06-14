@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: magnalister.php 6033 2015-09-22 10:12:38Z markus.bauer $
  *
  * (c) 2010 - 2012 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -114,16 +114,6 @@ $_POST    = $_backup['POST'];
 $_COOKIE  = $_backup['COOKIE'];
 
 unset($_backup);
-
-// remove CSRF Token from magnalister post data -> used to store date directly into database
-//  IdealoProductPrepare L58 saveProperties($_POST)
-if (   array_key_exists('CSRFName', $_SESSION)
-    && array_key_exists('CSRFToken', $_SESSION)
-    && array_key_exists($_SESSION['CSRFName'], $_POST)
-) {
-    $_postCSRFBackup = $_POST;
-    unset($_POST[$_SESSION['CSRFName']]);
-}
 
 /* Allow setting a different Update-Paths */
 if (isset($_GET['UPDATE_PATH'])) {
@@ -465,10 +455,5 @@ if (!MAGNA_SAFE_MODE) {
  * Magnalister Core
  */
 include_once(DIR_MAGNALISTER_FS.'init.php');
-
-// restore post date of removed CSRF Token from magnalister post data -> used to store date directly into database L118
-if (isset($_postCSRFBackup)) {
-    $_POST = $_postCSRFBackup;
-}
 
 include_once(DIR_WS_INCLUDES.'application_bottom.php');

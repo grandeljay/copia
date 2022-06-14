@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_write_user_info.inc.php 12973 2020-11-27 11:18:35Z GTB $   
+   $Id: xtc_write_user_info.inc.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -19,15 +19,16 @@
   require_once(DIR_FS_INC.'ip_clearing.inc.php');
   
   function xtc_write_user_info($customer_id) {
-    $sql_data_array = array(
-      'customers_id' => (int)$customer_id,
-      'customers_ip' => ip_clearing($_SESSION['tracking']['ip']),
-      'customers_ip_date' => 'now()',
-      'customers_host' => $_SESSION['tracking']['http_referer']['host'],
-      'customers_advertiser' => ((isset($_SESSION['tracking']['refID'])) ? $_SESSION['tracking']['refID'] : ''),
-      'customers_referer_url' => $_SESSION['tracking']['http_referer']['url'],
-    );
 
-    xtc_db_perform(TABLE_CUSTOMERS_IP, $sql_data_array);
+      $sql_data_array = array('customers_id' => (int)$customer_id,
+                              'customers_ip' => ip_clearing($_SESSION['tracking']['ip']),
+                              'customers_ip_date' => 'now()',
+                              'customers_host' => $_SESSION['tracking']['http_referer']['host'],
+                              'customers_advertiser' => ((isset($_SESSION['tracking']['refID']))?$_SESSION['tracking']['refID']:''),
+                              'customers_referer_url' => $_SESSION['tracking']['http_referer']['host'].$_SESSION['tracking']['http_referer']['path'],
+                              );
+
+      xtc_db_perform(TABLE_CUSTOMERS_IP, $sql_data_array);
+    return -1;
   }
 ?>

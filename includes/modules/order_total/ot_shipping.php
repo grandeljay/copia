@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_shipping.php 12606 2020-02-27 20:13:16Z GTB $
+   $Id: ot_shipping.php 9859 2016-05-24 17:12:52Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,8 +25,8 @@ class ot_shipping {
     $this->code = 'ot_shipping';
     $this->title = MODULE_ORDER_TOTAL_SHIPPING_TITLE;
     $this->description = MODULE_ORDER_TOTAL_SHIPPING_DESCRIPTION;
-    $this->enabled = ((defined('MODULE_ORDER_TOTAL_SHIPPING_STATUS') && MODULE_ORDER_TOTAL_SHIPPING_STATUS == 'true') ? true : false);
-    $this->sort_order = ((defined('MODULE_ORDER_TOTAL_SHIPPING_SORT_ORDER')) ? MODULE_ORDER_TOTAL_SHIPPING_SORT_ORDER : '');
+    $this->enabled = ((MODULE_ORDER_TOTAL_SHIPPING_STATUS == 'true') ? true : false);
+    $this->sort_order = MODULE_ORDER_TOTAL_SHIPPING_SORT_ORDER;
     $this->icon = '';
 
     $this->output = array();
@@ -69,11 +69,7 @@ class ot_shipping {
       }
     }
 
-    if (!isset($_SESSION['shipping']) 
-        || $_SESSION['shipping'] === false 
-        || !isset($_SESSION['shipping']['id'])
-        )
-    {
+    if (!isset($_SESSION['shipping'])) {
       return;
     }
    
@@ -84,48 +80,32 @@ class ot_shipping {
       $tax = 0;
       $shipping_tax = 0;
       $shipping_tax_description = '';
+      $shipping_tax = xtc_get_tax_rate($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
       
-      if (is_object($GLOBALS[$module]) && property_exists($GLOBALS[$module], 'tax_class')) {
-        $shipping_tax = xtc_get_tax_rate($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
-        $shipping_tax_description = xtc_get_tax_description($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
-      }
-      
+      $shipping_tax_description = xtc_get_tax_description($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
       $tax = xtc_add_tax($order->info['shipping_cost'], $shipping_tax) - $order->info['shipping_cost'];
-      //$tax = $xtPrice->xtcFormat($tax, false, 0, true); // do not round
+      $tax = $xtPrice->xtcFormat($tax, false, 0, true);
       
-      if ($tax != 0
-          && defined('MODULE_ORDER_TOTAL_TAX_STATUS')
-          && MODULE_ORDER_TOTAL_TAX_STATUS == 'true'
-          )
-      {
-        if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 1) {
-          // price with tax
-          $order->info['shipping_cost'] = xtc_add_tax($order->info['shipping_cost'], $shipping_tax);
-          $order->info['tax'] += $tax;
-          $order->info['tax_groups'][TAX_ADD_TAX . "$shipping_tax_description"] += $tax;
-          $order->info['total'] += $tax;
-        }
-        
-        if (($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 
-             && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1
-             ) || ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 
-                   && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 0
-                   && $order->delivery['country_id'] == STORE_COUNTRY
-                   )
-            )
-        {
+      if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 1) {
+        // price with tax
+        $order->info['shipping_cost'] = xtc_add_tax($order->info['shipping_cost'], $shipping_tax);
+        $order->info['tax'] += $tax;
+        $order->info['tax_groups'][TAX_ADD_TAX . "$shipping_tax_description"] += $tax;
+        $order->info['total'] += $tax;
+      } else {
+        if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1) {
           $order->info['tax'] = $order->info['tax'] += $tax;
           $order->info['tax_groups'][TAX_NO_TAX . "$shipping_tax_description"] = $order->info['tax_groups'][TAX_NO_TAX . "$shipping_tax_description"] += $tax;
         }
       }
       
       $this->output[] = array('title' => $order->info['shipping_method'] . ':',
-                              'text' => $xtPrice->xtcFormat($order->info['shipping_cost'], true),
-                              'value' => $xtPrice->xtcFormat($order->info['shipping_cost'], false));
+                              'text' => $xtPrice->xtcFormat($order->info['shipping_cost'], true, 0, true),
+                              'value' => $xtPrice->xtcFormat($order->info['shipping_cost'], false, 0, true));
     } elseif ($free_shipping === true) {
       $this->output[] = array('title' => $order->info['shipping_method'] . ':',
-                              'text' => $xtPrice->xtcFormat(0, true),
-                              'value' => $xtPrice->xtcFormat(0, false));
+                              'text' => $xtPrice->xtcFormat(0, true, 0, true),
+                              'value' => $xtPrice->xtcFormat(0, false, 0, true));
     }
   }
 

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: item.php 11585 2019-03-21 11:50:23Z GTB $
+   $Id: item.php 5118 2013-07-18 10:58:36Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -26,10 +26,10 @@
       $this->code = 'item';
       $this->title = MODULE_SHIPPING_ITEM_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_ITEM_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_ITEM_SORT_ORDER')) ? MODULE_SHIPPING_ITEM_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_ITEM_SORT_ORDER;
       $this->icon = '';
-      $this->tax_class = ((defined('MODULE_SHIPPING_ITEM_TAX_CLASS')) ? MODULE_SHIPPING_ITEM_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_ITEM_STATUS') && MODULE_SHIPPING_ITEM_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_ITEM_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_ITEM_STATUS == 'True') ? true : false);
       $this->num_item = defined('MODULE_SHIPPING_ITEM_NUMBER_ZONES') ? MODULE_SHIPPING_ITEM_NUMBER_ZONES : '1';
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_ITEM_ZONE > 0) && is_object($order) ) {
@@ -56,13 +56,13 @@
           xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_ITEM_NUMBER_ZONES', '1', '6', '0', now())");
           if (defined('MODULE_SHIPPING_ITEM_COST')) {
             if (!defined('MODULE_SHIPPING_ITEM_COUNTRIES_1')) {
-              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) values ('MODULE_SHIPPING_ITEM_COUNTRIES_1', '". MODULE_SHIPPING_ITEM_ALLOWED ."', '6', '0', 'xtc_cfg_textarea(', now())");
+              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) values ('MODULE_SHIPPING_ITEM_COUNTRIES_1', ". MODULE_SHIPPING_ITEM_ALLOWED .", '6', '0', 'xtc_cfg_textarea(', now())");
             }
             if (!defined('MODULE_SHIPPING_ITEM_COST_1')) {
-              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_ITEM_COST_1', '". MODULE_SHIPPING_ITEM_COST ."', '6', '0', now())");
+              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_ITEM_COST_1', ". MODULE_SHIPPING_ITEM_COST .", '6', '0', now())");
             }
             if (!defined('MODULE_SHIPPING_ITEM_HANDLING_1')) {
-              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_ITEM_HANDLING_1', '". MODULE_SHIPPING_ITEM_HANDLING ."', '6', '0', now())");
+              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_ITEM_HANDLING_1', ". MODULE_SHIPPING_ITEM_HANDLING .", '6', '0', now())");
             }
           }
         }

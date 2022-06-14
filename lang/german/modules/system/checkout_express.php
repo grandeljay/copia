@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: checkout_express.php 10597 2017-01-23 18:10:51Z Tomcraft $
+   $Id: checkout_express.php 9975 2016-06-13 19:12:42Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -18,6 +18,5 @@ define('MODULE_CHECKOUT_EXPRESS_TEXT_DESCRIPTION', 'Express Checkout erm&ouml;gl
 define('MODULE_CHECKOUT_EXPRESS_CONTENT_TITLE','Content');
 define('MODULE_CHECKOUT_EXPRESS_CONTENT_DESC','Sie k&ouml;nnen noch eine Contentseite anlegen und den Expresscheckout erkl&auml;ren.');
 
-define('MODULE_CHECKOUT_EXPRESS_DESCRIPTION_INSTALL','<br/><br/>Zus&auml;tzlich k&ouml;nnen Sie eine Informationsseite f&uuml;r den Express Checkout installieren.');
-define('MODULE_CHECKOUT_EXPRESS_BUTTON_INSTALL','Content einf&uuml;gen');
+define('MODULE_CHECKOUT_EXPRESS_DESCRIPTION_INSTALL','<br/><br/>Zus&auml;tzlich k&ouml;nnen sie eine Informationsseite f&uuml;r den Express Checkout installieren.');
 ?>

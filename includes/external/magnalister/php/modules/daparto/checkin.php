@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: checkin.php 3977 2014-06-17 10:37:56Z masoud.khodaparast $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -30,12 +30,12 @@ class DapartoCheckinSubmit extends ComparisonShoppingCheckinSubmit {
 	protected function appendAdditionalData($pID, $product, &$data) {
 		parent::appendAdditionalData($pID, $product, $data);
 		
-		$data['submit']['DapartoUsage']     = $data['submit']['EAN'];
+		$data['submit']['DapartoUsage']     = $product['products_ean'];
 		$data['submit']['DapartoCondition'] = getDBConfigValue('daparto.condition', $this->mpID);
 		$data['submit']['DapartoExchange']  = null;
 		$data['submit']['DapartoTecDoc']    = getDBConfigValue('daparto.tecdoc', $this->mpID);
 		if (!isset($data['submit']['ModelNumber']) || empty($data['submit']['ModelNumber'])) {
-			$data['submit']['ModelNumber']      = $product['ProductsModel'];
+			$data['submit']['ModelNumber']      = $product['products_model'];
 		}
 	}	
 }

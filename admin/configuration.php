@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: configuration.php 13371 2021-02-03 09:47:43Z GTB $
+   $Id: configuration.php 5547 2013-09-06 13:19:01Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -40,7 +40,7 @@
         // moneybookers payment module version 2.4
         if ($_GET['gID']=='31') {
           if (isset($_POST['_PAYMENT_MONEYBOOKERS_EMAILID'])) {
-            $url = 'https://www.skrill.com/app/email_check.pl?email=' . urlencode($_POST['_PAYMENT_MONEYBOOKERS_EMAILID']) . '&cust_id=8644877&password=1a28e429ac2fcd036aa7d789ebbfb3b0';
+            $url = 'https://www.moneybookers.com/app/email_check.pl?email=' . urlencode($_POST['_PAYMENT_MONEYBOOKERS_EMAILID']) . '&cust_id=8644877&password=1a28e429ac2fcd036aa7d789ebbfb3b0';
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -51,7 +51,7 @@
             if ($result=='NOK') {
               $messageStack->add_session(MB_ERROR_NO_MERCHANT, 'error');
             }
-            if (strpos($result,'OK,')) {
+            if (strstr($result,'OK,')) {
               $data = explode(',',$result);
               $_POST['_PAYMENT_MONEYBOOKERS_MERCHANTID'] = $data[1];
               $messageStack->add_session(sprintf(MB_MERCHANT_OK,$data[1]), 'success');
@@ -66,8 +66,7 @@
             $configuration['configuration_value'] = stripslashes($configuration['configuration_value']);
             if (is_array($_POST[$configuration['configuration_key']])) {
               // multi language config
-              $keys = array_keys($_POST[$configuration['configuration_key']]);
-              if (gettype(array_shift($keys)) == 'string') {
+              if (gettype(array_shift(array_keys($_POST[$configuration['configuration_key']]))) == 'string') {
                 $config_value = array();
                 foreach ($_POST[$configuration['configuration_key']] as $key => $value) {
                   if (xtc_not_null($value)) {
@@ -113,33 +112,27 @@
           }
         }
         
-        /*
         // DB Cache System [If Cache deactivated.. clean all cachefiles]
         if (isset($_POST['DB_CACHE']) && $_POST['DB_CACHE'] == 'false') {
           $handle = opendir(SQL_CACHEDIR);
           while (($file = readdir($handle)) !== false) {
             // Jump over files that are no sql-cache
-            if (strpos(basename($file), 'sql_') !== false || basename($file) == 'index.html' || (substr(basename($file), 0, 1) == '.')) continue;
+            if (strpos($file, 'sql_') !== false) continue;
             @unlink(SQL_CACHEDIR.$file);
           }
         }
-        */
+
         xtc_redirect(xtc_href_link(FILENAME_CONFIGURATION, 'gID=' . (int)$_GET['gID']));
         break;
 
       case 'delcache':
         clear_dir(DIR_FS_CATALOG.'cache/');
-        require_once(DIR_FS_CATALOG.'includes/classes/modified_cache.php');
-        $modified_cache->clear();
         $messageStack->add_session(DELETE_CACHE_SUCCESSFUL, 'success');
         xtc_redirect(xtc_href_link(FILENAME_CONFIGURATION, 'gID=' . (int)$_GET['gID']));
         break;
 
       case 'deltempcache':
         clear_dir(DIR_FS_CATALOG.'templates_c/');
-        file_put_contents(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/stylesheet.min.css', '');
-        file_put_contents(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/css/tpl_plugins.min.css', '');        
-        file_put_contents(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/javascript/tpl_plugins.min.js', '');
         $messageStack->add_session(DELETE_TEMP_CACHE_SUCCESSFUL, 'success');
         xtc_redirect(xtc_href_link(FILENAME_CONFIGURATION, 'gID=' . (int)$_GET['gID']));
         break;
@@ -155,10 +148,6 @@
   $cfg_group_query = xtc_db_query("select configuration_group_title, configuration_group_id from " . TABLE_CONFIGURATION_GROUP . " where configuration_group_id = '" . (int)$_GET['gID'] . "'"); // Hetfield - 2010-01-15 - multilanguage title in configuration
   $cfg_group = xtc_db_fetch_array($cfg_group_query);
   
-  if ((int)$_GET['gID'] == 11) {
-    $messageStack->add(CACHE_LIFETIME_NOTE, 'error');
-  }
-
   require (DIR_WS_INCLUDES.'head.php');
 ?>
   <script type="text/javascript" src="includes/general.js"></script>
@@ -216,7 +205,7 @@
                   echo '<div class="configPartner cf">
                           <a class="configtab'.(($_GET['gID'] == '21') ? ' activ' : '').'" href="'.xtc_href_link(FILENAME_CONFIGURATION, 'gID=21', 'NONSSL').'">Afterbuy</a>
                           <a class="configtab'.(($_GET['gID'] == '19') ? ' activ' : '').'" href="'.xtc_href_link(FILENAME_CONFIGURATION, 'gID=19', 'NONSSL').'">Google Conversion</a>
-                          <a class="configtab'.(($_GET['gID'] == '31') ? ' activ' : '').'" href="'.xtc_href_link(FILENAME_CONFIGURATION, 'gID=31', 'NONSSL').'">Skrill.com</a>
+                          <a class="configtab'.(($_GET['gID'] == '31') ? ' activ' : '').'" href="'.xtc_href_link(FILENAME_CONFIGURATION, 'gID=31', 'NONSSL').'">Moneybookers.com</a>
                         </div>';
 
                   $tabs = true;
@@ -244,7 +233,7 @@
                                                              FROM " . TABLE_CONFIGURATION . " 
                                                             WHERE configuration_group_id = '" . (int)$_GET['gID'] . "'
                                                               AND sort_order >= 0
-                                                         ORDER BY sort_order, configuration_id"
+                                                         ORDER BY sort_order"
                                                          );
                       while ($configuration = xtc_db_fetch_array($configuration_query)) {
                         $configuration['configuration_value'] = stripslashes($configuration['configuration_value']); //Web28 - 2012-08-09 - fix slashes
@@ -291,29 +280,43 @@
                         } else {
                           $cfgValue = encode_htmlspecialchars($configuration['configuration_value']);
                         }
+                        if ((!isset($_GET['cID']) || (isset($_GET['cID']) && ($_GET['cID'] == $configuration['configuration_id']))) && !isset($cInfo) && (substr($action, 0, 3) != 'new')) {
+                          $cfg_extra_query = xtc_db_query("SELECT configuration_key,
+                                                                  configuration_value, 
+                                                                  date_added, 
+                                                                  last_modified, 
+                                                                  use_function, 
+                                                                  set_function 
+                                                             FROM " . TABLE_CONFIGURATION . " 
+                                                            WHERE configuration_id = '" . $configuration['configuration_id'] . "'
+                                                          ");
+                          $cfg_extra = xtc_db_fetch_array($cfg_extra_query);
+                          $cInfo_array = xtc_array_merge($configuration, $cfg_extra);
+                          $cInfo = new objectInfo($cInfo_array);
+                        }
                         if ($configuration['set_function']) {
                           if (strpos($configuration['set_function'], '(') !== false) {
                             eval('$value_field = ' . $configuration['set_function'] . ' "' . encode_htmlspecialchars($configuration['configuration_value']) . '");');
                           } else {
                             $parameters = explode(';', $configuration['set_function']);
                             $function = trim($parameters[0]);
-                            $parameters[0] = $configuration['configuration_value'];
+                            $parameters[0] = encode_htmlspecialchars($configuration['configuration_value']);
                             $value_field = xtc_call_function($function, $parameters);
                           }
                         } else {
-                          $value_field = xtc_draw_input_field($configuration['configuration_key'], $configuration['configuration_value'], 'style="width:100%;"');
+                          $value_field = xtc_draw_input_field($configuration['configuration_key'], $configuration['configuration_value'], 'style="width:380px;"');
                         }
-                        if (strpos($value_field,'cfg_so_k')) {
+                        if (strstr($value_field,'cfg_so_k')) {
                           $value_field=str_replace('cfg_so_k',strtolower($configuration['configuration_key']),$value_field);
                         }
-                        if (strpos($value_field,'configuration_value')) {
+                        if (strstr($value_field,'configuration_value')) {
                           $value_field=str_replace('configuration_value',$configuration['configuration_key'],$value_field);
                         }
 
                         // catch up warnings if no language-text defined for configuration-key
                         $configuration_key_title = strtoupper($configuration['configuration_key'].'_TITLE');
                         $configuration_key_desc  = strtoupper($configuration['configuration_key'].'_DESC');
-                        if (defined($configuration_key_title) ) {                                         // if language definition
+                        if( defined($configuration_key_title) ) {                                          // if language definition
                           $configuration_key_title = constant($configuration_key_title);
                           $configuration_key_desc  = constant($configuration_key_desc);
                         } else {                                                                          // if no language
@@ -325,9 +328,7 @@
                         }
                         $class_mark = strpos(strtoupper($configuration['configuration_key']), 'SMTP') !== false || 
                                       strpos(strtoupper($configuration['configuration_key']), 'CONTACT_US') !== false || 
-                                      strpos(strtoupper($configuration['configuration_key']), 'EMAIL_BILLING') !== false ||
-                                      strpos(strtoupper($configuration['configuration_key']), 'PRODUCT_IMAGE_') !== false ||
-                                      strpos(strtoupper($configuration['configuration_key']), 'MANUFACTURER_IMAGE_') !== false  
+                                      strpos(strtoupper($configuration['configuration_key']), 'EMAIL_BILLING') !== false
                                       ? ' mark' 
                                       : '';
                         echo '

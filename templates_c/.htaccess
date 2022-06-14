@@ -1,5 +1,5 @@
 #  -----------------------------------------------------------------------------------------
-#  $Id: .htaccess 11767 2019-04-12 16:24:44Z GTB $
+#  $Id: .htaccess 9957 2016-06-09 12:01:38Z GTB $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -18,14 +18,16 @@
 # This is used with Apache WebServers
 # The following blocks direct HTTP requests in this directory recursively
 
-<IfModule mod_authz_core.c>
-  # Apache 2.4
-  <RequireAll>
-    Require all denied
-  </RequireAll>
-</IfModule>
-<IfModule !mod_authz_core.c>
-  # Apache 2.2
-  Order Deny,Allow
-  Deny from all
-</IfModule>
+<FilesMatch ".*\.(php|php3|php4|php5|phtml|htm|html|xhtml|pl)$">
+  <IfModule mod_authz_core.c>
+    # Apache 2.4
+    <RequireAll>
+      Require all denied
+    </RequireAll>
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    # Apache 2.2
+    Order Deny,Allow
+    Deny from all
+  </IfModule>
+</FilesMatch>

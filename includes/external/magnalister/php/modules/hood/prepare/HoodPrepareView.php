@@ -203,8 +203,8 @@ class HoodPrepareView extends MagnaCompatibleBase {
 					'#ARTNR#' => $dbSelection[0]['products_model'],
 					'#PID#' => $dbSelection[0]['products_id'],
 					'#SKU#' => magnaPID2SKU($dbSelection[0]['products_id']),
-					'#SHORTDESCRIPTION#' => fixHTMLUTF8Entities(stripLocalWindowsLinks($dbSelection[0]['products_short_description'])),
-					'#DESCRIPTION#' => fixHTMLUTF8Entities(stripLocalWindowsLinks($dbSelection[0]['products_description'])),
+					'#SHORTDESCRIPTION#' => stripLocalWindowsLinks($dbSelection[0]['products_short_description']),
+					'#DESCRIPTION#' => stripLocalWindowsLinks($dbSelection[0]['products_description']),
 				);
 				
 				$dbSelection[0]['Description'] = HoodHelper::getSubstitutePictures(HoodHelper::substituteTemplate(
@@ -246,13 +246,9 @@ class HoodPrepareView extends MagnaCompatibleBase {
 			$this->topTen = new HoodTopTenCategories();
 			$this->topTen->setMarketPlaceId($this->mpID);
 		}
+		$opt = '<option value="">&mdash;</option>'."\n";
 		
 		$aTopTenCatIds = $this->topTen->getTopTenCategories($type);
-		if (!empty($aTopTenCatIds)) {
-			$opt = '<option value="">&mdash;</option>'."\n";
-		} else {
-			$opt = '<option value=""> -- '.ML_GENERIC_USE_CATEGORY_BUTTON.' -- &gt; </option>'."\n";
-		}
 		
 		if (!empty($selectedCat) && !array_key_exists($selectedCat, $aTopTenCatIds)) {
 			$opt .= '<option value="'.$selectedCat.'" selected="selected">'.$selectedCatName.'</option>'."\n";
@@ -317,7 +313,7 @@ class HoodPrepareView extends MagnaCompatibleBase {
 				<tr class="' . (($oddEven = !$oddEven) ? 'odd' : 'even') . '">
 					<th>' . ML_HOOD_SUBTITLE . '</th>
 					<td class="input">
-						<input class="fullwidth blocked" type="text" maxlength="55" value="' . $data['Subtitle'] . '" name="Subtitle" id="Subtitle" disabled="disabled"/>
+						<input class="fullwidth" type="text" maxlength="55" value="' . $data['Subtitle'] . '" name="Subtitle" id="Subtitle" />
 						<input type="hidden" name="enableSubtitle" value="false" />
 						<input type="checkbox" name="enableSubtitle" value="true" /> ' . ML_HOOD_SUBTITLE_USE_YES_NO . '
 					</td>
@@ -402,9 +398,7 @@ class HoodPrepareView extends MagnaCompatibleBase {
 		$fixedPrice = $this->price
 			->setFinalPriceFromDB($data['products_id'], $this->mpID, $pConf['Fixed'])
 			->format();  // fixed (will only be displayed)
-		$strikePrice = $this->price
-			->setFinalPriceFromDB($data['products_id'], $this->mpID, $pConf['Strike'])
-			->format();  // strikeprice (UVP)
+		
 		ob_start();
 		?>
 				<tr class="<?php echo (($oddEven = !$oddEven) ? 'odd' : 'even'); ?>">
@@ -440,17 +434,6 @@ class HoodPrepareView extends MagnaCompatibleBase {
 								<td></td>
 							</tr>
 						</tbody></table>
-						<?php if (getDBConfigValue('hood.strike.price.group', $this->mpID, -1) > -1): ?>
-						<table id="priceStrike" class="lightstlye line15"><tbody>
-							<tr>
-								<td><?php echo ML_HOOD_STRIKEPRICE_CALCULATED ?> : </td>
-								<td id="showCalcPrice" name="showCalcPrice">
-									<?php echo $strikePrice; ?> 
-								</td>
-								<td></td>
-							</tr>
-						</tbody></table>
-						<?php endif; ?>
 					</td>
 					<td class="info"><?php echo ML_HOOD_PRICE_FOR_HOOD ?></td>
 				</tr>
@@ -703,7 +686,7 @@ class HoodPrepareView extends MagnaCompatibleBase {
 			$selected = (isset($preSelected['Features'][$featureKey]) && $preSelected['Features'][$featureKey]);
 			$html .= '
 						<input type="hidden"   name="Features['.$featureKey.']" value="false">
-						<input type="checkbox" name="Features['.$featureKey.']" value="true" id="'.$featureId.'" '.($selected ? 'checked' : '').'>
+						<input type="checkbox" name="Features['.$featureKey.']" value="true" id="'.$featureId.'" '.($selected ? 'selected' : '').'>
 						&nbsp;
 						<label for="'.$featureId.'">'.$featureDesc.'</label>
 						<br>';
@@ -946,19 +929,6 @@ class HoodPrepareView extends MagnaCompatibleBase {
 			}
 			
 			$(document).ready(function() {
-                $('input[name="enableSubtitle"]').change(function() {
-                    var oSubtitleInput = $('input[name="Subtitle"]');
-
-                    if ($(this).is(":checked")) {
-                        oSubtitleInput.removeClass('blocked');
-                        oSubtitleInput.prop('disabled', false);
-                        return;
-                    }
-
-                    oSubtitleInput.prop('disabled', true);
-                    oSubtitleInput.addClass('blocked');
-                });
-
 				$('#PrimaryCategoryVisual > select').change(function() {
 					var cID = this.value;
 					if (cID != '') {

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: stats_products_purchased.php 11791 2019-04-18 08:12:48Z GTB $   
+   $Id: stats_products_purchased.php 10119 2016-07-20 10:50:40Z GTB $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -141,7 +141,7 @@ require (DIR_WS_INCLUDES.'head.php');
                 while ($products = xtc_db_fetch_array($products_query)) {
                   $rows++;
                   $rows = str_pad($rows, strlen($page_max_display_results), '0', STR_PAD_LEFT);
-                  if ((!isset($_GET['pID']) || (isset($_GET['pID']) && $_GET['pID'] == $products['products_id'])) && !isset($pInfo)) {
+                  if ((!xtc_not_null($_GET['pID']) || (isset($_GET['pID']) && $_GET['pID'] == $products['products_id'])) && !isset($pInfo)) {
                     $pInfo = new objectInfo($products);
                   }
 

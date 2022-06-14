@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: gv_mail.php 12130 2019-09-20 12:41:01Z Tomcraft $
+   $Id: gv_mail.php 899 2005-04-29 02:40:57Z hhgag $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -26,16 +26,15 @@
    ---------------------------------------------------------------------------------------*/
 
 define('HEADING_TITLE', 'Send Gift Voucher To Customers');
-define('HEADING_COUPON_TITLE', 'Send Coupon To Customers');
 
-define('TEXT_CUSTOMER_GROUP', 'Customers Group:');
+define('TEXT_CUSTOMER', 'Customer:');
 define('TEXT_SUBJECT', 'Subject:');
 define('TEXT_FROM', 'From:');
 define('TEXT_TO', 'E-Mail to:');
 define('TEXT_AMOUNT', 'Amount');
 define('TEXT_MESSAGE', 'Message:');
 define('TEXT_SINGLE_EMAIL', '<span class="smallText">Use this for sending single E-Mails, otherwise use dropdown above</span>');
-define('TEXT_SELECT_CUSTOMER_GROUP', 'Select Customers Group');
+define('TEXT_SELECT_CUSTOMER', 'Select Customer');
 define('TEXT_ALL_CUSTOMERS', 'All Customers');
 define('TEXT_NEWSLETTER_CUSTOMERS', 'To All Newsletter Subscribers');
 
@@ -55,8 +54,4 @@ define ('TEXT_REDEEM_COUPON_MESSAGE_AMOUNT', "\n\n" . 'The value of the Gift Vou
 define ('TEXT_REDEEM_COUPON_MESSAGE_BODY', "\n\n" . 'You can now visit our site, login and send the Gift Voucher amount to anyone you want.');
 define ('TEXT_REDEEM_COUPON_MESSAGE_FOOTER', "\n\n");
 
-define('COUPON_INFO', "\nCoupon Amount: "); 
-define('COUPON_FREE_SHIPPING', 'Free Shipping');
-define('COUPON_MINORDER_INFO', "\nCoupon Minimum Order: ");
-define('COUPON_RESTRICT_INFO', "\nThis coupon is only valid for certain products!"); 
 ?>

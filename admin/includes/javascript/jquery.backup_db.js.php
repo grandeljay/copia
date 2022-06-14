@@ -1,24 +1,16 @@
 <?php 
-  /* --------------------------------------------------------------
-   $Id: jquery.backup_db.js.php 13059 2020-12-12 08:00:14Z GTB $
+/* -------------------------------------------------------------------------------------
+jquery.backup_db.js.php
+Vers. 1.00 (c) www.rpa-com.de
+* ----------------------------------------------------------------------------------- */
 
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
+defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.' );
 
-   Copyright (c) 2009 - 2013 [www.modified-shop.org]
-   --------------------------------------------------------------
-   based on:
-   (c) 2011 (c) by  web28 - www.rpa-com.de
-
-   Released under the GNU General Public License
-   --------------------------------------------------------------*/
-
-  defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.' );
 ?>
 
 <script type="text/javascript">
 var debug = false;
-var ajax_url = 'backup_db.php?ajax=1&action=readdb<?php echo defined('SID') ? '&'. SID : '';?>';
+var ajax_url = 'backup_db.php?ajax=1&action=readdb<?php echo SID ? '&'. SID : '';?>';
 var ajax_type = 'POST';
 var dataStr = '';
 
@@ -30,19 +22,20 @@ function ajaxCall(dataStr) {
     if (debug) console.log('dataStr: ' + dataStr);
     if (debug) console.log('url:' + ajax_url);
     //return;
-    jQuery.ajax({
-      url: ajax_url,
-      type: ajax_type,
-      timeout: 300000, //Set a timeout (in milliseconds) for the request. 
-      dataType: 'json',
+		jQuery.ajax({
+			url: ajax_url,
+			type: ajax_type,
+			timeout: 300000, //Set a timeout (in milliseconds) for the request. 
+			dataType: 'json',
       data : dataStr,
-      error: function(xhr, status, error) {
-        alert(xhr.responseText);
-      },
-      success: function(data){
+			error: function() {
+        //('.img_'+response.type).css('display','none');
+				alert('Error loading json data!');
+			},
+			success: function(data){
         JStoPHPResponse(data);
-      }
-    })
+			}
+		})
 }
 
 function JStoPHPResponse(data) {
@@ -53,7 +46,6 @@ function JStoPHPResponse(data) {
     var data_ok = '<div><b>' + 'Tabellen gesichert: ' + (response.nr) + ' von ' + (response.num_tables) + '</b></div>';
     data_ok += '<div><b>' + '<br />Zuletzt bearbeitet: ' + response.actual_table + '</b></div>';
     data_ok += '<div><b>' + '<br />Seitenaufrufe: ' + response.aufruf + '</b></div>';
-    data_ok += '<div><b>' + '<br />Anzahl Zeilen: ' + response.anzahl_zeilen + '</b></div>';
     data_ok += '<div><b>' + '<br />Scriptlaufzeit: ' +  response.time  + '</b></div>';
     
     $('#data_ok').html(data_ok);
@@ -78,7 +70,7 @@ function JStoPHPResponse(data) {
       if (maxReloadsText != '') infoText = maxReloadsText;
       $('#info_text').html(infoText);
     
-      var button_back = '<a href="backup.php?file='+ response.file +'<?php echo SID ? '&'. SID : '';?>" class="button">'+ '<?php echo BUTTON_BACK;?>' +'</a>';
+      var button_back = '<a href="backup.php<?php echo SID ? '?'. SID : '';?>" class="button">'+ '<?php echo BUTTON_BACK;?>' +'</a>';
       $('#button_back').html(button_back);
       
     }

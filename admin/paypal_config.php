@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypal_config.php 12444 2019-12-03 07:19:19Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -63,53 +63,18 @@ $transaction_array = array(
   array('id' => 'authorize', 'text' => 'Authorize'),
 ); 
 
-$color_array = array(
-  array('id' => 'white', 'text' => 'White'),
-  array('id' => 'blue', 'text' => 'Blue'),
-  array('id' => 'grey', 'text' => 'Grey'),
-  array('id' => 'black', 'text' => 'Black'),
-);
-
 $log_level_array = array(
   array('id' => 'ERROR', 'text' => 'Error'),
-  array('id' => 'WARNING', 'text' => 'Warning'),
-  array('id' => 'NOTICE', 'text' => 'Notice'),
+  array('id' => 'WARN', 'text' => 'Warning'),
   array('id' => 'INFO', 'text' => 'Info'),
+  array('id' => 'FINE', 'text' => 'Fine'),
   array('id' => 'DEBUG', 'text' => 'Debug'),
 ); 
 
-$paypal_live = $paypal->getOnboardingLink('live');
-$paypal_sandbox = $paypal->getOnboardingLink('sandbox');
-
+//$locale_code = array(
 require (DIR_WS_INCLUDES.'head.php');
 ?>
-<link rel="stylesheet" type="text/css" href="../includes/external/paypal/css/stylesheet.css"> 
-<script>
-  function onboardedClose() {
-    window.location.reload(false);
-  }
-  
-  function onboardedCallbackLive(authCode, sharedId) {
-    onboardedCallback(authCode, sharedId, 'live');
-  }
-
-  function onboardedCallbackSandbox(authCode, sharedId) {
-    onboardedCallback(authCode, sharedId, 'sandbox');
-  }
-  
-  function onboardedCallback(authCode, sharedId, mode) {
-    $.post( "../ajax.php", { 'ext': 'set_paypal_data', 'speed': 1, 'authCode': authCode, 'sharedId': sharedId, 'mode': mode, 'sec': '<?php echo MODULE_PAYMENT_PAYPAL_SECRET; ?>' }, function(data) {
-      if (data !== null 
-          && typeof data === 'object'
-          && data.success !== null 
-          && data.success !== undefined 
-          )
-      {
-        window.location.reload(false);  
-      }
-    });
-  }
-</script> 
+<link rel="stylesheet" type="text/css" href="../includes/external/paypal/css/stylesheet.css">  
 </head>
 <body>
     <!-- header //-->
@@ -133,7 +98,6 @@ require (DIR_WS_INCLUDES.'head.php');
           <div class="pageHeadingImage"><?php echo xtc_image(DIR_WS_ICONS.'heading/icon_configuration.png'); ?></div>
           <div class="flt-l">
             <div class="pageHeading pdg2"><?php echo TEXT_PAYPAL_CONFIG_HEADING_TITLE; ?></div>
-            <div class="main">v<?php echo $paypal->paypal_version; ?></div>
           </div>
           <?php
             include_once(DIR_FS_EXTERNAL.'paypal/modules/admin_menu.php');
@@ -146,22 +110,22 @@ require (DIR_WS_INCLUDES.'head.php');
               <tr>
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_CLIENT_LIVE; ?></td>
                 <td class="dataTableConfig col-middle"><?php echo xtc_draw_input_field('config[PAYPAL_CLIENT_ID_LIVE]', $paypal->get_config('PAYPAL_CLIENT_ID_LIVE'), 'style="width: 300px;"'); ?></td>
-                <td class="dataTableConfig col-right" rowspan="2"><?php echo (($paypal_live != '') ? '<a target="_blank" data-paypal-popup-close="onboardedClose" data-paypal-onboard-complete="onboardedCallbackLive" data-paypal-button="PPLtBlue" href="' . $paypal_live . '">' . TEXT_PAYPAL_APPINATOR_LIVE . '</a><br><br>' : '') . TEXT_PAYPAL_CONFIG_CLIENT_LIVE_INFO; ?></td>
+                <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_CONFIG_CLIENT_LIVE_INFO; ?></td>
               </tr>
               <tr>
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_SECRET_LIVE; ?></td>
                 <td class="dataTableConfig col-middle"><?php echo xtc_draw_input_field('config[PAYPAL_SECRET_LIVE]', $paypal->get_config('PAYPAL_SECRET_LIVE'), 'style="width: 300px;"'); ?></td>
-                <?php /*<td class="dataTableConfig col-right"><?php /*echo TEXT_PAYPAL_CONFIG_SECRET_LIVE_INFO; ?></td>*/ ?>
+                <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_CONFIG_SECRET_LIVE_INFO; ?></td>
               </tr>
               <tr>
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_CLIENT_SANDBOX; ?></td>
                 <td class="dataTableConfig col-middle"><?php echo xtc_draw_input_field('config[PAYPAL_CLIENT_ID_SANDBOX]', $paypal->get_config('PAYPAL_CLIENT_ID_SANDBOX'), 'style="width: 300px;"'); ?></td>
-                <td class="dataTableConfig col-right" rowspan="2"><?php echo (($paypal_sandbox != '') ? '<a target="_blank" data-paypal-popup-close="onboardedClose" data-paypal-onboard-complete="onboardedCallbackSandbox" data-paypal-button="PPLtBlue" href="' . $paypal_sandbox . '">' . TEXT_PAYPAL_APPINATOR_SANDBOX . '</a><br><br>' : '') . TEXT_PAYPAL_CONFIG_CLIENT_SANDBOX_INFO; ?></td>
+                <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_CONFIG_CLIENT_SANDBOX_INFO; ?></td>
               </tr>
               <tr>
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_SECRET_SANDBOX; ?></td>
                 <td class="dataTableConfig col-middle"><?php echo xtc_draw_input_field('config[PAYPAL_SECRET_SANDBOX]', $paypal->get_config('PAYPAL_SECRET_SANDBOX'), 'style="width: 300px;"'); ?></td>
-                <?php /*<td class="dataTableConfig col-right"><?php /*echo TEXT_PAYPAL_CONFIG_SECRET_SANDBOX_INFO; ?></td>*/ ?>
+                <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_CONFIG_SECRET_SANDBOX_INFO; ?></td>
               </tr>
               <tr>
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_MODE; ?></td>
@@ -187,16 +151,6 @@ require (DIR_WS_INCLUDES.'head.php');
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_CART; ?></td>
                 <td class="dataTableConfig col-middle"><?php echo draw_on_off_selection('config[PAYPAL_ADD_CART_DETAILS]', $status_array, (($paypal->get_config('PAYPAL_ADD_CART_DETAILS') == 1) ? true : false)); ?></td>
                 <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_CONFIG_CART_INFO; ?></td>
-              </tr>
-              <tr>
-                <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_INSTALLMENT_BANNER_DISPLAY; ?></td>
-                <td class="dataTableConfig col-middle"><?php echo draw_on_off_selection('config[PAYPAL_INSTALLMENT_BANNER_DISPLAY]', $status_array, $paypal->get_config('PAYPAL_INSTALLMENT_BANNER_DISPLAY')); ?></td>
-                <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_INSTALLMENT_BANNER_DISPLAY_INFO; ?></td>
-              </tr>
-              <tr>
-                <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_INSTALLMENT_BANNER_COLOR; ?></td>
-                <td class="dataTableConfig col-middle"><?php echo xtc_draw_pull_down_menu('config[PAYPAL_INSTALLMENT_BANNER_COLOR]', $color_array, $paypal->get_config('PAYPAL_INSTALLMENT_BANNER_COLOR')); ?></td>
-                <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_INSTALLMENT_BANNER_COLOR_INFO; ?></td>
               </tr>
               <tr>
                 <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_CONFIG_STATE_SUCCESS; ?></td>
@@ -252,7 +206,6 @@ require (DIR_WS_INCLUDES.'head.php');
         <!-- body_text_eof //-->
       </tr>
     </table>
-    <script id="paypal-js" src="//www.sandbox.paypal.com/webapps/merchantboarding/js/lib/lightbox/partner.js"></script>
     <!-- body_eof //-->
     <!-- footer //-->
     <?php require(DIR_WS_INCLUDES . 'footer.php'); ?>

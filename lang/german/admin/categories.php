@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: categories.php 13237 2021-01-26 13:30:03Z GTB $   
+   $Id: categories.php 10211 2016-08-07 08:15:31Z GTB $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -70,8 +70,6 @@ define('TEXT_EDIT_CATEGORIES_NAME', 'Kategorie Name:');
 define('TEXT_EDIT_CATEGORIES_HEADING_TITLE', 'Kategorie &Uuml;berschrift:');
 define('TEXT_EDIT_CATEGORIES_DESCRIPTION', 'Kategorie Beschreibung:');
 define('TEXT_EDIT_CATEGORIES_IMAGE', 'Kategorie Bild:');
-define('TEXT_EDIT_CATEGORIES_IMAGE_LIST', 'Kategorie Bild Listing:');
-define('TEXT_EDIT_CATEGORIES_IMAGE_MOBILE', 'Kategorie Bild Mobil:');
 
 define('TEXT_EDIT_SORT_ORDER', 'Sortierreihenfolge:');
 
@@ -125,7 +123,6 @@ define('TEXT_PRODUCT_NOT_AVAILABLE', 'Deaktiviert');
 define('TEXT_PRODUCTS_MANUFACTURER', 'Artikelhersteller:');
 define('TEXT_PRODUCTS_MANUFACTURER_MODEL', 'Hersteller Art.-Nr. (HAN/MPN):');
 define('TEXT_PRODUCTS_NAME', 'Artikelname:');
-define('TEXT_PRODUCTS_HEADING_TITLE', 'Artikel &Uuml;berschrift:');
 define('TEXT_PRODUCTS_DESCRIPTION', 'Artikelbeschreibung:');
 define('TEXT_PRODUCTS_QUANTITY', 'Lagerbestand:');
 define('TEXT_PRODUCTS_MODEL', 'Artikel-Nr.:');
@@ -194,7 +191,7 @@ define('TEXT_PRODUCTS_VPE_VALUE',' Wert:');
 
 define('CROSS_SELLING_1','Cross Selling');
 define('CROSS_SELLING_2','f&uuml;r Artikel');
-define('CROSS_SELLING_SEARCH','Produktsuche:');
+define('CROSS_SELLING_SEARCH','Produktsuche:<br/><small><i>Artikelnr. eingeben</i></small>');
 define('BUTTON_EDIT_CROSS_SELLING','Cross Selling');
 define('HEADING_DEL','L&ouml;schen');
 define('HEADING_ADD','Hinzuf&uuml;gen?');
@@ -204,6 +201,11 @@ define('HEADING_MODEL','Artikelnummer');
 define('HEADING_NAME','Artikel');
 define('HEADING_CATEGORY','Kategorie');
 define('HEADING_IMAGE','Bild');
+
+// BOF - Tomcraft - 2009-11-02 - Admin language tabs
+define('TEXT_SORT_ASC','aufsteigend');
+define('TEXT_SORT_DESC','absteigend');
+// EOF - Tomcraft - 2009-11-02 - Admin language tabs
 
 // BOF - Tomcraft - 2009-11-06 - Use variable TEXT_PRODUCTS_DATE_FORMAT
 define('TEXT_PRODUCTS_DATE_FORMAT', 'JJJJ-MM-TT');
@@ -258,6 +260,4 @@ define('TEXT_TAGS_COPY', 'Artikeleigenschaften mitkopieren');
 define('TEXT_TAGS_COPY_INFO', 'Artikeleigenschaften mitkopieren<br/ >Nur bei Einzelkopie (1 Artikel) empfohlen');
 
 define('TEXT_PRODUCTS_LAST_MODIFIED', 'Zuletzt aktualisiert:');
-define('TEXT_STOCK_UPDATE_SUCCESS', 'Lagerbestand aktualisiert');
-define('TEXT_STOCK_UPDATE_ERROR', 'Lagerbestand nicht aktualisiert');
 ?>

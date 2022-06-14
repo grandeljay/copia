@@ -56,15 +56,6 @@ class HoodHelper extends MagnaCompatibleHelper {
 				'UseSpecialOffer' => getDBConfigValue(array($mp.'.fixed.price.usespecialoffer', 'val'), $mpId, false),
 			),
 		);
-		if (getDBConfigValue('hood.strike.price.group', $mpId, -1) > -1) {
-			$config['Strike'] = array(
-				'AddKind' => getDBConfigValue($mp.'.strike.price.addkind', $mpId, 'percent'),
-				'Factor'  => (float)getDBConfigValue($mp.'.strike.price.factor', $mpId, 0),
-				'Signal'  => getDBConfigValue($mp.'.strike.price.signal', $mpId, ''),
-				'Group'   => getDBConfigValue($mp.'.strike.price.group', $mpId, ''),
-				'UseSpecialOffer' => false
-			);
-		}
 		$config['Auction']['StartPrice']['Group'] = $config['Auction']['BuyItNow']['Group'] =
 			getDBConfigValue($mp.'.auction.price.group', $mpId, '');
 		
@@ -81,14 +72,15 @@ class HoodHelper extends MagnaCompatibleHelper {
 			'Auction' => array(
 				'Type'  => getDBConfigValue($mp.'.auction.quantity.type', $mpId, 'lump'),
 				'Value' => (int)getDBConfigValue($mp.'.auction.quantity.value', $mpId, 0),
-				'MaxQuantity' => (int)getDBConfigValue($mp.'.auction.quantity.maxquantity', $mpId, 999999),
+				'MaxQuantity' => (int)getDBConfigValue($mp.'.auction.quantity.maxquantity', $mpId, 0),
 			),
 			'Fixed' => array(
 				'Type'  => getDBConfigValue($mp.'.fixed.quantity.type', $mpId, 'lump'),
 				'Value' => (int)getDBConfigValue($mp.'.fixed.quantity.value', $mpId, 0),
-				'MaxQuantity' => (int)getDBConfigValue($mp.'.fixed.quantity.maxquantity', $mpId, 999999),
+				'MaxQuantity' => (int)getDBConfigValue($mp.'.fixed.quantity.maxquantity', $mpId, 0),
 			),
 		);
+		
 		return $config;
 	}
 	
@@ -97,7 +89,7 @@ class HoodHelper extends MagnaCompatibleHelper {
 			return $dbQuantity;
 		}
 		if (!isset($config['MaxQuantity'])) {
-			$config['MaxQuantity'] = 999999;
+			$config['MaxQuantity'] = 0;
 		}
 		switch ($config['Type']) {
 			case 'stocksub': {
@@ -117,14 +109,6 @@ class HoodHelper extends MagnaCompatibleHelper {
 	}
 	
 	public static function substituteTemplate($mpId, $pID, $template, $substitution) {
-        /* {Hook} "HoodSubstituteTemplate": Enables you to extend the Hood Template substitution (e.g. use your own placeholders).<br>
-           Variables that can be used:
-           <ul><li><code>$mpID</code>: The ID of the marketplace.</li>
-               <li><code>$pID</code>: The ID of the product (Table <code>products.products_id</code>).</li>
-               <li><code>$template</code>: The Hood product template.</li>
-               <li><code>$substitution</code>: Associative array. Keys are placeholders, Values are their content.</li>
-           </ul>
-         */
 		if (($hp = magnaContribVerify('HoodSubstituteTemplate', 1)) !== false) {
 			require($hp);
 		}

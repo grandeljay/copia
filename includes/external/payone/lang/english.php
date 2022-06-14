@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: english.php 13367 2021-02-03 09:20:27Z GTB $
+   $Id: english.php 10232 2016-08-11 07:06:49Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,10 +10,10 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2013 Gambio GmbH - http://www.gambio.de
-
+  
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
@@ -24,10 +24,10 @@ define('INSTALLMENT_TYPE_NOT_SELECTED', 'No type selected.');
 define('PAYDATA_INCOMPLETE', 'The indications for the payment method are incomplete.');
 define('PAYMENT_ERROR', 'An error occurred while processing.');
 define('ERROR_MUST_CONFIRM_MANDATE', 'Please confirm that you want to grant the SEPA direct debit mandate.');
-
+ 
 // credit risk check
 define('CREDIT_RISK_HEADING', 'Credit check');
-defined('BUTTON_CONFIRM') OR define('BUTTON_CONFIRM', 'Yes, perform credit check');
+define('BUTTON_CONFIRM', 'Yes, perform credit check');
 define('BUTTON_NOCONFIRM', 'No, don\'t execute a verification');
 define('TEXT_CREDIT_RISK_INFO', 'A credit assessment is being executed.');
 define('TEXT_CREDIT_RISK_COMFIRM', 'Do you want to agree with this?');
@@ -53,7 +53,7 @@ define('CR_ERROR_MODE_CONTINUE', 'continue');
 define('CR_NOTICE', 'Notice');
 define('CR_CONFIRMATION', 'Inquiry of approval');
 define('CR_ABTEST', 'A/B testing');
-
+ 
 // address check
 define('TEXT_ADDRESS_CHECK_HEADING', 'Correct address');
 define('TEXT_ADDRESS_CHECK_CHANGED', 'corrected');
@@ -88,7 +88,7 @@ define('AC_PSTATUS_NAMEADDRAMBIGUITY', 'Ambiguity in name to address');
 define('AC_PSTATUS_UNDELIVERABLE', 'not deliverable (any more)');
 define('AC_PSTATUS_DEAD', 'Person deceased');
 define('AC_PSTATUS_POSTALERROR', 'Wrong postal address');
-
+ 
 // api
 define('STATUS_UPDATED_BY_PAYONE', 'Status updated by PAYONE');
 define('COMMENT_ERROR', 'comment_error');
@@ -98,7 +98,7 @@ define('COMMENT_PREAUTH_APPROVED', 'Payment approved');
 define('VOUCHER_OR_DISCOUNT', 'voucher_or_discount');
 define('MISC_HANDLING', 'misc_handling');
 define('SHIPPING_COST', 'shipping_cost');
-
+ 
 // payment
 define('paymenttype_visa', 'Visa');
 define('paymenttype_mastercard', 'Mastercard');
@@ -116,28 +116,27 @@ define('paymenttype_invoice', 'Sale on account');
 define('paymenttype_prepay', 'Cash in advance');
 define('paymenttype_cod', 'Cash on delivery');
 define('paymenttype_paypal', 'PayPal');
-define('paymenttype_paydirekt', 'PayDirekt');
-define('paymenttype_sofortueberweisung', 'Online bank transfer');
+define('paymenttype_sofortueberweisung', 'Sofort&uuml;berweisung');
 define('paymenttype_giropay', 'GiroPay');
 define('paymenttype_eps', 'EPS');
 define('paymenttype_pfefinance', 'Post-Finance EFinance');
 define('paymenttype_pfcard', 'Post-Finance Card');
 define('paymenttype_ideal', 'iDEAL');
-
+ 
 // payment form
 define('selection_type', 'Payment method:');
 define('customers_dob', 'Date of birth (DD.MM.YYYY):');
 define('customers_telephone', 'Phone:');
 define('personalid', 'Personal ID:');
 define('addressaddition', 'Additional address:');
-
+ 
 // installment
 define('TEXT_KLARNA_CONFIRM', ' I agree with the data processing required for the execution of the sale on account and an identity and credit check by Klarna. I can revoke my %s at any time with effect for the future. Terms and conditions of the dealer apply.');
 define('TEXT_KLARNA_ERROR_CONDITIONS', 'If you do not accept the conditions of invoice from Klarna, we unfortunately can not accept your order!');
 define('TEXT_KLARNA_INVOICE', 'For more information on sale on account, see the');
 define('KLARNA_STOREID', 'Klarna SoreID');
 define('KLARNA_COUNTRIES', 'Klarna Countries');
-
+ 
 // otrans
 define('onlinetransfer_type', 'Type:');
 define('bankaccountholder', 'Account holder:');
@@ -147,7 +146,7 @@ define('ideal', 'Bank group:');
 define('eps', 'Bank group:');
 define('bankaccount', 'Account number:');
 define('bankcode', 'Bank code:');
-
+ 
 // ELV
 define('SEPA_MANDATE_HEADING', 'SEPA direct debit');
 define('SEPA_MANDATE_INFO', 'For redeeming the amount by direct debit from your bank account, we need a SEPA direct debit mandate.');
@@ -175,7 +174,7 @@ define('CHECK_BANKDATA', 'Check account data');
 define('DONT_CHECK', 'don\'t check account data');
 define('CHECK_BASIC', 'Basic');
 define('CHECK_POS', 'with POS blocklist');
-
+ 
 // cc
 define('TEXT_CARDOWNER', 'Card holder:');
 define('TEXT_CARDTYPE', 'Card type:');
@@ -183,7 +182,7 @@ define('TEXT_CARDNO', 'Card number:');
 define('TEXT_CARDEXPIRES', 'Valid until (Month / Year):');
 define('TEXT_CARDCHECKNUM', 'Check digit:');
 define('TEXT_CHECK_DATA', 'Please check your data.');
-
+ 
 // orders status
 define('ORDERS_STATUS_CONFIGURATION', 'Orders status configuration');
 define('ORDERS_STATUS_TMP', 'temporary status');
@@ -202,13 +201,12 @@ define('ORDERS_STATUS_REMINDER', 'Payment reminder');
 define('ORDERS_STATUS_VAUTHORIZATION', 'Payment vAuth');
 define('ORDERS_STATUS_VSETTLEMENT', 'Payment vSettlement');
 define('ORDERS_STATUS_INVOICE', 'Payment sale on account');
-define('ORDERS_STATUS_NONE', 'no change');
 define('TEXT_EXTERN_CALLBACK_URL', 'URL status forwarding');
 define('TEXT_EXTERN_CALLBACK_TIMEOUT', 'Timeout');
-
+ 
 // global
-defined('TEXT_YES') OR define('TEXT_YES', 'Yes');
-defined('TEXT_NO') OR define('TEXT_NO', 'No');
+define('TEXT_YES', 'Yes');
+define('TEXT_NO', 'No');
 define('ERROR_OCCURED', 'Error occurred');
 define('BOX_PAYONE_CONFIG', 'PAYONE configuration');
 define('BOX_PAYONE_LOGS', 'PAYONE API Log');
@@ -226,7 +224,7 @@ define('AUTHORIZATION_METHOD', 'Authorization method');
 define('AUTHMETHOD_AUTH', 'Instant authorization');
 define('AUTHMETHOD_PREAUTH', 'Pre-authorization');
 define('SEND_CART', 'Transfer cart');
-
+ 
 // payment genre
 define('PAYMENT_GENRE', 'Payment method');
 define('PAYMENTGENRE_CONFIGURATION', 'Payment methods configuration');
@@ -260,7 +258,7 @@ define('PG_PAYMENTTYPE_BILLSAFE', 'BillSAFE');
 define('PG_PAYMENTTYPE_COMMERZFINANZ', 'CommerzFinanz');
 define('PG_TYPE_ACTIVE', 'active');
 define('PG_CHECK_CAV', 'Check digit inquiry');
-define('PG_PAYMENTTYPE_SOFORTUEBERWEISUNG', 'Online bank transfer (&Uuml;berweisung by Sofort.)');
+define('PG_PAYMENTTYPE_SOFORTUEBERWEISUNG', 'Sofort&uuml;berweisung (&Uuml;berweisung by SOFORT)');
 define('PG_PAYMENTTYPE_GIROPAY', 'GiroPay');
 define('PG_PAYMENTTYPE_EPS', 'EPS');
 define('PG_PAYMENTTYPE_PFEFINANCE', 'Post-Finance EFinance');
@@ -273,7 +271,7 @@ define('PAYGENRE_ONLINETRANSFER', 'Online transaction');
 define('PAYGENRE_EWALLET', 'e-Wallet');
 define('PAYGENRE_ACCOUNTBASED', 'Bank account based payment methods');
 define('PAYGENRE_INSTALLMENT', 'Hire purchase/Factoring');
-
+ 
 // config
 define('ACTIVE', 'active');
 define('CONFIG_SAVE', 'Save configuration');
@@ -301,13 +299,13 @@ define('DUMP_CONFIG', 'Export configuration');
 define('CONFIGURATION_DUMPED_TO', 'Configuration saved to file');
 define('ERROR_DUMPING_CONFIGURATION', 'There was an error during the export of the configuration.');
 define('INSTALL_CONFIG', 'Install PAYONE');
-
+ 
 // Capture
 define('CAPTURE_TRANSACTION', 'Capture paymnt');
 define('CAPTURE_AMOUNT', 'Amount');
 define('CAPTURE_SUBMIT', 'Capture now');
 define('AMOUNT_CAPTURED', 'Amount captured');
-
+ 
 // Clearing
 define('CLEARING_INTRO', 'Please transfer the billing amount to the following bank account:');
 define('CLEARING_OUTRO', 'Your order will not be shipped until we receive your payment in our bank account.');
@@ -319,7 +317,7 @@ define('CLEARING_BIC', 'BIC: ');
 define('CLEARING_BANK', 'Bank: ');
 define('CLEARING_AMOUNT', 'Amount');
 define('CLEARING_TEXT', 'Reference: ');
-
+ 
 // Refund
 define('REFUND_TRANSACTION', 'Credit advice');
 define('REFUND_SUBMIT', 'Process credit advice');
@@ -337,7 +335,7 @@ define('REFUND_BANKCHECKDIGIT', 'Check digit');
 define('REFUND_IBAN', 'IBAN');
 define('REFUND_BIC', 'BIC');
 define('AMOUNT_REFUNDED', 'Amount credited');
-
+ 
 // Log
 define('PAYONE_LOGS_TITLE', 'PAYONE API Log');
 define('EVENT_ID', 'Event-ID');

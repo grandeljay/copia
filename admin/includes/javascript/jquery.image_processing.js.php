@@ -1,9 +1,7 @@
 <?php 
 /* -------------------------------------------------------------------------------------
-$Id: jquery.image_processing.js.php 11129 2018-05-07 12:19:50Z Tomcraft $
-
 jquery.image_processing.php
-Vers. 3.53 (c) www.rpa-com.de
+Vers. 3.52 (c) www.rpa-com.de
 * ----------------------------------------------------------------------------------- */
 
 defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.' );
@@ -38,7 +36,7 @@ jQuery(document).submit(function(e){
         $('.ajax_count').html('0');
         updateProgressBar(1,'image',0);
         var ajax_url = form.attr("action");
-        ajax_url += <?php echo defined('SID') ? "'&". SID ."'": "''";?>;
+        ajax_url += ''<?php echo SID ? '&'. SID : '';?>;
         var dataStr = form.serialize();
         ajaxCall(ajax_url, dataStr);
     }
@@ -55,8 +53,9 @@ function ajaxCall(ajax_url, dataStr) {
       timeout: 60000, //Set a timeout (in milliseconds) for the request. 
       dataType: 'json',
       data : dataStr,
-      error: function(xhr, status, error) {
-        alert(xhr.responseText);
+      error: function() {
+        //alert('Error loading json data!');
+        alert('Error!');
       },
       success: function(data) {
         JStoPHPResponse(data);
@@ -74,7 +73,7 @@ function JStoPHPResponse(data) {
     //$.each(response, function( key, value ) {
       //console.log('key: ' + key + ' | value: ' + value);
     //});
-    $('.ajax_imgname').html(response.imgname);
+$('.ajax_imgname').html(response.imgname);
     $('.ajax_count').html(response.count);
     updateProgressBar(response.total,'image',response.start);
     //return;

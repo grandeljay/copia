@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: sales_report.php 12950 2020-11-24 16:00:14Z GTB $
+   $Id: sales_report.php 4824 2013-05-24 09:41:50Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -60,15 +60,15 @@
         $status, 
         $outlet;
 
-    function __construct($mode, $startDate = 0, $endDate = 0, $sort = 0, $statusFilter = 0, $filter = 0, $payment = 0, $cgroup = '', $country = '') {
+    function __construct($mode, $startDate = 0, $endDate = 0, $sort = 0, $statusFilter = 0, $filter = 0,$payment = 0,$cgroup = '') {
       // startDate and endDate have to be a unix timestamp. Use mktime !
       // if set then both have to be valid startDate and endDate
       $this->mode = $mode;
+      $this->tax_include = defined('DISPLAY_PRICE_WITH_TAX')?DISPLAY_PRICE_WITH_TAX:'';
 
       $this->statusFilter = $statusFilter;
       $this->paymentFilter = $payment;     
       $this->cgroupFilter = $cgroup;
-      $this->countryFilter = $country;
 
       // get date of first sale
       /*
@@ -128,16 +128,10 @@
                                     ON o.orders_id = op.orders_id";
 
       // query for shipping
-      $this->queryShipping = "SELECT sum(round(ot.value, 2)/o.currency_value) as shipping 
+      $this->queryShipping = "SELECT sum(ot.value/o.currency_value) as shipping 
                                 FROM " . TABLE_ORDERS . " o
                                 JOIN " . TABLE_ORDERS_TOTAL . " ot 
                                      ON (ot.orders_id = o.orders_id AND  ot.class = 'ot_shipping')";
-
-      // query for additional
-      $this->queryAdditional = "SELECT sum(round(ot.value, 2)/o.currency_value) as additional 
-                                  FROM " . TABLE_ORDERS . " o
-                                  JOIN " . TABLE_ORDERS_TOTAL . " ot 
-                                       ON (ot.orders_id = o.orders_id AND  ot.class NOT IN ('ot_subtotal', 'ot_shipping', 'ot_subtotal_no_tax', 'ot_tax', 'ot_total', 'ot_z_bpytc_total', 'ot_z_paylater_total', 'ot_easycredit_fee'))";
 
       switch ($sort) {
         case '0':
@@ -164,7 +158,7 @@
       }
     }
 
-    function getNext($details=0) {
+    function getNext($details=false) {
       switch ($this->mode) {
         // yearly
         case '1':
@@ -206,11 +200,6 @@
       if ($this->cgroupFilter != '') {
          $filterString .= " AND o.customers_status ='" . (int)$this->cgroupFilter . "' ";
       }
-
-      if ($this->countryFilter != '') {
-        $country = xtc_get_countriesList($this->countryFilter, $with_iso_codes = false);
-      	$filterString .= " AND o.delivery_country_iso_code_2 ='" . xtc_db_prepare_input($country['countries_iso_code_2']) . "' ";
-      }
        
       $rqOrders = xtc_db_query($this->queryOrderCnt . " WHERE o.date_purchased >= '" . xtc_db_input(date("Y-m-d H:i:s", $sd)) . "' AND o.date_purchased < '" . xtc_db_input(date("Y-m-d H:i:s", $ed)) . "'" . $filterString);
       $order = xtc_db_fetch_array($rqOrders);
@@ -218,10 +207,7 @@
       $rqShipping = xtc_db_query($this->queryShipping . " WHERE o.date_purchased >= '" . xtc_db_input(date("Y-m-d H:i:s", $sd)) . "' AND o.date_purchased < '" . xtc_db_input(date("Y-m-d H:i:s", $ed)) . "'" . $filterString);
       $shipping = xtc_db_fetch_array($rqShipping);
 
-      $rqAdditional = xtc_db_query($this->queryAdditional . " WHERE o.date_purchased >= '" . xtc_db_input(date("Y-m-d H:i:s", $sd)) . "' AND o.date_purchased < '" . xtc_db_input(date("Y-m-d H:i:s", $ed)) . "'" . $filterString);
-      $additional = xtc_db_fetch_array($rqAdditional);
-
-      $rqItems = xtc_db_query($this->queryItemCnt . " WHERE o.date_purchased >= '" . xtc_db_input(date("Y-m-d H:i:s", $sd)) . "' AND o.date_purchased < '" . xtc_db_input(date("Y-m-d H:i:s", $ed)) . "'" . $filterString . (($details > 0) ? " GROUP BY pid " . $this->sortString : ""));
+      $rqItems = xtc_db_query($this->queryItemCnt . " WHERE o.date_purchased >= '" . xtc_db_input(date("Y-m-d H:i:s", $sd)) . "' AND o.date_purchased < '" . xtc_db_input(date("Y-m-d H:i:s", $ed)) . "'" . $filterString . " GROUP BY pid " . $this->sortString);
       $rqItems_count = xtc_db_num_rows($rqItems);
 
       // set the return values
@@ -244,7 +230,7 @@
         
         // products_attributes
         // are there any attributes for this order_id ?
-        if ($details > 0) {
+        if ($details) {
           $attr = array();
           $attributes_query = xtc_db_query("SELECT opa.*
                                               FROM " . TABLE_ORDERS_PRODUCTS_ATTRIBUTES . " opa
@@ -313,7 +299,6 @@
         $resp['psum'] = $resp['pquant'] * $price;
         $resp['order'] = $order['order_cnt'];
         $resp['shipping'] = $shipping['shipping'];
-        $resp['additional'] = $additional['additional'];
 
         // values per date and item
         $sumTot += $resp['psum'];

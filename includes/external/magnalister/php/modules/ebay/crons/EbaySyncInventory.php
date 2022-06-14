@@ -282,7 +282,6 @@ class EbaySyncInventory extends MagnaCompatibleSyncInventory {
 	}
 
 	protected function updateItem() {
-		global $_MagnaSession;
 		if ($this->mlProductsUseLegacy) {
 			$this->updateItemOld();
 			return;
@@ -362,13 +361,10 @@ class EbaySyncInventory extends MagnaCompatibleSyncInventory {
 			// master price is empty for variation items, therefore check if isset
 			$process = $process || (isset($data['Price']) && (float)$this->cItem['Price'] != (float)$data['Price']);
 		}
-		$aMatching = getDBConfigValue($_MagnaSession['currentPlatform'] . '.listingdetails.'.strtolower('EAN').'.dbmatching.table', $_MagnaSession['mpID'], false);
-		if (   array_key_exists('EAN', $product)
-		    && !empty($product['EAN'])
-		    && is_array($aMatching)
-		    && !empty($aMatching['column'])
-		    && !empty($aMatching['table'])
-		) {
+
+		if (   ML_ShopAddOns::mlAddOnIsBooked('EbayProductIdentifierSync')
+		    && array_key_exists('EAN', $product)
+		    && !empty($product['EAN'])) {
 			$data['EAN'] = $product['EAN'];
 		}
 
@@ -427,7 +423,7 @@ class EbaySyncInventory extends MagnaCompatibleSyncInventory {
 		"\n\teBay Quantity: ".$this->cItem['Quantity'].
 		"\n\tShop Main Quantity: ". $data['NewQuantity'].
 		"\n\teBay Price: ".$this->cItem['Price'].
-		"\n\tShop Price: ".((isset($product['PriceReduced'][$listingMasterType])) ? $product['PriceReduced'][$listingMasterType] : $product['Price'][$listingMasterType])
+		"\n\tShop Price: ".$product['Price'][$listingMasterType]
 		);
 
 		if ($this->config['StatusMode'] == 'true') {
@@ -447,14 +443,12 @@ class EbaySyncInventory extends MagnaCompatibleSyncInventory {
 					}
 				}
 				$data['NewQuantity'] = 0;
-				if (getDBConfigValue('ebay.zerostockontrol', $this->mpID, false)
-				     && array_key_exists('Variations', $data)
-				     && is_array($data['Variations'])        ) {
+				if (getDBConfigValue('ebay.zerostockontrol', $this->mpID, false)) {
 					foreach($data['Variations'] as &$vv) {
 						$vv['Quantity'] = 0;
 					}
 				} else {
-					if (isset($data['Variations'])) unset($data['Variations']);
+					unset($data['Variations']);
 				}
 			}
 		}

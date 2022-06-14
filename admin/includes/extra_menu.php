@@ -68,7 +68,7 @@ if (!function_exists('dynamicsAdds')){ // Menüpunkte dynamisch ergänzen
         ## magnalister
 
         $html = '';
-        if(isset($add_contents[$box]) && count($add_contents[$box]) > 0) {
+        if(isset($add_contents[$box]) && count($add_contents[$box] > 0)) {
             //foreach ($add_contents[$box] as $keyname => $key) {
             foreach ($add_contents[$box] as $key) {
                 //check for 2nd level

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: order_history.php 12278 2019-10-15 09:03:39Z GTB $
+   $Id: order_history.php 5581 2013-09-08 21:26:38Z Tomcraft $
    
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,7 +23,7 @@ include(DIR_FS_BOXES_INC . 'smarty_default.php');
 // set cache id
 $cache_id = md5($_SESSION['language'].((isset($_SESSION['customer_id'])) ? $_SESSION['customer_id'] : '0'));
 
-if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_order_history.html', $cache_id) || !$cache) {
+if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_newsletter.html', $cache_id) || !$cache) {
 
   if (isset($_SESSION['customer_id'])) {
 
@@ -41,8 +41,7 @@ if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_order_history.html', $c
                                                   ON p.products_id = pd.products_id
                                                      AND language_id = '" . (int)$_SESSION['languages_id'] . "'
                                             WHERE o.customers_id = '" . (int)$_SESSION['customer_id'] . "'
-                                              AND p.products_status = '1'
-                                                  ".PRODUCTS_CONDITIONS_P."
+                                              AND p.products_status = '1' 
                                          GROUP BY p.products_id 
                                          ORDER BY o.date_purchased DESC 
                                             LIMIT " . MAX_DISPLAY_PRODUCTS_IN_ORDER_HISTORY_BOX);

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: update_data.php 13363 2021-02-03 08:40:04Z GTB $
+   $Id: update_data.php 10231 2016-08-11 06:48:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -8,9 +8,9 @@
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
    Released under the GNU General Public License
-   ---------------------------------------------------------------------------------------*/
-
-
+   ---------------------------------------------------------------------------------------*/  
+  
+  
   $modified_sql_array = array(
     'address_book' => array(
       'drop' => array(
@@ -24,19 +24,7 @@
       'drop' => array(
         'col' => array(
           'blacklist',
-          'blz_update',
-          'cache',
-          'define_language',
-          'easymarketing',
-          'fck_wrapper',
-          'module_paypal_install',
-          'popup_image',
-          'safeterms',
-          'sofortueberweisung_install',
-          'start',
           'xajax',
-          'xtbooster',
-          'new_attributes',
         ),
       ),
     ),
@@ -44,7 +32,6 @@
       'drop' => array(
         'idx' => array(
           'orders_id',
-          'idx_orders_id',
         ),
       ),
     ),
@@ -74,7 +61,6 @@
         ),
       ),
     ),
-    'content_manager_content' => array(),
     'countries' => array(
       'drop' => array(
         'idx' => array(
@@ -82,18 +68,11 @@
         ),
       ),
     ),
-    'coupon_email_track' => array(
-      'drop' => array(
-        'idx' => array(
-          'idx_coupon_id',
-        ),
-      ),
-    ),
+    'coupon_email_track' => array(),
     'coupon_gv_customer' => array(
       'drop' => array(
         'idx' => array(
           'customer_id',
-          'idx_coupon_id',
         ),
       ),
     ),
@@ -125,7 +104,6 @@
         'col' => array(
           'customers_login_tries',
           'customers_login_time',
-          'customers_newsletter_mode',
         ),
       ),
     ),
@@ -150,7 +128,6 @@
     ),
     'customers_status_history' => array(),
     'database_version' => array(),
-    'email_content' => array(),
     'geo_zones' => array(),
     'languages' => array(
       'drop' => array(
@@ -171,13 +148,9 @@
     'newsfeed' => array(),
     'module_newsletter' => array(),
     'newsletter_recipients' => array(),
-    'newsletter_recipients_history' => array(),
     'newsletters' => array(),
     'newsletters_history' => array(),
     'orders' => array(
-      'rename' => array(
-        'campaign' => 'refferers_id',
-      ),
       'drop' => array(
         'col' => array(
           'cc_type',

@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: MeinpaketCategoryMatching.php 5357 2015-03-13 14:16:33Z Soprex $
  *
  * (c) 2011 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)

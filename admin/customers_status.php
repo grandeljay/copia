@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: customers_status.php 13265 2021-01-31 14:13:24Z GTB $
+   $Id: customers_status.php 10392 2016-11-07 11:28:13Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -47,143 +47,135 @@
   }
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
-  $page = (isset($_GET['page']) ? (int)$_GET['page'] : 1);
 
   if (xtc_not_null($action)) {
     switch ($action) {
       case 'insert':
       case 'save':
         if (isset($_POST) && count($_POST) > 0) {
-          $customers_status_id = ((isset($_GET['cID'])) ? (int)$_GET['cID'] : null);
-          $languages = xtc_get_languages();
-          for ($i=0; $i < sizeof($languages); $i++) {
-            $language_id = $languages[$i]['id'];
-            $customers_status_payment_unallowed = implode(',', (isset($_POST['customers_status_payment_unallowed']) && is_array($_POST['customers_status_payment_unallowed']) ? $_POST['customers_status_payment_unallowed'] : array()));
-            $customers_status_shipping_unallowed = implode(',', (isset($_POST['customers_status_shipping_unallowed']) && is_array($_POST['customers_status_shipping_unallowed']) ? $_POST['customers_status_shipping_unallowed'] : array()));
-            $sql_data_array = array(
-                'customers_status_name' => xtc_db_prepare_input($_POST['customers_status_name'][$language_id]),
-                'customers_status_public' => xtc_db_prepare_input($_POST['customers_status_public']),
-                'customers_status_show_price' => xtc_db_prepare_input($_POST['customers_status_show_price']),
-                'customers_status_show_price_tax' => xtc_db_prepare_input($_POST['customers_status_show_price_tax']),
-                'customers_status_min_order' => xtc_db_prepare_input($_POST['customers_status_min_order']),
-                'customers_status_max_order' => xtc_db_prepare_input($_POST['customers_status_max_order']),
-                'customers_status_discount' => xtc_db_prepare_input($_POST['customers_status_discount']),
-                'customers_status_ot_discount_flag' => xtc_db_prepare_input($_POST['customers_status_ot_discount_flag']),
-                'customers_status_ot_discount' => xtc_db_prepare_input($_POST['customers_status_ot_discount']),
-                'customers_status_graduated_prices' => xtc_db_prepare_input($_POST['customers_status_graduated_prices']),
-                'customers_status_add_tax_ot' => xtc_db_prepare_input($_POST['customers_status_add_tax_ot']),
-                'customers_status_payment_unallowed' => xtc_db_prepare_input($customers_status_payment_unallowed),
-                'customers_status_shipping_unallowed' => xtc_db_prepare_input($customers_status_shipping_unallowed),
-                'customers_fsk18' => xtc_db_prepare_input($_POST['customers_fsk18']),
-                'customers_fsk18_display' => xtc_db_prepare_input($_POST['customers_fsk18_display']),
-                'customers_status_write_reviews' => xtc_db_prepare_input($_POST['customers_status_write_reviews']),
-                'customers_status_read_reviews' => xtc_db_prepare_input($_POST['customers_status_read_reviews']),
-                'customers_status_reviews_status' => xtc_db_prepare_input($_POST['customers_status_reviews_status']),
-                'customers_status_specials' => xtc_db_prepare_input($_POST['customers_status_specials']),
-                'customers_status_discount_attributes' => xtc_db_prepare_input($_POST['customers_status_discount_attributes']),
-                'customers_status_show_tax_total' => xtc_db_prepare_input($_POST['customers_status_show_tax_total'])
-              );
-            if ($action == 'insert') {
-              if (!xtc_not_null($customers_status_id)) {
-                $next_id_query = xtc_db_query("SELECT MAX(customers_status_id) AS customers_status_id FROM " . TABLE_CUSTOMERS_STATUS . "");
-                $next_id = xtc_db_fetch_array($next_id_query);
-                $customers_status_id = $next_id['customers_status_id'] + 1;
-              }
-              $insert_sql_data = array('customers_status_id' => xtc_db_prepare_input($customers_status_id), 'language_id' => xtc_db_prepare_input($language_id));
-              $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
-              xtc_db_perform(TABLE_CUSTOMERS_STATUS, $sql_data_array);
-            } elseif ($action == 'save') {
-              $customers_status_query = xtc_db_query("SELECT * FROM ".TABLE_CUSTOMERS_STATUS." WHERE language_id = '".$language_id."' AND customers_status_id = '".xtc_db_input($customers_status_id)."'");
-              if (xtc_db_num_rows($customers_status_query) == 0)
-                xtc_db_perform(TABLE_CUSTOMERS_STATUS, array ('customers_status_id' => xtc_db_input($customers_status_id), 'language_id' => $language_id));
-                xtc_db_perform(TABLE_CUSTOMERS_STATUS, $sql_data_array, 'update', "customers_status_id = '" . xtc_db_input($customers_status_id) . "' AND language_id = '" . $language_id . "'");
-            }
-          } # end of languages for-loop
-
+        $customers_status_id = xtc_db_prepare_input($_GET['cID']);
+        $languages = xtc_get_languages();
+        for ($i=0; $i < sizeof($languages); $i++) {
+          $language_id = $languages[$i]['id'];
+          $customers_status_payment_unallowed = implode(',', (is_array($_POST['customers_status_payment_unallowed']) ? $_POST['customers_status_payment_unallowed'] : array()));
+          $customers_status_shipping_unallowed = implode(',', (is_array($_POST['customers_status_shipping_unallowed']) ? $_POST['customers_status_shipping_unallowed'] : array()));
+          $sql_data_array = array(
+              'customers_status_name' => xtc_db_prepare_input($_POST['customers_status_name'][$language_id]),
+              'customers_status_public' => xtc_db_prepare_input($_POST['customers_status_public']),
+              'customers_status_show_price' => xtc_db_prepare_input($_POST['customers_status_show_price']),
+              'customers_status_show_price_tax' => xtc_db_prepare_input($_POST['customers_status_show_price_tax']),
+              'customers_status_min_order' => xtc_db_prepare_input($_POST['customers_status_min_order']),
+              'customers_status_max_order' => xtc_db_prepare_input($_POST['customers_status_max_order']),
+              'customers_status_discount' => xtc_db_prepare_input($_POST['customers_status_discount']),
+              'customers_status_ot_discount_flag' => xtc_db_prepare_input($_POST['customers_status_ot_discount_flag']),
+              'customers_status_ot_discount' => xtc_db_prepare_input($_POST['customers_status_ot_discount']),
+              'customers_status_graduated_prices' => xtc_db_prepare_input($_POST['customers_status_graduated_prices']),
+              'customers_status_add_tax_ot' => xtc_db_prepare_input($_POST['customers_status_add_tax_ot']),
+              'customers_status_payment_unallowed' => xtc_db_prepare_input($customers_status_payment_unallowed),
+              'customers_status_shipping_unallowed' => xtc_db_prepare_input($customers_status_shipping_unallowed),
+              'customers_fsk18' => xtc_db_prepare_input($_POST['customers_fsk18']),
+              'customers_fsk18_display' => xtc_db_prepare_input($_POST['customers_fsk18_display']),
+              'customers_status_write_reviews' => xtc_db_prepare_input($_POST['customers_status_write_reviews']),
+              'customers_status_read_reviews' => xtc_db_prepare_input($_POST['customers_status_read_reviews']),
+              'customers_status_reviews_status' => xtc_db_prepare_input($_POST['customers_status_reviews_status']),
+              'customers_status_specials' => xtc_db_prepare_input($_POST['customers_status_specials']),
+              'customers_status_discount_attributes' => xtc_db_prepare_input($_POST['customers_status_discount_attributes']),
+              'customers_status_show_tax_total' => xtc_db_prepare_input($_POST['customers_status_show_tax_total'])
+            );
           if ($action == 'insert') {
-            // Check if table exists and delete it first
-            xtc_db_query("DROP TABLE IF EXISTS personal_offers_by_customers_status_" . $customers_status_id);
-
-            // We want to create a personal offer table corresponding to each customers_status
-            xtc_db_query("CREATE TABLE personal_offers_by_customers_status_" . $customers_status_id . " (
-                            price_id INT NOT NULL AUTO_INCREMENT, 
-                            products_id int NOT NULL, 
-                            quantity int, 
-                            personal_offer decimal(15,4),
-                            PRIMARY KEY (price_id),
-                            KEY idx_products_id (products_id)
-                          )");
-
-            // get lat group
-            $last_group_table = get_table_columns(TABLE_CATEGORIES, 'group_permission_%', true);
-            $last_group = key(array_slice($last_group_table, -1, 1, true));
-
-            // Check if table column exists 
-            if (!get_table_columns(TABLE_PRODUCTS,'group_permission_' . $customers_status_id)) {
-              xtc_db_query("ALTER TABLE ".TABLE_PRODUCTS." ADD group_permission_" . $customers_status_id . " TINYINT( 1 ) NOT NULL AFTER `".$last_group."`");
+            if (!xtc_not_null($customers_status_id)) {
+              $next_id_query = xtc_db_query("SELECT MAX(customers_status_id) AS customers_status_id FROM " . TABLE_CUSTOMERS_STATUS . "");
+              $next_id = xtc_db_fetch_array($next_id_query);
+              $customers_status_id = $next_id['customers_status_id'] + 1;
             }
+            $insert_sql_data = array('customers_status_id' => xtc_db_prepare_input($customers_status_id), 'language_id' => xtc_db_prepare_input($language_id));
+            $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
+            xtc_db_perform(TABLE_CUSTOMERS_STATUS, $sql_data_array);
+          } elseif ($action == 'save') {
+            $customers_status_query = xtc_db_query("SELECT * FROM ".TABLE_CUSTOMERS_STATUS." WHERE language_id = '".$language_id."' AND customers_status_id = '".xtc_db_input($customers_status_id)."'");
+            if (xtc_db_num_rows($customers_status_query) == 0)
+              xtc_db_perform(TABLE_CUSTOMERS_STATUS, array ('customers_status_id' => xtc_db_input($customers_status_id), 'language_id' => $language_id));
+              xtc_db_perform(TABLE_CUSTOMERS_STATUS, $sql_data_array, 'update', "customers_status_id = '" . xtc_db_input($customers_status_id) . "' AND language_id = '" . $language_id . "'");
+          }
+        } # end of languages for-loop
 
-            // Check if table column exists
-            if (!get_table_columns(TABLE_CATEGORIES,'group_permission_' . $customers_status_id)) {
-              xtc_db_query("ALTER TABLE ".TABLE_CATEGORIES." ADD group_permission_" . $customers_status_id . " TINYINT( 1 ) NOT NULL AFTER `".$last_group."`");
-            }
+        if ($action == 'insert') {
+          // Check if table exists and delete it first
+          xtc_db_query("DROP TABLE IF EXISTS personal_offers_by_customers_status_" . $customers_status_id);
+
+          // We want to create a personal offer table corresponding to each customers_status
+          xtc_db_query("CREATE TABLE personal_offers_by_customers_status_" . $customers_status_id . " (price_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, products_id int NOT NULL, quantity int, personal_offer decimal(15,4))");
+
+          // get lat group
+          $last_group_table = get_table_columns(TABLE_CATEGORIES, 'group_permission_%', true);
+          $last_group = key(array_slice($last_group_table, -1, 1, true));
+
+          // Check if table column exists 
+          if (!get_table_columns(TABLE_PRODUCTS,'group_permission_' . $customers_status_id)) {
+            xtc_db_query("ALTER TABLE ".TABLE_PRODUCTS." ADD group_permission_" . $customers_status_id . " TINYINT( 1 ) NOT NULL AFTER `".$last_group."`");
           }
 
-          // adopt customer group permission
-          if (isset($_POST['customers_group_adopt_permission']) && $_POST['customers_group_adopt_permission'] !== '') {
-            $adopt_permission = (int)$_POST['customers_group_adopt_permission'];
-            // categories
-            $adopt_categories_permission = xtc_db_query("SELECT categories_id, group_permission_".$adopt_permission." FROM " . TABLE_CATEGORIES);
-            while($adopt_catp = xtc_db_fetch_array($adopt_categories_permission)) {
-              xtc_db_query("UPDATE ".TABLE_CATEGORIES."
-                               SET group_permission_" . $customers_status_id . "=".$adopt_catp['group_permission_'.$adopt_permission]."
-                             WHERE categories_id=".$adopt_catp['categories_id']);
-            }
-            // products
-            $adopt_products_permission = xtc_db_query("SELECT products_id, group_permission_".$adopt_permission." FROM " . TABLE_PRODUCTS);
-            while($adopt_pp = xtc_db_fetch_array($adopt_products_permission)) {
-              xtc_db_query("UPDATE ".TABLE_PRODUCTS."
-                               SET group_permission_" . $customers_status_id . "=".$adopt_pp['group_permission_'.$adopt_permission]." 
-                             WHERE products_id=".$adopt_pp['products_id']);
-            }
-            // content
-            $adopt_content_permission = xtc_db_query("SELECT content_id, group_ids FROM " . TABLE_CONTENT_MANAGER . " WHERE group_ids LIKE '%c_".$adopt_permission."_group%'");
-            while ($adopt_cp = xtc_db_fetch_array($adopt_content_permission)) {
-              xtc_db_query("UPDATE " . TABLE_CONTENT_MANAGER . "
-                               SET group_ids=CONCAT(group_ids, ',c_" . $customers_status_id . "_group')
-                             WHERE content_id=" . $adopt_cp['content_id'] . "
-                               AND group_ids NOT LIKE 'c_" . $customers_status_id . "_group'");
-            }
-          }
-
-          // adopt customer prices
-          if (isset($_POST['customers_base_status']) && !empty($_POST['customers_base_status'])) {
-            if ($action == 'save') {
-              xtc_db_query('TRUNCATE TABLE personal_offers_by_customers_status_' . $customers_status_id);
-            }
-            $products_query = xtc_db_query("SELECT price_id, products_id, quantity, personal_offer FROM personal_offers_by_customers_status_".(int)$_POST['customers_base_status']."");
-            while($products = xtc_db_fetch_array($products_query)){
-              $product_data_array = array(
-                  'price_id' => xtc_db_prepare_input($products['price_id']),
-                  'products_id' => xtc_db_prepare_input($products['products_id']),
-                  'quantity' => xtc_db_prepare_input($products['quantity']),
-                  'personal_offer' => xtc_db_prepare_input($products['personal_offer'])
-                );
-              xtc_db_perform('personal_offers_by_customers_status_' . $customers_status_id, $product_data_array);
-            }
-          }
-
-          $accepted_customers_status_image_files_extensions = array("jpg","jpeg","jpe","gif","png","bmp","tiff","tif","bmp");
-          $accepted_customers_status_image_files_mime_types = array("image/jpeg","image/gif","image/png","image/bmp");
-          if ($customers_status_image = xtc_try_upload('customers_status_image', DIR_FS_CATALOG.DIR_WS_ICONS, '644', $accepted_customers_status_image_files_extensions, $accepted_customers_status_image_files_mime_types)) {
-            xtc_db_query("UPDATE " . TABLE_CUSTOMERS_STATUS . " SET customers_status_image = '" . $customers_status_image->filename . "' WHERE customers_status_id = '" . xtc_db_input($customers_status_id) . "'");
-          }
-
-          if (isset($_POST['default']) && $_POST['default'] == 'on') {
-            xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '" . xtc_db_input($customers_status_id) . "' WHERE configuration_key = 'DEFAULT_CUSTOMERS_STATUS_ID'");
+          // Check if table column exists
+          if (!get_table_columns(TABLE_CATEGORIES,'group_permission_' . $customers_status_id)) {
+            xtc_db_query("ALTER TABLE ".TABLE_CATEGORIES." ADD group_permission_" . $customers_status_id . " TINYINT( 1 ) NOT NULL AFTER `".$last_group."`");
           }
         }
-        xtc_redirect(xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $customers_status_id));
+
+        // adopt customer group permission
+        if (isset($_POST['customers_group_adopt_permission']) && $_POST['customers_group_adopt_permission'] !== '') {
+          $adopt_permission = (int)$_POST['customers_group_adopt_permission'];
+          // categories
+          $adopt_categories_permission = xtc_db_query("SELECT categories_id, group_permission_".$adopt_permission." FROM " . TABLE_CATEGORIES);
+          while($adopt_catp = xtc_db_fetch_array($adopt_categories_permission)) {
+            xtc_db_query("UPDATE ".TABLE_CATEGORIES."
+                             SET group_permission_" . $customers_status_id . "=".$adopt_catp['group_permission_'.$adopt_permission]."
+                           WHERE categories_id=".$adopt_catp['categories_id']);
+          }
+          // products
+          $adopt_products_permission = xtc_db_query("SELECT products_id, group_permission_".$adopt_permission." FROM " . TABLE_PRODUCTS);
+          while($adopt_pp = xtc_db_fetch_array($adopt_products_permission)) {
+            xtc_db_query("UPDATE ".TABLE_PRODUCTS."
+                             SET group_permission_" . $customers_status_id . "=".$adopt_pp['group_permission_'.$adopt_permission]." 
+                           WHERE products_id=".$adopt_pp['products_id']);
+          }
+          // content
+          $adopt_content_permission = xtc_db_query("SELECT content_id, group_ids FROM " . TABLE_CONTENT_MANAGER . " WHERE group_ids LIKE '%c_".$adopt_permission."_group%'");
+          while ($adopt_cp = xtc_db_fetch_array($adopt_content_permission)) {
+            xtc_db_query("UPDATE " . TABLE_CONTENT_MANAGER . "
+                             SET group_ids=CONCAT(group_ids, ',c_" . $customers_status_id . "_group')
+                           WHERE content_id=" . $adopt_cp['content_id'] . "
+                             AND group_ids NOT LIKE 'c_" . $customers_status_id . "_group'");
+          }
+        }
+
+        // adopt customer prices
+        if (isset($_POST['customers_base_status']) && !empty($_POST['customers_base_status'])) {
+          if ($action == 'save') {
+            xtc_db_query('TRUNCATE TABLE personal_offers_by_customers_status_' . $customers_status_id);
+          }
+          $products_query = xtc_db_query("SELECT price_id, products_id, quantity, personal_offer FROM personal_offers_by_customers_status_".(int)$_POST['customers_base_status']."");
+          while($products = xtc_db_fetch_array($products_query)){
+            $product_data_array = array(
+                'price_id' => xtc_db_prepare_input($products['price_id']),
+                'products_id' => xtc_db_prepare_input($products['products_id']),
+                'quantity' => xtc_db_prepare_input($products['quantity']),
+                'personal_offer' => xtc_db_prepare_input($products['personal_offer'])
+              );
+            xtc_db_perform('personal_offers_by_customers_status_' . $customers_status_id, $product_data_array);
+          }
+        }
+
+        $accepted_customers_status_image_files_extensions = array("jpg","jpeg","jpe","gif","png","bmp","tiff","tif","bmp");
+        $accepted_customers_status_image_files_mime_types = array("image/jpeg","image/gif","image/png","image/bmp");
+        if ($customers_status_image = xtc_try_upload('customers_status_image', DIR_FS_CATALOG.DIR_WS_ICONS, '644', $accepted_customers_status_image_files_extensions, $accepted_customers_status_image_files_mime_types)) {
+          xtc_db_query("UPDATE " . TABLE_CUSTOMERS_STATUS . " SET customers_status_image = '" . $customers_status_image->filename . "' WHERE customers_status_id = '" . xtc_db_input($customers_status_id) . "'");
+        }
+
+        if ($_POST['default'] == 'on') {
+          xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '" . xtc_db_input($customers_status_id) . "' WHERE configuration_key = 'DEFAULT_CUSTOMERS_STATUS_ID'");
+        }
+        }
+        xtc_redirect(xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $customers_status_id));
         break;
 
       case 'deleteconfirm':
@@ -201,7 +193,7 @@
         xtc_db_query("DROP TABLE IF EXISTS personal_offers_by_customers_status_" . (int)$cID);
         xtc_db_query("ALTER TABLE `products` DROP `group_permission_" . (int)$cID . "`");
         xtc_db_query("ALTER TABLE `categories` DROP `group_permission_" . (int)$cID . "`");
-        xtc_redirect(xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page));
+        xtc_redirect(xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . (int)$_GET['page']));
         break;
 
       case 'delete':
@@ -211,7 +203,7 @@
         $status = xtc_db_fetch_array($status_query);
 
         $remove_status = true;
-        if ($cID == DEFAULT_CUSTOMERS_STATUS_ID || $cID == DEFAULT_CUSTOMERS_STATUS_ID_GUEST) {
+        if (($cID == DEFAULT_CUSTOMERS_STATUS_ID) || ($cID == DEFAULT_CUSTOMERS_STATUS_ID_GUEST) || ($cID == DEFAULT_CUSTOMERS_STATUS_ID_NEWSLETTER)) {
           $remove_status = false;
           $messageStack->add(ERROR_REMOVE_DEFAULT_CUSTOMERS_STATUS, 'error');
         } elseif ($status['count'] > 0) {
@@ -302,7 +294,7 @@ if (xtc_not_null($action) && $action != 'delete') {
                   </tr>
                   <?php
 
-                  $customers_status_split = new splitPageResults($page, MAX_DISPLAY_SEARCH_RESULTS, $customers_status_query_raw, $customers_status_query_numrows);
+                  $customers_status_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $customers_status_query_raw, $customers_status_query_numrows);
                   $customers_status_query = xtc_db_query($customers_status_query_raw);
                   while ($customers_status = xtc_db_fetch_array($customers_status_query)) {
                     if ((!isset($_GET['cID']) || (isset($_GET['cID']) && ($_GET['cID'] == $customers_status['customers_status_id']))) && !isset($cInfo) && (substr($action, 0, 3) != 'new')) {
@@ -310,16 +302,16 @@ if (xtc_not_null($action) && $action != 'delete') {
                     }
 
                     if (isset($cInfo) && is_object($cInfo) && ($customers_status['customers_status_id'] == $cInfo->customers_status_id) ) {
-                      $tr_attributes = 'class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id . '&action=edit') .'\'"';
+                      $tr_attributes = 'class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id . '&action=edit') .'\'"';
                     } else {
-                      $tr_attributes = 'class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $customers_status['customers_status_id']) .'\'"';
+                      $tr_attributes = 'class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\'' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $customers_status['customers_status_id']) .'\'"';
                     }
                     ?>
                     <tr <?php echo $tr_attributes;?>>
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_id'];?></td>
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_image'] != '' ? xtc_image(DIR_WS_CATALOG.DIR_WS_ICONS . $customers_status['customers_status_image'] , IMAGE_ICON_INFO) : '&nbsp;'?></td>
                       <td class="dataTableContent txta-c"><?php echo xtc_get_status_users($customers_status['customers_status_id']);?></td>
-                      <td class="dataTableContent"><?php echo $customers_status['customers_status_name'] . ($customers_status['customers_status_id'] == DEFAULT_CUSTOMERS_STATUS_ID ? ' (' . TEXT_DEFAULT . ')' : '') . ($customers_status['customers_status_public'] == '1' ? ', ' . CUSTOMERS_GROUP_PUBLIC : '');?></td>
+                      <td class="dataTableContent"><?php echo $customers_status['customers_status_name'] . ($customers_status['customers_status_id'] == DEFAULT_CUSTOMERS_STATUS_ID ? ' (' . TEXT_DEFAULT . ')' : '') . ($customers_status['customers_status_public'] == '1' ? ' ,public ' : '');?></td>
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_show_price'] == '1' ? ($customers_status['customers_status_show_price_tax'] == '1' ? TAX_YES : TAX_NO) : '---' ;?></td>
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_discount'];?> %</td>
                       <td class="dataTableContent txta-c"><?php echo ($customers_status['customers_status_ot_discount_flag'] == 0 ? '<span class="colorRed">' : '<span>' ).$customers_status['customers_status_ot_discount'];?> %</span></td>
@@ -327,20 +319,20 @@ if (xtc_not_null($action) && $action != 'delete') {
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_specials'] == 0 ? NO : YES;?></td>
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_payment_unallowed'];?></td>
                       <td class="dataTableContent txta-c"><?php echo $customers_status['customers_status_shipping_unallowed'];?></td>
-                      <td class="dataTableContent txta-r"><?php if (isset($cInfo) && is_object($cInfo) && ($customers_status['customers_status_id'] == $cInfo->customers_status_id) ) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $customers_status['customers_status_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
+                      <td class="dataTableContent txta-r"><?php if (isset($cInfo) && is_object($cInfo) && ($customers_status['customers_status_id'] == $cInfo->customers_status_id) ) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $customers_status['customers_status_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
                     </tr>
                     <?php
                   }
                   ?>
                   <tr>                          
                 </table>
-                <div class="smallText pdg2 flt-l"><?php echo $customers_status_split->display_count($customers_status_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $page, TEXT_DISPLAY_NUMBER_OF_CUSTOMERS_STATUS); ?></div>
-                <div class="smallText pdg2 flt-r"><?php echo $customers_status_split->display_links($customers_status_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $page); ?></div>
+                <div class="smallText pdg2 flt-l"><?php echo $customers_status_split->display_count($customers_status_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_CUSTOMERS_STATUS); ?></div>
+                <div class="smallText pdg2 flt-r"><?php echo $customers_status_split->display_links($customers_status_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></div>
                 <?php
                 if (empty($action)) {
                   ?>
                   <div class="clear"></div>
-                  <div class="pdg2 flt-r"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&action=new') . '">' . BUTTON_INSERT . '</a>'; ?></div>
+                  <div class="pdg2 flt-r"><?php echo '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&action=new') . '">' . BUTTON_INSERT . '</a>'; ?></div>
                   <?php
                 }
                 ?>        
@@ -358,7 +350,7 @@ if (xtc_not_null($action) && $action != 'delete') {
             switch ($action) {
               case 'new':
                 $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_NEW_CUSTOMERS_STATUS . '</b>');
-                $contents = array('form' => xtc_draw_form('status', FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&action=insert', 'post', 'enctype="multipart/form-data"'));
+                $contents = array('form' => xtc_draw_form('status', FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&action=insert', 'post', 'enctype="multipart/form-data"'));
                 $contents[] = array('text' => TEXT_INFO_INSERT_INTRO);
                 $customers_status_inputs_string = '';
                 $languages = xtc_get_languages();
@@ -367,34 +359,34 @@ if (xtc_not_null($action) && $action != 'delete') {
                 }
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_NAME . $customers_status_inputs_string);
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_IMAGE . '<br />' . xtc_draw_file_field('customers_status_image') . ' (jpg,jpeg,jpe,gif,png,bmp,tiff,tif,bmp)');
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_PUBLIC_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_PUBLIC . '<br />' . xtc_draw_pull_down_menu('customers_status_public', $customers_status_array, $cInfo->customers_status_public ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MIN_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MIN_ORDER . '<br />' . xtc_draw_input_field('customers_status_min_order', $cInfo->customers_status_min_order ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MAX_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MAX_ORDER . '<br />' . xtc_draw_input_field('customers_status_max_order', $cInfo->customers_status_max_order ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_INTRO     . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE . '<br />' . xtc_draw_pull_down_menu('customers_status_show_price', $customers_status_array, $cInfo->customers_status_show_price ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX . '<br />' . xtc_draw_pull_down_menu('customers_status_show_price_tax', $customers_status_array, $cInfo->customers_status_show_price_tax ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_ADD_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_ADD_TAX . '<br />' . xtc_draw_pull_down_menu('customers_status_add_tax_ot', $customers_status_array, $cInfo->customers_status_add_tax_ot));             
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . '<br />' . xtc_draw_input_field('customers_status_show_tax_total', $cInfo->customers_status_show_tax_total ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_PUBLIC_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_PUBLIC . ' ' . xtc_draw_pull_down_menu('customers_status_public', $customers_status_array, $cInfo->customers_status_public ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MIN_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MIN_ORDER . ' ' . xtc_draw_input_field('customers_status_min_order', $cInfo->customers_status_min_order ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MAX_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MAX_ORDER . ' ' . xtc_draw_input_field('customers_status_max_order', $cInfo->customers_status_max_order ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_INTRO     . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE . ' ' . xtc_draw_pull_down_menu('customers_status_show_price', $customers_status_array, $cInfo->customers_status_show_price ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX . ' ' . xtc_draw_pull_down_menu('customers_status_show_price_tax', $customers_status_array, $cInfo->customers_status_show_price_tax ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_ADD_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_ADD_TAX . ' ' . xtc_draw_pull_down_menu('customers_status_add_tax_ot', $customers_status_array, $cInfo->customers_status_add_tax_ot));             
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . ' ' . xtc_draw_input_field('customers_status_show_tax_total', $cInfo->customers_status_show_tax_total ));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE_INTRO . '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . '<br />' . xtc_draw_input_field('customers_status_discount', $cInfo->customers_status_discount));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_OT_XMEMBER_INTRO . '<br /> ' . ENTRY_OT_XMEMBER . '<br />' . xtc_draw_pull_down_menu('customers_status_ot_discount_flag', $customers_status_array, $cInfo->customers_status_ot_discount_flag ). '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . '<br />' . xtc_draw_input_field('customers_status_ot_discount', $cInfo->customers_status_ot_discount));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_GRADUATED_PRICES_INTRO . '<br />' . ENTRY_GRADUATED_PRICES . '<br />' . xtc_draw_pull_down_menu('customers_status_graduated_prices', $customers_status_array, $cInfo->customers_status_graduated_prices ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES . '<br />' . xtc_draw_pull_down_menu('customers_status_discount_attributes', $customers_status_array, $cInfo->customers_status_discount_attributes ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_OT_XMEMBER_INTRO . '<br /> ' . ENTRY_OT_XMEMBER . ' ' . xtc_draw_pull_down_menu('customers_status_ot_discount_flag', $customers_status_array, $cInfo->customers_status_ot_discount_flag ). '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . '<br />' . xtc_draw_input_field('customers_status_ot_discount', $cInfo->customers_status_ot_discount));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_GRADUATED_PRICES_INTRO . '<br />' . ENTRY_GRADUATED_PRICES . ' ' . xtc_draw_pull_down_menu('customers_status_graduated_prices', $customers_status_array, $cInfo->customers_status_graduated_prices ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES . ' ' . xtc_draw_pull_down_menu('customers_status_discount_attributes', $customers_status_array, $cInfo->customers_status_discount_attributes ));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_PAYMENT_UNALLOWED_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_PAYMENT_UNALLOWED . '<br/>' . xtc_cfg_checkbox_unallowed_module('payment','customers_status_payment_unallowed',$cInfo->customers_status_payment_unallowed) );
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHIPPING_UNALLOWED_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SHIPPING_UNALLOWED . '<br/>' . xtc_cfg_checkbox_unallowed_module('shipping','customers_status_shipping_unallowed',$cInfo->customers_status_shipping_unallowed) );                          
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18 . '<br />' . xtc_draw_pull_down_menu('customers_fsk18', $customers_status_array, $cInfo->customers_fsk18));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_DISPLAY_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18_DISPLAY . '<br />' . xtc_draw_pull_down_menu('customers_fsk18_display', $customers_status_array, $cInfo->customers_fsk18_display));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_WRITE_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_WRITE_REVIEWS . '<br />' . xtc_draw_pull_down_menu('customers_status_write_reviews', $customers_status_array, $cInfo->customers_status_write_reviews));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_READ_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_READ_REVIEWS . '<br />' . xtc_draw_pull_down_menu('customers_status_read_reviews', $customers_status_array, $cInfo->customers_status_read_reviews));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_REVIEWS_STATUS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_REVIEWS_STATUS . '<br />' . xtc_draw_pull_down_menu('customers_status_reviews_status', $customers_status_array, $cInfo->customers_status_reviews_status));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SPECIALS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SPECIALS . '<br />' . xtc_draw_pull_down_menu('customers_status_specials', $customers_status_array, $cInfo->customers_status_specials));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18 . ' ' . xtc_draw_pull_down_menu('customers_fsk18', $customers_status_array, $cInfo->customers_fsk18));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_DISPLAY_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18_DISPLAY . ' ' . xtc_draw_pull_down_menu('customers_fsk18_display', $customers_status_array, $cInfo->customers_fsk18_display));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_WRITE_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_WRITE_REVIEWS . ' ' . xtc_draw_pull_down_menu('customers_status_write_reviews', $customers_status_array, $cInfo->customers_status_write_reviews));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_READ_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_READ_REVIEWS . ' ' . xtc_draw_pull_down_menu('customers_status_read_reviews', $customers_status_array, $cInfo->customers_status_read_reviews));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_REVIEWS_STATUS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_REVIEWS_STATUS . ' ' . xtc_draw_pull_down_menu('customers_status_reviews_status', $customers_status_array, $cInfo->customers_status_reviews_status));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SPECIALS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SPECIALS . ' ' . xtc_draw_pull_down_menu('customers_status_specials', $customers_status_array, $cInfo->customers_status_specials));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_BASE . '<br />' . ENTRY_CUSTOMERS_STATUS_BASE . '<br />' . xtc_draw_pull_down_menu('customers_base_status', xtc_get_customers_statuses()));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_GROUP_ADOPT_PERMISSION . '<br />' . ENTRY_CUSTOMERS_GROUP_ADOPT_PERMISSION . '<br />' . xtc_draw_pull_down_menu('customers_group_adopt_permission', array_merge(array(array('id' => '', 'text' => CUSTOMERS_GROUP_ADOPT_PERMISSIONS)), xtc_get_customers_statuses())));
                 $contents[] = array('text' => '<br />' . xtc_draw_checkbox_field('default') . ' ' . TEXT_SET_DEFAULT);
-                $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_INSERT . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page) . '">' . BUTTON_CANCEL . '</a>');
+                $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_INSERT . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page']) . '">' . BUTTON_CANCEL . '</a>');
                 break;
 
               case 'edit':
                 $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_EDIT_CUSTOMERS_STATUS . '</b>');
-                $contents = array('form' => xtc_draw_form('status', FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id  .'&action=save', 'post', 'enctype="multipart/form-data"'));
+                $contents = array('form' => xtc_draw_form('status', FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id  .'&action=save', 'post', 'enctype="multipart/form-data"'));
                 $contents[] = array('text' => TEXT_INFO_EDIT_INTRO);
                 $customers_status_inputs_string = '';
                 $languages = xtc_get_languages();
@@ -405,49 +397,49 @@ if (xtc_not_null($action) && $action != 'delete') {
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_NAME . $customers_status_inputs_string);
                 $contents[] = array('text' => '<br />' . xtc_image(DIR_WS_CATALOG.DIR_WS_ICONS . $cInfo->customers_status_image, $cInfo->customers_status_name) . '<br />' . DIR_WS_CATALOG.DIR_WS_ICONS . '<b>' . $cInfo->customers_status_image . '</b>'); 
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_IMAGE . '<br />' . xtc_draw_file_field('customers_status_image', $cInfo->customers_status_image) . ' (jpg,jpeg,jpe,gif,png,bmp,tiff,tif,bmp)');
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_PUBLIC_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_PUBLIC . '<br />' . xtc_draw_pull_down_menu('customers_status_public', $customers_status_array, $cInfo->customers_status_public ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MIN_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MIN_ORDER . '<br />' . xtc_draw_input_field('customers_status_min_order', $cInfo->customers_status_min_order ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MAX_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MAX_ORDER . '<br />' . xtc_draw_input_field('customers_status_max_order', $cInfo->customers_status_max_order ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_INTRO     . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE . '<br />' . xtc_draw_pull_down_menu('customers_status_show_price', $customers_status_array, $cInfo->customers_status_show_price ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX . '<br />' . xtc_draw_pull_down_menu('customers_status_show_price_tax', $customers_status_array, $cInfo->customers_status_show_price_tax ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_ADD_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_ADD_TAX . '<br />' . xtc_draw_pull_down_menu('customers_status_add_tax_ot', $customers_status_array, $cInfo->customers_status_add_tax_ot));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . '<br />' . xtc_draw_input_field('customers_status_show_tax_total', $cInfo->customers_status_show_tax_total ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE_INTRO . '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . '<br />' . xtc_draw_input_field('customers_status_discount', $cInfo->customers_status_discount));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES . '<br />' . xtc_draw_pull_down_menu('customers_status_discount_attributes', $customers_status_array, $cInfo->customers_status_discount_attributes ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_OT_XMEMBER_INTRO . '<br /> ' . ENTRY_OT_XMEMBER . '<br />' . xtc_draw_pull_down_menu('customers_status_ot_discount_flag', $customers_status_array, $cInfo->customers_status_ot_discount_flag). '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . ' ' . xtc_draw_input_field('customers_status_ot_discount', $cInfo->customers_status_ot_discount));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_GRADUATED_PRICES_INTRO . '<br />' . ENTRY_GRADUATED_PRICES . '<br />' . xtc_draw_pull_down_menu('customers_status_graduated_prices', $customers_status_array, $cInfo->customers_status_graduated_prices));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_PUBLIC_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_PUBLIC . ' ' . xtc_draw_pull_down_menu('customers_status_public', $customers_status_array, $cInfo->customers_status_public ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MIN_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MIN_ORDER . ' ' . xtc_draw_input_field('customers_status_min_order', $cInfo->customers_status_min_order ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_MAX_ORDER_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_MAX_ORDER . ' ' . xtc_draw_input_field('customers_status_max_order', $cInfo->customers_status_max_order ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_INTRO     . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE . ' ' . xtc_draw_pull_down_menu('customers_status_show_price', $customers_status_array, $cInfo->customers_status_show_price ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX . ' ' . xtc_draw_pull_down_menu('customers_status_show_price_tax', $customers_status_array, $cInfo->customers_status_show_price_tax ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_ADD_TAX_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_ADD_TAX . ' ' . xtc_draw_pull_down_menu('customers_status_add_tax_ot', $customers_status_array, $cInfo->customers_status_add_tax_ot));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . '<br />' . ENTRY_CUSTOMERS_STATUS_SHOW_PRICE_TAX_TOTAL . ' ' . xtc_draw_input_field('customers_status_show_tax_total', $cInfo->customers_status_show_tax_total ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE_INTRO . '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . ' ' . xtc_draw_input_field('customers_status_discount', $cInfo->customers_status_discount));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_DISCOUNT_ATTRIBUTES . ' ' . xtc_draw_pull_down_menu('customers_status_discount_attributes', $customers_status_array, $cInfo->customers_status_discount_attributes ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_OT_XMEMBER_INTRO . '<br /> ' . ENTRY_OT_XMEMBER . ' ' . xtc_draw_pull_down_menu('customers_status_ot_discount_flag', $customers_status_array, $cInfo->customers_status_ot_discount_flag). '<br />' . TEXT_INFO_CUSTOMERS_STATUS_DISCOUNT_PRICE . ' ' . xtc_draw_input_field('customers_status_ot_discount', $cInfo->customers_status_ot_discount));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_GRADUATED_PRICES_INTRO . '<br />' . ENTRY_GRADUATED_PRICES . ' ' . xtc_draw_pull_down_menu('customers_status_graduated_prices', $customers_status_array, $cInfo->customers_status_graduated_prices));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_PAYMENT_UNALLOWED_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_PAYMENT_UNALLOWED . '<br/>' . xtc_cfg_checkbox_unallowed_module('payment','customers_status_payment_unallowed',$cInfo->customers_status_payment_unallowed) );
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SHIPPING_UNALLOWED_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SHIPPING_UNALLOWED . '<br/>' . xtc_cfg_checkbox_unallowed_module('shipping','customers_status_shipping_unallowed',$cInfo->customers_status_shipping_unallowed) );                          
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18 . '<br />' . xtc_draw_pull_down_menu('customers_fsk18', $customers_status_array, $cInfo->customers_fsk18 ));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_DISPLAY_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18_DISPLAY . '<br />' . xtc_draw_pull_down_menu('customers_fsk18_display', $customers_status_array, $cInfo->customers_fsk18_display));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_WRITE_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_WRITE_REVIEWS . '<br />' . xtc_draw_pull_down_menu('customers_status_write_reviews', $customers_status_array, $cInfo->customers_status_write_reviews));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_READ_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_READ_REVIEWS . '<br />' . xtc_draw_pull_down_menu('customers_status_read_reviews', $customers_status_array, $cInfo->customers_status_read_reviews));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_REVIEWS_STATUS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_REVIEWS_STATUS . '<br />' . xtc_draw_pull_down_menu('customers_status_reviews_status', $customers_status_array, $cInfo->customers_status_reviews_status));
-                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SPECIALS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SPECIALS . '<br />' . xtc_draw_pull_down_menu('customers_status_specials', $customers_status_array, $cInfo->customers_status_specials));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18 . ' ' . xtc_draw_pull_down_menu('customers_fsk18', $customers_status_array, $cInfo->customers_fsk18 ));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_FSK18_DISPLAY_INTRO . '<br />' . ENTRY_CUSTOMERS_FSK18_DISPLAY . ' ' . xtc_draw_pull_down_menu('customers_fsk18_display', $customers_status_array, $cInfo->customers_fsk18_display));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_WRITE_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_WRITE_REVIEWS . ' ' . xtc_draw_pull_down_menu('customers_status_write_reviews', $customers_status_array, $cInfo->customers_status_write_reviews));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_READ_REVIEWS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_READ_REVIEWS . ' ' . xtc_draw_pull_down_menu('customers_status_read_reviews', $customers_status_array, $cInfo->customers_status_read_reviews));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_REVIEWS_STATUS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_REVIEWS_STATUS . ' ' . xtc_draw_pull_down_menu('customers_status_reviews_status', $customers_status_array, $cInfo->customers_status_reviews_status));
+                $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_SPECIALS_INTRO . '<br />' . ENTRY_CUSTOMERS_STATUS_SPECIALS . ' ' . xtc_draw_pull_down_menu('customers_status_specials', $customers_status_array, $cInfo->customers_status_specials));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_STATUS_BASE . '<br />' . ENTRY_CUSTOMERS_STATUS_BASE_EDIT . '<br />' . xtc_draw_pull_down_menu('customers_base_status', xtc_get_customers_statuses()));
                 $contents[] = array('text' => '<br />' . TEXT_INFO_CUSTOMERS_GROUP_ADOPT_PERMISSION . '<br />' . ENTRY_CUSTOMERS_GROUP_ADOPT_PERMISSION . '<br />' . xtc_draw_pull_down_menu('customers_group_adopt_permission', array_merge(array(array('id' => '', 'text' => CUSTOMERS_GROUP_ADOPT_PERMISSIONS)), xtc_get_customers_statuses())));
                 if (DEFAULT_CUSTOMERS_STATUS_ID != $cInfo->customers_status_id) {
                   $contents[] = array('text' => '<br />' . xtc_draw_checkbox_field('default') . ' ' . TEXT_SET_DEFAULT);
                 }
-                $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_UPDATE . '"> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id) . '">' . BUTTON_CANCEL . '</a>');
+                $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_UPDATE . '"> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id) . '">' . BUTTON_CANCEL . '</a>');
                 break;
 
               case 'delete':
                 $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_DELETE_CUSTOMERS_STATUS . '</b>');
 
-                $contents = array('form' => xtc_draw_form('status', FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id  . '&action=deleteconfirm'));
+                $contents = array('form' => xtc_draw_form('status', FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id  . '&action=deleteconfirm'));
                 $contents[] = array('text' => TEXT_INFO_DELETE_INTRO);
                 $contents[] = array('text' => '<br /><b>' . $cInfo->customers_status_name . '</b>');
 
                 if ($remove_status)
-                  $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_DELETE . '"> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id) . '">' . BUTTON_CANCEL . '</a>');
+                  $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_DELETE . '"> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id) . '">' . BUTTON_CANCEL . '</a>');
                 break;
 
               default:
                 if (isset($cInfo) && is_object($cInfo)) {
                   $heading[] = array('text' => '<b>' . $cInfo->customers_status_name . '</b>');
 
-                  $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id . '&action=edit') . '">' . BUTTON_EDIT . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $page . '&cID=' . $cInfo->customers_status_id . '&action=delete') . '">' . BUTTON_DELETE . '</a>');
+                  $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id . '&action=edit') . '">' . BUTTON_EDIT . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_status_id . '&action=delete') . '">' . BUTTON_DELETE . '</a>');
                   $customers_status_inputs_string = '';
                   $languages = xtc_get_languages();
                   for ($i=0; $i<sizeof($languages); $i++) {

@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: configFunctions.php 6288 2015-12-04 15:08:12Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -21,12 +21,7 @@
 defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 
 function mlGetLanguages(&$form) {
-	$sSql = 'SELECT * FROM '.TABLE_LANGUAGES;
-	if (SHOPSYSTEM === 'xtcmodified' && MagnaDB::gi()->columnExistsInTable('status_admin', TABLE_LANGUAGES)) {
-		$sSql .= " WHERE status_admin='1'"; // admin can view and edit
-	}
-	
-	$langs = MagnaDB::gi()->fetchArray($sSql);
+	$langs = MagnaDB::gi()->fetchArray('SELECT * FROM '.TABLE_LANGUAGES);
 	$form['values'] = array();
 	foreach ($langs as $lang) {
 		$form['values'][$lang['languages_id']] = $lang['name'].' ('.$lang['code'].')';
@@ -84,29 +79,12 @@ function mlGetShippingMethods(&$form) {
 
 function mlGetOrderStatus(&$form) {
 	if (!isset($_SESSION['languages_id'])) {
-		if (defined('DEFAULT_LANGUAGE')) {
-			$_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-				SELECT `languages_id`
-				  FROM ".TABLE_LANGUAGES." l
-				 WHERE l.`code` = '".DEFAULT_LANGUAGE."'
-			");
-		} else {
-            if (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-                $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-                    SELECT `languages_id`
-                      FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c
-                     WHERE     l.`code` = c.`value`
-                           AND c.`key` = 'configuration/DEFAULT_LANGUAGE'
-                ");
-            } else {
-                $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-                    SELECT `languages_id`
-                      FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c 
-                    WHERE l.`code` = c.`configuration_value` 
-                    AND c.`configuration_key` = 'DEFAULT_LANGUAGE'
-                ");
-            }
-		}
+		$_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
+			SELECT languages_id
+			  FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c 
+			 WHERE l.code=c.configuration_value 
+			       AND c.configuration_key='DEFAULT_LANGUAGE'
+		");
 	}
 	$orders_status_array = MagnaDB::gi()->fetchArray(
 		'SELECT orders_status_id, orders_status_name '.
@@ -186,29 +164,11 @@ function mlGetShippingModules(&$form) {
 
 function mlGetProductOptions(&$form) {
 	if (!isset($_SESSION['languages_id'])) {
-        if (defined('DEFAULT_LANGUAGE')) {
-            $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-				SELECT `languages_id`
-				  FROM ".TABLE_LANGUAGES." l
-				 WHERE l.`code` = '".DEFAULT_LANGUAGE."'
-			");
-        } else {
-            if (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-                $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-                    SELECT `languages_id`
-                      FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c
-                     WHERE     l.`code` = c.`value`
-                           AND c.`key` = 'configuration/DEFAULT_LANGUAGE'
-                ");
-            } else {
-                $_SESSION['languages_id'] = MagnaDB::gi()->fetchOne("
-                    SELECT `languages_id`
-                      FROM ".TABLE_LANGUAGES." l, ".TABLE_CONFIGURATION." c 
-                    WHERE l.`code` = c.`configuration_value` 
-                    AND c.`configuration_key` = 'DEFAULT_LANGUAGE'
-                ");
-            }
-        }
+		$_SESSION['languages_id'] = MagnaDB::gi()->fetchOne(
+		'SELECT languages_id '.
+		'FROM '.TABLE_LANGUAGES.' l, '.TABLE_CONFIGURATION.' c '.
+		'WHERE l.code=c.configuration_value '.
+		'AND c.configuration_key=\'DEFAULT_LANGUAGE\'');
 	}
 	$products_options_array = MagnaDB::gi()->fetchArray(
 		'SELECT products_options_id, products_options_name '.

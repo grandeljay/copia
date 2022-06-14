@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalFunctions.php 12392 2019-11-08 11:31:12Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -11,41 +11,32 @@
    ---------------------------------------------------------------------------------------*/
 
 
-defined('ENCODE_DEFINED_CHARSETS') or define('ENCODE_DEFINED_CHARSETS','ASCII,UTF-8,ISO-8859-1,ISO-8859-15,cp866,cp1251,cp1252,KOI8-R,GB18030,SJIS,EUC-JP'); 
+defined('ENCODE_DEFINED_CHARSETS') or define('ENCODE_DEFINED_CHARSETS','ISO-8859-1,ISO-8859-15,UTF-8,cp866,cp1251,cp1252,KOI8-R,BIG5,GB2312,BIG5-HKSCS,Shift_JIS,EUC-JP'); 
 defined('ENCODE_DEFAULT_CHARSET') or define('ENCODE_DEFAULT_CHARSET', 'ISO-8859-15');
 
 /*
  * helper functions
  */
 function get_third_party_payments() {
-  $selection = array();
-  if (defined('MODULE_PAYMENT_PAYPAL_PLUS_THIRDPARTY_PAYMENT')) {
-    $payment_allowed = explode(';', MODULE_PAYMENT_PAYPAL_PLUS_THIRDPARTY_PAYMENT);
+  $payment_allowed = explode(';', MODULE_PAYMENT_PAYPAL_PLUS_THIRDPARTY_PAYMENT);
     
-    if (count($payment_allowed) > 0) {
-      require_once (DIR_FS_CATALOG . 'includes/classes/payment.php');
-      $payment_modules = new payment();
+  require_once (DIR_FS_CATALOG . 'includes/classes/payment.php');
+  $payment_modules = new payment;
 
-      if (is_array($payment_modules->modules)) {
-        if (isset($GLOBALS['ot_payment']) && is_object($GLOBALS['ot_payment'])) {
-          $GLOBALS['ot_payment']->xtc_order_total();
-        }
-        reset($payment_modules->modules);
-        foreach ($payment_modules->modules as $value) {
-          $class = substr($value, 0, strrpos($value, '.'));
-          if (isset($GLOBALS[$class]) && $GLOBALS[$class]->enabled && in_array($class, $payment_allowed)) {
-            $module_selection = $GLOBALS[$class]->selection();
-            if (is_array($module_selection)) {
-              if (isset($GLOBALS['ot_payment']) && is_object($GLOBALS['ot_payment']) && !isset($module_selection['module_cost'])) {
-                $module_selection['module_cost'] = $GLOBALS['ot_payment']->get_module_cost($module_selection);
-              }
-              $selection[] = $module_selection;
-            }
-          }
+  $selection = array();
+  if (is_array($payment_modules->modules)) {
+    reset($payment_modules->modules);
+    while (list(, $value) = each($payment_modules->modules)) {
+      $class = substr($value, 0, strrpos($value, '.'));
+      if (isset($GLOBALS[$class]) && $GLOBALS[$class]->enabled && in_array($class, $payment_allowed)) {
+        $module_selection = $GLOBALS[$class]->selection();
+        if (is_array($module_selection)) {
+          $selection[] = $module_selection;
         }
       }
     }
   }
+  
   return $selection;
 }
 
@@ -153,16 +144,6 @@ if (!function_exists('decode_htmlentities')) {
     $default_charset = isset($_SESSION['language_charset']) && in_array(strtoupper($_SESSION['language_charset']), $supported_charsets) ? strtoupper($_SESSION['language_charset']) : ENCODE_DEFAULT_CHARSET;
     $encoding = !empty($encoding) && in_array(strtoupper($encoding), $supported_charsets) ? strtoupper($encoding) : $default_charset;
     return html_entity_decode($string, $flags , $encoding);
-  }
-}
-
-
-if (!function_exists('encode_htmlentities')) {
-  function encode_htmlentities ($string, $flags = ENT_COMPAT, $encoding = '') {
-    $supported_charsets = explode(',', strtoupper(ENCODE_DEFINED_CHARSETS));  
-    $default_charset = isset($_SESSION['language_charset']) && in_array(strtoupper($_SESSION['language_charset']), $supported_charsets) ? strtoupper($_SESSION['language_charset']) : ENCODE_DEFAULT_CHARSET;
-    $encoding = !empty($encoding) && in_array(strtoupper($encoding), $supported_charsets) ? strtoupper($encoding) : $default_charset;  
-    return htmlentities($string, $flags , $encoding);
   }
 }
 

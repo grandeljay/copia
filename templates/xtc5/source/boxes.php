@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: boxes.php 10720 2017-05-08 10:19:57Z Tomcraft $
+   $Id: boxes.php 10016 2016-06-26 14:11:26Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,7 +25,8 @@
   require_once(DIR_FS_BOXES . 'information.php');
   require_once(DIR_FS_BOXES . 'languages.php'); 
   require_once(DIR_FS_BOXES . 'infobox.php');
-  if (!defined('MODULE_NEWSLETTER_STATUS') || MODULE_NEWSLETTER_STATUS == 'true') {
+  require_once(DIR_FS_BOXES . 'loginbox.php');
+  if (defined('MODULE_NEWSLETTER_STATUS') && MODULE_NEWSLETTER_STATUS == 'true') {
     require_once(DIR_FS_BOXES . 'newsletter.php');
   }
   if (defined('MODULE_TS_TRUSTEDSHOPS_ID') 
@@ -34,12 +35,6 @@
       ) 
   {
     require_once(DIR_FS_BOXES . 'trustedshops.php');
-  }
-// -----------------------------------------------------------------------------------------
-//	Nur sichtbar, wenn nicht auf der login.php Seite
-// -----------------------------------------------------------------------------------------
-  if (substr(basename($PHP_SELF), 0,5) != 'login') {
-    require_once(DIR_FS_BOXES . 'loginbox.php');
   }
 // -----------------------------------------------------------------------------------------
 //	Nur, wenn Preise sichtbar

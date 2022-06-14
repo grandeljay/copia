@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: janolaw.php 11599 2019-03-21 16:05:39Z GTB $
+   $Id: janolaw.php 9924 2016-06-04 08:08:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -11,7 +11,7 @@
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
    (c) 2002-2003 osCommerce(cod.php,v 1.28 2003/02/14); www.oscommerce.com
    (c) 2003   nextcommerce (invoice.php,v 1.6 2003/08/24); www.nextcommerce.org
-   (c) 2005 XT-Commerce - community made shopping http://www.xt-commerce.com ($Id: janolaw.php 11599 2019-03-21 16:05:39Z GTB $)
+   (c) 2005 XT-Commerce - community made shopping http://www.xt-commerce.com ($Id: janolaw.php 9924 2016-06-04 08:08:18Z GTB $)
    (c) 2008 Gambio OHG (billiger.php 2008-11-11 gambio)
 
    Released under the GNU General Public License
@@ -25,12 +25,11 @@ class janolaw {
   function __construct() {
     global $order;
 
-    $this->code = 'janolaw';
-    $this->title = MODULE_JANOLAW_TEXT_TITLE;
-    $this->description = MODULE_JANOLAW_TEXT_DESCRIPTION;
-    $this->enabled = ((defined('MODULE_JANOLAW_STATUS') && MODULE_JANOLAW_STATUS == 'True') ? true : false);
-    $this->sort_order = '';
-  }
+     $this->code = 'janolaw';
+     $this->title = MODULE_JANOLAW_TEXT_TITLE;
+     $this->description = MODULE_JANOLAW_TEXT_DESCRIPTION;
+     $this->enabled = ((MODULE_JANOLAW_STATUS == 'True') ? true : false);
+   }
 
   function process($file) {
     global $messageStack;

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_check_gzip.inc.php 11990 2019-07-23 06:53:35Z GTB $   
+   $Id: xtc_check_gzip.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -16,17 +16,14 @@
    ---------------------------------------------------------------------------------------*/
    
   function xtc_check_gzip() {
+
     if (headers_sent() || connection_aborted()) {
       return false;
     }
 
-    $encoding = '';
-    if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
-      $encoding = $_SERVER['HTTP_ACCEPT_ENCODING'];
-    }
-    
-    if (strpos($encoding, 'x-gzip') !== false) return 'x-gzip';
-    if (strpos($encoding,'gzip') !== false) return 'gzip';
+    if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip') !== false) return 'x-gzip';
+
+    if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') !== false) return 'gzip';
 
     return false;
   } 

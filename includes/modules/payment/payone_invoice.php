@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: payone_invoice.php 11444 2018-11-22 15:09:16Z GTB $
+   $Id: payone_invoice.php 10250 2016-08-19 08:41:45Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -35,8 +35,6 @@ class payone_invoice extends PayonePayment {
 	function _paymentDataFormProcess($active_genre_identifier) {
 	  global $order;
 	  
-	  require_once(DIR_FS_INC.'xtc_date_short.inc.php');
-
 	  $payment_smarty = new Smarty();
 	  $payment_smarty->template_dir = DIR_FS_EXTERNAL.'payone/templates/';
 

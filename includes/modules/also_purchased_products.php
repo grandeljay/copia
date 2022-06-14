@@ -1,6 +1,7 @@
 <?php
+
 /* -----------------------------------------------------------------------------------------
-   $Id: also_purchased_products.php 13284 2021-02-01 12:03:03Z GTB $   
+   $Id: also_purchased_products.php 1243 2005-09-25 09:33:02Z mz $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -15,31 +16,19 @@
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
-// include needed functions
-require_once (DIR_FS_INC.'get_pictureset_data.inc.php');
-
 $module_smarty = new Smarty;
 $module_smarty->assign('tpl_path', DIR_WS_BASE.'templates/'.CURRENT_TEMPLATE.'/');
 
 $data = $product->getAlsoPurchased();
-if (count($data) > 0
-    && count($data) >= MIN_DISPLAY_ALSO_PURCHASED
-    )
-{
-  $module_smarty->assign('language', $_SESSION['language']);
-  $module_smarty->assign('module_content', $data);
+if (count($data) >= MIN_DISPLAY_ALSO_PURCHASED) {
 
-  if (defined('PICTURESET_BOX')) {
-    $module_smarty->assign('pictureset_box', get_pictureset_data(PICTURESET_BOX));
-  }
-  if (defined('PICTURESET_ROW')) {
-    $module_smarty->assign('pictureset_row', get_pictureset_data(PICTURESET_ROW));
-  }
+	$module_smarty->assign('language', $_SESSION['language']);
+	$module_smarty->assign('module_content', $data);
+	
+	// set cache ID
+	$module_smarty->caching = 0;
+	$module = $module_smarty->fetch(CURRENT_TEMPLATE.'/module/also_purchased.html');
 
-  // set cache ID
-  $module_smarty->caching = 0;
-  $module = $module_smarty->fetch(CURRENT_TEMPLATE.'/module/also_purchased.html');
-
-  $info_smarty->assign('MODULE_also_purchased', $module);
+	$info_smarty->assign('MODULE_also_purchased', $module);
 }
 ?>

@@ -1,6 +1,6 @@
 <?php
   /* -----------------------------------------------------------------------------------------
-   $Id: print_packingslip.php 13375 2021-02-03 11:35:02Z GTB $
+   $Id: print_packingslip.php 3419 2012-08-11 12:17:52Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -49,19 +49,17 @@
   $smarty->assign('charset', $langcode['language_charset']);
   $smarty->assign('language', $order->info['language']);
 
-  $smarty->assign('logo_path', DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
-  $smarty->assign('tpl_path', DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/');
+  $smarty->assign('logo_path',HTTP_SERVER  . DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
+  $smarty->assign('tpl_path',HTTP_SERVER . DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/');
 
   $smarty->assign('oID',$order->info['order_id']);
   if ($order->info['payment_method']!='' && $order->info['payment_method']!='no_payment') {
-    require_once (DIR_FS_CATALOG.DIR_WS_CLASSES . 'payment.php');
-    $payment_modules = new payment($order->info['payment_method']);
-    $payment_method = $payment_modules::payment_title($order->info['payment_method'],$order->info['order_id']);
-    $smarty->assign('PAYMENT_METHOD', $payment_modules::payment_title($order->info['payment_method'],$order->info['order_id']));
+    include(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/payment/'.$order->info['payment_method'].'.php');
+    $payment_method=constant(strtoupper('MODULE_PAYMENT_'.$order->info['payment_method'].'_TEXT_TITLE'));
+    $smarty->assign('PAYMENT_METHOD',$payment_method);
   }
   $smarty->assign('COMMENTS', nl2br($order->info['comments']));
   $smarty->assign('DATE',xtc_date_long($order->info['date_purchased']));
-  $smarty->assign('SHIPPING_CLASS', $order->info['shipping_class']);
 
   require_once(DIR_FS_CATALOG.'includes/classes/main.php');
   $main = new main();
@@ -69,8 +67,6 @@
   $invoice_data = $main->getContentData(INVOICE_INFOS);
   $smarty->assign('ADDRESS_SMALL', $invoice_data['content_heading']);
   $smarty->assign('ADDRESS_LARGE', $invoice_data['content_text']);
-
-  foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/orders/orders_print/','php') as $file) require ($file);
 
   // dont allow cache
   $smarty->caching = false;

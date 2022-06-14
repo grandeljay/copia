@@ -19,7 +19,7 @@
 // Allgemeine Texte
 define('TABLE_HEADING', 'Edit Order');
 define('TABLE_HEADING_ORDER', 'Order #:&nbsp;');
-define('TEXT_SAVE_ORDER', 'Complete and recalculate order.&nbsp;');
+define('TEXT_SAVE_ORDER', 'Finish editing and recalculate order.&nbsp;');
 
 define('TEXT_EDIT_ADDRESS', 'Address and customer details');
 define('TEXT_EDIT_PRODUCTS', 'Products, products options and prices');
@@ -64,7 +64,9 @@ define('TEXT_PRODUCT_SEARCH', 'Search Products:');
 define('TEXT_PRODUCT_OPTION', 'Attributes:');
 define('TEXT_PRODUCT_OPTION_VALUE', 'Option Value:');
 define('TEXT_PRICE_PREFIX', 'Price Prefix:');
+define('TEXT_SAVE_ORDER', 'Finish and recalculate');
 define('TEXT_INS', 'Add:');
+define('TEXT_SHIPPING', 'Shipping Costs');
 define('TEXT_COD_COSTS', 'COD Costs');
 define('TEXT_VALUE', 'Price');
 define('TEXT_DESC', 'insert');
@@ -72,13 +74,17 @@ define('TEXT_DESC', 'insert');
 // Sonstiges
 
 define('TEXT_PAYMENT', 'Payment:');
-define('TEXT_SHIPPING', 'Shipping Method:');
+define('TEXT_SHIPPING', 'Shipping Module:');
 define('TEXT_LANGUAGE', 'Language:');
 define('TEXT_CURRENCIES', 'Currency:');
 define('TEXT_ORDER_TOTAL', 'Total:');
 define('TEXT_SAVE', 'Save');
 define('TEXT_ACTUAL', 'actual:');
 define('TEXT_NEW', 'new:');
+define('TEXT_PRICE', 'Costs: ');
+
+define('TEXT_ADD_TAX','incl. ');
+define('TEXT_NO_TAX','plus ');
 
 define('TEXT_ORDERS_EDIT_INFO', '<b>Important Notes:</b><br />
 Please chose the right customer group with the address/customer data!<br />

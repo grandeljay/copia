@@ -7,7 +7,7 @@ use PayPal\Common\PayPalModel;
 /**
  * Class Patch
  *
- * A JSON patch object that you can use to apply partial updates to resources.
+ * A JSON Patch object used for doing partial updates to resources.
  *
  * @package PayPal\Api
  *
@@ -43,7 +43,7 @@ class Patch extends PayPalModel
     }
 
     /**
-     * A JSON pointer that references a location in the target document where the operation is performed. A `string` value.
+     * string containing a JSON-Pointer value that references a location within the target document (the target location) where the operation is performed.
      *
      * @param string $path
      * 
@@ -56,7 +56,7 @@ class Patch extends PayPalModel
     }
 
     /**
-     * A JSON pointer that references a location in the target document where the operation is performed. A `string` value.
+     * string containing a JSON-Pointer value that references a location within the target document (the target location) where the operation is performed.
      *
      * @return string
      */
@@ -68,7 +68,7 @@ class Patch extends PayPalModel
     /**
      * New value to apply based on the operation.
      *
-     * @param mixed $value
+     * @param string $value
      * 
      * @return $this
      */
@@ -81,7 +81,7 @@ class Patch extends PayPalModel
     /**
      * New value to apply based on the operation.
      *
-     * @return mixed
+     * @return string
      */
     public function getValue()
     {

@@ -20,7 +20,6 @@
 
 <h1 class="checkout">{#heading_shipping#}</h1>
 {if $error != ''}<div class="errormessage">{$error}</div>{/if}
-{if $success_message}<div class="infomessage">{$success_message}</div>{/if}
 
 {$FORM_ACTION}
 <div class="twoColums">
@@ -38,6 +37,6 @@
   </div>
 </div>
 <br class="clearfix" />
-{if isset($BUTTON_BACK)}<div class="button_left">{$BUTTON_BACK}</div>{/if}
+<div class="button_left">{$BUTTON_BACK}</div>
 <div class="button_right">{$BUTTON_CONTINUE}</div>
 {$FORM_END}

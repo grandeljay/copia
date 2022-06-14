@@ -66,12 +66,11 @@ class HitmeisterCheckinProductList extends MLProductListMagnaCompatibleAbstract{
 								? 'p.products_model = hp.products_model'
 								: 'p.products_id = hp.products_id'
 						).
-						" AND hp.mpID = '".$this->aMagnaSession['mpID']."'
-						AND Verified = 'OK' "
+						" AND hp.mpID = '".$this->aMagnaSession['mpID']."'"
 				),
 				ML_Database_Model_Query_Select::JOIN_TYPE_INNER
 			)
-//			->where("p.products_ean IS NOT NULL AND p.products_ean <> '' AND products_ean <> '0'")
+//			->where("p.products_ean IS NOT NULL AND p.products_ean <> ''")
 		;
 		return $this;
 	}
@@ -104,7 +103,7 @@ class HitmeisterCheckinProductList extends MLProductListMagnaCompatibleAbstract{
 				<tr><td>
 					<table class="nostyle"><tbody>
 						<tr>
-							<td class="label">' . ML_LABEL_CATEGORY . ':&nbsp;</td>
+							<td class="label">'.'Kategorie'.':&nbsp;</td>
 							<td>'.(empty($aData['MarketplaceCategories']) ? '&mdash;' : $aData['MarketplaceCategories']).(empty($aData['MarketplaceCategoriesName']) ? '' : ' '.$aData['MarketplaceCategoriesName']).'</td>
 						<tr>
 					</tbody></table>
@@ -113,40 +112,6 @@ class HitmeisterCheckinProductList extends MLProductListMagnaCompatibleAbstract{
 		}
 		return '&mdash;';
 	}
-
-	protected function isPreparedDifferently($aRow) {
-		$sPrimaryCategory = $this->getPrepareData($aRow, 'MarketplaceCategories');
-		if (!empty($sPrimaryCategory)) {
-			$sCategoryDetails = $this->getPrepareData($aRow, 'CategoryAttributes');
-			$categoryMatching = HitmeisterHelper::gi()->getCategoryMatching($sPrimaryCategory);
-			$categoryDetails = json_decode($sCategoryDetails, true);
-			return HitmeisterHelper::gi()->detectChanges($categoryMatching, $categoryDetails);
-		}
-
-		return false;
-	}
-
-	protected function isDeletedAttributeFromShop($aRow, &$message) {
-	    $aMarketplaceCategories = $this->getPrepareData($aRow, 'MarketplaceCategories');
-		if (!empty($aMarketplaceCategories)) {
-			$matchedAttributes = $this->getPrepareData($aRow, 'CategoryAttributes');
-			$matchedAttributes = json_decode($matchedAttributes, true);
-			$shopAttributes = HitmeisterHelper::gi()->flatShopVariations();
-
-            if (!is_array($matchedAttributes)) {
-                $matchedAttributes = array();
-            }
-
-			foreach ($matchedAttributes as $matchedAttribute) {
-				if (HitmeisterHelper::gi()->detectIfAttributeIsDeletedOnShop($shopAttributes, $matchedAttribute, $message)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
 
 	protected function getPrepareType($aRow){
 		return $this->getPrepareData($aRow, 'PrepareType') == 'Apply' ? ML_AMAZON_LABEL_PREPARE_IS_APPLIED : ML_AMAZON_LABEL_PREPARE_IS_MATCHED;

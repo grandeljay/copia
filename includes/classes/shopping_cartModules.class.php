@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: shopping_cartModules.class.php 12921 2020-10-20 08:45:02Z GTB $
+   $Id: shopping_cartModules.class.php 10333 2016-10-20 11:26:26Z web28 $
 
    modified eCommerce Shopsoftware  
    http://www.modified-shop.org     
@@ -32,13 +32,6 @@ class shoppingCartModules {
             $class = substr($file, 0, strpos($file, '.'));
             $module_status = (defined('MODULE_'. strtoupper($module_type) .'_'. strtoupper($class) .'_STATUS') && strtolower(constant('MODULE_'. strtoupper($module_type) .'_'. strtoupper($class) .'_STATUS')) == 'true') ? true : false;
             if (is_file($module_directory . $file) && $module_status) {
-              if (isset($_SESSION)
-                  && isset($_SESSION['language'])
-                  && file_exists(DIR_FS_CATALOG . 'lang/' . $_SESSION['language'] . '/modules/' . $module_type . '/' . $file)
-                  )
-              {
-                include_once(DIR_FS_CATALOG . 'lang/' . $_SESSION['language'] . '/modules/' . $module_type . '/' . $file);
-              }
               include_once($module_directory . $file);
               $GLOBALS[$class] = new $class();
               self::$modules[] = $class;
@@ -103,16 +96,16 @@ class shoppingCartModules {
         return self::call_module_method($products,$table_basket_attributes,$type);
     }
     
-    public static function update_cart_products_session($products_id,$type,$quantity,$attributes)
+    public static function update_cart_products_session($products_id,$type,$qty,$attributes)
     {
         self::$function_call = 'update_cart_products_session';
-        return self::call_module_method($products_id,$type,$quantity,$attributes);
+        return self::call_module_method($products_id,$type,$qty,$attributes);
     }
     
-    public static function update_cart_products_db($sql_data_array,$products_id,$attributes,$type)
+    public static function update_cart_products_db($sql_data_array,$products_id,$attributes)
     {
         self::$function_call = 'update_cart_products_db';
-        return self::call_module_method($sql_data_array,$products_id,$attributes,$type);
+        return self::call_module_method($sql_data_array,$products_id,$attributes);
     }
     
     public static function update_cart_attributes_session($value,$type,$products_id,$option)
@@ -121,22 +114,22 @@ class shoppingCartModules {
         return self::call_module_method($value,$type,$products_id,$option);
     }
     
-    public static function update_cart_attributes_db($sql_data_array,$products_id,$option,$type)
+    public static function update_cart_attributes_db($sql_data_array,$products_id,$option)
     {
         self::$function_call = 'update_cart_attributes_db';
-        return self::call_module_method($sql_data_array,$products_id,$option,$type);
+        return self::call_module_method($sql_data_array,$products_id,$option);
     }
     
     public static function add_cart_products_session($products_id,$type,$qty,$attributes)
     {
         self::$function_call = 'add_cart_products_session';
-        return self::call_module_method($products_id,$type,$qty,$attributes);
+        return self::call_module_method($products_id,$type,$qty);
     }
     
-    public static function add_cart_products_db($sql_data_array,$type)
+    public static function add_cart_products_db($sql_data_array)
     {
         self::$function_call = 'add_cart_products_db';
-        return self::call_module_method($sql_data_array,$type);
+        return self::call_module_method($sql_data_array);
     }
     
     public static function add_cart_attributes_session($value,$type,$products_id,$option)
@@ -145,22 +138,22 @@ class shoppingCartModules {
         return self::call_module_method($value,$type,$products_id,$option);
     }
     
-    public static function add_cart_attributes_db($sql_data_array,$type)
+    public static function add_cart_attributes_db($sql_data_array)
     {
         self::$function_call = 'add_cart_attributes_db';
-        return self::call_module_method($sql_data_array,$type);
+        return self::call_module_method($sql_data_array);
     }
     
-    public static function remove_custom_inputs_session($products_id,$type)
+    public static function remove_custom_inputs_session($products_id)
     {
         self::$function_call = 'remove_custom_inputs_session';
-        return self::call_module_method($products_id,$type);
+        return self::call_module_method($products_id);
     }
     
-    public static function calculate_product_price($products_price, $product, $contents, $products_id)
+    public static function calculate_product_price($products_price, $product, $contents)
     {
         self::$function_call = 'calculate_product_price';
-        return self::call_module_method($products_price, $product, $contents, $products_id);
+        return self::call_module_method($products_price, $product, $contents);
     }
     
     public static function calculate_option_price($price, $option, $value, $products_id, $qty)
@@ -169,16 +162,16 @@ class shoppingCartModules {
         return self::call_module_method($price, $option, $value, $products_id, $qty);
     }
     
-    public static function get_uprid($opt_val_array, $products_id)
+    public static function get_uprid($opt_val_array)
     {
         self::$function_call = 'get_uprid';
-        return self::call_module_method($opt_val_array, $products_id);
+        return self::call_module_method($opt_val_array);
     }
     
-    public static function get_products($products_data, $product, $contents, $type)
+    public static function get_products($products_data, $product, $contents)
     {
         self::$function_call = 'get_products';
-        return self::call_module_method($products_data, $product, $contents, $type);
+        return self::call_module_method($products_data, $product, $contents);
     }
     
     public static function get_content_type($db_products_id)
@@ -187,22 +180,11 @@ class shoppingCartModules {
         return self::call_module_method($db_products_id);
     }
     
-    public static function check_products_status_permission($status, $products_id)
-    {
-        self::$function_call = 'check_products_status_permission';
-        return self::call_module_method($status, $products_id);
-    }
-
-    public static function create_products_attributes_array($dataArray, $products_id, $type)
+    public static function create_products_attributes_array($products_id)
     {
         self::$function_call = 'create_products_attributes_array';
-        return self::call_module_method($dataArray, $products_id, $type);
+        return self::call_module_method($products_id);
     }
 
-    public static function get_continue_shopping_link($url, $referer)
-    {
-        self::$function_call = 'get_continue_shopping_link';
-        return self::call_module_method($url, $referer);
-    }
 
 }

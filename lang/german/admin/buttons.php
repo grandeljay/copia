@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: buttons.php 12557 2020-02-04 07:04:22Z GTB $
+   $Id: buttons.php 4892 2013-06-06 16:34:15Z Tomcraft $
 
 
    modified eCommerce Shopsoftware
@@ -75,12 +75,22 @@ define('BUTTON_NEW_TAX_CLASS', 'Neue Steuerklasse');
 define('BUTTON_NEW_TAX_RATE', 'Neuer Steuersatz');
 define('BUTTON_SEND', 'Senden');
 define('BUTTON_REVERSE', 'Stornieren');
+
+// BOF - Tomcraft - 2009-11-28 - Included xs:booster
+define('BUTTON_EDIT_XTBOOSTER', 'eBay-Artikel');
+define('BUTTON_XTBOOSTER_MULTI', 'eBay-Multi-Artikel');
+// EOF - Tomcraft - 2009-11-28 - Included xs:booster
+
+// BOF - Dokuman - 2010-02-04 - delete cache files in admin section
 define('BUTTON_DELETE_CACHE', 'Cache leeren');
 define('BUTTON_DELETE_TEMP_CACHE', 'Templatecache leeren');
 define('BUTTON_DELETE_LOGS', 'Logfiles l&ouml;schen');
+// EOF - Dokuman - 2010-02-04 - delete cache files in admin section
+
+// BOF - web28 - 2011-07-13 - New Button
 define('BUTTON_VIEW_PRODUCT', 'Artikel ansehen');
-define('BUTTON_VIEW_CATEGORY', 'Kategorie ansehen');
+//EOF - web28 - 2011-07-13 - New Button
+
 define('BUTTON_VALUES', 'Werte');
 define('BUTTON_DELETE_BANKTRANSFER', 'Bankdaten l&ouml;schen');
-define('BUTTON_BLACKLIST', 'Blacklist');
 ?>

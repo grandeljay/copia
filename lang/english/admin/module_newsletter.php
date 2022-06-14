@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-  $Id: module_newsletter.php 13125 2021-01-06 14:40:08Z Tomcraft $
+  $Id: module_newsletter.php 2515 2011-12-12 16:15:44Z dokuman $
 
   modified eCommerce Shopsoftware
   http://www.modified-shop.org
@@ -34,8 +34,12 @@ define('TITLE_DATE','Date');
 define('TEXT_SEND_TO','Recipient:');
 define('TEXT_PREVIEW','<b>Preview:</b>');
 define('TEXT_REMOVE_LINK', 'Newsletter unsubscribe');
+
+// BOF - DokuMan - 2011-12-12 - Texts for Newsletter E-Mail send status
 define('INFO_NEWSLETTER_SEND', '%d newsletters sent');
 define('INFO_NEWSLETTER_LEFT', '%d newsletters remaining');
-define('TEXT_NEWSLETTER_INFO', '<strong>ATTENTION:</strong> For sending newsletters, the use of external programs is recommended!<br /><br />If the Newsletter Shop module is used, it should be requested from the provider, how many emails can be sent in a given time at all.<br />With many providers, there are restrictions or sending is only allowed by special email servers.<br /><br />By default the signature is attached automatically. If you would like to format the signature other than the standard-signature format, then add the code [NOSIGNATUR] (incl. squared brackets) to the end of your newsletter.<br />In addition, the signature placeholder [SIGNATURE] (incl. square brackets) can also be used and positioned at the desired location.<br />For our standard templates tpl_modified &amp; tpl_modified_responsive it is recommended to place the newsletter content in a DIV with 700px width in the source view, so that newsletter and signature are flush: <br /><pre style="border: #999999 dotted; border-width:1px; background-color:#F1F1F1; color:#000000; padding:10px;"><code>&lt;div style="width:700px;margin: 0px auto;"&gt;...&lt;/div&gt;</code></pre>');
-define('TEXT_INFO_SENDING', 'Please wait, the newsletter is being sent. This can take some time.');
+// EOF - DokuMan - 2011-12-12 - Texts for Newsletter E-Mail send status
+
+define('TEXT_NEWSLETTER_INFO', '<strong>ATTENTION:</strong> For sending newsletters, the use of external programs is recommended!<br /><br />If the Newsletter Shop module is used, it should be requested from the provider, how many emails can be sent in a given time at all.<br />With many providers, there are restrictions or sending is only allowed by special email servers.<br /><br />By default the signature is attached automatically. If you would like to format the signature other than the standard-signature format, then add the code [NOSIGNATUR] (incl. squared brackets) to the end of your newsletter.');
+
 ?>

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: sofort_payment.php 12940 2020-11-23 12:48:58Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,19 +10,20 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2010 Payment Network AG - http://www.payment-network.com
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_TITLE') OR define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_TITLE', 'Online Bank Transfer.');
-defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION') OR define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION', 'Online Bank Transfer. is the free of charge, T&Uuml;V certified payment method by SOFORT GmbH.');
-defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_INFO') OR define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_INFO', 'You can pay with the T&Uuml;V certified online banking system Online Bank Transfer. of SOFORT GmbH.');
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_TITLE', 'SOFORT Banking<br /><img src="https://images.sofort.com/en/su/logo_90x30.png" alt="SOFORT Banking"/>');
+define('MODULE_PAYMENT_'.$sofort_code.'_KS_TEXT_TITLE', 'SOFORT Banking with customer protection<br /><img src="https://images.sofort.com/de/su/logo_90x30.png" alt="Logo SOFORT &Uuml;berweisung"/>');
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION', 'SOFORT Banking is the free of charge, T&Uuml;V certified payment method by SOFORT AG.');
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_INFO', 'You can pay with the T&Uuml;V certified online banking system SOFORT Banking of SOFORT AG.');
 
 // checkout
-defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGE') OR define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGE', '
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGE', '
   <table border="0" cellspacing="0" cellpadding="0">
     <tr>
       <td valign="bottom">
@@ -33,29 +34,40 @@ defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGE
 	    <td class="main">{{text}}</td>
 	  </tr>
 	</table>');
-defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGEALT') OR define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGEALT', 'Online Bank Transfer.');
-defined('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT') OR define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT', '
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_IMAGEALT', 'SOFORT Banking');
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT', '
   <ul>
-    <li>Simple and secure.</li>
+    <li>Payment system with data protection certified by TÜV</li>
+    <li>No registration required</li>
+    <li>Immediate shipping of stock goods</li>
+    <li>Please keep your online banking login data ready</li>
+  </ul>');
+define('MODULE_PAYMENT_'.$sofort_code.'_KS_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT', '
+  <ul>
+    <li>If paying with SOFORT Banking you enjoy [[link_beginn]]buyer protection![[link_end]]</li>
+    <li>Payment system with TÜV-certified privacy policy</li>
+    <li>No registration needed</li>
+    <li>Goods/service will be shipped immediately, if available</li>
+    <li>Please keep your online banking data ready</li>
   </ul>');
 
 // admin
-defined('MODULE_PAYMENT_'.$sofort_code.'_STATUS_TITLE') OR define('MODULE_PAYMENT_'.$sofort_code.'_STATUS_TITLE', 'Activate Online Bank Transfer.');
-defined('MODULE_PAYMENT_'.$sofort_code.'_STATUS_DESC') OR define('MODULE_PAYMENT_'.$sofort_code.'_STATUS_DESC', 'Activates/deactivates Online Bank Transfer.');
 define('MODULE_PAYMENT_'.$sofort_code.'_ALLOWED_TITLE', 'Allowed zones');
-define('MODULE_PAYMENT_'.$sofort_code.'_ALLOWED_DESC', 'Please enter the zones <b>separately</b> which should be allowed to use this module. (e. g. AT,DE (leave empty if you want to allow all zones))');
+define('MODULE_PAYMENT_'.$sofort_code.'_ALLOWED_DESC', 'Please enter <b>einzeln</b> the zones, which should be allowed for this module. (eg allow AT, DE (if empty, all zones))');
+define('MODULE_PAYMENT_'.$sofort_code.'_STATUS_TITLE', 'Activate SOFORT Banking');
+define('MODULE_PAYMENT_'.$sofort_code.'_STATUS_DESC', 'Activates/deactivates SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_TMP_ORDER_TITLE', 'Temporary Order');
 define('MODULE_PAYMENT_'.$sofort_code.'_TMP_ORDER_DESC', 'Do you want to create a temporary order?');
 define('MODULE_PAYMENT_'.$sofort_code.'_LOGGING_TITLE', 'activate Logging');
 define('MODULE_PAYMENT_'.$sofort_code.'_LOGGING_DESC', 'Activates/deactivates Logging<br/>Logfiles are saved in /log');
 define('MODULE_PAYMENT_'.$sofort_code.'_KEY_TITLE', 'Configurationkey');
-define('MODULE_PAYMENT_'.$sofort_code.'_KEY_DESC', 'Configurationkey can be found in Online Bank Transfer.');
+define('MODULE_PAYMENT_'.$sofort_code.'_KEY_DESC', 'Configurationkey can be found in SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_SORT_ORDER_TITLE', 'Display order');
 define('MODULE_PAYMENT_'.$sofort_code.'_SORT_ORDER_DESC', 'Order of display. Smallest number is displayed first');
 define('MODULE_PAYMENT_'.$sofort_code.'_ZONE_TITLE', 'Payment Zone');
 define('MODULE_PAYMENT_'.$sofort_code.'_ZONE_DESC', 'If a zone is selected, the payment method is valid only for that zone.');
 define('MODULE_PAYMENT_'.$sofort_code.'_CURRENCY_TITLE', 'Transaction currency');
-define('MODULE_PAYMENT_'.$sofort_code.'_CURRENCY_DESC', 'Receiving currency Online Bank Transfer. setting');
+define('MODULE_PAYMENT_'.$sofort_code.'_CURRENCY_DESC', 'Receiving currency SOFORT Banking setting');
 define('MODULE_PAYMENT_'.$sofort_code.'_ORDER_STATUS_ID_TITLE', 'Confirmed Order');
 define('MODULE_PAYMENT_'.$sofort_code.'_ORDER_STATUS_ID_DESC', 'Order status after receipt of an order, was sent in advance of a successful payment confirmation');
 define('MODULE_PAYMENT_'.$sofort_code.'_TMP_STATUS_ID_TITLE', 'Temporary Order Status');
@@ -75,38 +87,38 @@ define('MODULE_PAYMENT_'.$sofort_code.'_REASON_2_DESC', 'In use (maximum 27 char
 define('MODULE_PAYMENT_'.$sofort_code.'_IMAGE_TITLE', 'Payment Grafic / Text');
 define('MODULE_PAYMENT_'.$sofort_code.'_IMAGE_DESC', 'Grafic / Text on Payment Checkout');
 define('MODULE_PAYMENT_'.$sofort_code.'_KS_STATUS_TITLE', 'Customer protection activated');
-define('MODULE_PAYMENT_'.$sofort_code.'_KS_STATUS_DESC', 'Activate customer protection for Online Bank Transfer.');
+define('MODULE_PAYMENT_'.$sofort_code.'_KS_STATUS_DESC', 'Activate customer protection for SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_USER_ID_TITLE', 'Customer Number');
-define('MODULE_PAYMENT_'.$sofort_code.'_USER_ID_DESC', 'Customer Number at Online Bank Transfer.');
+define('MODULE_PAYMENT_'.$sofort_code.'_USER_ID_DESC', 'Customer Number at SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_PROJECT_ID_TITLE', 'Project Nummer');
-define('MODULE_PAYMENT_'.$sofort_code.'_PROJECT_ID_DESC', 'The responsible project number in the immediate navigation use Online Bank Transfer. to the payment belongs');
+define('MODULE_PAYMENT_'.$sofort_code.'_PROJECT_ID_DESC', 'The responsible project number in the immediate navigation use SOFORT Banking to the payment belongs');
 define('MODULE_PAYMENT_'.$sofort_code.'_PROJECT_PASS_TITLE', 'Project Password');
-define('MODULE_PAYMENT_'.$sofort_code.'_PROJECT_PASS_DESC', 'Find this under Settings at Online Bank Transfer.');
+define('MODULE_PAYMENT_'.$sofort_code.'_PROJECT_PASS_DESC', 'Find this under Settings at SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_NOTIFY_PASS_TITLE', 'Notification Password');
-define('MODULE_PAYMENT_'.$sofort_code.'_NOTIFY_PASS_DESC', 'Find this under Settings at Online Bank Transfer.');
+define('MODULE_PAYMENT_'.$sofort_code.'_NOTIFY_PASS_DESC', 'Find this under Settings at SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_HASH_ALGORITHM_TITLE', 'Hash-Algorithmus:');
-define('MODULE_PAYMENT_'.$sofort_code.'_HASH_ALGORITHM_DESC', 'Find this under Settings at Online Bank Transfer.');
+define('MODULE_PAYMENT_'.$sofort_code.'_HASH_ALGORITHM_DESC', 'Find this under Settings at SOFORT Banking');
 define('MODULE_PAYMENT_'.$sofort_code.'_DESCRIPTION_INSTALL', '<br/><br/>Do you want to install proper order status?<br/>The currently set statuses are overwritten.');
 
 // status
-defined('TEXT_NO_STATUSUPDATE') OR define('TEXT_NO_STATUSUPDATE', 'no status update');
+define('TEXT_NO_STATUSUPDATE', 'no status update');
 
 // error
 define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_ERROR_HEADING', 'The following error was reported during the process:');
 define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_ERROR_MESSAGE', 'Payment is unfortunately not possible or has been cancelled by the customer. Please select another payment method.');
 
 // callback
-defined('TEXT_SOFORT_NOT_CREDITED_YET') OR define('TEXT_SOFORT_NOT_CREDITED_YET', 'Successfully completed Online Bank Transfer.');
-defined('TEXT_SOFORT_NOT_CREDITED') OR define('TEXT_SOFORT_NOT_CREDITED', 'Not received money on account');
-defined('TEXT_SOFORT_LOSS') OR define('TEXT_SOFORT_LOSS', 'verify the order');
-defined('TEXT_SOFORT_RECEIVED') OR define('TEXT_SOFORT_RECEIVED', 'Received money on account');
-defined('TEXT_SOFORT_CREDITED') OR define('TEXT_SOFORT_CREDITED', TEXT_SOFORT_RECEIVED);
-defined('TEXT_SOFORT_REFUNDED') OR define('TEXT_SOFORT_REFUNDED', 'Money was refunded in full');
-defined('TEXT_SOFORT_CANCELED') OR define('TEXT_SOFORT_CANCELED', 'Online Bank Transfer. canceled');
-defined('TEXT_SOFORT_WAIT_FOR_MONEY') OR define('TEXT_SOFORT_WAIT_FOR_MONEY', 'Waiting for Payment');
-defined('TEXT_SOFORT_CONFIRMATION_PERIOD_EXPIRED') OR define('TEXT_SOFORT_CONFIRMATION_PERIOD_EXPIRED', 'Online Bank Transfer. Timeout');
-defined('TEXT_SOFORT_REJECTED') OR define('TEXT_SOFORT_REJECTED', 'Online Bank Transfer. rejected');
-defined('TEXT_SOFORT_SOFORT_BANK_ACCOUNT_NEEDED') OR define('TEXT_SOFORT_SOFORT_BANK_ACCOUNT_NEEDED', TEXT_SOFORT_NOT_CREDITED_YET);
+define('TEXT_SOFORT_NOT_CREDITED_YET', 'Successfully completed Transfer');
+define('TEXT_SOFORT_NOT_CREDITED', 'Not received money on account');
+define('TEXT_SOFORT_LOSS', 'verify the order');
+define('TEXT_SOFORT_RECEIVED', 'Received money on account');
+define('TEXT_SOFORT_CREDITED', TEXT_SOFORT_RECEIVED);
+define('TEXT_SOFORT_REFUNDED', 'Money was refunded in full');
+define('TEXT_SOFORT_CANCELED', 'canceled');
+define('TEXT_SOFORT_WAIT_FOR_MONEY', 'Waiting for Payment');
+define('TEXT_SOFORT_CONFIRMATION_PERIOD_EXPIRED', 'Timeout');
+define('TEXT_SOFORT_REJECTED', 'rejected');
+define('TEXT_SOFORT_SOFORT_BANK_ACCOUNT_NEEDED', TEXT_SOFORT_NOT_CREDITED_YET);
 
 define('MODULE_PAYMENT_'.$sofort_code.'_ERROR_TRANSACTION', "Error during HTTP notification\nPlease check transaction and notification\nTransaction-ID: %s");
 define('MODULE_PAYMENT_'.$sofort_code.'_ERROR_PAYMENT', "Money NOT received yet\nTransaction-ID: %s");

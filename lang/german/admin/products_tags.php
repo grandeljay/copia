@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: products_tags.php 11773 2019-04-12 17:16:40Z Tomcraft $   
+   $Id: geo_TAGs.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -64,7 +64,6 @@ define('TEXT_INFO_HEADING_EDIT_OPTION', 'Eigenschaft bearbeiten');
 define('TEXT_INFO_EDIT_OPTION_INTRO', 'Bitte f&uuml;hren Sie alle notwendigen &Auml;nderungen durch.');
 define('TEXT_INFO_HEADING_DELETE_OPTION', 'Eigenschaft l&ouml;schen');
 define('TEXT_INFO_DELETE_OPTION_INTRO', 'Sind Sie sicher, dass Sie diese Eigenschaft l&ouml;schen wollen?');
-define('TEXT_INFO_WARNING_PRODUCTS', '<b>WARNUNG:</b> Es existieren noch %s Artikel, welche diese Eigenschaft zugeordnet haben. Diese Zuordnung wird gel&ouml;scht!');
 
 define('TEXT_DISPLAY_NUMBER_OF_OPTIONS', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Eigenschaften)');
 
@@ -76,10 +75,4 @@ define('TEXT_INFO_ATTRIBUTES_DELETE', 'Attribute - Zuordnungen entfernen von gel
 define('TEXT_INFO_IMPORT_WAIT', 'Bitte warten...');
 define('TEXT_INFO_IMPORT_FINISHED', 'Import abgeschlossen.');
 
-define('SORT_ORDER','Reihenfolge');
-define('TEXT_SORTORDER', 'Sortierung');
-define('TEXT_OPTION_ID', 'Options ID');
-define('TEXT_OPTION_NAME', 'Optionsname');
-define('TITLE_EDIT','Artikeleigenschaften Editieren');
-define('ATTR_SAVE_ACTIVE', 'Aufgeklappte Eigenschaften speichern');
 ?>

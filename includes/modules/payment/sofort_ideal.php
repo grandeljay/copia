@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: sofort_ideal.php 11753 2019-04-12 12:53:47Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,19 +10,18 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2010 Payment Network AG - http://www.payment-network.com
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-// include autoloader
-require_once(DIR_FS_EXTERNAL.'sofort/autoload.php');
-
 // include needed classes
 require_once(DIR_FS_EXTERNAL.'sofort/classes/sofortLibIdeal.inc.php');
+require_once(DIR_FS_EXTERNAL.'sofort/classes/sofortLibIdealBanks.inc.php');
 require_once(DIR_FS_EXTERNAL.'sofort/classes/SofortLibPayment.php');
+require_once(DIR_FS_EXTERNAL.'sofort/core/fileLogger.php');
 
 class sofort_ideal extends SofortLibPayment {
 
@@ -35,8 +34,10 @@ class sofort_ideal extends SofortLibPayment {
     $this->ideal = true;
 
     // logger
-    $this->logger = new Sofort\SofortLib\FileLogger();
+    $this->logger = new FileLogger();
     $this->logger->setLogfilePath(DIR_FS_LOG.'sofort_'.date('Y-m-d').'.log');
+    $this->logger->setErrorLogfilePath(DIR_FS_LOG.'sofort_error_'.date('Y-m-d').'.log');
+    $this->logger->setWarningsLogfilePath(DIR_FS_LOG.'sofort_warning_'.date('Y-m-d').'.log');
 	}
 
 
@@ -74,7 +75,7 @@ class sofort_ideal extends SofortLibPayment {
 
     $this->SofortIdeal->setAmount($this->data['amount']);
     $this->SofortIdeal->setCurrencyCode($this->data['currency']);
-    $this->SofortIdeal->setReason($this->shortenReason($this->data['reason_1']), $this->shortenReason($this->data['reason_2']));
+    $this->SofortIdeal->setReason($this->data['reason_1'], $this->data['reason_2']);
     $this->SofortIdeal->setOrderID($insert_id);
     $this->SofortIdeal->setCustomerID($_SESSION['customer_id']);
     $this->SofortIdeal->setCallbackIdentifier(32);

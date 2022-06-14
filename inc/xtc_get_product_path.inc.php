@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_product_path.inc.php 11433 2018-11-06 15:32:20Z GTB $
+   $Id: xtc_get_product_path.inc.php 8910 2015-10-08 11:43:16Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -16,8 +16,6 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-require_once (DIR_FS_INC.'xtc_get_subcategories.inc.php');
-
 function xtc_get_product_path($products_id) {
   global $canonical_flag, $products_link_cat_id;
   
@@ -29,27 +27,13 @@ function xtc_get_product_path($products_id) {
       ) 
   {
     $cPath_array = xtc_parse_category_path($_SESSION['CatPath']);
-    $categories_id = $cPath_array[(sizeof($cPath_array) - 1)];
-    
-    $where = " AND (c.categories_id = '".(int)$categories_id."' OR c.parent_id = '".(int)$categories_id."') ";
-    if (CATEGORIES_SHOW_PRODUCTS_SUBCATS == 'true') {
-      $subcategories_array = array ();
-      xtc_get_subcategories($subcategories_array, $categories_id);
-      $subcategories_array[] = $categories_id;
-      $where = " AND c.categories_id IN ('".implode("', '", $subcategories_array)."') ";
-    }
-        
-    $check_query = xtDBquery("SELECT count(*) as total,
-                                     c.categories_id 
-                                FROM ".TABLE_PRODUCTS_TO_CATEGORIES." p2c
-                                JOIN ".TABLE_CATEGORIES." c
-                                     ON c.categories_id = p2c.categories_id
-                                        AND c.categories_status = '1'
-                               WHERE p2c.products_id = '".(int)$products_id."'
-                                     ".$where);
+    $check_query = xtDBquery("SELECT count(*) as total 
+                                FROM ".TABLE_PRODUCTS_TO_CATEGORIES." 
+                               WHERE categories_id = '".(int)$cPath_array[(sizeof($cPath_array) - 1)]."'
+                                 AND products_id = '".(int)$products_id."'");
     $check = xtc_db_fetch_array($check_query, true);
     if ($check['total'] > 0) {
-      return xtc_get_category_path($check['categories_id']);
+      return $_SESSION['CatPath'];
     }
   }
   
@@ -60,21 +44,19 @@ function xtc_get_product_path($products_id) {
   
   // canonical
   $add_select = ((defined('PRODUCTS_CANONICAL_CAT_ID') && PRODUCTS_CANONICAL_CAT_ID === true) ? "p.products_canonical_cat_id," : '');
-  $order_by = ((defined('PRODUCTS_CANONICAL_CAT_ID') && PRODUCTS_CANONICAL_CAT_ID) ? "ORDER BY FIELD(p2c.categories_id, p.products_canonical_cat_id) DESC" : '');
   
   $category_query = "SELECT ".$add_select."
                             p2c.categories_id
-                       FROM " . TABLE_PRODUCTS . " p
+                       FROM " . TABLE_CATEGORIES . " c 
                        JOIN " . TABLE_PRODUCTS_TO_CATEGORIES . " p2c 
+                         ON p2c.categories_id != '0' 
+                            AND p2c.categories_id = c.categories_id 
+                            AND c.categories_status = '1' 
+                                ".$category_check."
+                       JOIN " . TABLE_PRODUCTS ." p 
                             ON p.products_id = p2c.products_id 
-                               AND p2c.categories_id != '0' 
-                                   ".$category_check."
-                       JOIN " . TABLE_CATEGORIES ." c
-                            ON p2c.categories_id = c.categories_id 
-                               AND c.categories_status = '1' 
-                      WHERE p.products_id = '" . (int)$products_id . "' 
-                        AND p.products_status = '1' 
-                            ".$order_by."
+                               AND p.products_id = '" . (int)$products_id . "' 
+                               AND p.products_status = '1' 
                             ".$limit;
 
   $category_query  = xtDBquery($category_query);
@@ -90,7 +72,6 @@ function xtc_get_product_path($products_id) {
           && !$products_link_cat_id 
           && isset($category['products_canonical_cat_id']) 
           && $category['products_canonical_cat_id'] > 0
-          && $category['products_canonical_cat_id'] == $category['categories_id']
           )
       {
         $cat_id = $category['products_canonical_cat_id'];            

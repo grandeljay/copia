@@ -54,12 +54,6 @@ class Check24SyncInventory extends MagnaCompatibleSyncInventory {
 		MLProduct::gi()->setLanguage(getDBConfigValue($this->marketplace . '.lang', $this->mpID));
 		MLProduct::gi()->setPriceConfig(Check24Helper::loadPriceSettings($this->mpID));
 		MLProduct::gi()->setQuantityConfig(Check24Helper::loadQuantitySettings($this->mpID));
-        MLProduct::gi()->useMultiDimensionalVariations(true);
-        MLProduct::gi()->setOptions(array(
-            'sameVariationsToAttributes' => false,
-            'purgeVariations' => true,
-            'useGambioProperties' => (getDBConfigValue('general.options', '0', 'old') == 'gambioProperties')
-        ));
 
 		$product = MLProduct::gi()->getProductById($this->cItem['pID']);
 		arrayEntitiesToUTF8($product);
@@ -79,10 +73,6 @@ class Check24SyncInventory extends MagnaCompatibleSyncInventory {
 			} else {
 				$data['NewQuantity'] = $product['Quantity'];
 			}
-
-            if ($this->config['StatusMode'] == 'true' && $product['Status'] == 0) {
-                $data['NewQuantity'] = 0;
-            }
 
 			$data['Process'] = ($data['Process'] || (isset($this->cItem['Quantity']) && ($this->cItem['Quantity'] != $data['NewQuantity'])));
 		}
@@ -114,8 +104,7 @@ class Check24SyncInventory extends MagnaCompatibleSyncInventory {
 						'Value' => $specific['Value'],
 					);
 				}
-				#$variant['SKU'] = (getDBConfigValue('general.keytype', '0') == 'artNr') ? $variantData['MarketplaceSku'] : $variantData['MarketplaceId'];
-				$variant['SKU'] = $variantData['MarketplaceSku'];
+				$variant['SKU'] = (getDBConfigValue('general.keytype', '0') == 'artNr') ? $variantData['MarketplaceSku'] : $variantData['MarketplaceId'];
 				$cVariation = array();
 				foreach ($this->cItem['Variations'] as $cVariation){
 					if ($cVariation['SKU'] == $variant['SKU']) {
@@ -125,11 +114,6 @@ class Check24SyncInventory extends MagnaCompatibleSyncInventory {
 
 				if ($bSyncStock) {
 					$variant['Quantity'] = $variantData['Quantity'];
-
-                    if ($this->config['StatusMode'] == 'true' && $product['Status'] == 0) {
-                        $variant['Quantity'] = 0;
-                    }
-
 					$variant['Process'] = ($variant['Process'] || ($cVariation['Quantity'] != $variant['Quantity']));
 				}
 

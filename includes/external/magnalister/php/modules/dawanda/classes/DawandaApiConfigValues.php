@@ -89,15 +89,5 @@ class DawandaApiConfigValues extends MagnaCompatibleApiConfigValues {
 		}
 		return $data;
 	}
-
-	public function getVariantConfigurationDefinition($which) {
-		$data = $this->fetchDataFromApi('GetCategoryDetails', array (
-			'DATA' => array (
-				'CategoryID' => $which,
-			)
-		));
-
-		return $data;
-	}
 	
 }

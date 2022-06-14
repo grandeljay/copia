@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: column_left.php 13490 2021-04-01 10:15:45Z Tomcraft $
+   $Id: column_left.php 10143 2016-07-26 11:05:50Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -76,12 +76,12 @@ echo mainMenue(BOX_HEADING_CUSTOMERS);
     if ($admin_access['customers_status'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_CUSTOMERS_STATUS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_CUSTOMERS_STATUS . '</a></li>';
     if ($admin_access['customers_group'] == '1' && GROUP_CHECK == 'true') echo '<li><a href="' . xtc_href_link('customers_group.php', '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_CUSTOMERS_GROUP . '</a></li>';
     if ($admin_access['orders'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_ORDERS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_ORDERS . '</a></li>';
-    if ($admin_access['module_export'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=export&module=dsgvo_export', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_DSGVO_EXPORT . '</a></li>';
 echo endMenue(BOX_HEADING_CUSTOMERS);
 
 //---------------------------ARTIKELKATALOG
 echo mainMenue(BOX_HEADING_PRODUCTS);
     if ($admin_access['categories'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_CATEGORIES, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_CATEGORIES . '</a></li>';
+    if ($admin_access['new_attributes'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_NEW_ATTRIBUTES, '', 'NONSSL') . '" class="menuBoxContentLink"> -'.BOX_ATTRIBUTES_MANAGER.'</a></li>';
     if ($admin_access['products_attributes'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_PRODUCTS_ATTRIBUTES, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_PRODUCTS_ATTRIBUTES . '</a></li>';
     if ($admin_access['products_tags'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_PRODUCTS_TAGS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_PRODUCTS_TAGS . '</a></li>';
     if ($admin_access['manufacturers'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MANUFACTURERS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_MANUFACTURERS . '</a></li>';
@@ -97,7 +97,7 @@ echo mainMenue(BOX_HEADING_MODULES);
     if ($admin_access['modules'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULES, 'set=shipping', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_SHIPPING . '</a></li>';
     if ($admin_access['modules'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULES, 'set=ordertotal', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_ORDER_TOTAL . '</a></li>';
     if ($admin_access['modules'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULES, 'set=categories', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_MODULE_TYPE . '</a></li>';
-    if ($admin_access['module_export'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=export&module=sitemaporg', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_GOOGLE_SITEMAP . '</a></li>';
+    if ($admin_access['module_export'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=system&module=sitemaporg', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_GOOGLE_SITEMAP . '</a></li>';
     if ($admin_access['module_export'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=system', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_MODULE_SYSTEM . '</a></li>';
     if ($admin_access['module_export'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=export', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_MODULE_EXPORT . '</a></li>';
 echo endMenue(BOX_HEADING_MODULES);
@@ -107,6 +107,8 @@ echo mainMenue(BOX_HEADING_PARTNER_MODULES);
     if (isset($admin_access['janolaw']) && $admin_access['janolaw'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_JANOLAW, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_JANOLAW . '</a></li>';
     if (isset($admin_access['it_recht_kanzlei']) && $admin_access['it_recht_kanzlei'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_IT_RECHT_KANZLEI, '') . '" class="menuBoxContentLink"> -' . BOX_IT_RECHT_KANZLEI . '</a></li>';
     if (isset($admin_access['haendlerbund']) && $admin_access['haendlerbund'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_HAENDLERBUND, '') . '" class="menuBoxContentLink"> -' . BOX_HAENDLERBUND . '</a></li>';
+    if (isset($admin_access['safeterms']) && $admin_access['safeterms'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_SAFETERMS, '') . '" class="menuBoxContentLink"> -' . BOX_SAFETERMS . '</a></li>';
+    if (isset($admin_access['easymarketing']) && $admin_access['easymarketing'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_EASYMARKETING, '') . '" class="menuBoxContentLink"> -' . BOX_EASYMARKETING . '</a></li>';
     if (isset($admin_access['protectedshops']) && $admin_access['protectedshops'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_PROTECTEDSHOPS, '') . '" class="menuBoxContentLink"> -' . BOX_PROTECTEDSHOPS . '</a></li>';
     if (isset($admin_access['cleverreach']) && $admin_access['cleverreach'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_CLEVERREACH, '') . '" class="menuBoxContentLink"> -' . BOX_CLEVERREACH . '</a></li>';
     if (isset($admin_access['supermailer']) && $admin_access['supermailer'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_SUPERMAILER, '') . '" class="menuBoxContentLink"> -' . BOX_SUPERMAILER . '</a></li>';
@@ -134,9 +136,15 @@ echo mainMenue(BOX_HEADING_PARTNER_MODULES);
     } else {
       if ($admin_access['shopgate'] == '1') echo '<li><a href="' . xtc_href_link('shopgate.php', 'sg_option=info', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_SHOPGATE . '</a></li>';
     }
-    
-    ## SEMKNOX
-    if (isset($admin_access['semknox']) && $admin_access['semknox'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_SEMKNOX, '') . '" class="menuBoxContentLink"> -' . BOX_SEMKNOX . '</a></li>';
+
+    ## xs:booster
+    if (defined('MODULE_XTBOOSTER_STATUS') && MODULE_XTBOOSTER_STATUS =='True') {
+      echo '<li><a href="#" class="menuBoxContentLinkSub"> -'.BOX_HEADING_XSBOOSTER.'</a><ul>';
+        if ($admin_access['configuration'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_XTBOOSTER."?xtb_module=list", '', 'NONSSL') . '" class="menuBoxContentLink"> -'.BOX_XSBOOSTER_LISTAUCTIONS.'</a></li>';
+        if ($admin_access['configuration'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_XTBOOSTER."?xtb_module=add", '', 'NONSSL') . '" class="menuBoxContentLink"> -'.BOX_XSBOOSTER_ADDAUCTIONS.'</a></li>';
+        if ($admin_access['configuration'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_XTBOOSTER."?xtb_module=conf", '', 'NONSSL') . '" class="menuBoxContentLink"> -'.BOX_XSBOOSTER_CONFIG.'</a></li>';
+      echo '</ul></li>';
+    }
 echo endMenue(BOX_HEADING_PARTNER_MODULES);
 
 //---------------------------STATISTIKEN
@@ -150,17 +158,17 @@ echo endMenue(BOX_HEADING_STATISTICS);
 
 //---------------------------HILFSPROGRAMME
 echo mainMenue(BOX_HEADING_TOOLS);
-    if (defined('MODULE_NEWSLETTER_STATUS') && MODULE_NEWSLETTER_STATUS == 'true') {
-      if ($admin_access['newsletter_recipients'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_NEWSLETTER_RECIPIENTS) . '" class="menuBoxContentLink"> -' . BOX_NEWSLETTER_RECIPIENTS . '</a></li>';
+    if (MODULE_NEWSLETTER_STATUS == 'true') {
       if ($admin_access['module_newsletter'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_MODULE_NEWSLETTER) . '" class="menuBoxContentLink"> -' . BOX_MODULE_NEWSLETTER . '</a></li>';
     }
     if ($admin_access['content_manager'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_CONTENT_MANAGER) . '" class="menuBoxContentLink"> -' . BOX_CONTENT . '</a></li>';
     if ($admin_access['removeoldpics'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_REMOVEOLDPICS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_REMOVEOLDPICS . '</a></li>';
     if ($admin_access['backup'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_BACKUP) . '" class="menuBoxContentLink"> -' . BOX_BACKUP . '</a></li>';
-    if (defined('MODULE_BANNER_MANAGER_STATUS') && MODULE_BANNER_MANAGER_STATUS == 'true') {
+    if (MODULE_BANNER_MANAGER_STATUS == 'true') {
       if ($admin_access['banner_manager'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_BANNER_MANAGER) . '" class="menuBoxContentLink"> -' . BOX_BANNER_MANAGER . '</a></li>';
     }
     if ($admin_access['server_info'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_SERVER_INFO) . '" class="menuBoxContentLink"> -' . BOX_SERVER_INFO . '</a></li>';
+    if ($admin_access['blz_update'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_BLZ_UPDATE) . '" class="menuBoxContentLink"> -' . BOX_BLZ_UPDATE . '</a></li>';
     if ($admin_access['whos_online'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_WHOS_ONLINE) . '" class="menuBoxContentLink"> -' . BOX_WHOS_ONLINE . '</a></li>';
     if ($admin_access['csv_backend'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_CSV_BACKEND) . '" class="menuBoxContentLink"> -' . BOX_IMPORT . '</a></li>';
     if ($admin_access['parcel_carriers'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_PARCEL_CARRIERS) . '" class="menuBoxContentLink"> -' . BOX_PARCEL_CARRIERS . '</a></li>';
@@ -210,7 +218,6 @@ echo mainMenue(BOX_HEADING_CONFIGURATION);
     if ($admin_access['products_vpe'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_PRODUCTS_VPE, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_PRODUCTS_VPE . '</a></li>';
     if ($admin_access['campaigns'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_CAMPAIGNS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_CAMPAIGNS . '</a></li>';
     if ($admin_access['cross_sell_groups'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_XSELL_GROUPS, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_ORDERS_XSELL_GROUP . '</a></li>';
-    if (isset($admin_access['cookie_consent']) && $admin_access['cookie_consent'] == '1') echo '<li><a href="' . xtc_href_link(FILENAME_COOKIE_CONSENT, '', 'NONSSL') . '" class="menuBoxContentLink"> -' . BOX_COOKIE_CONSENT . '</a></li>';
 echo endMenue(BOX_HEADING_CONFIGURATION);
 
 //---------------------------KONFIGURATION 2

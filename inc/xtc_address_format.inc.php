@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_address_format.inc.php 13409 2021-02-08 17:16:46Z GTB $   
+   $Id: xtc_address_format.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -17,7 +17,6 @@
    ---------------------------------------------------------------------------------------*/
    
   require_once(DIR_FS_INC . 'xtc_get_zone_code.inc.php');
-  require_once(DIR_FS_INC . 'xtc_get_zone_name.inc.php');
   require_once(DIR_FS_INC . 'xtc_get_country_name.inc.php');
    
   function xtc_address_format($address_format_id, $address, $html, $boln, $eoln) {
@@ -39,7 +38,6 @@
     $postcode = isset($address['postcode']) ? addslashes($address['postcode']) : '';
     $zip = $postcode;
     $country = isset($address['country_id']) ? xtc_get_country_name($country_id) : '';
-    $zone = xtc_get_zone_name($country_id, $zone_id, $state);
     $state = xtc_get_zone_code($country_id, $zone_id, $state);
 
     if ($html) {
@@ -65,15 +63,10 @@
     $statecomma = '';
     $streets = $street;
     if ($suburb != '') $streets = $street . $cr . $suburb;
-    if ($firstname == '' && isset($address['name'])) $firstname = addslashes($address['name']);
-    if ($country == '' && isset($address['country'])) $country = addslashes((is_array($address['country']) && array_key_exists('title', $address['country'])) ? $address['country']['title'] : $address['country']);
+    if ($firstname == '') $firstname = addslashes($address['name']);
+    if ($country == '') $country = addslashes((is_array($address['country']) && array_key_exists('title', $address['country'])) ? $address['country']['title'] : $address['country']);
     if ($state != '') $statecomma = $state . ', ';
-    
-    if (defined('CAPITALIZE_ADDRESS_FORMAT') && CAPITALIZE_ADDRESS_FORMAT == 'true') {
-      $city = strtoupper($city);
-      $country = strtoupper($country);
-    }
-    
+
     $fmt = $address_format['format'];
     eval("\$address = \"$fmt\";");
 
@@ -85,4 +78,5 @@
 
     return $address;
   }
-?>
+ 
+ ?>

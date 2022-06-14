@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: banktransfer.php 13050 2020-12-09 19:19:31Z Hetfield $
+   $Id: banktransfer.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,38 +21,27 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-
-  // include needed classes
-  require_once(DIR_FS_CATALOG.'includes/classes/modified_api.php');
-
-
   class banktransfer {
-    var $code, $title, $description, $enabled, $extended_description;
+    var $code, $title, $description, $enabled;
 
     function __construct() {
       global $order;
 
       $this->code = 'banktransfer';
       $this->title = MODULE_PAYMENT_BANKTRANSFER_TEXT_TITLE;
-      $this->info = MODULE_PAYMENT_BANKTRANSFER_TEXT_INFO;
       $this->description = MODULE_PAYMENT_BANKTRANSFER_TEXT_DESCRIPTION;
-      //$this->extended_description = MODULE_PAYMENT_BANKTRANSFER_TEXT_EXTENDED_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_PAYMENT_BANKTRANSFER_SORT_ORDER')) ? MODULE_PAYMENT_BANKTRANSFER_SORT_ORDER : '');
-      $this->enabled = ((defined('MODULE_PAYMENT_BANKTRANSFER_STATUS') && MODULE_PAYMENT_BANKTRANSFER_STATUS == 'True') ? true : false);      
-
-      $this->properties['button_update'] = '<a class="button btnbox" onclick="this.blur();" href="' . xtc_href_link(FILENAME_MODULES, 'set=payment&action=update&module='.$this->code) . '">' . BUTTON_UPDATE . '</a>';
-
-      if ($this->check() > 0) {
-        $this->min_order = MODULE_PAYMENT_BANKTRANSFER_MIN_ORDER;
-        if ((int)MODULE_PAYMENT_BANKTRANSFER_ORDER_STATUS_ID > 0) {
-          $this->order_status = MODULE_PAYMENT_BANKTRANSFER_ORDER_STATUS_ID;
-        }
-        if (isset($_POST['banktransfer_fax']) && $_POST['banktransfer_fax'] == "on") {
-          $this->email_footer = MODULE_PAYMENT_BANKTRANSFER_TEXT_EMAIL_FOOTER;
-        }
+      $this->sort_order = MODULE_PAYMENT_BANKTRANSFER_SORT_ORDER;
+      $this->min_order = MODULE_PAYMENT_BANKTRANSFER_MIN_ORDER;
+      $this->enabled = ((MODULE_PAYMENT_BANKTRANSFER_STATUS == 'True') ? true : false);
+      $this->info=MODULE_PAYMENT_BANKTRANSFER_TEXT_INFO;
+      if ((int)MODULE_PAYMENT_BANKTRANSFER_ORDER_STATUS_ID > 0) {
+        $this->order_status = MODULE_PAYMENT_BANKTRANSFER_ORDER_STATUS_ID;
       }
       if (is_object($order)) {
         $this->update_status();
+      }
+      if (isset($_POST['banktransfer_fax']) && $_POST['banktransfer_fax'] == "on") {
+        $this->email_footer = MODULE_PAYMENT_BANKTRANSFER_TEXT_EMAIL_FOOTER;
       }
     }
 
@@ -153,11 +142,11 @@
     }
 
     function pre_confirmation_check(){
-      if (!isset($_POST['banktransfer_fax']) && (!isset($_POST['recheckok']) || $_POST['recheckok'] != 'true')) {
+      if (@$_POST['banktransfer_fax'] == false && @$_POST['recheckok'] != 'true') {
         include(DIR_WS_CLASSES . 'banktransfer_validation.php');
 
         // iban / classic?
-        $number = preg_replace('/[^a-zA-Z0-9]/', '', ((isset($_POST['banktransfer_iban'])) ? $_POST['banktransfer_iban'] : $_POST['banktransfer_number']));
+        $number = preg_replace('/[^a-zA-Z0-9]/', '', $_POST['banktransfer_number']);
         if (ctype_digit($number) && MODULE_PAYMENT_BANKTRANSFER_IBAN_ONLY == 'False') {
           // classic
           $banktransfer_validation = new AccountCheck;
@@ -168,7 +157,7 @@
         } else {
           // iban
           $banktransfer_validation = new IbanAccountCheck;
-          $banktransfer_result = $banktransfer_validation->IbanCheckAccount($number, ((isset($_POST['banktransfer_bic'])) ? $_POST['banktransfer_bic'] : $_POST['banktransfer_blz']));
+          $banktransfer_result = $banktransfer_validation->IbanCheckAccount($number, $_POST['banktransfer_blz']);
           // some error codes <> 0/OK pass as OK
           if ($banktransfer_validation->account_acceptable($banktransfer_result))
             $banktransfer_result = 0;
@@ -274,7 +263,7 @@
             break;
         }
 
-        if ($banktransfer_result > 0 && (!isset($_POST['recheckok']) || $_POST['recheckok'] != 'true')) {
+        if ($banktransfer_result > 0 && $_POST['recheckok'] != 'true') {
           $payment_error_return = 'payment_error=' . $this->code . '&error=' . urlencode($error) . '&banktransfer_owner=' . urlencode($_POST['banktransfer_owner']) . '&banktransfer_number=' . urlencode($_POST['banktransfer_number']) . '&banktransfer_blz=' . urlencode($_POST['banktransfer_blz']) . '&banktransfer_bankname=' . urlencode($_POST['banktransfer_bankname']) .'&banktransfer_owner_email=' . urlencode($_POST['banktransfer_owner_email']) .  '&recheckok=' . $recheckok;
           xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, $payment_error_return, 'SSL', true, false));
         }
@@ -326,11 +315,9 @@
     function process_button() {
       global $_POST;
       
-      $process_button_string = xtc_draw_hidden_field('banktransfer_blz', $this->banktransfer_blz) .
+      $process_button_string = xtc_draw_hidden_field('banktransfer_blz', ($this->iban_mode) ? $this->banktransfer_bic : $this->banktransfer_blz) .
                                xtc_draw_hidden_field('banktransfer_bankname', $this->banktransfer_bankname).
-                               xtc_draw_hidden_field('banktransfer_number', $this->banktransfer_number) .
-                               xtc_draw_hidden_field('banktransfer_iban', $this->banktransfer_iban) .
-                               xtc_draw_hidden_field('banktransfer_bic', $this->banktransfer_bic) .
+                               xtc_draw_hidden_field('banktransfer_number', ($this->iban_mode) ? $this->banktransfer_iban : $this->banktransfer_number) .
                                xtc_draw_hidden_field('banktransfer_owner', $this->banktransfer_owner) .
                                xtc_draw_hidden_field('banktransfer_owner_email', $this->banktransfer_owner_email) .
                                xtc_draw_hidden_field('banktransfer_status', $this->banktransfer_status) .
@@ -341,11 +328,10 @@
     }
 
     function before_process() {
+      //fp implement checking the post vars
       $this->pre_confirmation_check();
-      
       $this->banktransfer_bankname = xtc_db_prepare_input($_POST['banktransfer_bankname']);
-      $this->banktransfer_fax = ((isset($_POST['banktransfer_fax'])) ? xtc_db_prepare_input($_POST['banktransfer_fax']) : '');
-      
+      $this->banktransfer_fax = xtc_db_prepare_input($_POST['banktransfer_fax']);
       return false;
     }
 
@@ -353,28 +339,25 @@
       global $insert_id, $_POST;
       
       $sql_data_array = array('orders_id' => $insert_id,
-                              'banktransfer_owner' => xtc_db_prepare_input($_POST['banktransfer_owner']),
-                              'banktransfer_number' => xtc_db_prepare_input($_POST['banktransfer_number']),
-                              'banktransfer_bankname' => xtc_db_prepare_input($_POST['banktransfer_bankname']),
-                              'banktransfer_blz' => xtc_db_prepare_input($_POST['banktransfer_blz']),
-                              'banktransfer_status' => xtc_db_prepare_input($_POST['banktransfer_status']),
-                              'banktransfer_prz' => xtc_db_prepare_input($_POST['banktransfer_prz']),
-                              'banktransfer_iban' => xtc_db_prepare_input($_POST['banktransfer_iban']),
-                              'banktransfer_bic' => xtc_db_prepare_input($_POST['banktransfer_bic']),
-                              'banktransfer_owner_email' => xtc_db_prepare_input($_POST['banktransfer_owner_email']),
+                              'banktransfer_owner' => $this->banktransfer_owner,
+                              'banktransfer_number' => $this->banktransfer_number,
+                              'banktransfer_bankname' => $this->banktransfer_bankname,
+                              'banktransfer_blz' => $this->banktransfer_blz,
+                              'banktransfer_status' => $this->banktransfer_status,
+                              'banktransfer_prz' => $this->banktransfer_prz,
+                              'banktransfer_iban' => $this->banktransfer_iban,
+                              'banktransfer_bic' => $this->banktransfer_bic,
+                              'banktransfer_owner_email' => $this->banktransfer_owner_email,
                               );
       xtc_db_perform(TABLE_BANKTRANSFER, $sql_data_array);
 
       if (isset($_POST['banktransfer_fax'])) {
-        xtc_db_query("UPDATE banktransfer SET banktransfer_fax = '" . xtc_db_prepare_input($_POST['banktransfer_fax']) ."' WHERE orders_id = " . $insert_id);
+        xtc_db_query("UPDATE banktransfer SET banktransfer_fax = '" . $this->banktransfer_fax ."' WHERE orders_id = '" . $insert_id . "'");
       }
-      
       if (isset($this->order_status) && $this->order_status) {
-        xtc_db_query("UPDATE ".TABLE_ORDERS." SET orders_status = ".$this->order_status." WHERE orders_id = ".$insert_id);
-        xtc_db_query("UPDATE ".TABLE_ORDERS_STATUS_HISTORY." SET orders_status_id = ".$this->order_status." WHERE orders_id = ".$insert_id);
+        xtc_db_query("UPDATE ".TABLE_ORDERS." SET orders_status='".$this->order_status."' WHERE orders_id='".$insert_id."'");
+        xtc_db_query("UPDATE ".TABLE_ORDERS_STATUS_HISTORY." SET orders_status_id='".$this->order_status."' WHERE orders_id='".$insert_id."'");
       }
-      
-      unset($_SESSION['banktransfer_info']);
     }
     
     function info() {
@@ -383,10 +366,9 @@
       if ($send_by_admin) {
         $banktransfer_query = xtc_db_query("SELECT banktransfer_iban,
                                                    banktransfer_bankname,
-                                                   banktransfer_owner,
                                                    banktransfer_owner_email
                                               FROM ".TABLE_BANKTRANSFER."
-                                             WHERE orders_id = ".$order->info['order_id']);
+                                             WHERE orders_id = '".$order->info['order_id']."'");
         if (xtc_db_num_rows($banktransfer_query) > 0) {
           $banktransfer = xtc_db_fetch_array($banktransfer_query);
           return $banktransfer;
@@ -395,7 +377,6 @@
       
       return array('banktransfer_iban' => $this->banktransfer_iban, 
                    'banktransfer_bankname' => $this->banktransfer_bankname,
-                   'banktransfer_owner' => $this->banktransfer_owner,
                    'banktransfer_owner_email' => $this->banktransfer_owner_email);
     }
     
@@ -413,54 +394,6 @@
         $this->_check = xtc_db_num_rows($check_query);
       }
       return $this->_check;
-    }
-
-    function update() {
-      global $messageStack;
-      
-      $filename = DIR_FS_CATALOG.'cache/blz.txt';
-      
-      modified_api::reset();
-      $response = modified_api::request('bundesbank/blz');
-      
-      if ($response != null && is_array($response) && isset($response['requestURL'])) {
-        // include needed functions
-        require_once (DIR_FS_INC.'get_external_content.inc.php');
-
-        $blz_file_content = get_external_content($response['requestURL'], 3, false);
-        file_put_contents($filename, $blz_file_content);
-      }
-
-      if (is_file($filename)) {
-        if (($handle = fopen($filename, "r")) !== false) {
-          xtc_db_query("TRUNCATE ".TABLE_BANKTRANSFER_BLZ);
-          
-          $cnt = 0;
-          while (!feof($handle)) {
-            $line = stream_get_line($handle, 65535, "\n");
-            $kennzeichen = substr($line, 158, 1);
-                                
-            if ($kennzeichen != 'D'
-                && substr($line, 8, 1) == '1'
-                )
-            {
-              $sql_data_array = array(
-                'blz' => substr($line, 0, 8),
-                'bankname' => encode_utf8(trim(substr($line, 9, 58))),
-                'prz' => substr($line, 150, 2),
-              );
-              
-              xtc_db_perform(TABLE_BANKTRANSFER_BLZ, $sql_data_array);
-              $cnt ++;
-            }
-          }
-          fclose($handle);
-        }
-        $messageStack->add_session(MODULE_PAYMENT_BANKTRANSFER_TEXT_UPDATE_SUCCESS.$cnt, 'success');
-        unlink($filename);
-      } else {
-        $messageStack->add_session(MODULE_PAYMENT_BANKTRANSFER_TEXT_UPDATE_ERROR, 'error');
-      }
     }
 
     function install() {

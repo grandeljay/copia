@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: banktransfer.php 12337 2019-10-30 06:50:10Z GTB $   
+   $Id: banktransfer.php 998 2005-07-07 14:18:20Z mz $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,13 +20,14 @@
    
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
+define('MODULE_PAYMENT_TYPE_PERMISSION', 'bt');
 
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_TITLE', 'Banktransfer');
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_DESCRIPTION', 'Banktransfer Payments');
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_INFO','');
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_BANK', 'Banktransfer');
-define('MODULE_PAYMENT_BANKTRANSFER_TEXT_EMAIL_FOOTER', ((defined('MODULE_PAYMENT_BANKTRANSFER_URL_NOTE')) ? 'Note: You can download our Fax Confirmation form from here: ' . HTTP_SERVER . DIR_WS_CATALOG . MODULE_PAYMENT_BANKTRANSFER_URL_NOTE : ''));
-define('MODULE_PAYMENT_BANKTRANSFER_TEXT_BANK_INFO', ((defined('MODULE_PAYMENT_BANKTRANSFER_IBAN_ONLY') && MODULE_PAYMENT_BANKTRANSFER_IBAN_ONLY != 'True') ? 'Please note that direct debit without IBAN/BIC is <b>only available</b> from a <b>german bank account</b>. By specifying IBAN/BIC, you can use the direct debit system <b>across the EU</b>.<br/>' : '') . 'Fields marked with (*) are mandatory. For a german IBAN specifying a BIC is optional.<br/><br/>');
+define('MODULE_PAYMENT_BANKTRANSFER_TEXT_EMAIL_FOOTER', 'Note: You can download our Fax Confirmation form from here: ' . HTTP_SERVER . DIR_WS_CATALOG . MODULE_PAYMENT_BANKTRANSFER_URL_NOTE . '');
+define('MODULE_PAYMENT_BANKTRANSFER_TEXT_BANK_INFO', ((MODULE_PAYMENT_BANKTRANSFER_IBAN_ONLY != 'True') ? 'Please note that direct debit without IBAN/BIC is <b>only available</b> from a <b>german bank account</b>. By specifying IBAN/BIC, you can use the direct debit system <b>across the EU</b>.<br/>' : '') . 'Fields marked with (*) are mandatory. For a german IBAN specifying a BIC is optional.<br/><br/>');
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_BANK_OWNER', 'Account Owner:*');
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_BANK_OWNER_EMAIL', 'E-Mail Account Owner:*');
 define('MODULE_PAYMENT_BANKTRANSFER_TEXT_BANK_NUMBER', 'Account Number / IBAN:*');
@@ -63,7 +64,7 @@ define('JS_BANK_OWNER', '* Please enter the name of the account owner!\n\n');
 define('JS_BANK_OWNER_EMAIL', '* Please enter E-Mail-Address of the account owner!\n\n');
 
 define('MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ_TITLE' , 'Use database lookup for Bank Code?');
-define('MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ_DESC', 'Use Database for validate Bank Code. Default: ("true")?<br/>Make sure that the bank codes in the database are up to date!<br/><br/>On "false" (standard) is used the supplied blz.csv file that contains possibly outdated entries!');
+define('MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ_DESC', 'Use Database for validate Bank Code. Default: ("true")?<br/>Make sure that the bank codes in the database are up to date!<br/><a href="'.xtc_href_link(defined('FILENAME_BLZ_UPDATE')?FILENAME_BLZ_UPDATE:'').'" target="_blank"><strong>Link: --> BLZ UPDATE <-- </strong></a><br/><br/>On "false" (standard) is used the supplied blz.csv file that contains possibly outdated entries!');
 define('MODULE_PAYMENT_BANKTRANSFER_URL_NOTE_TITLE' , 'Fax-URL');
 define('MODULE_PAYMENT_BANKTRANSFER_URL_NOTE_DESC' , 'The fax-confirmation file. It must located in catalog-dir');
 define('MODULE_PAYMENT_BANKTRANSFER_FAX_CONFIRMATION_TITLE' , 'Allow Fax Confirmation');
@@ -90,9 +91,4 @@ define('MODULE_PAYMENT_BANKTRANSFER_REFERENCE_PREFIX_TITLE', 'Prefix for Referen
 define('MODULE_PAYMENT_BANKTRANSFER_REFERENCE_PREFIX_DESC', 'Enter a Prefix for die Reference');
 define('MODULE_PAYMENT_BANKTRANSFER_DUE_DELAY_TITLE', 'Maturity');
 define('MODULE_PAYMENT_BANKTRANSFER_DUE_DELAY_DESC', 'Enter period (in days) to execute banktransfer');
-
-define('MODULE_PAYMENT_BANKTRANSFER_TEXT_EXTENDED_DESCRIPTION', '<strong><font color="red">ATTENTION:</font></strong> Please update the german bank code numbers!');
-
-define('MODULE_PAYMENT_BANKTRANSFER_TEXT_UPDATE_SUCCESS', 'Updated bank codes: ');
-define('MODULE_PAYMENT_BANKTRANSFER_TEXT_UPDATE_ERROR', 'Bank codes could not be updated.');
 ?>

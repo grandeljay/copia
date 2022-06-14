@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypallink.php 12400 2019-11-08 13:28:49Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -14,11 +14,11 @@
 $lang_array = array(
   'MODULE_PAYMENT_PAYPALLINK_TEXT_TITLE' => 'PayPal Link',
   'MODULE_PAYMENT_PAYPALLINK_TEXT_INFO' => '<img src="https://www.paypal.com/de_DE/DE/i/logo/lockbox_150x47.gif" />',
-  'MODULE_PAYMENT_PAYPALLINK_TEXT_DESCRIPTION' => 'PayPal als Zahlungslink der den Kunden erst nach Bestellabschluss zur Verf&uuml;gung steht. Entscheiden Sie selber, wo der Kunde die Aufforderung zur Zahlung erh&auml;lt.',
+  'MODULE_PAYMENT_PAYPALLINK_TEXT_DESCRIPTION' => 'Sie werden nach dem "Best&auml;tigen" zu PayPal geleitet um hier Ihre Bestellung zu bezahlen.<br />Danach gelangen Sie zur&uuml;ck in den Shop und erhalten Ihre Bestell-Best&auml;tigung.<br />Jetzt schneller bezahlen mit unbegrenztem PayPal-K&auml;uferschutz - nat&uuml;rlich kostenlos.',
   'MODULE_PAYMENT_PAYPALLINK_ALLOWED_TITLE' => 'Erlaubte Zonen',
   'MODULE_PAYMENT_PAYPALLINK_ALLOWED_DESC' => 'Geben Sie <b>einzeln</b> die Zonen an, welche f&uuml;r dieses Modul erlaubt sein sollen. (z.B. AT,DE (wenn leer, werden alle Zonen erlaubt))',
-  'MODULE_PAYMENT_PAYPALLINK_STATUS_TITLE' => 'PayPal Link aktivieren',
-  'MODULE_PAYMENT_PAYPALLINK_STATUS_DESC' => 'M&ouml;chten Sie Zahlungen per PayPal Link akzeptieren?',
+  'MODULE_PAYMENT_PAYPALLINK_STATUS_TITLE' => 'PayPal Modul aktivieren',
+  'MODULE_PAYMENT_PAYPALLINK_STATUS_DESC' => 'M&ouml;chten Sie Zahlungen per PayPal akzeptieren?',
   'MODULE_PAYMENT_PAYPALLINK_SORT_ORDER_TITLE' => 'Anzeigereihenfolge',
   'MODULE_PAYMENT_PAYPALLINK_SORT_ORDER_DESC' => 'Reihenfolge der Anzeige. Kleinste Ziffer wird zuerst angezeigt',
   'MODULE_PAYMENT_PAYPALLINK_ZONE_TITLE' => 'Zahlungszone',

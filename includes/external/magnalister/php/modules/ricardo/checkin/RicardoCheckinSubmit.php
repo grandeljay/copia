@@ -35,7 +35,7 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 			'language' => getDBConfigValue($settings['marketplace'] . '.lang', $_MagnaSession['mpID'], ''),
 			'currency' => getCurrencyFromMarketplace($_MagnaSession['mpID']),
 			'keytype' => getDBConfigValue('general.keytype', '0'),
-			'itemsPerBatch' => 10,
+			'itemsPerBatch' => 100,
 			'mlProductsUseLegacy' => false,
 		), $settings);
 
@@ -51,7 +51,7 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 			);
 		}
 		
-		return array_merge(parent::generateRequestHeader(), array('UPLOAD' => true));
+		return parent::generateRequestHeader();
 	}
 
 	protected function processException($e) {
@@ -140,7 +140,7 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 			}
 		}
 
-		$aData['submit']['Quantity'] = $aProduct['Quantity'];
+		$aData['submit']['Quantity'] = $aData['quantity'];
 
 		$imagePath = getDBConfigValue($this->marketplace . '.imagepath', $this->_magnasession['mpID'], SHOP_URL_POPUP_IMAGES);
 		$imagePath = trim($imagePath, '/ ').'/';
@@ -166,14 +166,12 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 		$simplePrice = new SimplePrice(null, getCurrencyFromMarketplace($this->_magnasession['mpID']));
 		$productTax = SimplePrice::getTaxByPID($aProduct['ProductId']);
 		$taxFromConfig = getDBConfigValue($this->marketplace . '.checkin.mwst', $this->_magnasession['mpID']);
-		$priceSignal = getDBConfigValue($this->marketplace . '.price.signal', $this->mpID);
 
 		$simplePrice->setFinalPriceFromDB($aProduct['ProductId'], $this->_magnasession['mpID']);
 		if (isset($taxFromConfig) && $taxFromConfig !== '') {
 			$simplePrice
 				->removeTax($productTax)
-				->addTax($taxFromConfig)
-				->makeSignalPrice($priceSignal);
+				->addTax($taxFromConfig);
 		}
 
 		$ricardoPrice = $simplePrice
@@ -291,17 +289,6 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 
 		if ($variationSupport === true) {
 			$this->getVariations($iPID, $aProduct, $aData);
-			if (array_key_exists('Variations', $aData['submit']) && count($aData['submit']['Variations']) > 0) {
-				$aData['submit']['Quantity'] = 0; // is sum of variation qty
-				foreach ($aData['submit']['Variations'] as $aVariation) {
-					$aData['submit']['Quantity'] += max($aVariation['Quantity'], 0); // if qty is negativ
-				}
-			}
-		}
-		if ($aData['submit']['Quantity'] < 1) {
-			$aData['submit'] = array();
-			$this->badItems[] = $iPID;
-			unset($this->selection[$iPID]);
 		}
 	}
 	
@@ -321,7 +308,7 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 			return;
 		}
 
-		$aData['submit']['Quantity'] = $aProduct['Quantity'];
+		$aData['submit']['Quantity'] = $aData['quantity'];
 
 
 		$imagePath = getDBConfigValue($this->marketplace . '.imagepath', $this->_magnasession['mpID'], SHOP_URL_POPUP_IMAGES);
@@ -388,135 +375,101 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 		}
 	}
 
-	protected function preSubmit(&$request) {
+	protected function afterPopulateSelectionWithData() {
 		if (isset($_GET['where']) && $_GET['where'] === 'getItemsFee') {
-			$this->preSubmitItemsFee($request);
+			$this->afterPopulateSelectionWithDataForItemsFee();
 			return;
 		}
+		
+		$newSelection = array();
 
-		$request['DATA'] = array();
-		foreach ($this->selection as $iProductId => &$aProduct) {
+		foreach ($this->selection as $productId => $product) {
+			if (isset($product['submit']['Variations']) === false) {
+				$newSelection[] = $product;
+				continue;
+			}
+
 			// Prepare product
-			$deDescription = '';
-			$frDescription = '';
-			if (isset($aProduct['submit']['Descriptions']['DE']['Title'])) {
-				$deDescription = html_entity_decode(fixHTMLUTF8Entities($aProduct['submit']['Descriptions']['DE']['Description']));
+			if (isset($product['submit']['Descriptions']['DE']['Title'])) {
 				MLProduct::gi()->setLanguage($this->settings['language']['DE']);
 				MLProduct::gi()->setPriceConfig(RicardoHelper::loadPriceSettings($this->mpID));
 				MLProduct::gi()->setQuantityConfig(RicardoHelper::loadQuantitySettings($this->mpID));
 
-				$productDe = MLProduct::gi()->getProductById($iProductId);
+				$productDe = MLProduct::gi()->getProductById($productId);
 			}
 
-			if (isset($aProduct['submit']['Descriptions']['FR']['Title'])) {
-				$frDescription = html_entity_decode(fixHTMLUTF8Entities($aProduct['submit']['Descriptions']['FR']['Description']));
+			if (isset($product['submit']['Descriptions']['FR']['Title'])) {
 				MLProduct::gi()->setLanguage($this->settings['language']['FR']);
 				MLProduct::gi()->setPriceConfig(RicardoHelper::loadPriceSettings($this->mpID));
 				MLProduct::gi()->setQuantityConfig(RicardoHelper::loadQuantitySettings($this->mpID));
 
-				$productFr = MLProduct::gi()->getProductById($iProductId);
-			}
-			
-			//add variations
-			$product = MLProduct::gi()->getProductById($iProductId);
-			if (array_key_exists('Variations', $product)) {
-				unset($aProduct['submit']['Variations']);// avoid double entries
-				foreach ($product['Variations'] as $variation) {
-					$variation['Price'] = $variation['Price']['Price'];
-					$variation['SKU'] = ($this->settings['keytype'] == 'artNr') ? $variation['MarketplaceSku'] : $variation['MarketplaceId'];
-					unset($variation['Variation']); // is in $productDe or $productFr
-					$aProduct['submit']['Variations'][] = $variation;
-				}
-			}
-			
-			if (empty($aProduct['submit']['Variations'])) {
-				if (strpos($deDescription, '#VARIATIONDETAILS#') !== false) {
-					$aProduct['submit']['Descriptions']['DE']['Description'] = str_replace('#VARIATIONDETAILS#', '', $deDescription);
-				}
-
-				if (strpos($frDescription, '#VARIATIONDETAILS#') !== false) {
-					$aProduct['submit']['Descriptions']['FR']['Description'] = str_replace('#VARIATIONDETAILS#', '', $frDescription);
-				}
-				
-				$request['DATA'][] = $aProduct['submit'];
-				continue;
+				$productFr = MLProduct::gi()->getProductById($productId);
 			}
 
+			foreach ($product['submit']['Variations'] as $variation) {
+				$variationData = $product;
+				unset($variationData['submit']['Variations']);
 
-			foreach ($aProduct['submit']['Variations'] as $aVariation) {
-				$aVariationData = $aProduct;
-				unset($aVariationData['submit']['Variations']);
-				unset($aVariation['ShippingTime']);// get matched shipping time from article
-				foreach ($aVariation as $sParameter => $mParameterValue) {
-					if (array_key_exists($sParameter, $aVariationData['submit'])) {
-						$aVariationData['submit'][$sParameter] = $mParameterValue;
-					}
+				foreach ($variation as $param => $paramValue) {
+					$variationData['submit'][$param] = $paramValue;
 				}
 
 				if (isset($productDe)) {
 					foreach ($productDe['Variations'] as $v) {
-						if (    (    ($this->settings['keytype'] == 'artNr')
-						          && ($v['MarketplaceSku'] === $aVariation['SKU'])) 
-						     || (    ($this->settings['keytype'] != 'artNr')
-						          && ($v['MarketplaceId'] === $aVariation['MarketplaceId'])) 
-						) {
+						if ($v['MarketplaceSku'] === $variation['SKU']) {
 							$attributes = array();
 							foreach ($v['Variation'] as $var) {
 								$attributes[] = "{$var['Name']} - {$var['Value']}";
 							}
 
-							if (strpos($deDescription, '#VARIATIONDETAILS#') !== false)  {
-								$aVariationData['submit']['Descriptions']['DE']['Description'] =
-									str_replace('#VARIATIONDETAILS#', html_entity_decode(fixHTMLUTF8Entities(implode(' ', $attributes))), $deDescription);
-							}
+							$variationData['submit']['Descriptions']['DE']['Title'] .= ': ' . implode(', ', $attributes);
 						}
 					}
 				}
 
 				if (isset($productFr)) {
 					foreach ($productFr['Variations'] as $v) {
-						if (    (    ($this->settings['keytype'] == 'artNr')
-						          && ($v['MarketplaceSku'] === $aVariation['SKU'])) 
-						     || (    ($this->settings['keytype'] != 'artNr')
-						          && ($v['MarketplaceId'] === $aVariation['MarketplaceId'])) 
-						) {
+						if ($v['MarketplaceSku'] === $variation['SKU']) {
 							$attributes = array();
 							foreach ($v['Variation'] as $var) {
 								$attributes[] = "{$var['Name']} - {$var['Value']}";
 							}
 
-							if (strpos($frDescription, '#VARIATIONDETAILS#') !== false) {
-								$aVariationData['submit']['Descriptions']['FR']['Description'] =
-									str_replace('#VARIATIONDETAILS#', html_entity_decode(fixHTMLUTF8Entities(implode(' ', $attributes))), $frDescription);
-							}
+							$variationData['submit']['Descriptions']['FR']['Title'] .= ': ' . implode(', ', $attributes);
 						}
 					}
 				}
 
-				$request['DATA'][] = $aVariationData['submit'];
+				$newSelection[] = $variationData;
 			}
+
 		}
-		arrayEntitiesToUTF8($request['DATA']);
+
+		$this->variationCount = count($newSelection) - count($this->selection);
+		$this->selection = $newSelection;
 	}
 
-	protected function preSubmitItemsFee(&$request) {
-		$request['DATA'] = array();
-		foreach ($this->selection as $iProductId => &$aProduct) {
-			if (empty($aProduct['submit']['Variations'])) {
-				$request['DATA'][] = $aProduct['submit'];
+	protected function afterPopulateSelectionWithDataForItemsFee() {
+		$newSelection = array();
+
+		foreach ($this->selection as $productId => $product) {
+			if (isset($product['submit']['Variations']) === false) {
+				$newSelection[] = $product;
 				continue;
 			}
 
-			foreach ($aProduct['submit']['Variations'] as $aVariation) {
-				$aVariationData = $aProduct;
-				unset($aVariationData['submit']['Variations']);
-				$aVariationData['submit']['Quantity'] = $aVariation['Quantity'];
+			foreach ($product['submit']['Variations'] as $variation) {
+				$variationData = $product;
+				unset($variationData['submit']['Variations']);
 
-				$request['DATA'][] = $aVariationData['submit'];
+				$variationData['submit']['Quantity'] = $variation['Quantity'];
+
+				$newSelection[] = $variationData;
 			}
 		}
 
-		arrayEntitiesToUTF8($request['DATA']);
+		$this->variationCount = count($newSelection) - count($this->selection);
+		$this->selection = $newSelection;
 	}
 
 	protected function markAsFailed($sku) {
@@ -526,8 +479,21 @@ class RicardoCheckinSubmit extends MagnaCompatibleCheckinSubmit {
 	}
 
 	protected function postSubmit() {
-        $this->ajaxReply['uploadNotSync'] = true;
-        parent::postSubmit();
+		try {
+			$this->ajaxReply['uploadNotSync'] = true;
+			$result = MagnaConnector::gi()->submitRequest(array(
+				'ACTION' => 'UploadItems',
+			));
+		} catch (MagnaException $e) {
+			$this->submitSession['api']['exception'] = $e;
+			$this->submitSession['api']['html'] = MagnaError::gi()->exceptionsToHTML();
+			
+			$response = $e->getResponse();
+			$this->ajaxReply['state']['submmited'] -= count($response['ERRORS']);
+			$this->ajaxReply['state']['success'] -= count($response['ERRORS']);
+			$this->ajaxReply['state']['failed'] += count($response['ERRORS']);
+			$this->ajaxReply['redirect'] = $this->generateRedirectURL('fail');
+		}
 	}
 	
 	protected function afterSendRequest() {

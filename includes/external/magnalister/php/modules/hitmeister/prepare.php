@@ -20,20 +20,11 @@
 
 defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 
-class HitmeisterPrepare extends MagnaCompatibleBase
-{
+class HitmeisterPrepare extends MagnaCompatibleBase {
 
 	protected $prepareSettings = array();
 
-	public function __construct(&$params)
-	{
-		if (!empty($_POST['FullSerializedForm'])) {
-			$newPost = array();
-			parse_str_unlimited($_POST['FullSerializedForm'], $newPost);
-
-			$_POST = array_merge($_POST, $newPost);
-		}
-
+	public function __construct(&$params) {
 		parent::__construct($params);
 
 		$this->prepareSettings['selectionName'] = isset($_GET['view']) ? $_GET['view'] : 'apply';
@@ -41,18 +32,16 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		$this->resources['url']['view'] = $this->prepareSettings['selectionName'];
 	}
 
-	protected function saveMatching()
-	{
+	protected function saveMatching() {
 		if (!array_key_exists('saveMatching', $_POST)) {
-			if (!isset($_POST['Action']) || $_POST['Action'] !== 'SaveMatching' || $_GET['where'] === 'varmatchView') {
-				return;
-			}
+			return;
 		}
-
+		
 		require_once(DIR_MAGNALISTER_MODULES . 'hitmeister/classes/HitmeisterProductSaver.php');
-
+		
+		$itemDetails = $_POST;
 		$oProductSaver = new HitmeisterProductSaver($this->resources['session']);
-
+		
 		$aProductIDs = MagnaDB::gi()->fetchArray("
 			SELECT pID
 			  FROM ".TABLE_MAGNA_SELECTION."
@@ -61,99 +50,35 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 				   AND session_id = '".session_id()."'
 		", true);
 
-		$isSinglePrepare = 1 == count($aProductIDs);
-		$shopVariations = $this->saveMatchingAttributes($oProductSaver, $isSinglePrepare);
-		$itemDetails = $_POST;
-		$itemDetails['CategoryAttributes'] = $shopVariations;
-
-		if ($isSinglePrepare) {
+		if (1 == count($aProductIDs)) {
 			$oProductSaver->saveSingleProductProperties($aProductIDs[0], $itemDetails, $this->prepareSettings['selectionName']);
 		} else if (!empty($aProductIDs)) {
 			$oProductSaver->saveMultipleProductProperties($aProductIDs, $itemDetails, $this->prepareSettings['selectionName']);
 		}
-
-		$saveMatching = array_key_exists('saveMatching', $_POST);
-
-		if (count($oProductSaver->aErrors) === 0 || !$saveMatching) {
-			$isAjax = false;
-			if (!$saveMatching) {
-				# stay on prepare product form
-				$_POST['prepare'] = 'prepare';
-				$isAjax = true;
-			}
-			$aExcludeProductIds = array();
-			foreach ($oProductSaver->aMissingFields as $sErrorMessage => $aErrorProducts) {
-				if (count($aErrorProducts)) {
-					$aExcludeProductIds = array_merge($aExcludeProductIds, array_keys($aErrorProducts));
-					if (!$isAjax) {
-                        echo '<div class="errorBox">';
-                        echo constant($sErrorMessage);
-                        if (count($aErrorProducts) === 1) { // eg. for variant errors
-                            foreach ($aErrorProducts as $sSpecificError) {
-                                echo empty($sSpecificError) ? '' : ' ('.$sSpecificError.')';
-                            }
-                        }
-                        echo '</div>';
-                    }
-				}
-			}
-
-			$matchingNotFinished = isset($_POST['matching_nextpage']) && ctype_digit($_POST['matching_nextpage']) || $isAjax;
+		
+		if (count($oProductSaver->aErrors) === 0) {
+			$matchingNotFinished = isset($_POST['matching_nextpage']) && ctype_digit($_POST['matching_nextpage']);
 			if ($matchingNotFinished === false) {
-				MagnaDB::gi()->delete(
-					TABLE_MAGNA_SELECTION, 
-					array(
-						'mpID' => $this->mpID,
-						'selectionname' => $this->prepareSettings['selectionName'],
-						'session_id' => session_id()
-					), 
-					count($aExcludeProductIds)
-					? " AND pID not in ('".implode("', '", $aExcludeProductIds)."')"
-					: ''
-				);
+				MagnaDB::gi()->delete(TABLE_MAGNA_SELECTION, array(
+					'mpID' => $this->mpID,
+					'selectionname' => $this->prepareSettings['selectionName'],
+					'session_id' => session_id()
+				));
 			}
 		} else {
 			# stay on prepare product form
 			$_POST['prepare'] = 'prepare';
 
-			if ($saveMatching) {
-				foreach ($oProductSaver->aErrors as $sError) {
-					echo '<div class="errorBox">' . $sError . '</div>';
-				}
+			foreach ($oProductSaver->aErrors as $sError) {
+				echo '<div class="errorBox">' . $sError . '</div>';
 			}
 		}	
 	}
 
-	protected function saveMatchingAttributes($oProductSaver, $isSinglePrepare)
-	{
-		if (isset($_POST['Variations'])) {
-			parse_str_unlimited($_POST['Variations'], $params);
-			$_POST = $params;
-		}
-
-		$sIdentifier = $_POST['PrimaryCategory'];
-		$matching = $_POST['ml']['match'];
-		$variationThemeAttributes = null;
-
-		if (isset($_POST['variationTheme']) && $_POST['variationTheme'] !== 'null') {
-			$variationThemes = json_decode($_POST['variationThemes'], true);
-			$variationThemeAttributes = $variationThemes[$_POST['variationTheme']]['attributes'];
-		}
-		
-		$savePrepare = isset($_POST['saveMatching']) ? $_POST['saveMatching'] : false;
-		$oProductSaver->aErrors = array_merge($oProductSaver->aErrors,
-			HitmeisterHelper::gi()->saveMatching($sIdentifier, $matching, $savePrepare, true, $isSinglePrepare, 
-				$variationThemeAttributes));
-
-		return json_encode($matching['ShopVariation']);
-	}
-
-	protected function deleteMatching()
-	{
+	protected function deleteMatching() {
 		if (!(array_key_exists('unprepare', $_POST)) || empty($_POST['unprepare'])) {
 			return;
 		}
-		
 	 	$pIDs = MagnaDB::gi()->fetchArray('
 			SELECT pID FROM '.TABLE_MAGNA_SELECTION.'
 			 WHERE mpID=\''.$this->mpID.'\' AND
@@ -185,12 +110,9 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		unset($_POST['unprepare']);
 	}
 
-	protected function processMatching()
-	{
+	protected function processMatching() {
 		if ($this->prepareSettings['selectionName'] === 'match') {
 			$className = 'MatchingPrepareView';
-		} elseif ($this->prepareSettings['selectionName'] === 'varmatch') {
-			$className = 'VariationMatching';
 		} else {
 			$className = 'ApplyPrepareView';
 		}
@@ -201,7 +123,6 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 			} else {
 				echo 'This is not supported';
 			}
-
 			return;
 		}
 
@@ -214,11 +135,24 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 
 		$cMDiag = new $class($params);
 
-		echo $this->isAjax ? $cMDiag->renderAjax() : $cMDiag->process();
+		if ($this->isAjax) {
+			echo $cMDiag->renderAjax();
+		} else {
+			$categories = MagnaDB::gi()->fetchArray('
+				SELECT DISTINCT p2c.categories_id
+				  FROM '.TABLE_MAGNA_SELECTION.' ms, '.TABLE_PRODUCTS_TO_CATEGORIES.' p2c
+				 WHERE ms.mpID=\''.$this->mpID.'\' AND
+				       ms.selectionname=\''.$this->prepareSettings['selectionName'].'\' AND
+				       ms.session_id=\''.session_id().'\' AND
+				       ms.pID=p2c.products_id
+			', true);
+			//echo print_m($categories, '$categories');
+			$html = $cMDiag->process();
+			echo $html;
+		}
 	}
 
-	protected function processSelection()
-	{
+	protected function processSelection() {
 		if (($class = $this->loadResource('prepare', 'PrepareCategoryView')) === false) {
 			if ($this->isAjax) {
 				echo '{"error": "This is not supported"}';
@@ -235,13 +169,9 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		}
 	}
 
-	protected function processProductList()
-	{
+	protected function processProductList() {
 		if ($this->prepareSettings['selectionName'] === 'match') {
 			$className = 'MatchingProductList';
-		} elseif ($this->prepareSettings['selectionName'] === 'varmatch') {
-			$this->processMatching();
-			return;
 		} else {
 			$className = 'ApplyProductList';
 		}
@@ -259,8 +189,7 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		echo $o;
 	}
 
-	public function process()
-	{
+	public function process() {
 		if (   isset($_POST['request'])
 			&& ($_POST['request'] === 'ItemSearchByTitle' || $_POST['request'] === 'ItemSearchByEAN')
 		) {
@@ -320,12 +249,12 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		$hasNextPage = isset($_POST['matching_nextpage']) && ctype_digit($_POST['matching_nextpage']);
 
 		if (
-			(
-				isset($_POST['prepare']) ||
-				(isset($_GET['where']) && (($_GET['where'] == 'catMatchView') || ($_GET['where'] == 'prepareView')  || ($_GET['where'] == 'varmatchView'))) ||
-				$hasNextPage
-			) &&
-			($this->getSelectedProductsCount() > 0)
+				(
+					isset($_POST['prepare']) || 
+					(isset($_GET['where']) && (($_GET['where'] == 'catMatchView') || ($_GET['where'] == 'catAttributes'))) || 
+					$hasNextPage
+				) &&
+				($this->getSelectedProductsCount() > 0)
 		) {
 			$this->processMatching();
 		} else {
@@ -337,8 +266,7 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		}
 	}
 	
-	protected function getSelectedProductsCount()
-	{
+	protected function getSelectedProductsCount() {
 		$query = '
 			SELECT COUNT(*)
 			FROM ' . TABLE_MAGNA_SELECTION . ' s
@@ -355,8 +283,7 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 		return (int) MagnaDB::gi()->fetchOne($query);
 	}
 
-	private function insertAutoMatchProduct()
-	{
+	private function insertAutoMatchProduct() {
 		$autoMatchingStats = array (
 			'success' => 0,
 			'almost' => 0,
@@ -444,4 +371,5 @@ class HitmeisterPrepare extends MagnaCompatibleBase
 
 		return $autoMatchingStats;
 	}
+
 }

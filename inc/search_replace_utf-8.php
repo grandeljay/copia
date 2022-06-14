@@ -243,8 +243,6 @@ function shopstat_getRegExps()
     }
   }
   
-  foreach(auto_include(DIR_FS_CATALOG.'includes/extra/search_replace_utf-8/','php') as $file) require_once ($file);
-  
   return array($search, $replace);
 }
 ?>

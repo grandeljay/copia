@@ -1,26 +1,26 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ups.php 11585 2019-03-21 11:50:23Z GTB $
+   $Id: ups.php 5121 2013-07-18 11:38:19Z Tomcraft $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on:
+   based on: 
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(UPS.php,v 1.4 2003/02/18 04:28:00); www.oscommerce.com
+   (c) 2002-2003 osCommerce(UPS.php,v 1.4 2003/02/18 04:28:00); www.oscommerce.com 
    (c) 2003	 nextcommerce (UPS.php,v 1.5 2003/08/13); www.nextcommerce.org
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    -----------------------------------------------------------------------------------------
    Third Party contributions:
    German Post (Deutsche Post WorldNet)
-   Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
+   Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
    Changes for personal use: Copyright (C) 2004 Comm4All, Bernd Blazynski | http://www.comm4all.com & http://www.cheapshirt.de
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
 
@@ -28,8 +28,8 @@ define('MODULE_SHIPPING_UPS_TEXT_TITLE', 'United Parcel Service Standard');
 define('MODULE_SHIPPING_UPS_TEXT_DESCRIPTION', 'United Parcel Service Standard - Versandmodul');
 define('MODULE_SHIPPING_UPS_TEXT_WAY', 'Versand nach');
 define('MODULE_SHIPPING_UPS_TEXT_UNITS', 'kg');
-define('MODULE_SHIPPING_UPS_TEXT_FREE', 'Ab EUR ' . ((defined('MODULE_SHIPPING_UPS_FREEAMOUNT')) ? MODULE_SHIPPING_UPS_FREEAMOUNT : '') . ' Bestellwert versenden wir Ihre Bestellung versandkostenfrei!');
-define('MODULE_SHIPPING_UPS_TEXT_LOW', 'Ab EUR ' . ((defined('MODULE_SHIPPING_UPS_FREEAMOUNT')) ? MODULE_SHIPPING_UPS_FREEAMOUNT : '') . ' Bestellwert versenden wir Ihre Bestellung zu erm&auml;&szlig;igten Versandkosten!');
+define('MODULE_SHIPPING_UPS_TEXT_FREE', 'Ab EUR ' . MODULE_SHIPPING_UPS_FREEAMOUNT . ' Bestellwert versenden wir Ihre Bestellung versandkostenfrei!');
+define('MODULE_SHIPPING_UPS_TEXT_LOW', 'Ab EUR ' . MODULE_SHIPPING_UPS_FREEAMOUNT . ' Bestellwert versenden wir Ihre Bestellung zu erm&auml;&szlig;igten Versandkosten!');
 define('MODULE_SHIPPING_UPS_INVALID_ZONE', 'Es ist leider kein Versand in dieses Land m&ouml;glich.');
 define('MODULE_SHIPPING_UPS_UNDEFINED_RATE', 'Die Versandkosten k&ouml;nnen im Moment nicht errechnet werden.');
 

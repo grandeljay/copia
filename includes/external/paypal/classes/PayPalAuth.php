@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalAuth.php 12950 2020-11-24 16:00:14Z GTB $
+   $Id: PayPalAuth.php 10209 2016-08-06 14:29:35Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org

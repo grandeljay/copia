@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: banner_monthly.php 13081 2020-12-15 17:04:30Z GTB $   
+   $Id: banner_monthly.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -15,7 +15,7 @@
    Released under the GNU General Public License 
    --------------------------------------------------------------*/
 
-  require_once(DIR_WS_CLASSES . 'phplot.php');
+  require(DIR_WS_CLASSES . 'phplot.php');
 
   $year = (($_GET['year']) ? $_GET['year'] : date('Y'));
 

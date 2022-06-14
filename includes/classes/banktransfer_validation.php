@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: banktransfer_validation.php 13056 2020-12-11 15:24:21Z GTB $
+   $Id: banktransfer_validation.php 4434 2013-02-11 09:05:02Z dokuman $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,10 +27,10 @@
    New methods and bug fixes 2010 - 2015:	Christian Rothe <buero@laufstar.de>
 
 	 BLZ-Downloadseite der Deutschen Bundesbank:
-	 https://www.bundesbank.de/de/aufgaben/unbarer-zahlungsverkehr/serviceangebot/bankleitzahlen/download---bankleitzahlen-602592
+	 http://www.bundesbank.de/Redaktion/DE/Standardartikel/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/bankleitzahlen_download.html
 
    Aktuelle Beschreibung der Pruefverfahren:
-   https://www.bundesbank.de/de/aufgaben/unbarer-zahlungsverkehr/serviceangebot/pruefzifferberechnung
+   http://www.bundesbank.de/Navigation/DE/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/Pruefzifferberechnung/pruefzifferberechnung.html
    
    Stand dieses Klassen-Moduls: 7. September 2015 
    
@@ -67,7 +67,7 @@ class AccountCheck {
 // Diese Funktion gibt die Bankinformationen aus der csv-Datei zurück*/
   function csv_query($blz) {
     $cdata = -1;
-    $fp = fopen(DIR_FS_CATALOG.'includes/data/blz.csv', 'r');
+    $fp = fopen(DIR_FS_CATALOG.DIR_WS_INCLUDES . 'data/blz.csv', 'r');
     while ($data = fgetcsv($fp, 1024, ";")) {
       if ($data[0] == $blz){
         $cdata = array ('blz' => $data[0],
@@ -81,7 +81,7 @@ class AccountCheck {
 ////
 // Diese Funktion gibt die Bankinformationen aus der Datenbank zurück*/
   function db_query($blz) {
-    $blz_query = xtc_db_query("SELECT * FROM ".TABLE_BANKTRANSFER_BLZ." WHERE blz = '" . xtc_db_input($blz) . "'");
+    $blz_query = xtc_db_query("SELECT * from ".TABLE_BANKTRANSFER_BLZ." WHERE blz = '" . xtc_db_input($blz) . "'");
     if (xtc_db_num_rows($blz_query)){
       $data = xtc_db_fetch_array ($blz_query);
     }else
@@ -92,7 +92,7 @@ class AccountCheck {
 ////
 // Diese Funktion gibt die Bankinformationen aus der Datenbank zurück*/
   function query($blz) {
-    if (defined('MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ') && MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ == 'true')
+    if (MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ == 'true' && defined(MODULE_PAYMENT_BANKTRANSFER_DATABASE_BLZ))
       $data = $this->db_query($blz);
     else
       $data = $this->csv_query($blz);
@@ -254,14 +254,14 @@ class AccountCheck {
   private function Method06($AccountNo, $Significance, $Modified, $Checkpoint, $Modulator) {
     $Help = 0;
     $Method06 = 1;
-    $AccountNo = $this->ExpandAccount($AccountNo);
-    switch ($Modified) {
-      case FALSE :
+     $AccountNo = $this->ExpandAccount($AccountNo);
+     switch ($Modified) {
+       case FALSE :
         for ($Run = 0; $Run < strlen($Significance);$Run++) {
           $Help += (substr($AccountNo,$Run,1) * substr($Significance,$Run,1));
         }
         break;
-      case TRUE :
+      case TRUE  :
         for ($Run = 0; $Run < strlen($Significance);$Run++) {
           $Help += (substr($AccountNo,$Run,1) * HexDec(substr($Significance,$Run,1)));
         }
@@ -274,10 +274,6 @@ class AccountCheck {
     if ($Help == 0 && $Modulator == 7) {
       $Checksum = 0;
     }
-    // --- fix vr 20200414
-    if ($Help == 0 && $Modulator == 10) {
-      $Checksum = 0;
-    }
     // Bedingung bei Modulator 11
     if ($Help < 2 && $Modulator == 11) {
       $Checksum = 0;
@@ -288,34 +284,28 @@ class AccountCheck {
     return $Method06;
   }  /* End of Method06 */
 
-  private function Method16($AccountNo, $Significance, $Checkpoint) {
+  private function Method16($AccountNo , $Significance, $Checkpoint) {
     $Help = 0;
     $Method16 = 1;
     $AccountNo = $this->ExpandAccount($AccountNo);
-    for ($Run = 0; $Run < strlen($Significance); $Run++) {
-      $Help += (substr($AccountNo, $Run, 1) * substr($Significance, $Run, 1));
+    for ($Run = 0;$Run < strlen($Significance);$Run++) {
+      $Help += (substr($AccountNo,$Run,1) * substr($Significance,$Run,1));
     }
     $Help = $Help % 11;
     $Checksum = 11 - $Help;
     if ($Help == 0) {
       $Checksum = 0;
     }
-    if ($Checksum == substr($AccountNo, $Checkpoint - 1, 1)) {
+    if ($Checksum == substr($AccountNo,$Checkpoint-1,1)) {
        $Method16 = 0;
-    }
-    if ($Help == 1) {
-      if ($Checksum == substr($AccountNo, $Checkpoint - 2, 1)) {
-        $Method16 = 0;
-      }
-      // BOF Sonderfall fehlte: Vergleich der letzten beiden Stellen (9. und 10. bei Mark16 bzw 6. und 7. bei Mark23) 7.3.2019 vr
-      $Checksum = substr($AccountNo, $Checkpoint - 1, 1);
-      if ($Checksum == substr($AccountNo, $Checkpoint - 2, 1)) {
-        $Method16 = 0;
-      }
-      // EOF
-    }
-    return $Method16;
-  }  /* End of Method16 */
+     }
+     if ($Help == 1) {
+       if ($Checksum == substr($AccountNo,$Checkpoint-2,1)) {
+         $Method16 = 0;
+       }
+     }
+     return $Method16;
+   }  /* End of Method16 */
 
   private function Method90($AccountNo , $Significance ,$Checkpoint, $Modulator) {
     $Help = 0;
@@ -1754,8 +1744,8 @@ class AccountCheck {
     } else {
     	// Methode A
       for ($Run = 0; $Run < strlen($AccountNo); $Run++) {
-        $AccountNoTemp[$Run + 1] = (int) substr($AccountNo,$Run,1);
-        //$AccountNoTemp[$Run] = (int) substr($AccountNo,$Run,1);
+        // $AccountNoTemp[$Run + 1] = (int) substr($AccountNo,$Run,1);
+        $AccountNoTemp[$Run] = (int) substr($AccountNo,$Run,1);
       }
 
       $i = 4;
@@ -2194,9 +2184,6 @@ class AccountCheck {
     if ($RetVal != 0){
       $RetVal = $this->Method01($AccountNo, '173173173');
     }
-    if ($RetVal != 0){
-      $RetVal = $this->Method00($AccountNo, '212121212', 10);
-    }
     return $RetVal;
   }  /* End of MarkB1 */
 
@@ -2391,7 +2378,7 @@ class AccountCheck {
   private function MarkC1($AccountNo) {
     $AccountNo = $this->ExpandAccount($AccountNo);
     $markC1 = 1;
-    if($AccountNo[0] != '5') { // Variante 1
+    if($AccountNo{0} != '5') { // Variante 1
       // Methode 17, Modulus 11, Gewichtung 1, 2, 1, 2, 1, 2
       $markC1 = $this->Mark17($AccountNo);
     } else { // Variante 2
@@ -2405,7 +2392,7 @@ class AccountCheck {
       if(0 < $prz) {
         $prz = 10 - $prz;
       }
-      if($prz == $AccountNo[9]) { // 10. Stelle ist PRZ
+      if($prz == $AccountNo{9}) { // 10. Stelle ist PRZ
         $markC1 = 0;
       }
     }
@@ -2419,10 +2406,7 @@ class AccountCheck {
     if($markC2 != 0) {
       $markC2 = $this->Mark00($AccountNo);
     }
-    if($markC2 != 0) {
-      $markC2 = $this->Mark04($AccountNo);
-    }
-    return $markC2;
+  return $markC2;
   }
 
   /* --- Added FrankM 20070305 --- */
@@ -2805,17 +2789,6 @@ class AccountCheck {
 	    $markE2 = $this->Method00($Help, '212121212121212', 16, 10, 0, 1);
 	  }   
     return $markE2;
-  }
-
-  /* --- Added Christian Rothe 20170103 --- */
-  private function MarkE3($AccountNo) {
-    $AccountNo = $this->ExpandAccount($AccountNo);
-    $markE3 = $this->Method00($AccountNo, '212121212', 10, 10);
-    // Wenn Pruefzifferfehler, dann weiter pruefen mit Methode 21.
-    if ($markE3) {
-      $markE3 = $this->Mark21($AccountNo);
-    }
-    return $markE3;
   }
 
 /* ----- Ende Endgueltige Funktionen der einzelnen Berechnungsmethoden. ---- */

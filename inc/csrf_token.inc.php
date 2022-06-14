@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: csrf_token.inc.php 13461 2021-03-11 07:37:48Z GTB $
+   $Id: csrf_token.inc.php 10396 2016-11-07 13:20:51Z GTB $
 
    modified eCommerce Shopsoftware - community made shopping
    http://www.modified-shop.org
@@ -31,11 +31,11 @@ if (defined('RUN_MODE_ADMIN')) {
     'bill', 
     'haendlerbund', 
     'magnalister', 
+    'new_attributes', 
     'popup', 
     'popup_memo',
     'print_order', 
     'print_packingslip', 
-    'products_attributes', 
     'products_tags', 
     'validproducts', 
     'validcategories',
@@ -55,17 +55,23 @@ if (defined('RUN_MODE_ADMIN')) {
 
 // verfiy CSRF Token
 if (is_array($_POST) && count($_POST) > 0) {
-  $error = false;
   if (isset($_POST[$_SESSION['CSRFName']])) {
     if ($_POST[$_SESSION['CSRFName']] != $_SESSION['CSRFToken']) {
-      $error = CSRF_TOKEN_MANIPULATION;
+      trigger_error("CSRFToken manipulation.\n".print_r($_POST, true), E_USER_WARNING);
+      unset($_POST);
+      unset($_GET['action']);
+      unset($_GET['saction']);
+      
+      // create CSRF Token
+      $_SESSION['CSRFName'] = xtc_RandomString(6);
+      $_SESSION['CSRFToken'] = xtc_RandomString(32);
+      if (defined('RUN_MODE_ADMIN')) {
+        $messageStack->add(CSRF_TOKEN_MANIPULATION, 'warning');
+        $messageStack->add_session(CSRF_TOKEN_MANIPULATION, 'warning');
+      }
     }
-  } elseif ($CSRFKeep !== true) {
-    $error = CSRF_TOKEN_NOT_DEFINED;
-  }
-  
-  if ($error !== false) {
-    trigger_error($error."\n".print_r($_POST, true), E_USER_WARNING);
+  } else {
+    trigger_error("CSRFToken not defined.\n".print_r($_POST, true), E_USER_WARNING);
     unset($_POST);
     unset($_GET['action']);
     unset($_GET['saction']);
@@ -73,13 +79,12 @@ if (is_array($_POST) && count($_POST) > 0) {
     // create CSRF Token
     $_SESSION['CSRFName'] = xtc_RandomString(6);
     $_SESSION['CSRFToken'] = xtc_RandomString(32);
-
     if (defined('RUN_MODE_ADMIN')) {
-      $messageStack->add($error, 'warning');
+      $messageStack->add(CSRF_TOKEN_NOT_DEFINED, 'warning');
+      $messageStack->add_session(CSRF_TOKEN_NOT_DEFINED, 'warning');
     }
   }
 } elseif ($CSRFKeep === false) {
-  // create CSRF Token
   $_SESSION['CSRFName'] = xtc_RandomString(6);
   $_SESSION['CSRFToken'] = xtc_RandomString(32);
 }

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypalplus_comment.php 13462 2021-03-11 07:48:20Z GTB $
+   $Id: paypalplus_comment.php 10343 2016-10-26 11:54:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,7 +27,7 @@ if ($url_host['host'] == $url_request['host']
     && isset($_POST['comments'])
     )
 {
-  $_SESSION['comments'] = decode_utf8($_POST['comments'],'',true);
+  $_SESSION['comments'] = $_POST['comments'];  
   session_write_close();
   xtc_db_close();
 }

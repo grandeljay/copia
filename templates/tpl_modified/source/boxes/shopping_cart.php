@@ -1,6 +1,6 @@
 <?php
   /* -----------------------------------------------------------------------------------------
-   $Id: shopping_cart.php 12428 2019-11-30 08:37:22Z GTB $
+   $Id: shopping_cart.php 3072 2012-06-18 15:01:13Z hhacker $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -43,7 +43,7 @@
       
         $qty += $products[$i]['quantity'];
         $products_in_cart[] = array ('QTY' => $products[$i]['quantity'],
-                                     'LINK' => xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$products[$i]['id']),
+                                     'LINK' => xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($products[$i]['id'], $products[$i]['name'])),
                                      'NAME' => $products[$i]['name'],
                                      'BUTTON_DELETE' => $del_button,
                                      'LINK_DELETE' => $del_link);
@@ -89,18 +89,18 @@
 
   // GV Code
   if (isset($_SESSION['customer_id'])) {
-    $gv_query = xtc_db_query("SELECT amount
+    $gv_query = xtc_db_query("-- /templates/".CURRENT_TEMPLATE."/source/boxes/shopping_cart.php
+                              SELECT amount
                                 FROM ".TABLE_COUPON_GV_CUSTOMER."
                                WHERE customer_id = '".(int)$_SESSION['customer_id']."'");
-    if (xtc_db_num_rows($gv_query) > 0) {
-      $gv_result = xtc_db_fetch_array($gv_query);
-      if ($gv_result['amount'] > 0) {
-        $box_smarty->assign('GV_AMOUNT', $xtPrice->xtcFormat($gv_result['amount'], true, 0, true));
-        $box_smarty->assign('GV_SEND_TO_FRIEND_LINK', '<a href="'.xtc_href_link(FILENAME_GV_SEND).'">');
-      }
+    $gv_result = xtc_db_fetch_array($gv_query);
+    if ($gv_result['amount'] > 0) {
+      $box_smarty->assign('GV_AMOUNT', $xtPrice->xtcFormat($gv_result['amount'], true, 0, true));
+      $box_smarty->assign('GV_SEND_TO_FRIEND_LINK', '<a href="'.xtc_href_link(FILENAME_GV_SEND).'">');
     }
     if (isset($_SESSION['gv_id'])) {
-      $gv_query = xtc_db_query("SELECT coupon_amount
+      $gv_query = xtc_db_query("-- /templates/".CURRENT_TEMPLATE."/source/boxes/shopping_cart.php
+                                SELECT coupon_amount
                                   FROM ".TABLE_COUPONS."
                                  WHERE coupon_id = '".(int)$_SESSION['gv_id']."'");
       $coupon = xtc_db_fetch_array($gv_query);
@@ -109,7 +109,7 @@
     if (isset($_SESSION['cc_id'])) {
       $clink_parameters = defined('TPL_POPUP_CONTENT_LINK_PARAMETERS') ? TPL_POPUP_CONTENT_LINK_PARAMETERS : POPUP_CONTENT_LINK_PARAMETERS;
       $clink_class = defined('TPL_POPUP_CONTENT_LINK_CLASS') ? TPL_POPUP_CONTENT_LINK_CLASS : POPUP_CONTENT_LINK_CLASS;
-      $box_smarty->assign('COUPON_HELP_LINK', '<a target="_blank" class="'.$clink_class.'" title="'.TEXT_LINK_TITLE_INFORMATION.'" href="'.xtc_href_link(FILENAME_POPUP_COUPON_HELP, 'cID='.$_SESSION['cc_id']. $clink_parameters, $request_type).'">Information</a>');
+      $box_smarty->assign('COUPON_HELP_LINK', '<a target="_blank" class="'.$clink_class.'" title="Information" href="'.xtc_href_link(FILENAME_POPUP_COUPON_HELP, 'cID='.$_SESSION['cc_id']. $clink_parameters, $request_type).'">Information</a>');
     }
   }
 

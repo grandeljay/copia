@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: orders_paypal_action.php 12950 2020-11-24 16:00:14Z GTB $
+   $Id: orders_paypal_action.php 9961 2016-06-10 10:20:58Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -18,7 +18,6 @@ if (isset($oID) && $oID != '') {
       || $order->info['payment_method'] == 'paypalplus'
       || $order->info['payment_method'] == 'paypallink'
       || $order->info['payment_method'] == 'paypalpluslink'
-      || $order->info['payment_method'] == 'paypalsubscription'
       ) 
   {
     require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalInfo.php');
@@ -38,12 +37,6 @@ if (isset($oID) && $oID != '') {
           $paypal->capture_payment_admin($order->info['order_id'], $_POST['capture_price'], (isset($_POST['final_capture'])));
         } else {
           $_SESSION['pp_error'] = TEXT_PAYPAL_ERROR_AMOUNT;
-        }
-      }
-      if ($_POST['cmd'] == 'cancel') {
-        $response = $paypal->cancel_subscription($order->info['order_id']);
-        if ($response === false) {
-          $_SESSION['pp_error'] = TEXT_PAYPAL_ERROR_CANCEL;
         }
       }
     }

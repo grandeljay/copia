@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: dhl.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: dhl.php 5129 2013-07-18 14:00:37Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -16,7 +16,7 @@
    Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   dhl_austria_1.02       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
+   dhl_austria_1.02       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
@@ -33,10 +33,10 @@
       $this->code = 'dhl';
       $this->title = MODULE_SHIPPING_DHL_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_DHL_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_DHL_SORT_ORDER')) ? MODULE_SHIPPING_DHL_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_DHL_SORT_ORDER;
       $this->icon = DIR_WS_ICONS . 'shipping_dhl.gif';
-      $this->tax_class = ((defined('MODULE_SHIPPING_DHL_TAX_CLASS')) ? MODULE_SHIPPING_DHL_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_DHL_STATUS') && MODULE_SHIPPING_DHL_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_DHL_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_DHL_STATUS == 'True') ? true : false);
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_DHL_ZONE > 0) && is_object($order)) {
         $check_flag = false;
@@ -130,12 +130,12 @@
             $shipping_cost = 0;
             $shipping_method = MODULE_SHIPPING_DHL_UNDEFINED_RATE;
           } else {
-            $shipping_cost_1 = ($shipping_ecx * $shipping_num_boxes) + MODULE_SHIPPING_DHL_HANDLING;
+            $shipping_cost_1 = ($shipping_ecx + MODULE_SHIPPING_DHL_HANDLING);
           }
 
           $methods[] = array('id' => 'ECX',
                              'title' => 'EU Express Service',
-                             'cost' => $shipping_cost_1);
+                             'cost' => (MODULE_SHIPPING_DHL_HANDLING + $shipping_cost_1) * $shipping_num_boxes);
           $n++;
         }
 
@@ -164,12 +164,12 @@
             $shipping_cost = 0;
             $shipping_method = MODULE_SHIPPING_DHL_UNDEFINED_RATE;
           } else {
-            $shipping_cost_2 = ($shipping_dox * $shipping_num_boxes) + MODULE_SHIPPING_DHL_HANDLING;
+            $shipping_cost_2 = ($shipping_dox + MODULE_SHIPPING_DHL_HANDLING);
           }
 
           $methods[] = array('id' => 'DOX',
                              'title' => 'Document Express Service',
-                             'cost' => $shipping_cost_2);
+                             'cost' => (MODULE_SHIPPING_DHL_HANDLING + $shipping_cost_2) * $shipping_num_boxes);
           $n++;
         }
 
@@ -197,12 +197,12 @@
             $shipping_cost = 0;
             $shipping_method = MODULE_SHIPPING_DHL_UNDEFINED_RATE;
           } else {
-            $shipping_cost_3 = ($shipping_wpx * $shipping_num_boxes) + MODULE_SHIPPING_DHL_HANDLING;
+            $shipping_cost_3 = ($shipping_wpx + MODULE_SHIPPING_DHL_HANDLING);
           }
 
           $methods[] = array('id' => 'WPX',
                              'title' => 'Waren Express Service',
-                             'cost' => $shipping_cost_3);
+                             'cost' => (MODULE_SHIPPING_DHL_HANDLING + $shipping_cost_3) * $shipping_num_boxes);
           $n++;
         }
 
@@ -230,12 +230,12 @@
             $shipping_cost = 0;
             $shipping_method = MODULE_SHIPPING_DHL_UNDEFINED_RATE;
           } else {
-            $shipping_cost_4 = ($shipping_mdx * $shipping_num_boxes) + MODULE_SHIPPING_DHL_HANDLING;
+            $shipping_cost_4 = ($shipping_mdx + MODULE_SHIPPING_DHL_HANDLING);
           }
 
           $methods[] = array('id' => 'MDX',
                              'title' => 'Mid Day Express Service',
-                             'cost' => $shipping_cost_4);
+                             'cost' => (MODULE_SHIPPING_DHL_HANDLING + $shipping_cost_4) * $shipping_num_boxes);
           $n++;
         }
 
@@ -263,18 +263,18 @@
             $shipping_cost = 0;
             $shipping_method = MODULE_SHIPPING_DHL_UNDEFINED_RATE;
           } else {
-            $shipping_cost_5 = ($shipping_sdx * $shipping_num_boxes) + MODULE_SHIPPING_DHL_HANDLING;
+            $shipping_cost_5 = ($shipping_sdx + MODULE_SHIPPING_DHL_HANDLING);
           }
 
           $methods[] = array('id' => 'SDX',
                              'title' => 'Start Day Express Service',
-                             'cost' => $shipping_cost_5);
+                             'cost' => (MODULE_SHIPPING_DHL_HANDLING + $shipping_cost_5) * $shipping_num_boxes);
           $n++;
         }
       }
 
       $this->quotes = array('id' => $this->code,
-                            'module' => $this->title . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_DHL_TEXT_UNITS .')');
+                            'module' => $this->title . ' (' . $shipping_num_boxes . ' x ' . $shipping_weight . ' ' . MODULE_SHIPPING_DHL_TEXT_UNITS .')');
 
       $this->quotes['methods'] = isset($methods) ? $methods : '';
 
@@ -536,7 +536,7 @@ xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, config
         $keys[] = 'MODULE_SHIPPING_DHL_STEP_SDX_50_' . $i;
         $keys[] = 'MODULE_SHIPPING_DHL_STEP_SDX_51_' . $i;
       }
-
+      
       $exclude_array = array('MODULE_SHIPPING_DHL_COST_DOX_1',
                              'MODULE_SHIPPING_DHL_COST_WPX_1',
                              'MODULE_SHIPPING_DHL_STEP_DOX_20_1',
@@ -622,7 +622,7 @@ xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, config
                              'MODULE_SHIPPING_DHL_STEP_ECX_30_10',
                              'MODULE_SHIPPING_DHL_STEP_ECX_50_10',
                              'MODULE_SHIPPING_DHL_STEP_ECX_51_10');
-
+      
       for ($x=0, $n=sizeof($keys); $x<$n; $x++) {
         if (in_array($keys[$x], $exclude_array)) {
           unset($keys[$x]);

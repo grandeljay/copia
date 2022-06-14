@@ -7,14 +7,13 @@
   <meta name="robots" content="noindex, nofollow, noodp" />
   <base href="{$base_href}" />
   <link rel="stylesheet" type="text/css" href="{$tpl_path}stylesheet.css" />
-  <script src="{$tpl_path}javascript/jquery.min.js" type="text/javascript"></script>
+  <script src="{$tpl_path}javascript/jquery-1.8.3.min.js" type="text/javascript"></script>
   <script type="text/javascript">
-    {literal}
     $(document).ready(function(){
-      window.focus();
-      window.print();
+      window.onload = function () {
+        window.print();
+      }
     });
-    {/literal}
   </script>
 </head>
 <body class="popupprint">
@@ -38,7 +37,7 @@
     <div class="print_big">{#packingslip#}</div>
     <div class="hr_15"></div>
     <div class="printColumsLeft">
-      <strong>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}{#pickup_address#}{else}{#shipping_address#}{/if}</strong><br />{$address_label_shipping}
+      <strong>{#shipping_address#}</strong><br />{$address_label_shipping}
     </div>
     <div class="printColumsRight">
       {if $address_label_payment}<strong>{#payment_address#}</strong>{/if}<br />{$address_label_payment}
@@ -64,7 +63,7 @@
             </ul>
           {/if}
         </td>
-        <td class="ord_table_right ord_width120">{$order_values.PRODUCTS_MODEL}{$order_values.PRODUCTS_ATTRIBUTES_MODEL}</td>
+        <td class="ord_table_right ord_width120">{$order_values.PRODUCTS_MODEL}</td>
       </tr>
       {/foreach}
     </table>

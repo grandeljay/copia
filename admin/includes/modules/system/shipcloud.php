@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: shipcloud.php 11599 2019-03-21 16:05:39Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -18,12 +18,11 @@ class shipcloud {
   function __construct() {
     global $order;
 
-    $this->code = 'shipcloud';
-    $this->title = MODULE_SHIPCLOUD_TEXT_TITLE;
-    $this->description = MODULE_SHIPCLOUD_TEXT_DESCRIPTION;
-    $this->enabled = ((defined('MODULE_SHIPCLOUD_STATUS') && MODULE_SHIPCLOUD_STATUS == 'True') ? true : false);
-    $this->sort_order = '';
-  }
+     $this->code = 'shipcloud';
+     $this->title = MODULE_SHIPCLOUD_TEXT_TITLE;
+     $this->description = MODULE_SHIPCLOUD_TEXT_DESCRIPTION;
+     $this->enabled = ((MODULE_SHIPCLOUD_STATUS == 'True') ? true : false);
+   }
 
   function process($file) {
   }

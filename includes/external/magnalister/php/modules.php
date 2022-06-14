@@ -1,17 +1,19 @@
 <?php
 /**
- * 888888ba                 dP  .88888.                    dP
- * 88    `8b                88 d8'   `88                   88
- * 88aaaa8P' .d8888b. .d888b88 88        .d8888b. .d8888b. 88  .dP  .d8888b.
- * 88   `8b. 88ooood8 88'  `88 88   YP88 88ooood8 88'  `"" 88888"   88'  `88
- * 88     88 88.  ... 88.  .88 Y8.   .88 88.  ... 88.  ... 88  `8b. 88.  .88
- * dP     dP `88888P' `88888P8  `88888'  `88888P' `88888P' dP   `YP `88888P'
+ * 888888ba                 dP  .88888.                    dP                
+ * 88    `8b                88 d8'   `88                   88                
+ * 88aaaa8P' .d8888b. .d888b88 88        .d8888b. .d8888b. 88  .dP  .d8888b. 
+ * 88   `8b. 88ooood8 88'  `88 88   YP88 88ooood8 88'  `"" 88888"   88'  `88 
+ * 88     88 88.  ... 88.  .88 Y8.   .88 88.  ... 88.  ... 88  `8b. 88.  .88 
+ * dP     dP `88888P' `88888P8  `88888'  `88888P' `88888P' dP   `YP `88888P' 
  *
  *                          m a g n a l i s t e r
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id: modules.php 6799 2016-07-14 08:05:07Z tim.neumann $
+ *
+ * (c) 2010 - 2012 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -24,30 +26,30 @@ $_modules = array(
 		'displayAlways' => true,
 		'requiredConfigKeys' => array (
 			'amazon.firstactivation',
-			/*'amazon.username',
-			'amazon.password',*/
+			'amazon.username',
+			'amazon.password',
 			'amazon.merchantid',
 			'amazon.marketplaceid',
 			'amazon.mwstoken',
 			'amazon.lang',
-			'amazon.internationalShipping',
-			'amazon.mwstfallback',
+			'amazon.internationalShipping', 
+			'amazon.mwstfallback', 
 			/*//
-			{search: 1427198983}'amazon.mwst.shipping',
-			//*/
-			'amazon.quantity.type',
-			'amazon.leadtimetoship',
-			'amazon.price.addkind',
-			'amazon.import',
-			'amazon.orderstatus.open',
-			'amazon.orderstatus.fba',
-			'amazon.orderstatus.sync',
-			'amazon.orderstatus.shipped',
-			'amazon.orderstatus.carrier.default',
-			'amazon.orderstatus.cancelled',
-			'amazon.stocksync.tomarketplace',
-			'amazon.stocksync.frommarketplace',
-			'amazon.mail.send',
+			{search: 1427198983}'amazon.mwst.shipping', 
+			//*/			
+			'amazon.quantity.type', 
+			'amazon.leadtimetoship', 
+			'amazon.price.addkind', 
+			'amazon.import', 
+			'amazon.orderstatus.open', 
+			'amazon.orderstatus.fba', 
+			'amazon.orderstatus.sync', 
+			'amazon.orderstatus.shipped', 
+			'amazon.orderstatus.carrier.default', 
+			'amazon.orderstatus.cancelled', 
+			'amazon.stocksync.tomarketplace', 
+			'amazon.stocksync.frommarketplace', 
+			'amazon.mail.send'
 			//'amazon.CustomerGroup', /* gibt es nicht in osCommerce */
 		),
 		'pages' => array (
@@ -56,18 +58,10 @@ $_modules = array(
 				'views' => array (
 					'apply' => ML_AMAZON_NEW_ITMES,
 					'match' => ML_AMAZON_PRODUCT_MATCHING,
-					'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
 				)
 			),
 			#'apply' => ML_AMAZON_NEW_ITMES,
 			'checkin' => ML_GENERIC_CHECKIN,
-			'shippinglabel' => array (
-				'title' => ML_AMAZON_SHIPPINGLABEL,
-				'views' => array (
-					'upload' => ML_AMAZON_SHIPPINGLABEL_UPLOAD,
-					'overview' => ML_AMAZON_SHIPPINGLABEL_OVERVIEW,
-				),
-                        ),
 			'listings' => array (
 				'title' => ML_GENERIC_LISTINGS,
 				'views' => array (
@@ -91,7 +85,6 @@ $_modules = array(
 		'logo' => 'ebay',
 		'displayAlways' => true,
 		'requiredConfigKeys' => array (
-            'ebay.username',
 			'ebay.firstactivation',
 			'ebay.token',
 			'ebay.lang',
@@ -99,14 +92,7 @@ $_modules = array(
 			'ebay.postalcode',
 		),
 		'pages' => array (
-            'prepare' => array (
-                'title' => ML_GENERIC_PREPARE,
-                'views' => array (
-                    'apply' => ML_AMAZON_NEW_ITMES,
-                    #'match' => ML_AMAZON_PRODUCT_MATCHING,     #PBSE# suspended
-                    'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-                )
-            ),
+			'prepare' => ML_GENERIC_PREPARE,
 			'checkin' => ML_GENERIC_CHECKIN,
 			'listings' => array (
 				'title' => ML_GENERIC_LISTINGS,
@@ -177,8 +163,8 @@ $_modules = array(
 	'meinpaket' => array(
 		'title' => ML_MODULE_MEINPAKET,
 		'logo' => 'ayn',
-		'displayAlways' => false,
-		'referer' => array('allyouneed.com'),
+		'displayAlways' => true,
+		'referer' => array('meinpaket.de'),
 		'requiredConfigKeys' => array (
 			'meinpaket.username',
 			'meinpaket.password',
@@ -205,7 +191,7 @@ $_modules = array(
 				'title' => ML_GENERIC_PREPARE,
 				'views' => array (
 					'apply' => ML_AMAZON_NEW_ITMES,
-					'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
+					'varmatch' => ML_MEINPAKET_VARIANT_MATCHING,
 				),
 			),
 			'checkin' => ML_GENERIC_CHECKIN,
@@ -282,12 +268,14 @@ $_modules = array(
 	),
 	'hitmeister' => array(
 		'title' => ML_MODULE_HITMEISTER,
-		'logo' => 'real_de',
+		'logo' => 'hitmeister',
 		'displayAlways' => false,
 		'requiredConfigKeys' => array (
 			'hitmeister.firstactivation',
 			'hitmeister.clientkey',
 			'hitmeister.secretkey',
+			'hitmeister.mpusername',
+			'hitmeister.mppassword',
 			'hitmeister.lang',
 			'hitmeister.shippingtime',
 			'hitmeister.itemcondition',
@@ -301,7 +289,7 @@ $_modules = array(
 				'views' => array (
 					'apply' => ML_AMAZON_NEW_ITMES,
 					'match' => ML_AMAZON_PRODUCT_MATCHING,
-					'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
+					//'varmatch' => ML_AYN24_VARIANT_MATCHING,
 				)
 			),
 			'checkin' => ML_GENERIC_CHECKIN,
@@ -323,129 +311,6 @@ $_modules = array(
 		),
 		'type' => 'marketplace',
 	),
-	'cdiscount' => array(
-		'title' => ML_MODULE_CDISCOUNT,
-		'logo' => 'cdiscount',
-		'displayAlways' => false,
-		'requiredConfigKeys' => array (
-			'cdiscount.firstactivation',
-			'cdiscount.mpusername',
-			'cdiscount.mppassword',
-			'cdiscount.lang',
-			'cdiscount.itemcondition',
-			'cdiscount.import',
-			'cdiscount.multimatching.itemsperpage'
-		),
-		'pages' => array (
-			'prepare' => array (
-				'title' => ML_GENERIC_PREPARE,
-				'views' => array (
-					'apply' => ML_AMAZON_NEW_ITMES,
-//					'match' => ML_AMAZON_PRODUCT_MATCHING,
-					'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-				)
-			),
-			'checkin' => ML_GENERIC_CHECKIN,
-			'listings' => array (
-				'title' => ML_GENERIC_LISTINGS,
-				'views' => array (
-					'inventory' => ML_GENERIC_INVENTORY,
-					'deleted' => ML_GENERIC_DELETED,
-				)
-			),
-			'errorlog' => ML_GENERIC_ERRORLOG,
-			'conf' => ML_GENERIC_CONFIGURATION,
-		),
-		'settings' => array (
-			'defaultpage' => 'prepare',
-			'subsystem' => 'Cdiscount',
-			'currency' => 'EUR',
-			'hasOrderImport' => true,
-		),
-		'type' => 'marketplace',
-	),
-    'priceminister' => array(
-        'title' => ML_MODULE_PRICEMINISTER,
-        'logo' => 'priceminister',
-        'displayAlways' => false,
-        'requiredConfigKeys' => array (
-            'priceminister.firstactivation',
-            'priceminister.apitoken',
-            'priceminister.mpusername',
-            'priceminister.lang',
-            'priceminister.itemcondition',
-            'priceminister.import',
-            'priceminister.multimatching.itemsperpage',
-            'priceminister.orderstatus.cancelreason'
-        ),
-        'pages' => array (
-            'prepare' => array (
-                'title' => ML_GENERIC_PREPARE,
-                'views' => array (
-                    'apply' => ML_AMAZON_NEW_ITMES,
-                    'match' => ML_AMAZON_PRODUCT_MATCHING,
-                    'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-                )
-            ),
-            'checkin' => ML_GENERIC_CHECKIN,
-            'listings' => array (
-                'title' => ML_GENERIC_LISTINGS,
-                'views' => array (
-                    'inventory' => ML_GENERIC_INVENTORY,
-                    'deleted' => ML_GENERIC_DELETED,
-                )
-            ),
-            'errorlog' => ML_GENERIC_ERRORLOG,
-            'conf' => ML_GENERIC_CONFIGURATION,
-        ),
-        'settings' => array (
-            'defaultpage' => 'prepare',
-            'subsystem' => 'Priceminister',
-            'currency' => 'EUR',
-            'hasOrderImport' => true,
-        ),
-        'type' => 'marketplace',
-    ),
-
-    'crowdfox' => array(
-        'title' => ML_MODULE_CROWDFOX,
-        'logo' => 'crowdfox',
-        'displayAlways' => false,
-        'requiredConfigKeys' => array (
-            'crowdfox.firstactivation',
-            'crowdfox.mpusername',
-            'crowdfox.mppassword',
-            'crowdfox.companyname',
-            'crowdfox.lang',
-            'crowdfox.import',
-        ),
-        'pages' => array (
-            'prepare' => array (
-                'title' => ML_GENERIC_PREPARE,
-                'views' => array (
-                    'apply' => ML_AMAZON_NEW_ITMES,
-                    'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-                )
-            ),
-            'checkin' => ML_GENERIC_CHECKIN,
-            'listings' => array (
-                'title' => ML_GENERIC_LISTINGS,
-                'views' => array (
-                    'inventory' => ML_GENERIC_INVENTORY,
-                    'deleted' => ML_GENERIC_DELETED,
-                )
-            ),
-            'errorlog' => ML_GENERIC_ERRORLOG,
-            'conf' => ML_GENERIC_CONFIGURATION,
-        ),
-        'settings' => array (
-            'defaultpage' => 'prepare',
-            'subsystem' => 'Crowdfox',
-            'currency' => 'EUR',
-            'hasOrderImport' => true,
-        ),
-        'type' => 'marketplace',
-    ),
 	'guenstiger' => array(
 		'title' => ML_MODULE_GUENSTIGER,
 		'logo' => 'guenstiger',
@@ -453,7 +318,7 @@ $_modules = array(
 		'referer' => array('guenstiger.de'),
 		'requiredConfigKeys' => array (
 			'guenstiger.lang',
-			'guenstiger.inventorysync.price',
+			'guenstiger.inventorysync',
 			'guenstiger.shipping.country',
 			'guenstiger.shipping.method',
 			'guenstiger.shipping.cost',
@@ -473,7 +338,7 @@ $_modules = array(
 		'settings' => array (
 			'subsystem' => 'ComparisonShopping',
 			'currency' => 'EUR',
-			'hasOrderImport' => true,
+			'hasOrderImport' => false,
 		),
 		'type' => 'marketplace',
 	),
@@ -484,7 +349,7 @@ $_modules = array(
 		'referer' => array('getdeal.de'),
 		'requiredConfigKeys' => array (
 			'getdeal.lang',
-			'getdeal.inventorysync.price',
+			'getdeal.inventorysync',
 			'getdeal.shipping.country',
 			'getdeal.shipping.method',
 			'getdeal.shipping.cost',
@@ -507,7 +372,7 @@ $_modules = array(
 			'hasOrderImport' => false,
 		),
 		'type' => 'marketplace',
-	),
+	),	
 	'idealo' => array(
 		'title' => ML_MODULE_IDEALO,
 		'logo' => 'idealo',
@@ -515,14 +380,12 @@ $_modules = array(
 		'referer' => array('idealo.de'),
 		'requiredConfigKeys' => array (
 			'idealo.lang',
-			'idealo.inventorysync.price',
+			'idealo.inventorysync',
 			'idealo.shipping.country',
 			'idealo.shipping.method',
 			'idealo.shipping.cost',
-			'idealo.deliverytime',
 		),
 		'pages' => array (
-			'prepare' => ML_GENERIC_PREPARE,
 			'checkin' => ML_GENERIC_CHECKIN,
 			'listings' => array (
 				'title' => ML_GENERIC_LISTINGS,
@@ -548,7 +411,7 @@ $_modules = array(
 		'referer' => array('kelkoo.de'),
 		'requiredConfigKeys' => array (
 			'kelkoo.lang',
-			'kelkoo.inventorysync.price',
+			'kelkoo.inventorysync',
 			'kelkoo.shipping.country',
 			'kelkoo.shipping.method',
 			'kelkoo.shipping.cost',
@@ -580,7 +443,7 @@ $_modules = array(
 		'referer' => array('preissuchmaschine.de', 'preissuchmaschine.ch'),
 		'requiredConfigKeys' => array (
 			'preissuchmaschine.lang',
-			'preissuchmaschine.inventorysync.price',
+			'preissuchmaschine.inventorysync',
 			'preissuchmaschine.shipping.country',
 			'preissuchmaschine.shipping.method',
 			'preissuchmaschine.shipping.cost',
@@ -611,7 +474,7 @@ $_modules = array(
 		'referer' => array('billiger.de'),
 		'requiredConfigKeys' => array (
 			'billiger.lang',
-			'billiger.inventorysync.price',
+			'billiger.inventorysync',
 			'billiger.shipping.country',
 			'billiger.shipping.method',
 			'billiger.shipping.cost',
@@ -644,7 +507,7 @@ $_modules = array(
 			'daparto.tecdoc',
 			'daparto.condition',
 			'daparto.lang',
-			'daparto.inventorysync.price',
+			'daparto.inventorysync',
 			'daparto.shipping.country',
 			'daparto.shipping.method',
 			'daparto.shipping.cost',
@@ -704,20 +567,15 @@ $_modules = array(
 	'tradoria' => array (
 		'title' => 'Rakuten',
 		'logo' => 'rakuten',
-		'displayAlways' => true,
+		'displayAlways' => false,
 		'requiredConfigKeys' => array (
 			'tradoria.apikey',
 			'tradoria.mpusername',
+			'tradoria.mppassword',
 			'tradoria.import',
 		),
 		'pages' => array (
-			'prepare' => array (
-				'title' => ML_GENERIC_PREPARE,
-				'views' => array (
-					'apply' => ML_AMAZON_NEW_ITMES,
-					'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-				)
-			),
+			'catmatch' => ML_MEINPAKET_CATEGORY_MATCHING,
 			'checkin' => ML_GENERIC_CHECKIN,
 			'listings' => array (
 				'title' => ML_GENERIC_LISTINGS,
@@ -730,7 +588,7 @@ $_modules = array(
 			'conf' => ML_GENERIC_CONFIGURATION,
 		),
 		'settings' => array (
-			'defaultpage' => 'prepare',
+			'defaultpage' => 'catmatch',
 			'subsystem' => 'Tradoria',
 			'currency' => 'EUR',
 			'hasOrderImport' => true,
@@ -773,12 +631,8 @@ $_modules = array(
 		'displayAlways' => false,
 		'requiredConfigKeys' => array (
 			'hood.mpusername',
-			//'hood.mppassword',
+			'hood.mppassword',
 			'hood.apikey',
-                        'hood.orderstatus.canceled.nostock',
-			'hood.orderstatus.canceled.defect',
-			'hood.orderstatus.canceled.revoked',
-			'hood.orderstatus.canceled.nopayment',
 		),
 		'pages' => array (
 			'prepare' => ML_GENERIC_PREPARE,
@@ -808,7 +662,7 @@ $_modules = array(
 		'referer' => array('twenga.de'),
 		'requiredConfigKeys' => array (
 			'twenga.lang',
-			'twenga.inventorysync.price',
+			'twenga.inventorysync',
 			'twenga.shipping.country',
 			'twenga.shipping.method',
 			'twenga.shipping.cost',
@@ -832,57 +686,6 @@ $_modules = array(
 		),
 		'type' => 'marketplace',
 	),
-    'etsy' => array (
-        'title' => ML_MODULE_ETSY,
-        'logo' => 'etsy',
-        'displayAlways' => false,
-        'requiredConfigKeys' => array (
-            'etsy.username',
-            'etsy.password',
-            'etsy.shop.language',
-            'etsy.currency',
-            'etsy.lang',
-            'etsy.imagepath',
-            'etsy.price.addkind',
-            'etsy.price.factor',
-            //'etsy.price.group', // do not check - because its doesn't exists in oscommerce
-            'etsy.import',
-            //'etsy.CustomerGroup', // do not check - because its doesn't exists in oscommerce
-            'etsy.preimport.start',
-            'etsy.orderstatus.open',
-            'etsy.orderstatus.shipped',
-            'etsy.orderstatus.cancelled',
-            'etsy.stocksync.tomarketplace',
-            'etsy.stocksync.frommarketplace',
-            'etsy.inventorysync.price',
-        ),
-        'pages' => array (
-            'prepare' => array (
-                'title' => ML_GENERIC_PREPARE,
-                'views' => array (
-                    'apply' => ML_AMAZON_NEW_ITMES,
-                    'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-                )
-            ),
-            'checkin' => ML_GENERIC_CHECKIN,
-            'listings' => array (
-                'title' => ML_GENERIC_LISTINGS,
-                'views' => array (
-                    'inventory' => ML_GENERIC_INVENTORY,
-                    'deleted' => ML_GENERIC_DELETED
-                )
-            ),
-            'errorlog' => ML_GENERIC_ERRORLOG,
-            'conf' => ML_GENERIC_CONFIGURATION,
-        ),
-        'settings' => array (
-            'defaultpage' => 'prepare',
-            'subsystem' => 'Etsy',
-            'currency' => 'EUR',
-            'hasOrderImport' => true,
-        ),
-        'type' => 'marketplace',
-    ),
 	'dawanda' => array (
 		'title' => ML_MODULE_DAWANDA,
 		'logo' => 'dawanda',
@@ -893,13 +696,7 @@ $_modules = array(
 			'dawanda.apikey',
 		),
 		'pages' => array (
-			'prepare' => array (
-				'title' => ML_GENERIC_PREPARE,
-				'views' => array (
-					'apply' => ML_AMAZON_NEW_ITMES,
-					'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-				)
-			),
+			'prepare' => ML_GENERIC_PREPARE,
 			'checkin' => ML_GENERIC_CHECKIN,
 			'listings' => array (
 				'title' => ML_GENERIC_LISTINGS,
@@ -960,7 +757,7 @@ $_modules = array(
 			'ricardo.access.MPUSERNAME',
 			'ricardo.access.MPPASSWORD',
 			'ricardo.access.LANG',
-            'ricardo.token',
+			'ricardo.checkin.displayfees'
 		),
 		'pages' => array (
 			'prepare' => ML_GENERIC_PREPARE,
@@ -1045,84 +842,6 @@ $_modules = array(
 		),
 		'type' => 'marketplace',
 	),
-    'googleshopping' => array(
-        'title' => 'Google Shopping',
-        'logo' => 'googleshopping',
-        'displayAlways' => false,
-        'requiredConfigKeys' => array (
-            'googleshopping.firstactivation',
-            'googleshopping.lang',
-            'googleshopping.lang.match.googleshopping',
-            'googleshopping.targetCountry',
-            'googleshopping.currency',
-        ),
-        'pages' => array (
-            'prepare' => array (
-                'title' => ML_GENERIC_PREPARE,
-                'views' => array (
-                    'apply' => ML_AMAZON_NEW_ITMES,
-                    'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-                )
-            ),
-            'checkin' => ML_GENERIC_CHECKIN,
-            'listings' => array (
-                'title' => ML_GENERIC_LISTINGS,
-                'views' => array (
-                    'inventory' => ML_GENERIC_INVENTORY,
-                    'deleted' => ML_GENERIC_DELETED,
-                )
-            ),
-            'errorlog' => ML_GENERIC_ERRORLOG,
-            'conf' => ML_GENERIC_CONFIGURATION,
-        ),
-        'settings' => array (
-            'defaultpage' => 'prepare',
-            'subsystem' => 'Googleshopping',
-            'currency' => '__depends__',
-            'hasOrderImport' => true,
-        ),
-        'type' => 'marketplace',
-    ),
-    'metro' => array(
-        'title' => 'METRO',
-        'logo' => 'metro',
-        'displayAlways' => false,
-        'requiredConfigKeys' => array (
-            'metro.clientkey',
-            'metro.secretkey',
-            'metro.lang',
-            'metro.mwst.fallback',
-            'metro.price.addkind',
-            'metro.stocksync.tomarketplace',
-            'metro.orderstatus.cancelled',
-        ),
-        'pages' => array (
-            'prepare' => array (
-                'title' => ML_GENERIC_PREPARE,
-                'views' => array (
-                    'apply' => ML_AMAZON_NEW_ITMES,
-                    'varmatch' => ML_GENERIC_VARIANTEN_MATCHING,
-                )
-            ),
-            'checkin' => ML_GENERIC_CHECKIN,
-            'listings' => array (
-                'title' => ML_GENERIC_LISTINGS,
-                'views' => array (
-                    'inventory' => ML_GENERIC_INVENTORY,
-                    'deleted' => ML_GENERIC_DELETED,
-                )
-            ),
-            'errorlog' => ML_GENERIC_ERRORLOG,
-            'conf' => ML_GENERIC_CONFIGURATION,
-        ),
-        'settings' => array (
-            'defaultpage' => 'prepare',
-            'subsystem' => 'Metro',
-            'currency' => 'EUR',
-            'hasOrderImport' => true,
-        ),
-        'type' => 'marketplace',
-    ),
 	'more' => array (
 		'title' => '&hellip;',
 		'displayAlways' => true,

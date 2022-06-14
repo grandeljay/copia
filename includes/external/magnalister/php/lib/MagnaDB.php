@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: MagnaDB.php 6309 2015-12-17 01:05:22Z MaW $
  *
  * (c) 2010 - 2013 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -87,23 +87,11 @@ class MagnaDBDriverMysqli extends MagnaDBDriver {
 			$this->access['sock'] = $this->access['host'];
 			$this->access['host'] = '.';
 		} else if (strpos($this->access['host'], '.sock') !== false) {
-			// modified >= 2.0.5.0:
-			$blMsock3 = false;
-			if (is_file(DIR_FS_INC.'get_database_version.inc.php')) {
-				require_once(DIR_FS_INC.'get_database_version.inc.php');
-				$modified_shop_version = get_database_version();
-				if ($shop_version['plain'] >= '2.0.5.0') {
-					$blMsock3 = true;
-				}
-			}
 			$this->access['type'] = 'socket'; // Unix domain sockets use the file system as their address name space.
 			$msock = array();
 			if (preg_match('/^([^\:]+)\:(.*)$/', $this->access['host'], $msock)) {
 				$this->access['host'] = $msock[1];
 				$this->access['sock'] = $msock[2];
-				if ($blMsock3) {
-					$this->access['sock'] = $msock[3];
-				}
 			} else {
 				$this->access['sock'] = $this->access['host'];
 				$this->access['host'] = '';
@@ -472,7 +460,8 @@ class MagnaDB {
 		$this->start         = microtime(true);
 		$this->count         = 0;
 		$this->querytime     = 0;
-		$this->setEscapeStrings();
+		// magic quotes are deprecated as of php 5.4
+		$this->escapeStrings = get_magic_quotes_gpc();
 		
 		$this->access['host'] = DB_SERVER;
 		$this->access['user'] = DB_SERVER_USERNAME;
@@ -511,22 +500,6 @@ class MagnaDB {
 		$this->reloadTables();
 		
 		$this->initSession();
-	}
-	
-	/**
-	 * disables / enables stripslashes in escape()
-	 * @param bool $bl
-	 * @param null $bl default value
-	 * @return \MagnaDB
-	 */
-	public function setEscapeStrings ($bl = null) {
-		// magic quotes are deprecated as of php 5.4
-		if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
-			$this->escapeStrings = $bl === null ? false : $bl;
-		} else {
-			$this->escapeStrings = $bl === null ? get_magic_quotes_gpc() : $bl;
-		}
-		return $this;
 	}
 	
 	protected function selectDriver() {
@@ -902,7 +875,6 @@ class MagnaDB {
 	protected function initSession() {
 		global $_MagnaSession, $_MagnaShopSession;
 		
-		if (!defined('TABLE_MAGNA_SESSION')) define('TABLE_MAGNA_SESSION', 'magnalister_session');
 		if ($this->tableExists(TABLE_MAGNA_SESSION)) {
 			$this->sessionLifetime = (int)ini_get("session.gc_maxlifetime");
 			$this->sessionGarbageCollector();
@@ -1380,6 +1352,7 @@ class MagnaDB {
 		$where = rtrim($where, "AND ");
 
 		$query = "DELETE FROM `".$table."` WHERE ".$where." ".$add;
+
 		return $this->query($query);
 	}
 

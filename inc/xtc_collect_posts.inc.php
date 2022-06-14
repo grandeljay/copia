@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_collect_posts.inc.php 13182 2021-01-18 09:02:07Z GTB $
+   $Id: xtc_collect_posts.inc.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,7 +27,7 @@
    ---------------------------------------------------------------------------------------*/
 
   function xtc_collect_posts() {
-    global $coupon_no, $xtPrice, $cc_id, $messageStack, $PHP_SELF;
+    global $coupon_no, $xtPrice, $cc_id, $messageStack;
 
     if (isset($_POST['gv_redeem_code']) && xtc_not_null($_POST['gv_redeem_code'])) {
       unset($_SESSION['cc_id']);
@@ -53,11 +53,11 @@
                                        WHERE coupon_id = '" . $gv_result['coupon_id'] . "'");
         if ((xtc_db_num_rows($redeem_query) != 0) && ($gv_result['coupon_type'] == 'G')) {
           $messageStack->add_session('coupon_message', ERROR_NO_INVALID_REDEEM_GV);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
       } else {
         $messageStack->add_session('coupon_message', ERROR_NO_INVALID_REDEEM_GV);
-        xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+        xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
       }
 
       // GIFT CODE G START
@@ -102,53 +102,45 @@
             );
             xtc_db_perform(TABLE_COUPON_GV_CUSTOMER, $sql_data_array);
           }
-          $messageStack->add_session('coupon_message', sprintf(REDEEMED_AMOUNT, $xtPrice->xtcFormatCurrency($gv_amount)), 'success');
-          
-          if (strpos(basename($PHP_SELF), 'checkout') !== false) {
-            $_SESSION['cot_gv'] = 'ot_gv';
-            xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'NONSSL'));
-          } else {
-            xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
-          }
+          $messageStack->add_session('coupon_message', REDEEMED_AMOUNT);
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, 'info=1', 'NONSSL'));
         } else {
           $messageStack->add_session('coupon_message', GUEST_REDEEM_NOT_ALLOWED);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
       } else {
 
         if (xtc_db_num_rows($gv_query)==0) {
           $messageStack->add_session('coupon_message', ERROR_NO_INVALID_REDEEM_COUPON);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
         
         // not active yet
         if (strtotime($gv_result['coupon_start_date']) > time()) {
           $messageStack->add_session('coupon_message', ERROR_INVALID_STARTDATE_COUPON);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
         
         // expired
         if (strtotime($gv_result['coupon_expire_date']) < time()) {
           $messageStack->add_session('coupon_message', ERROR_INVALID_FINISDATE_COUPON);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
 
         $coupon_count = xtc_db_query("SELECT coupon_id 
                                         FROM " . TABLE_COUPON_REDEEM_TRACK . " 
                                        WHERE coupon_id = '" . $gv_result['coupon_id']."'");
-        $coupon_count_customer = xtc_db_query("SELECT * 
-                                                 FROM " . TABLE_COUPON_REDEEM_TRACK . "  crt
-                                                 JOIN " . TABLE_ORDERS . " o
-                                                      ON o.orders_id = crt.order_id
-                                                         AND o.customers_email_address = '" . xtc_db_input($_SESSION['customer_email_address']) . "'
-                                                WHERE crt.coupon_id = '" . $gv_result['coupon_id'] . "'");
+        $coupon_count_customer = xtc_db_query("SELECT coupon_id 
+                                                 FROM " . TABLE_COUPON_REDEEM_TRACK . " 
+                                                WHERE coupon_id = '" . $gv_result['coupon_id']."' 
+                                                  AND customer_id = '" . (int)$_SESSION['customer_id'] . "'");
         if (xtc_db_num_rows($coupon_count)>=$gv_result['uses_per_coupon'] && $gv_result['uses_per_coupon'] > 0) {
           $messageStack->add_session('coupon_message', ERROR_INVALID_USES_COUPON . $gv_result['uses_per_coupon'] . TIMES);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
         if (xtc_db_num_rows($coupon_count_customer) >= $gv_result['uses_per_user'] && $gv_result['uses_per_user'] > 0) {
           $messageStack->add_session('coupon_message', ERROR_INVALID_USES_USER_COUPON . $gv_result['uses_per_user'] . TIMES);
-          xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+          xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
         }
         if ($gv_result['coupon_type'] == 'S') {
           $coupon_amount = TEXT_COUPON_HELP_FIXED; //$order->info['shipping_cost'];
@@ -174,14 +166,13 @@
         }
         $_SESSION['cc_post'] = true;
         
-        $messageStack->add_session('coupon_message', REDEEMED_COUPON, 'success');
-        xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+        xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
       }
     }
-        
-    if (isset($_POST['gv_redeem_code']) && (isset($_POST['check_gift']) || isset($_POST['check_gift_x']))) {
+    
+    if (isset($_POST['gv_redeem_code'])) {
       $messageStack->add_session('coupon_message', ERROR_NO_REDEEM_CODE);
-      xtc_redirect(xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('action')), 'NONSSL'));
+      xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
     }
   }
 ?>

@@ -21,7 +21,6 @@
 require_once(DIR_MAGNALISTER_MODULES.'magnacompatible/MagnaCompatibleHelper.php');
 
 class RicardoHelper extends MagnaCompatibleHelper {
-	const SUBTITLE_MAX_LENGTH = 60;
 	
 	public static function loadPriceSettings($mpId) {
 		$mp = magnaGetMarketplaceByID($mpId);
@@ -50,7 +49,7 @@ class RicardoHelper extends MagnaCompatibleHelper {
 		$config = array(
 			'Type'  => getDBConfigValue($mp.'.quantity.type', $mpId, 'lump'),
 			'Value' => (int)getDBConfigValue($mp.'.quantity.value', $mpId, 0),
-			'MaxQuantity' => (int)getDBConfigValue($mp.'.quantity.maxquantity', $mpId, 999),
+			'MaxQuantity' => (int)getDBConfigValue($mp.'.quantity.maxquantity', $mpId, 0),
 		);
 		
 		return $config;
@@ -67,21 +66,13 @@ class RicardoHelper extends MagnaCompatibleHelper {
 		
 		$ricardoTemplate = getDBConfigValue('ricardo.template.content', $mpID);
 		if (!isset($ricardoTemplate)) {
-			$ricardoTemplate = '<p>#TITLE#<br>
-				#VARIATIONDETAILS#</p>
+			$ricardoTemplate = '<p>#TITLE#</p>
 				<p>#ARTNR#</p>
 				<p>#SHORTDESCRIPTION#</p>
 				<p>#PICTURE1#</p>
 				<p>#PICTURE2#</p>
 				<p>#PICTURE3#</p>
 				<p>#DESCRIPTION#</p>';
-		} elseif (strpos($ricardoTemplate, '#VARIATIONDETAILS#') === false) {
-			$strPosTitle = strpos($ricardoTemplate, '#TITLE#');
-			if ($strPosTitle !== false) {
-				$ricardoTemplate = substr_replace($ricardoTemplate, '<br>#VARIATIONDETAILS#<br>', $strPosTitle + strlen('#TITLE#'), 0);
-			} else {
-				$ricardoTemplate = '#VARIATIONDETAILS#<br>' . $ricardoTemplate;
-			}
 		}
 		
 		# Template fuellen
@@ -155,28 +146,5 @@ class RicardoHelper extends MagnaCompatibleHelper {
 			$str = preg_replace(	'/#PICTURE\d+#/','', $tmplStr);
 		}
 		return $str;
-	}
-
-	/**
-	 * Sanitizes subtitle and preparing it for Ricardo because Ricardo doesn't allow html tags.
-	 *
-	 * @param $sSubtitle
-	 * @return mixed
-	 */
-	public static function ricardoSanitizeSubtitle($sSubtitle){
-		$sSubtitle= preg_replace(array('/<\/?font>/','/<\/?div>/','/<\/?li>/','/<\/?p>/','/<\/?h1>/','/<\/?h2>/','/<\/?h3>/','/<\/?h4>/','/<\/?h5>/','/<\/?blockquote>/','/<\/?br>/')," ", $sSubtitle);
-		$sSubtitle = preg_replace('/&nbsp;/', " ", $sSubtitle);
-		// Replace <br> tags with new lines
-		$sSubtitle = preg_replace('/<[h|b]r[^>]*>/i', "\n", $sSubtitle);
-		$sSubtitle = trim(strip_tags($sSubtitle));
-		// Normalize space
-		$sSubtitle = str_replace("\r", "\n", $sSubtitle);
-		$sSubtitle = preg_replace("/\n{3,}/", "\n\n", $sSubtitle);
-
-		if (isset($sSubtitle) && mb_strlen($sSubtitle, 'UTF-8') > self::SUBTITLE_MAX_LENGTH) {
-			$sSubtitle = mb_substr($sSubtitle, 0, self::SUBTITLE_MAX_LENGTH - 3, 'UTF-8') . '...';
-		}
-
-		return $sSubtitle;
 	}
 }

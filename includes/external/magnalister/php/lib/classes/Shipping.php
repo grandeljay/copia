@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: Shipping.php 5924 2015-08-18 09:20:58Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -37,7 +37,6 @@
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
-defined('DIR_MAGNA_LANGUAGES') or define('DIR_MAGNA_LANGUAGES', DIR_FS_LANGUAGES);
 class FakeOrder {
 	public $delivery = array();
 	
@@ -95,7 +94,8 @@ class Shipping {
 			$this->modules = explode(';', MODULE_SHIPPING_INSTALLED);
 			$include_modules = array();
 
-			foreach ($this->modules as $value) {
+			reset($this->modules);
+			while (list(, $value) = each($this->modules)) {
 				$class = substr($value, 0, strrpos($value, '.'));
 				$include_modules[] = array(
 					'class' => $class,
@@ -107,12 +107,12 @@ class Shipping {
 				// check if zone is alowed to see module
 				$const = 'MODULE_SHIPPING_'.strtoupper(str_replace('.php', '', $include_modules[$i]['file'])).'_ALLOWED';
 				if (defined($const) && constant($const) != '') {
-					$allowed_zones = explode(',', constant($const));
+					$unallowed_zones = explode(',', constant($const));
 				} else {
-					$allowed_zones = array();
+					$unallowed_zones = array();
 				}
-				if ((array_key_exists('delivery_zone', $_SESSION) && in_array($_SESSION['delivery_zone'], $allowed_zones))
-					|| (count($allowed_zones) == 0)
+				if ((array_key_exists('delivery_zone', $_SESSION) && in_array($_SESSION['delivery_zone'], $unallowed_zones))
+					|| (count($unallowed_zones) == 0)
 				) {
 					if (!class_exists($include_modules[$i]['class'])) {
 						mlLoadModuleLanguageDefines($langPath.$include_modules[$i]['file']);
@@ -242,8 +242,9 @@ class Shipping {
 			}
 			
 			$include_quotes = array();
-
-            foreach ($this->modules as $value) {
+			
+			reset($this->modules);
+			while (list(, $value) = each($this->modules)) {
 				$class = substr($value, 0, strrpos($value, '.'));
 				if (!empty($module)) {
 					if (($module == $class) && ($this->instances[$class]->enabled)) {

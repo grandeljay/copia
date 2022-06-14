@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: zones.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: zones.php 5118 2013-07-18 10:58:36Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -26,11 +26,11 @@
       $this->code = 'zones';
       $this->title = MODULE_SHIPPING_ZONES_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_ZONES_TEXT_DESCRIPTION;
-      $this->sort_order = defined('MODULE_SHIPPING_ZONES_SORT_ORDER') ? MODULE_SHIPPING_ZONES_SORT_ORDER : '';
+      $this->sort_order = MODULE_SHIPPING_ZONES_SORT_ORDER;
       $this->icon = '';
-      $this->tax_class = defined('MODULE_SHIPPING_ZONES_TAX_CLASS') ? MODULE_SHIPPING_ZONES_TAX_CLASS : '';
-      $this->enabled = ((defined('MODULE_SHIPPING_ZONES_STATUS') && MODULE_SHIPPING_ZONES_STATUS == 'True') ? true : false);
-      $this->num_zones = defined('MODULE_SHIPPING_ZONES_NUMBER_ZONES') ? MODULE_SHIPPING_ZONES_NUMBER_ZONES : '';
+      $this->tax_class = MODULE_SHIPPING_ZONES_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_ZONES_STATUS == 'True') ? true : false);
+      $this->num_zones = defined('MODULE_SHIPPING_ZONES_NUMBER_ZONES') ? MODULE_SHIPPING_ZONES_NUMBER_ZONES : '1';
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_ZONES_ZONE > 0) && is_object($order) ) {
         $check_flag = false;
@@ -110,7 +110,7 @@
         for ($i=0; $i<$size; $i+=2) {
           if ($shipping_weight <= $zones_table[$i]) {
             $shipping = $zones_table[$i+1];
-            $shipping_method = MODULE_SHIPPING_ZONES_TEXT_WAY . ' ' . $dest_country . ': ';
+            $shipping_method = MODULE_SHIPPING_ZONES_TEXT_WAY . ' ' . $dest_country . ' : ' . $shipping_weight . ' ' . MODULE_SHIPPING_ZONES_TEXT_UNITS;
             break;
           }
         }
@@ -124,7 +124,7 @@
         } else {
           $shipping_cost = (($shipping * $shipping_num_boxes) + constant('MODULE_SHIPPING_ZONES_HANDLING_' . $dest_zone));
           $this->quotes['methods'] = array(array('id' => $this->code,
-                                                 'title' => $shipping_method . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_ZONES_TEXT_UNITS .')',
+                                                 'title' => $shipping_method,
                                                  'cost'  => $shipping_cost));
         }
       }

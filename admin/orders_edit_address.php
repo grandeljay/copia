@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: orders_edit_address.php 13395 2021-02-06 15:59:49Z GTB $
+   $Id: orders_edit_address.php 5338 2013-08-06 13:00:51Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,7 +27,7 @@
 ?>
 <!-- Adressbearbeitung Anfang //-->
 <?php
-if ($_GET['edit_action'] == 'address') {
+if ($_GET['edit_action']=='address') {
   // dropdown countries boxes
   function get_country_id($country_name, $country_iso_2) {
     $where = " WHERE countries_name = '".xtc_db_input($country_name)."'";
@@ -79,13 +79,13 @@ if ($_GET['edit_action'] == 'address') {
     <?php echo TEXT_GENDER;?>
     </td>
     <td class="dataTableContent"><span class="select_f12">
-    <?php echo xtc_draw_pull_down_menu('customers_gender', get_customers_gender(), $order->customer['gender'], 'style="width:200px;"');?>
+    <?php echo xtc_draw_gender_pull_down('customers_gender', $order->customer['gender'], 'style="width:200px;"');?>
     </span></td>
     <td class="dataTableContent"><span class="select_f12">
-    <?php echo xtc_draw_pull_down_menu('delivery_gender', get_customers_gender(), $order->delivery['gender'], 'style="width:200px;"');?>
+    <?php echo xtc_draw_gender_pull_down('delivery_gender', $order->delivery['gender'], 'style="width: 200px"');?>
     </span></td>
     <td class="dataTableContent"><span class="select_f12">
-    <?php echo xtc_draw_pull_down_menu('billing_gender', get_customers_gender(), $order->billing['gender'], 'style="width:200px;"');?>
+    <?php echo xtc_draw_gender_pull_down('billing_gender', $order->billing['gender'], 'style="width: 200px"');?>
     </span></td>
   </tr>
   <?php } ?>
@@ -194,19 +194,19 @@ if ($_GET['edit_action'] == 'address') {
     <td class="dataTableContent">
     <?php echo ENTRY_STATE;?>
     </td>
-    <td class="dataTableContent"><span class="select_f12" id="customers_state">
+    <td class="dataTableContent">
     <?php echo xtc_draw_input_field('customers_state', $order->customer['state'], 'style="width: 200px"');?>
-    </span></td>
-    <td class="dataTableContent"><span class="select_f12" id="delivery_state">
+    </td>
+    <td class="dataTableContent">
     <?php echo xtc_draw_input_field('delivery_state', $order->delivery['state'], 'style="width: 200px"');?>
-    </span></td>
-    <td class="dataTableContent"><span class="select_f12" id="billing_state">
+    </td>
+    <td class="dataTableContent">
     <?php echo xtc_draw_input_field('billing_state', $order->billing['state'], 'style="width: 200px"');?>
-    </span></td>
+    </td>
   </tr>
   <?php } ?>
   <tr class="dataTableRow">
-    <td class="dataTableContent" colspan="4">&nbsp;</td>
+    <td class="dataTableContent" colspan="4" style="padding: 0px !important; border-bottom: 0px !important;"><br /><br /><div class="main important_info"><?php echo TEXT_CUSTOMER_GROUP_INFO;?></div></td>
   </tr>
   <tr class="dataTableRow">
     <td class="dataTableContent">
@@ -261,24 +261,3 @@ if ($_GET['edit_action'] == 'address') {
 }
 ?>
 <!-- Adressbearbeitung Ende //-->
-
-<?php require(DIR_WS_INCLUDES . 'javascript/jquery.entry_state.js.php'); ?>
-<script>
-  $(document).ready(function () {
-    create_states($('select[name="customers_country_id"]').val(), 'customers_state');
-    create_states($('select[name="delivery_country_id"]').val(), 'delivery_state');
-    create_states($('select[name="billing_country_id"]').val(), 'billing_state');
-
-    $('[name="customers_country_id"]').on('change', function() {
-      create_states($(this).val(), 'customers_state');
-    });
-
-    $('[name="delivery_country_id"]').on('change', function() {
-      create_states($(this).val(), 'delivery_state');
-    });
-
-    $('[name="billing_country_id"]').on('change', function() {
-      create_states($(this).val(), 'billing_state');
-    });
-  });  
-</script>

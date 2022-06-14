@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: get_states.php 12566 2020-02-16 06:54:48Z GTB $
+ * $Id: get_states.php 7777 2012-06-15 20:20:00Z h-h-h $
  *
  * modified eCommerce Shopsoftware
  * http://www.modified-shop.org
@@ -11,11 +11,10 @@
  */
 
 if (isset($_REQUEST['speed'])) {
+  // auto include
   require_once (DIR_FS_INC.'auto_include.inc.php');
 
   require_once (DIR_FS_INC.'db_functions_'.DB_MYSQL_TYPE.'.inc.php');
-  require_once (DIR_FS_INC.'db_functions.inc.php');
-
   require_once (DIR_WS_INCLUDES.'database_tables.php');
 }
 

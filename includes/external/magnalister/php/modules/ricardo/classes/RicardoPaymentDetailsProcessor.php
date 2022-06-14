@@ -29,16 +29,12 @@ class RicardoPaymentDetailsProcessor {
 		global $_MagnaSession;
 		
 		$this->args = $args;
-		$this->mpID = $_MagnaSession['mpID'];
+		$this->mpID = $_MagnaSession['mpID'];		
 		$this->mainKey = $mainKey;
 	}
 
 	protected static function getPaymentMethods() {
-        try {
-            $result = MagnaConnector::gi()->submitRequest(array('ACTION' => 'GetPaymentMethods'));
-        } catch (MagnaException $e) {
-            throw new Exception('Couldn\'t fetch the payment methods from the ricardo API.', 1540214080);
-        }
+		$result = MagnaConnector::gi()->submitRequest(array('ACTION' => 'GetPaymentMethods'));
 		return $result['DATA'];
 	}
 	

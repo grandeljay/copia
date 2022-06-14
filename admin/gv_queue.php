@@ -1,6 +1,6 @@
 <?php
    /* -----------------------------------------------------------------------------------------
-   $Id: gv_queue.php 13302 2021-02-01 17:02:03Z GTB $
+   $Id: gv_queue.php 1030 2005-07-14 20:22:32Z novalis $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -40,93 +40,69 @@
 
   require(DIR_WS_CLASSES . 'currencies.php');
   $currencies = new currencies();
-  
-  $action = (isset($_GET['action']) ? $_GET['action'] : '');
-  $page = (isset($_GET['page']) ? (int)$_GET['page'] : 1);
-  
-  switch ($action) {
-    case 'releaseconfirm':
-      $gv_query = xtc_db_query("SELECT * 
-                                  FROM " . TABLE_COUPON_GV_QUEUE . " 
-                                 WHERE unique_id='".(int)$_GET['gid']."'
-                                   AND release_flag = 'N'");
-      if (xtc_db_num_rows($gv_query) > 0) {
-        $gv = xtc_db_fetch_array($gv_query);
-                
-        $gv_amount = $gv['amount'];
-        
-        //Let's build a message object using the email class
-        $mail_query = xtc_db_query("SELECT *
-                                      FROM " . TABLE_CUSTOMERS . " 
-                                     WHERE customers_id = '" . $gv['customer_id'] . "'");
-        $mail = xtc_db_fetch_array($mail_query);
 
-        // assign language to template for caching
-        $smarty->assign('language', $_SESSION['language']);
-        $smarty->caching = false;
+  if ($_GET['action']=='confirmrelease' && isset($_GET['gid'])) {
+    $gv_query=xtc_db_query("select release_flag from " . TABLE_COUPON_GV_QUEUE . " where unique_id='".$_GET['gid']."'");
+    $gv_result=xtc_db_fetch_array($gv_query);
+    if ($gv_result['release_flag']=='N') { 
+      $gv_query=xtc_db_query("select customer_id, amount from " . TABLE_COUPON_GV_QUEUE ." where unique_id='".$_GET['gid']."'");
+      if ($gv_resulta=xtc_db_fetch_array($gv_query)) {
+      $gv_amount = $gv_resulta['amount'];
+      //Let's build a message object using the email class
+      $mail_query = xtc_db_query("select customers_firstname, customers_lastname, customers_email_address from " . TABLE_CUSTOMERS . " where customers_id = '" . $gv_resulta['customer_id'] . "'");
+      $mail = xtc_db_fetch_array($mail_query);
 
-        // set dirs manual
-        $smarty->template_dir = DIR_FS_CATALOG.'templates';
-        $smarty->compile_dir = DIR_FS_CATALOG.'templates_c';
-        $smarty->config_dir = DIR_FS_CATALOG.'lang';
 
-        $smarty->assign('tpl_path', HTTP_SERVER.DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/');
-        $smarty->assign('logo_path', HTTP_SERVER.DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
+      // assign language to template for caching
+      $smarty->assign('language', $_SESSION['language']);
+      $smarty->caching = false;
 
-        $smarty->assign('AMMOUNT',$currencies->format($gv_amount));
-        $smarty->assign('NAME', $mail['customers_firstname'].' '.$mail['customers_lastname']);
-        $smarty->assign('GENDER', $mail['customers_gender']);
-        $smarty->assign('FIRSTNAME', $mail['customers_firstname']);
-        $smarty->assign('LASTNAME', $mail['customers_lastname']);
+          // set dirs manual
+      $smarty->template_dir=DIR_FS_CATALOG.'templates';
+      $smarty->compile_dir=DIR_FS_CATALOG.'templates_c';
+      $smarty->config_dir=DIR_FS_CATALOG.'lang';
 
-        $html_mail = $smarty->fetch(CURRENT_TEMPLATE . '/admin/mail/'.$_SESSION['language'].'/gift_accepted.html');
-        $txt_mail = $smarty->fetch(CURRENT_TEMPLATE . '/admin/mail/'.$_SESSION['language'].'/gift_accepted.txt');
+      $smarty->assign('tpl_path', HTTP_SERVER.DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/');
+      $smarty->assign('logo_path', HTTP_SERVER.DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
 
-        xtc_php_mail(EMAIL_BILLING_ADDRESS,
-                     EMAIL_BILLING_NAME,
-                     $mail['customers_email_address'], 
-                     $mail['customers_firstname'] . ' ' . $mail['customers_lastname'], 
-                     '', 
-                     EMAIL_BILLING_REPLY_ADDRESS, 
-                     EMAIL_BILLING_REPLY_ADDRESS_NAME, 
-                     '', 
-                     '', 
-                     EMAIL_BILLING_SUBJECT, 
-                     $html_mail, 
-                     $txt_mail);
+      $smarty->assign('AMMOUNT',$currencies->format($gv_amount));
 
-        
-        $check_query = xtc_db_query("SELECT amount 
-                                       FROM " . TABLE_COUPON_GV_CUSTOMER . " 
-                                      WHERE customer_id = '".$gv['customer_id']."'");
-        if (xtc_db_num_rows($check_query) > 0) {
-          $check = xtc_db_fetch_array($check_query);
-          $gv_amount += $check['amount'];
-          xtc_db_query("UPDATE " . TABLE_COUPON_GV_CUSTOMER . " 
-                           SET amount = '".$gv_amount."' 
-                         WHERE customer_id = '".$gv['customer_id']."'");
-        } else {
-          $sql_data_array = array(
-            'customer_id' => $gv['customer_id'],
-            'amount' => $gv_amount
-          );
-          xtc_db_perform(TABLE_COUPON_GV_CUSTOMER, $sql_data_array);
-        }
-        
-        xtc_db_query("UPDATE " . TABLE_COUPON_GV_QUEUE . " 
-                         SET release_flag='Y' 
-                       WHERE unique_id='".(int)$_GET['gid']."'");
+      $html_mail=$smarty->fetch(CURRENT_TEMPLATE . '/admin/mail/'.$_SESSION['language'].'/gift_accepted.html');
+      $txt_mail=$smarty->fetch(CURRENT_TEMPLATE . '/admin/mail/'.$_SESSION['language'].'/gift_accepted.txt');
+
+      xtc_php_mail(EMAIL_BILLING_ADDRESS,
+                   EMAIL_BILLING_NAME,
+                   $mail['customers_email_address'], 
+                   $mail['customers_firstname'] . ' ' . $mail['customers_lastname'], 
+                   '', 
+                   EMAIL_BILLING_REPLY_ADDRESS, 
+                   EMAIL_BILLING_REPLY_ADDRESS_NAME, 
+                   '', 
+                   '', 
+                   EMAIL_BILLING_SUBJECT, 
+                   $html_mail, 
+                   $txt_mail);
+
+
+      $gv_amount=$gv_resulta['amount'];
+      $gv_query=xtc_db_query("select amount from " . TABLE_COUPON_GV_CUSTOMER . " where customer_id='".$gv_resulta['customer_id']."'");
+      $customer_gv=false;
+      $total_gv_amount=0;
+      if ($gv_result=xtc_db_fetch_array($gv_query)) {
+        $total_gv_amount=$gv_result['amount'];
+        $customer_gv=true;
+      }    
+      $total_gv_amount=$total_gv_amount+$gv_amount;
+      if ($customer_gv) {
+        $gv_update=xtc_db_query("update " . TABLE_COUPON_GV_CUSTOMER . " set amount='".$total_gv_amount."' where customer_id='".$gv_resulta['customer_id']."'");
+      } else {
+        $gv_insert=xtc_db_query("insert into " .TABLE_COUPON_GV_CUSTOMER . " (customer_id, amount) values ('".$gv_resulta['customer_id']."','".$total_gv_amount."')");
       }
-      xtc_redirect(xtc_href_link('gv_queue.php', xtc_get_all_get_params(array('action', 'gid'))));
-      break;
-    
-    case 'deleteconfirm':
-      xtc_db_query("DELETE FROM " . TABLE_COUPON_GV_QUEUE . " WHERE unique_id = '" . (int)$_GET['gid'] . "'");
-      xtc_redirect(xtc_href_link('gv_queue.php', xtc_get_all_get_params(array('action', 'gid'))));
-      break;
+        $gv_update=xtc_db_query("update " . TABLE_COUPON_GV_QUEUE . " set release_flag='Y' where unique_id='".$_GET['gid']."'");
+      }
+    }
   }
-  
-  require (DIR_WS_INCLUDES.'head.php');
+require (DIR_WS_INCLUDES.'head.php');
 ?>
 </head>
 <body>
@@ -164,61 +140,46 @@
                 <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</td>
               </tr>
               <?php
-                $gv_query_raw = "SELECT c.customers_firstname, 
-                                        c.customers_lastname, 
-                                        gv.unique_id, 
-                                        gv.date_created, 
-                                        gv.amount, 
-                                        gv.order_id 
-                                   FROM " . TABLE_CUSTOMERS . " c
-                                   JOIN " . TABLE_COUPON_GV_QUEUE . " gv 
-                                        ON gv.customer_id = c.customers_id
-                                           AND gv.release_flag = 'N'";
-                $gv_split = new splitPageResults($page, $page_max_display_results, $gv_query_raw, $gv_query_numrows);
+                $gv_query_raw = "select c.customers_firstname, c.customers_lastname, gv.unique_id, gv.date_created, gv.amount, gv.order_id from " . TABLE_CUSTOMERS . " c, " . TABLE_COUPON_GV_QUEUE . " gv where (gv.customer_id = c.customers_id and gv.release_flag = 'N')";
+                $gv_split = new splitPageResults($_GET['page'], $page_max_display_results, $gv_query_raw, $gv_query_numrows);
                 $gv_query = xtc_db_query($gv_query_raw);
                 while ($gv_list = xtc_db_fetch_array($gv_query)) {
-                  if ((!isset($_GET['gid']) || ($_GET['gid'] == $gv_list['unique_id'])) && !isset($gInfo)) {
+                  if (((!$_GET['gid']) || (@$_GET['gid'] == $gv_list['unique_id'])) && (!$gInfo)) {
                     $gInfo = new objectInfo($gv_list);
                   }
-                  if (isset($gInfo) && is_object($gInfo) && $gv_list['unique_id'] == $gInfo->unique_id) {
-                    echo '<tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\'' . xtc_href_link('gv_queue.php', xtc_get_all_get_params(array('gid', 'action')) . 'gid=' . $gInfo->unique_id . '&action=edit') . '\'">' . "\n";
+                  if ( (is_object($gInfo)) && ($gv_list['unique_id'] == $gInfo->unique_id) ) {
+                    echo '              <tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'" onclick="document.location.href=\'' . xtc_href_link('gv_queue.php', xtc_get_all_get_params(array('gid', 'action')) . 'gid=' . $gInfo->unique_id . '&action=edit') . '\'">' . "\n";
                   } else {
-                    echo '<tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\'' . xtc_href_link('gv_queue.php', xtc_get_all_get_params(array('gid', 'action')) . 'gid=' . $gv_list['unique_id']) . '\'">' . "\n";
+                    echo '              <tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'" onclick="document.location.href=\'' . xtc_href_link('gv_queue.php', xtc_get_all_get_params(array('gid', 'action')) . 'gid=' . $gv_list['unique_id']) . '\'">' . "\n";
                   }
-                  ?>
+              ?>
                 <td class="dataTableContent"><?php echo $gv_list['customers_firstname'] . ' ' . $gv_list['customers_lastname']; ?></td>
                 <td class="dataTableContent txta-c"><?php echo $gv_list['order_id']; ?></td>
                 <td class="dataTableContent txta-r"><?php echo $currencies->format($gv_list['amount']); ?></td>
                 <td class="dataTableContent txta-r"><?php echo xtc_datetime_short($gv_list['date_created']); ?></td>
-                <td class="dataTableContent txta-r"><?php if ((!isset($_GET['gid']) || ($_GET['gid'] == $gv_list['unique_id'])) && !isset($gInfo)) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_GV_QUEUE, 'page=' . $page . '&gid=' . $gv_list['unique_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
+                <td class="dataTableContent txta-r"><?php if ( (is_object($gInfo)) && ($gv_list['unique_id'] == $gInfo->unique_id) ) { echo xtc_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ICON_ARROW_RIGHT); } else { echo '<a href="' . xtc_href_link(FILENAME_GV_QUEUE, 'page=' . $_GET['page'] . '&gid=' . $gv_list['unique_id']) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
               </tr>
               <?php
                 }
               ?>
             </table>
 
-            <div class="smallText pdg2 flt-l"><?php echo $gv_split->display_count($gv_query_numrows, $page_max_display_results, $page, TEXT_DISPLAY_NUMBER_OF_GIFT_VOUCHERS); ?></div>
-            <div class="smallText pdg2 flt-r"><?php echo $gv_split->display_links($gv_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $page); ?></div>
+            <div class="smallText pdg2 flt-l"><?php echo $gv_split->display_count($gv_query_numrows, $page_max_display_results, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_GIFT_VOUCHERS); ?></div>
+            <div class="smallText pdg2 flt-r"><?php echo $gv_split->display_links($gv_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></div>
             <?php echo draw_input_per_page($PHP_SELF,$cfg_max_display_results_key,$page_max_display_results); ?>
           </td>
           <?php
-            $heading = array();
-            $contents = array();
             if (isset($gInfo) && is_object($gInfo)) {
-              switch ($action) {
-                case 'delete':
-                  $heading[] = array('text' => '<b>[' . $gInfo->unique_id . '] ' . xtc_datetime_short($gInfo->date_created) . ' ' . $currencies->format($gInfo->amount).'</b>');
-                  $contents[] = array('text' => TEXT_INFO_DELETE_INTRO);
-                  $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=deleteconfirm&gid='.$gInfo->unique_id,'NONSSL').'">'. BUTTON_CONFIRM . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=cancel&gid=' . $gInfo->unique_id,'NONSSL') . '">' . BUTTON_CANCEL . '</a>');
-                  break;
+              $heading = array();
+              $contents = array();
+              switch ($_GET['action']) {
                 case 'release':
                   $heading[] = array('text' => '<b>[' . $gInfo->unique_id . '] ' . xtc_datetime_short($gInfo->date_created) . ' ' . $currencies->format($gInfo->amount).'</b>');
-                  $contents[] = array('text' => TEXT_INFO_REDEEM_INTRO);
-                  $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=releaseconfirm&gid='.$gInfo->unique_id,'NONSSL').'">'. BUTTON_CONFIRM . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=cancel&gid=' . $gInfo->unique_id,'NONSSL') . '">' . BUTTON_CANCEL . '</a>');
+                  $contents[] = array('align' => 'center', 'text' => '<a class="button col-red" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=confirmrelease&gid='.$gInfo->unique_id,'NONSSL').'">'. BUTTON_CONFIRM . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=cancel&gid=' . $gInfo->unique_id,'NONSSL') . '">' . BUTTON_CANCEL . '</a>');
                   break;
                 default:
                   $heading[] = array('text' => '[' . $gInfo->unique_id . '] ' . xtc_datetime_short($gInfo->date_created) . ' ' . $currencies->format($gInfo->amount));
-                  $contents[] = array('align' => 'center','text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=release&gid=' . $gInfo->unique_id,'NONSSL'). '">' . BUTTON_RELEASE . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=delete&gid=' . $gInfo->unique_id,'NONSSL'). '">' . BUTTON_DELETE . '</a>');
+                  $contents[] = array('align' => 'center','text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link('gv_queue.php','action=release&gid=' . $gInfo->unique_id,'NONSSL'). '">' . BUTTON_RELEASE . '</a>');
                   break;
               }
             }

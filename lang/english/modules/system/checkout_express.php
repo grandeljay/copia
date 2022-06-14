@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: checkout_express.php 10406 2016-11-10 16:42:47Z Tomcraft $
+   $Id: checkout_express.php 9975 2016-06-13 19:12:42Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -19,5 +19,4 @@ define('MODULE_CHECKOUT_EXPRESS_CONTENT_TITLE','Content');
 define('MODULE_CHECKOUT_EXPRESS_CONTENT_DESC','Choose a content page to describe the express checkout');
 
 define('MODULE_CHECKOUT_EXPRESS_DESCRIPTION_INSTALL','<br/><br/>Additional you can install an informationpage for Express Checkout.');
-define('MODULE_CHECKOUT_EXPRESS_BUTTON_INSTALL','Insert content');
 ?>

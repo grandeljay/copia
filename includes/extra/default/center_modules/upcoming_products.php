@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: upcoming_products.php 12294 2019-10-23 09:15:59Z GTB $
+   $Id:$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -24,7 +24,8 @@ if (MAX_DISPLAY_UPCOMING_PRODUCTS != '0') {
   // include needed functions
   require_once (DIR_FS_INC.'xtc_date_short.inc.php');
 
-  $expected_query = xtDBquery("SELECT ".$product->default_select.",
+  $expected_query = xtDBquery("SELECT p.products_id, 
+                                      pd.products_name, 
                                       products_date_available as date_expected
                                  FROM ".TABLE_PRODUCTS." p
                                  JOIN ".TABLE_PRODUCTS_DESCRIPTION." pd
@@ -41,7 +42,7 @@ if (MAX_DISPLAY_UPCOMING_PRODUCTS != '0') {
     $module_content = array ();
     while ($expected = xtc_db_fetch_array($expected_query,true)) {
       $module_content[] = array (
-          'PRODUCTS_LINK' => xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$expected['products_id']),
+          'PRODUCTS_LINK' => xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($expected['products_id'], $expected['products_name'])),
           'PRODUCTS_NAME' => $expected['products_name'],
           'PRODUCTS_DATE' => xtc_date_short($expected['date_expected'])
         );

@@ -40,8 +40,6 @@ class MagnaCompatibleInventoryView {
 	protected $magnaShopSession = array();
 
 	protected $search = '';
-	protected $additionalParameters = array();
-	protected $saveDeletedLocally = true;
 
 	public function __construct($settings = array()) {
 		global $_MagnaShopSession, $_MagnaSession, $_url, $_modules;
@@ -83,16 +81,15 @@ class MagnaCompatibleInventoryView {
 		}
 	}
 
-	protected function getInventory() {
+	private function getInventory() {
 		try {
 			$request = array(
 				'ACTION' => 'GetInventory',
 				'LIMIT' => $this->settings['itemLimit'],
 				'OFFSET' => $this->offset,
 				'ORDERBY' => $this->sort['order'],
-				'SORTORDER' => $this->sort['type'],
+				'SORTORDER' => $this->sort['type']
 			);
-            $request = array_merge($request, $this->additionalParameters);
 			if (!empty($this->search)) {
 				#$request['SEARCH'] = (!magnalisterIsUTF8($this->search)) ? utf8_encode($this->search) : $this->search;
 				$request['SEARCH'] = $this->search;
@@ -203,7 +200,7 @@ class MagnaCompatibleInventoryView {
 						);
 					}
 
-					if ($this->saveDeletedLocally && $result['STATUS'] == 'SUCCESS') {
+					if ($result['STATUS'] == 'SUCCESS') {
 						MagnaDB::gi()->batchinsert(
 							TABLE_MAGNA_COMPAT_DELETEDLOG,
 							$insertData
@@ -246,34 +243,16 @@ class MagnaCompatibleInventoryView {
 				} else {
 					$iLanguageId = $this->settings['language'];
 				}
-
-				$item['MarketplaceTitle'] = $item['Title'];
-				if(function_exists('mb_strlen')) {
-                    $iLengthOfMarketplaceTitle = mb_strlen($item['MarketplaceTitle'], 'UTF-8');
-                } else {
-                    $iLengthOfMarketplaceTitle = strlen($item['MarketplaceTitle']);
-                }
-				$item['MarketplaceTitleShort'] = ($iLengthOfMarketplaceTitle > $this->settings['maxTitleChars'] + 2)
-					? (fixHTMLUTF8Entities(mb_substr($item['MarketplaceTitle'], 0, $this->settings['maxTitleChars'], 'UTF-8')) . '&hellip;')
-					: fixHTMLUTF8Entities($item['MarketplaceTitle']);
-
 				$sTitle = (string)MagnaDB::gi()->fetchOne("
 					SELECT products_name 
 					  FROM ".TABLE_PRODUCTS_DESCRIPTION."
 					 WHERE     products_id = '".$pID."'
 					       AND language_id = '".$iLanguageId."'
 				");
-				$item['Title'] = '&mdash;';
 				if (!empty($sTitle)) {
 					$item['Title'] = $sTitle;
 				}
-
-                if(function_exists('mb_strlen')) {
-                    $iLengthOfTitle = mb_strlen($item['Title'], 'UTF-8');
-                } else {
-                    $iLengthOfTitle = strlen($item['Title']);
-                }
-				$item['TitleShort'] = ($iLengthOfTitle > $this->settings['maxTitleChars'] + 2)
+				$item['TitleShort'] = (mb_strlen($item['Title'], 'UTF-8') > $this->settings['maxTitleChars'] + 2)
 						? (fixHTMLUTF8Entities(mb_substr($item['Title'], 0, $this->settings['maxTitleChars'], 'UTF-8')).'&hellip;')
 						: fixHTMLUTF8Entities($item['Title']);
 			}
@@ -330,11 +309,6 @@ class MagnaCompatibleInventoryView {
 	protected function getTitle($item) {
 		return '<td title="'.fixHTMLUTF8Entities($item['Title'], ENT_COMPAT).'">'.$item['TitleShort'].'</td>';
 	}
-
-	protected function getMarketplaceTitle($item)
-	{
-		return '<td title="'.fixHTMLUTF8Entities($item['MarketplaceTitle'], ENT_COMPAT).'">'.$item['MarketplaceTitleShort'].'</td>';
-	}
 	
 	protected function getItemPrice($item) {
 		$item['Currency'] = isset($item['Currency']) ? $item['Currency'] : $this->mpCurrency;
@@ -373,11 +347,8 @@ class MagnaCompatibleInventoryView {
 			 	'Price' => $item['Price'],
 			 	'Currency' => isset($item['Currency']) ? $item['Currency'] : $this->mpCurrency,
 			))));
-
-			$addStyle = ($item['Title'] === '&mdash;' && $item['SKU'] !== '&mdash;') ? 'style="color:#900;"' : '';
-
 			$html .= '
-				<tr class="'.(($oddEven = !$oddEven) ? 'odd' : 'even').'" ' . $addStyle . '>
+				<tr class="'.(($oddEven = !$oddEven) ? 'odd' : 'even').'">
 					<td><input type="checkbox" name="SKUs[]" value="'.$item['SKU'].'">
 						<input type="hidden" name="details['.$item['SKU'].']" value="'.$details.'"></td>';
 			foreach ($fieldsDesc as $fdesc) {
@@ -504,9 +475,9 @@ $(document).ready(function() {
 			<table class="actions">
 				<thead><tr><th>'.ML_LABEL_ACTIONS.'</th></tr></thead>
 				<tbody><tr><td>
-					<table style="table-layout:fixed"><tbody><tr>
+					<table><tbody><tr>
 						<td class="firstChild">'.$left.'</td>
-						<td style="text-align:center"><label for="tfSearch">'.ML_LABEL_SEARCH.':</label>
+						<td><label for="tfSearch">'.ML_LABEL_SEARCH.':</label>
 							<input id="tfSearch" name="tfSearch" type="text" value="'.fixHTMLUTF8Entities($this->search, ENT_COMPAT).'"/>
 							<input type="submit" class="ml-button" value="'.ML_BUTTON_LABEL_GO.'" name="search_go" /></td>
 						<td class="lastChild">'.$right.'</td>

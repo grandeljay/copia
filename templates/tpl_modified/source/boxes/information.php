@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: information.php 12924 2020-10-21 14:11:50Z GTB $   
+   $Id:$   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -48,7 +48,7 @@ if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_information.html', $cac
 
   if (xtc_db_num_rows($content_query, true) > 0) {
 		unset ($prev_cid);
-		unset ($first_information_element);
+		unset ($first_content_element);
     while ($content_data = xtc_db_fetch_array($content_query, true)) {
       $content_array[$content_data['content_id']] = array(
           'name' => $content_data['content_title'],
@@ -74,7 +74,7 @@ if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_information.html', $cac
       $new_path = '';
       $coid = explode('_', $coPath);
       reset($coid);
-      foreach ($coid as $key => $value) {
+      while (list ($key, $value) = each($coid)) {
         unset ($prev_cid);
         unset ($first_cid);
         $content_query = xtDBquery("SELECT content_id,

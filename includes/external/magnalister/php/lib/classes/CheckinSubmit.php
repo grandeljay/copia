@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: CheckinSubmit.php 5668 2015-05-26 13:01:31Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -53,8 +53,6 @@ abstract class CheckinSubmit {
 
 	protected $deleteSelection = true;
 	protected $lastResponse = array();
-
-	protected $additionalSplitProducts = array();
 	
 	public function __construct($settings = array()) {
 		global $_MagnaSession, $_MagnaShopSession, $magnaConfig, $_magnaQuery, $_url;
@@ -154,7 +152,7 @@ abstract class CheckinSubmit {
 					'selectionname' => $this->settings['selectionName'],
 					'session_id' => session_id()
 				),
-                'AND pID IN ('.implode(', ', $this->badItems).')'
+				'AND pID IN ('.implode(', ', $this->badItems).')'
 			);
 		}
 	}
@@ -254,20 +252,7 @@ abstract class CheckinSubmit {
 		foreach ($requirements as $req => $needed) {
 			if (!$needed) continue;
 			if (empty($product[$req]) && ($product[$req] !== '0')) {
-				if (array_key_exists('Variations', $product)) {
-					$blFail = false;
-					foreach ($product['Variations'] as $variation) {
-						if (empty($variation[$req]) && ($variation[$req] !== '0')) {
-							$blFail = true;
-							break;
-						}
-					}
-				} else {
-					$blFail = true;
-				}
-				if ($blFail) {
-					$failed[] = $req;
-				}
+				$failed[] = $req;
 			}
 		}
 		return empty($failed);
@@ -379,7 +364,6 @@ abstract class CheckinSubmit {
 			unset($_SESSION['magna_deletedFilter'][$this->mpID]);
 		}
 		$this->initSelection(0, $this->settings['itemsPerBatch']);
-		$this->ajaxReply['ignoreErrors'] = array_key_exists('ignoreErrors', $this->ajaxReply) ? $this->ajaxReply['ignoreErrors'] : $this->ignoreErrors;
 		$this->ajaxReply['itemsPerBatch'] = $this->settings['itemsPerBatch'];
 		
 		/* Spaetestens beim 2. Durchgang muessen die Artukel hinzugefuegt werden,
@@ -493,24 +477,22 @@ abstract class CheckinSubmit {
 		//$html = print_m($this->selection, '$this->selection').'
 		$html = '
 			<div id="checkinSubmit">
-				<div id="checkinSubmitSubwrap">
-					<h1 id="threeDots">
-						<span id="headline">'.ML_HEADLINE_SUBMIT_PRODUCTS.'</span><span class="alldots"
-							><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>&nbsp;
-						</span>
-					</h1>
-					<p id="checkinSubmitProductsNotice">'.ML_NOTICE_SUBMIT_PRODUCTS.'</p>
-					<div id="apiException" style="display:none;"><p class="errorBox">'.ML_ERROR_SUBMIT_PRODUCTS.'</p></div>
-					<div id="uploadprogress" class="progressBarContainer">
-						<div class="progressBar"></div>
-						<div class="progressPercent"></div>
-					</div>
-					<br>
-					<div id="checkinSubmitStatus" class="paddingBottom"></div>
-					<div style="display: none; text-align: left; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.2); border-radius: 3px 3px 3px 3px; margin-bottom: 1em; padding: 0 7px 7px;" id="checkinSubmitDebug">'.print_m($this->submitSession, 'submitSession').'</div>
-				 </div>
-			 </div>
-			
+				<h1 id="threeDots">
+					<span id="headline">'.ML_HEADLINE_SUBMIT_PRODUCTS.'</span><span class="alldots"
+						><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>&nbsp;
+					</span>
+				</h1>
+				<hr/>
+				<p>'.ML_NOTICE_SUBMIT_PRODUCTS.'</p>
+				<div id="apiException" style="display:none;"><p class="errorBox">'.ML_ERROR_SUBMIT_PRODUCTS.'</p></div>
+				<div id="uploadprogress" class="progressBarContainer">
+					<div class="progressBar"></div>
+					<div class="progressPercent"></div>
+				</div>
+				<br>
+				<div id="checkinSubmitStatus" class="paddingBottom"></div>
+				<div style="display: none; text-align: left; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.2); border-radius: 3px 3px 3px 3px; margin-bottom: 1em; padding: 0 7px 7px;" id="checkinSubmitDebug">'.print_m($this->submitSession, 'submitSession').'</div>
+			</div>
 		';
 		
 		ob_start();?>
@@ -542,332 +524,4 @@ $(document).ready(function() {
 	protected function afterSendRequest() {
 		
 	}
-
-	/**
-	 * Matched attributes array is a few levels deep and this method forms new structure. It is an array which
-	 * will have as a key, shop key (name id) of matched shop attribute, and as value array of keys for values which are
-	 * matched (Value ids). That way it is easy to check if some attribute or some of its values is matched.
-	 *
-	 * @param array $allMatchedAttributes
-	 * @param array $variationTheme
-	 * @param array $variationBlackList
-	 * @return array
-	 */
-	protected function getMatchedVariationAttributesCodeValueId(
-		$allMatchedAttributes,
-		$variationTheme = array(),
-		$variationBlackList = array())
-	{
-		$matchedAttributeFormatted = array();
-		// Go through all matched attributes.
-		if (is_array($allMatchedAttributes)) {
-			foreach ($allMatchedAttributes as $mpAttributeCode => $matchedAttribute) {
-				if (!is_array($matchedAttribute['Values']) ||
-					$this->attributeMatchedValueIsLiteral($matchedAttribute) ||
-					in_array($mpAttributeCode, $variationBlackList) ||
-					(!empty($variationTheme) && !in_array($mpAttributeCode, $variationTheme[key($variationTheme)]))
-				) {
-					continue;
-				}
-	
-				$matchedAttributeFormatted[$matchedAttribute['Code']][$mpAttributeCode] = array();
-	
-				// Go through all its values.
-				foreach ($matchedAttribute['Values'] as $matchedAttributeValue) {
-					// Check if that value is already added. If it is don`t add it again.
-					if (!in_array($matchedAttributeValue['Shop']['Key'], $matchedAttributeFormatted[$matchedAttribute['Code']])) {
-						// Form new array which will contain final result.
-						$matchedAttributeFormatted[$matchedAttribute['Code']][$mpAttributeCode][] = $matchedAttributeValue['Shop']['Key'];
-					}
-				}
-			}
-		}
-
-		return $matchedAttributeFormatted;
-	}
-
-	private function attributeMatchedValueIsLiteral($attribute)
-	{
-		return in_array($attribute['Code'], array('freetext', 'attribute_value', 'database_value'));
-	}
-
-	/**
-	 * Sets all information about variations. Checks for every variation if it should be submitted, skipped or split.
-	 *
-	 * @param $productVariations
-	 * @param $variantForSubmit
-	 * @param $variationsForSubmit
-	 * @param $matchedAttributesCodeValueId
-	 * @param $rawAmConfiguration
-	 * @param $masterProductSku
-	 * @param $data
-	 * @param $product
-	 * @param array $variationThemeBlacklist
-	 */
-	protected function setAllVariationsDataAndMasterProductsSKUs(
-		$productVariations,
-		&$variantForSubmit,
-		&$variationsForSubmit,
-		$matchedAttributesCodeValueId,
-		$rawAmConfiguration,
-		$masterProductSku,
-		$data,
-		$product,
-		$variationThemeBlacklist = array()
-	){
-		$this->additionalSplitProducts = array();
-		$variationTheme = $product['variation_theme'];
-		$skipVariation = false;
-		$masterProductTitleSuffix = array();
-		$variationThemeCode = empty($variationTheme) ? 'null' : $this->getVariationThemeCode($variationTheme);
-		$codeForSplitAll = 'splitAll';
-
-		foreach ($productVariations['Variation'] as $varAttribute) {
-			// If none of shop variation attributes are matched, send data from shop.
-			if (empty($matchedAttributesCodeValueId) && $this->shouldSendShopData()) {
-				$this->setProductVariant($variantForSubmit, $varAttribute, $rawAmConfiguration, $productVariations);
-				continue;
-			}
-
-			if ($this->shouldSkipVariation($matchedAttributesCodeValueId, $variationTheme, $varAttribute)) {
-				$skipVariation = true;
-				break;
-			}
-
-			if ($this->shouldSplitVariation(
-				$variationTheme,
-				$variationThemeBlacklist,
-				$varAttribute,
-				$matchedAttributesCodeValueId,
-				$varAttribute['NameId'],
-				$rawAmConfiguration
-			)) {
-				if ($variationThemeCode === $codeForSplitAll) {
-					$masterProductSku = $this->getVariationSku($productVariations);
-				} else {
-					// If shop variational attribute is not matched product should be split by that attribute. Set masterProductSku.
-					$masterProductSku .= '-' . $varAttribute['Name'] . '-' . $varAttribute['Value'];
-				}
-				$masterProductTitleSuffix[] = $varAttribute['Name'] . ' - ' . $varAttribute['Value'];
-			} else {
-				$this->setProductVariant($variantForSubmit, $varAttribute, $rawAmConfiguration, $productVariations);
-			}
-		}
-
-		if ($skipVariation) {
-			return;
-		}
-
-		$variantForSubmit = $this->setAdditionalVariantProperties($variantForSubmit, $data, $product, $productVariations);
-
-		// If product has new ItemTitle, set it.
-		if (!empty($masterProductTitleSuffix)) {
-			if (!isset($variantForSubmit['ItemTitle'])) {
-				$variantForSubmit['ItemTitle'] = $variantForSubmit['Title'];
-			}
-			$variantForSubmit['ItemTitle'] .= ' : ' . join(', ', $masterProductTitleSuffix);
-		}
-		
-		$variationsForSubmit[$masterProductSku][] = $variantForSubmit;
-	}
-	
-	protected function shouldSendShopData() 
-	{
-		return false;
-	}
-
-	protected function getVariationSku($productVariations)
-	{
-		return $productVariations['MarketplaceSku'];
-	}
-
-	protected function setAdditionalVariantProperties($variantForSubmit, $data, $product, $productVariations)
-	{
-		return $variantForSubmit;
-	}
-
-	protected function isVariationInBlacklist($variationThemeBlacklist, $varAttribute, $rawAmConfiguration)
-	{
-		return false;
-	}
-
-	/**
-	 * Gets variations that should not be skipped.
-	 *
-	 * @param $matchedAttributesCodeValueId
-	 * @param $variationTheme
-	 * @param $variationAttribute
-	 * @return array
-	 * @internal param $rawAmConfiguration
-	 */
-	protected function shouldSkipVariation($matchedAttributesCodeValueId, $variationTheme, $variationAttribute)
-	{
-		$matchedValueIds = array();
-
-		foreach ($matchedAttributesCodeValueId as $matchedAttributeKey => $matchedValuesForMpAttribute) {
-			foreach ($matchedValuesForMpAttribute as $valueIds) {
-				if (empty($matchedValueIds[$matchedAttributeKey])) {
-					$matchedValueIds[$matchedAttributeKey] = $valueIds;
-				} else {
-					$matchedValueIds[$matchedAttributeKey] = array_intersect($matchedValueIds[$matchedAttributeKey], $valueIds);
-				}
-			}
-		}
-
-		// Go through all variation definitions
-		$attributeCode = $variationAttribute['NameId'];
-		// Check if attributes that make dimension are matched and if their values are matched
-		if ((!empty($variationTheme) && !$this->isShopVariationValueMatched(
-					$variationTheme, $variationAttribute['ValueId'], $matchedAttributesCodeValueId, $attributeCode)
-			) ||
-			(empty($variationTheme) && isset($matchedAttributesCodeValueId[$attributeCode]) &&
-				!in_array($variationAttribute['ValueId'], $matchedValueIds[$attributeCode])
-			)) {
-			// If any value that makes variation definition is not matched that variation should be skipped.
-			// $allValuesMatched flag will be used for skipping.
-			return true;
-		}
-
-		return false;
-	}
-
-
-	protected function isShopVariationValueMatched(
-		$variationTheme,
-		$variationValueId,
-		$matchedAttributesCodeValueId,
-		$attributeCode
-	) {
-		$variationThemeCode = key($variationTheme);
-		$codeForSplitAll = 'splitAll';
-
-		if (empty($variationTheme) || $variationThemeCode === $codeForSplitAll) {
-			return true;
-		}
-
-		foreach ($variationTheme[$variationThemeCode] as $mpKey) {
-			if (isset($matchedAttributesCodeValueId[$attributeCode][$mpKey]) &&
-				!in_array($variationValueId, $matchedAttributesCodeValueId[$attributeCode][$mpKey])
-			) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private function getVariationThemeCode($variationTheme)
-	{
-		return key($variationTheme);
-	}
-
-	protected function shouldSplitVariation(
-		$variationTheme,
-		$variationThemeBlacklist,
-		$varAttribute,
-		$matchedAttributesCodeValueId,
-		$matchedShopVariationCode,
-		$rawAmConfiguration
-	) {
-		if (!isset($matchedAttributesCodeValueId[$matchedShopVariationCode]) ||
-			$this->isVariationInBlacklist($variationThemeBlacklist, $varAttribute, $rawAmConfiguration)
-		) {
-			return true;
-		}
-
-		if (empty($variationTheme)) {
-			return false;
-		}
-
-		$variationThemeCode = $this->getVariationThemeCode($variationTheme);
-		$codeForSplitAll = 'splitAll';
-
-		if ($variationThemeCode === $codeForSplitAll || !isset($matchedAttributesCodeValueId[$matchedShopVariationCode])
-		) {
-			return true;
-		}
-
-		$variationThemeAttributes = $variationTheme[$variationThemeCode];
-
-		foreach ($matchedAttributesCodeValueId[$matchedShopVariationCode] as $mpKey => $matchedValues) {
-			if (!in_array($mpKey, $variationThemeAttributes)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Standard way for setting product variants for request.
-	 *
-	 * @param $productVariant
-	 * @param $varAttribute
-	 * @param $variations
-	 */
-	protected function setProductVariant(&$productVariant, $varAttribute, $rawAmConfiguration, $variations)
-	{
-		$productVariant['Variation'][$varAttribute['Name']] = $varAttribute['Value'];
-	}
-
-	/**
-	 * Prepares data for request based on the checking if product is split or not.
-	 *
-	 * @param $variations
-	 * @param $data
-	 */
-	protected function prepareVariationDataForSubmitRequest($variations, &$data)
-	{
-		$data['submit']['Variations'] = array();
-		$itemTitle = $data['submit']['ItemTitle'];
-
-		foreach ($variations as $variationMasterSku => $dimensions) {
-			// If product is not split, it will have the same SKU as master product. Then send it on standard way.
-			if ($variationMasterSku === $data['submit']['SKU']) {
-				$data['submit']['Variations'] = $dimensions;
-				continue;
-			}
-
-			if (isset($dimensions[0]['ItemTitle'])) {
-				$itemTitle = $dimensions[0]['ItemTitle'];
-			}
-
-			// If product is not split form new master product with its variations and add it to array which will be sent.
-			$masterProduct = $this->createVariantMasterProduct($dimensions, $variationMasterSku, $itemTitle, $data['submit']);
-			$this->additionalSplitProducts[] = $masterProduct;
-		}
-	}
-
-	/**
-	 * When product is split it is necessary to create new master product which will have its own variations.
-	 *
-	 * @param $dimensions
-	 * @param $variationMasterSku
-	 * @param $itemTitle
-	 * @param $productToClone
-	 * @return mixed
-	 */
-	protected function createVariantMasterProduct($dimensions, $variationMasterSku, $itemTitle, $productToClone)
-	{
-		if (count($dimensions) === 1 && isset($dimensions[0]['Variation']) && $dimensions[0]['Variation'] == array()) {
-			// If everything is split and there are no variation dimensions variation product should be sent as master product.
-			$masterProduct = array_merge($productToClone, $dimensions[0]);
-			$masterProduct['IsSplit'] = 1;
-			$masterProduct['ItemTitle']  = $itemTitle;
-			unset($masterProduct['Variations']);
-			unset($masterProduct['Variation']);
-			return $masterProduct;
-		}
-
-		// Basic case is that new master product will be the same as old master product just with a new SKU and
-		// its own variations.
-		$masterProduct = $productToClone;
-		$masterProduct['SKU'] = $variationMasterSku;
-		$masterProduct['ItemTitle'] = $itemTitle;
-		$masterProduct['Variations'] = $dimensions;
-		// If product is split add flag for product.
-		$masterProduct['IsSplit'] = intval($variationMasterSku != $productToClone['SKU']);
-		return $masterProduct;
-	}
-
 }

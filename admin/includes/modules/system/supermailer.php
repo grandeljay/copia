@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: supermailer.php 11602 2019-03-21 17:56:53Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,9 +20,9 @@ class supermailer {
      $this->code = 'supermailer';
      $this->title = MODULE_SUPERMAILER_TEXT_TITLE;
      $this->description = MODULE_SUPERMAILER_TEXT_DESCRIPTION;
-     $this->sort_order = defined('MODULE_SUPERMAILER_SORT_ORDER') ? MODULE_SUPERMAILER_SORT_ORDER : '';
-     $this->enabled = ((defined('MODULE_SUPERMAILER_STATUS') && MODULE_SUPERMAILER_STATUS == 'True') ? true : false);
-  }
+     $this->sort_order = defined('MODULE_SUPERMAILER_SORT_ORDER') ? MODULE_SUPERMAILER_SORT_ORDER : 0;
+     $this->enabled = ((MODULE_SUPERMAILER_STATUS == 'True') ? true : false);
+   }
 
   function process($file) {
 

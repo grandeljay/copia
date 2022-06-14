@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: checkout_address_store.php 12264 2019-10-09 06:05:28Z GTB $
+   $Id: checkout_address_store.php 10398 2016-11-08 11:11:27Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,7 +27,7 @@
 
     // prepare variables
     foreach ($_POST as $key => $value) {
-      if ((!isset(${$key}) || !is_object(${$key})) && in_array($key , $valid_params)) {
+      if (!is_object(${$key}) && in_array($key , $valid_params)) {
         ${$key} = xtc_db_prepare_input($value);
       }
     }
@@ -41,17 +41,17 @@
       $messageStack->add('checkout_address', ENTRY_GENDER_ERROR);
     }
 
-    if (mb_strlen($firstname, $_SESSION['language_charset']) < ENTRY_FIRST_NAME_MIN_LENGTH) {
+    if (strlen($firstname) < ENTRY_FIRST_NAME_MIN_LENGTH) {
       $error = true;
       $messageStack->add('checkout_address', ENTRY_FIRST_NAME_ERROR);
     }
 
-    if (mb_strlen($lastname, $_SESSION['language_charset']) < ENTRY_LAST_NAME_MIN_LENGTH) {
+    if (strlen($lastname) < ENTRY_LAST_NAME_MIN_LENGTH) {
       $error = true;
       $messageStack->add('checkout_address', ENTRY_LAST_NAME_ERROR);
     }
 
-    if (mb_strlen($street_address, $_SESSION['language_charset']) < ENTRY_STREET_ADDRESS_MIN_LENGTH) {
+    if (strlen($street_address) < ENTRY_STREET_ADDRESS_MIN_LENGTH) {
       $error = true;
       $messageStack->add('checkout_address', ENTRY_STREET_ADDRESS_ERROR);
     }
@@ -61,7 +61,7 @@
       $messageStack->add('checkout_address', ENTRY_POST_CODE_ERROR);
     }
 
-    if (mb_strlen($city, $_SESSION['language_charset']) < ENTRY_CITY_MIN_LENGTH) {
+    if (strlen($city) < ENTRY_CITY_MIN_LENGTH) {
       $error = true;
       $messageStack->add('checkout_address', ENTRY_CITY_ERROR);
     }
@@ -93,9 +93,7 @@
           $messageStack->add('checkout_address', ENTRY_STATE_ERROR_SELECT);
         }
       } else {
-        if (!$required_zones) {
-          $state = '';
-        } elseif (mb_strlen($state, $_SESSION['language_charset']) < ENTRY_STATE_MIN_LENGTH) {
+        if (strlen($state) < ENTRY_STATE_MIN_LENGTH) {
           $error = true;
           $messageStack->add('checkout_address', ENTRY_STATE_ERROR);
         }
@@ -142,34 +140,19 @@
       }
       if (ACCOUNT_STATE == 'true') {
         $sql_data_array['entry_zone_id'] = (isset($zone_id) ? (int)$zone_id : 0);
-        $sql_data_array['entry_state'] = ((isset($state) && !empty($state)) ? $state : '');
+        $sql_data_array['entry_state'] = (isset($state) ? $state : '');
       }
 
       xtc_db_perform(TABLE_ADDRESS_BOOK, $sql_data_array);      
-      $new_address_book_id = xtc_db_insert_id();
       
-      if (isset($_POST['primary']) && ($_POST['primary'] == 'on')) {
-        $_SESSION['customer_default_address_id'] = (int)$new_address_book_id;
-        $_SESSION['customer_country_id'] = (int)$country;
-        $_SESSION['customer_zone_id'] = ((isset($zone_id) && $zone_id > 0) ? (int)$zone_id : 0);
-        
-        xtc_db_query("UPDATE ".TABLE_CUSTOMERS."
-                         SET customers_default_address_id = '".(int)$new_address_book_id."'
-                       WHERE customers_id = '".(int)$_SESSION['customer_id']."'");
-      }
-
       //SWITCH shipping/payment
       switch ($checkout_page) {
         case 'shipping':
-          unset ($_SESSION['shipping']);
-          $_SESSION['sendto'] = $new_address_book_id;
-          if (isset($_POST['primary']) && ($_POST['primary'] == 'on')) {
-            $_SESSION['billto'] = $new_address_book_id;
-          }
+          $_SESSION['sendto'] = xtc_db_insert_id();
           xtc_redirect(xtc_href_link($link_checkout_shipping, $params, 'SSL'));
           break;
         case 'payment':
-          $_SESSION['billto'] = $new_address_book_id;
+          $_SESSION['billto'] = xtc_db_insert_id();
           if ($_SESSION['shipping'] === false) {
             $_SESSION['sendto'] = $_SESSION['billto'];
           }

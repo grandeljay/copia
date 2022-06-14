@@ -19,21 +19,18 @@ class PayPalHttpConnection
     private $httpConfig;
 
     /**
+     * HTTP status codes for which a retry must be attempted
+     * retry is currently attempted for Request timeout, Bad Gateway,
+     * Service Unavailable and Gateway timeout errors.
+     */
+    private static $retryCodes = array('408', '502', '503', '504',);
+
+    /**
      * LoggingManager
      *
      * @var PayPalLoggingManager
      */
     private $logger;
-
-    /**
-     * @var array
-     */
-    private $responseHeaders = array();
-
-    /**
-     * @var bool
-     */
-    private $skippedHttpStatusLine = false;
 
     /**
      * Default Constructor
@@ -66,62 +63,6 @@ class PayPalHttpConnection
     }
 
     /**
-     * Parses the response headers for debugging.
-     *
-     * @param resource $ch
-     * @param string $data
-     * @return int
-     */
-    protected function parseResponseHeaders($ch, $data) {
-        if (!$this->skippedHttpStatusLine) {
-            $this->skippedHttpStatusLine = true;
-            return strlen($data);
-        }
-
-        $trimmedData = trim($data);
-        if (strlen($trimmedData) == 0) {
-            return strlen($data);
-        }
-
-        // Added condition to ignore extra header which dont have colon ( : )
-        if (strpos($trimmedData, ":") == false) {
-            return strlen($data);
-        }
-        
-        list($key, $value) = explode(":", $trimmedData, 2);
-
-        $key = trim($key);
-        $value = trim($value);
-
-        // This will skip over the HTTP Status Line and any other lines
-        // that don't look like header lines with values
-        if (strlen($key) > 0 && strlen($value) > 0) {
-            // This is actually a very basic way of looking at response headers
-            // and may miss a few repeated headers with different (appended)
-            // values but this should work for debugging purposes.
-            $this->responseHeaders[$key] = $value;
-        }
-
-        return strlen($data);
-    }
-
-
-    /**
-     * Implodes a key/value array for printing.
-     *
-     * @param array $arr
-     * @return string
-     */
-    protected function implodeArray($arr) {
-        $retStr = '';
-        foreach($arr as $key => $value) {
-            $retStr .= $key . ': ' . $value . ', ';
-        }
-        rtrim($retStr, ', ');
-        return $retStr;
-    }
-
-    /**
      * Executes an HTTP request
      *
      * @param string $data query string OR POST content as a string
@@ -141,7 +82,7 @@ class PayPalHttpConnection
         }
         curl_setopt_array($ch, $options);
         curl_setopt($ch, CURLOPT_URL, $this->httpConfig->getUrl());
-        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $this->getHttpHeaders());
 
@@ -163,9 +104,11 @@ class PayPalHttpConnection
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->httpConfig->getMethod());
         }
 
-        $this->responseHeaders = array();
-        $this->skippedHttpStatusLine = false;
-        curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, 'parseResponseHeaders'));
+        //Logging Each Headers for debugging purposes
+        foreach ($this->getHttpHeaders() as $header) {
+            //TODO: Strip out credentials and other secure info when logging.
+            // $this->logger->debug($header);
+        }
 
         //Execute Curl Request
         $result = curl_exec($ch);
@@ -181,6 +124,17 @@ class PayPalHttpConnection
             $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         }
 
+        //Retry if Failing
+        $retries = 0;
+        if (in_array($httpStatus, self::$retryCodes) && $this->httpConfig->getHttpRetryCount() != null) {
+            $this->logger->info("Got $httpStatus response from server. Retrying");
+            do {
+                $result = curl_exec($ch);
+                //Retrieve Response Status
+                $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            } while (in_array($httpStatus, self::$retryCodes) && (++$retries < $this->httpConfig->getHttpRetryCount()));
+        }
+
         //Throw Exception if Retries and Certificates doenst work
         if (curl_errno($ch)) {
             $ex = new PayPalConnectionException(
@@ -194,16 +148,38 @@ class PayPalHttpConnection
 
         // Get Request and Response Headers
         $requestHeaders = curl_getinfo($ch, CURLINFO_HEADER_OUT);
+        //Using alternative solution to CURLINFO_HEADER_SIZE as it throws invalid number when called using PROXY.
+        if (function_exists('mb_strlen')) {
+            $responseHeaderSize = mb_strlen($result, '8bit') - curl_getinfo($ch, CURLINFO_SIZE_DOWNLOAD);
+            $responseHeaders = mb_substr($result, 0, $responseHeaderSize, '8bit');
+            $result = mb_substr($result, $responseHeaderSize, mb_strlen($result), '8bit');
+        } else {
+            $responseHeaderSize = strlen($result) - curl_getinfo($ch, CURLINFO_SIZE_DOWNLOAD);
+            $responseHeaders = substr($result, 0, $responseHeaderSize);
+            $result = substr($result, $responseHeaderSize);
+        }
+
         $this->logger->debug("Request Headers \t: " . str_replace("\r\n", ", ", $requestHeaders));
         $this->logger->debug(($data && $data != '' ? "Request Data\t\t: " . $data : "No Request Payload") . "\n" . str_repeat('-', 128) . "\n");
         $this->logger->info("Response Status \t: " . $httpStatus);
-        $this->logger->debug("Response Headers\t: " . $this->implodeArray($this->responseHeaders));
+        $this->logger->debug("Response Headers\t: " . str_replace("\r\n", ", ", $responseHeaders));
 
         //Close the curl request
         curl_close($ch);
 
         //More Exceptions based on HttpStatus Code
-        if ($httpStatus < 200 || $httpStatus >= 300) {
+        if (in_array($httpStatus, self::$retryCodes)) {
+            $ex = new PayPalConnectionException(
+                $this->httpConfig->getUrl(),
+                "Got Http response code $httpStatus when accessing {$this->httpConfig->getUrl()}. " .
+                "Retried $retries times."
+            );
+            $ex->setData($result);
+            $this->logger->error("Got Http response code $httpStatus when accessing {$this->httpConfig->getUrl()}. " .
+                "Retried $retries times." . $result);
+            $this->logger->debug("\n\n" . str_repeat('=', 128) . "\n");
+            throw $ex;
+        } elseif ($httpStatus < 200 || $httpStatus >= 300) {
             $ex = new PayPalConnectionException(
                 $this->httpConfig->getUrl(),
                 "Got Http response code $httpStatus when accessing {$this->httpConfig->getUrl()}.",

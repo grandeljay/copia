@@ -94,10 +94,10 @@ class ML_Database_Model_Query_Select {
 
     /**
      * 
-     * @param string|array $mJoin
+     * @param type $mJoin 
      *      if is string like this 'LEFT JOIN '._DB_PREFIX_.'product p ON ...' , 
      *      if is array like this array( tablename , alias , join condition )
-     * @param int $iType can be one the const join type
+     * @param type $iType can be one the const join type
      * @return ML_Database_Model_Query_Select
      */
     public function join($mJoin, $iType = 0) {
@@ -119,7 +119,7 @@ class ML_Database_Model_Query_Select {
 
     /**
      * see createCondition document
-     * @param string|array $mCondition
+     * @param type $mCondition
      * @return ML_Database_Model_Query_Select
      */
     public function where($mCondition) {
@@ -177,15 +177,15 @@ class ML_Database_Model_Query_Select {
                         $sBoolOperator = $sMixed;
                         foreach ($mValue as $sKey => $mWhereClause) {
                             if (gettype($sKey) === "string") {
-                                $aWhere[] = $this->createCondition(array("$sKey" => $mWhereClause), $sBoolOperator);
+                                $aWhere[] = $this->createCondition(array("$sKey" => $mWhereClause), $sBoolOperator, true);
                             } elseif (gettype($mWhereClause) === "string") {
-                                $aWhere[] = $this->createCondition($mWhereClause, $sBoolOperator);
+                                $aWhere[] = $this->createCondition($mWhereClause, $sBoolOperator, true);
                             } else if (is_array($mWhereClause)) {
-                                $aWhere[] = $this->createCondition($mWhereClause, 'AND');
+                                $aWhere[] = $this->createCondition($mWhereClause, 'AND', true);
                             }
                         }
                     } else {
-                        $aWhere[] = $this->createCondition($mValue, $sBoolOperator);
+                        $aWhere[] = $this->createCondition($mValue, $sBoolOperator, true);
                     }
                 }
             }

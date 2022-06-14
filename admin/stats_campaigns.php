@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: stats_campaigns.php 13037 2020-12-09 05:54:36Z GTB $
+   $Id: stats_sales_report.php 1687 2011-01-23 12:12:04Z franky-n-xtcm $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -177,33 +177,29 @@ require (DIR_WS_INCLUDES.'head.php');
                         </td>
                         <td class="menuBoxHeading">
                           <?php 
-                            echo '<p class="pdg2 mrg0"><b>'.REPORT_START_DATE.'</b></p>';
+                            echo REPORT_START_DATE.'<br/>';
                             echo xtc_draw_pull_down_menu('startD', $day_array, $sDay);
                             echo xtc_draw_pull_down_menu('startM', $month_array, $sMon);
                             echo xtc_draw_pull_down_menu('startY', $year_array, $sYear);
                           ?>
                         </td>
-                        <td class="menuBoxHeading">
-                          <?php 
-                            echo '<p class="pdg2 mrg0"><b>'.REPORT_STATUS_FILTER.'</b></p>';
-                            echo xtc_draw_pull_down_menu('status', array_merge(array(array('id' => '0', 'text' => REPORT_ALL)), $orders_statuses), ((isset($_GET['status']) && $_GET['status'] != '') ? $_GET['status'] : 0)); 
-                          ?> 
+                        <td rowspan="2" class="menuBoxHeading txta-l">
+                          <?php echo REPORT_STATUS_FILTER; ?><br />
+                          <?php echo xtc_draw_pull_down_menu('status', array_merge(array(array('id' => '0', 'text' => REPORT_ALL)), $orders_statuses), ((isset($_GET['status']) && $_GET['status'] != '') ? $_GET['status'] : 0)); ?> 
+                          <br /><?php echo REPORT_CAMPAIGN_FILTER; ?><br /> 
+                          <?php echo xtc_draw_pull_down_menu('campaign', array_merge(array(array('id' => '0', 'text' => REPORT_ALL)), $campaigns), ((isset($_GET['campaign']) && $_GET['campaign'] != '') ? $_GET['campaign'] : 0)); ?> 
                         </td>
+                        <td rowspan="2" align="left" class="menuBoxHeading"><br /></td>
+                        <td rowspan="2" align="left" class="menuBoxHeading"><br /></td>
                       </tr>
                       <tr>
                         <td class="menuBoxHeading">
                           <?php 
-                            echo '<p class="pdg2 mrg0"><b>'.REPORT_END_DATE.'</b></p>';
+                            echo REPORT_END_DATE.'<br/>';
                             echo xtc_draw_pull_down_menu('endD', $day_array, $eDay);
                             echo xtc_draw_pull_down_menu('endM', $month_array, $eMon);
                             echo xtc_draw_pull_down_menu('endY', $year_array, $eYear);
                           ?>
-                        </td>
-                        <td class="menuBoxHeading">
-                          <?php 
-                            echo '<p class="pdg2 mrg0"><b>'.REPORT_CAMPAIGN_FILTER.'</b></p>';
-                            echo xtc_draw_pull_down_menu('campaign', array_merge(array(array('id' => '0', 'text' => REPORT_ALL)), $campaigns), ((isset($_GET['campaign']) && $_GET['campaign'] != '') ? $_GET['campaign'] : 0)); 
-                          ?> 
                         </td>
                       </tr>
                     </table>  
@@ -247,10 +243,10 @@ require (DIR_WS_INCLUDES.'head.php');
                         <td class="dataTableContent">&nbsp;</td>
                         <td class="dataTableContent"><?php echo $campaign->result[$n]['result'][$nn]['range']; ?></td>
                         <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['hits']; ?></td>
-                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['leads'].' ('.round($campaign->result[$n]['result'][$nn]['leads_p'],2).'%)'; ?></td>
-                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['sells'].' ('.round($campaign->result[$n]['result'][$nn]['sells_p'],2).'%)'; ?></td>
-                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['late_sells'].' ('.round($campaign->result[$n]['result'][$nn]['late_sells_p'],2).'%)'; ?></td>
-                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['sum'].' ('.round($campaign->result[$n]['result'][$nn]['sum_p'],2).'%)'; ?></td>
+                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['leads'].' ('.$campaign->result[$n]['result'][$nn]['leads_p'].'%)'; ?></td>
+                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['sells'].' ('.$campaign->result[$n]['result'][$nn]['sells_p'].'%)'; ?></td>
+                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['late_sells'].' ('.$campaign->result[$n]['result'][$nn]['late_sells_p'].'%)'; ?></td>
+                        <td class="dataTableContent txta-r"><?php echo $campaign->result[$n]['result'][$nn]['sum'].' ('.$campaign->result[$n]['result'][$nn]['sum_p'].'%)'; ?></td>
                       </tr>
                       <?php
                     }
@@ -258,10 +254,10 @@ require (DIR_WS_INCLUDES.'head.php');
                     <tr class="dataTableHeadingRow"> 
                       <td class="dataTableHeadingContent" colspan="2"><strong><?php echo HEADING_SUM; ?></strong></td>
                       <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['hits_s']; ?></strong></td>
-                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['leads_s'].' ('.($campaign->total['leads']> 0 ? round(($campaign->result[$n]['leads_s']/$campaign->total['leads']*100),2):'0').'%)'; ?></strong></td>
-                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['sells_s'].' ('.($campaign->total['sells']> 0 ? round(($campaign->result[$n]['sells_s']/$campaign->total['sells']*100),2):'0').'%)'; ?></strong></td>
-                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['late_sells_s'].' ('.($campaign->total['sells']> 0 ? round(($campaign->result[$n]['late_sells_s']/$campaign->total['sells']*100),2):'0').'%)'; ?></strong></td>
-                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['sum_s'].' ('.($campaign->total['sum_plain']> 0 ? round(($campaign->result[$n]['sum_s']/$campaign->total['sum_plain']*100),2):'0').'%)'; ?></strong></td>
+                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['leads_s'].' ('.($campaign->total['leads']> 0 ? ($campaign->result[$n]['leads_s']/$campaign->total['leads']*100):'0').'%)'; ?></strong></td>
+                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['sells_s'].' ('.($campaign->total['sells']> 0 ? ($campaign->result[$n]['sells_s']/$campaign->total['sells']*100):'0').'%)'; ?></strong></td>
+                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['late_sells_s'].' ('.($campaign->total['sells']> 0 ? ($campaign->result[$n]['late_sells_s']/$campaign->total['sells']*100):'0').'%)'; ?></strong></td>
+                      <td class="dataTableHeadingContent txta-r"><strong><?php echo $campaign->result[$n]['sum_s'].' ('.($campaign->total['sum_plain']> 0 ? round(($campaign->result[$n]['sum_s']/$campaign->total['sum_plain']*100),0):'0').'%)'; ?></strong></td>
                     </tr>
                     <?php
                   }

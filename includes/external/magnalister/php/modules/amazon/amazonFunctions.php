@@ -595,53 +595,19 @@ function amazonProcessMultiOrderStatus($args) {
 	#die();
 }
 
-function magnaAmazonRunDbMatching($tableSettings, $defaultAlias, $where) {
-    if (   !isset($tableSettings['Table']['table'])
-        || empty($tableSettings['Table']['table'])
-        || empty($tableSettings['Table']['column'])
-    ) {
-        return false;
-    }
-    if (empty($tableSettings['Alias'])) {
-        $tableSettings['Alias'] = $defaultAlias;
-    }
-
-    return (string)MagnaDB::gi()->fetchOne('
-        SELECT `'.$tableSettings['Table']['column'].'` 
-          FROM `'.$tableSettings['Table']['table'].'` 
-         WHERE `'.$tableSettings['Alias'].'` = "'.MagnaDB::gi()->escape($where).'"
-               AND `'.$tableSettings['Table']['column'].'` <> \'\'
-         LIMIT 1
-    ');
-}
-
 function magnaAmazonFetchTrackingCode3rdParty($oID, $mpID) {
-    $mTrackingCode = magnaAmazonRunDbMatching(array (
-        'Table' => getDBConfigValue('amazon.orderstatus.carrier.trackingcode.table', $mpID, false),
-        'Alias' => getDBConfigValue('amazon.orderstatus.carrier.trackingcode.alias', $mpID, false),
-    ), 'orders_id', $oID);
-
-    // for Gambio 2.3 > if table "orders_parcel_tracking_codes" exists
-    if (false == $mTrackingCode && MagnaDB::gi()->tableExists('orders_parcel_tracking_codes')) {
-        $mTrackingCode = MagnaDB::gi()->fetchOne("
-            SELECT tracking_code
-              FROM orders_parcel_tracking_codes
-             WHERE order_id = '".MagnaDB::gi()->escape($oID)."'
-             LIMIT 1
-        ");
-    }
-
-    // for modified 2.0 > if table "orders_tracking" exists
-    if (false == $mTrackingCode && MagnaDB::gi()->tableExists('orders_tracking')) {
-        $mTrackingCode = MagnaDB::gi()->fetchOne("
-            SELECT parcel_id
-              FROM orders_tracking
-             WHERE orders_id = '".MagnaDB::gi()->escape($oID)."'
-             LIMIT 1
-        ");
-    }
-
-    return $mTrackingCode;
+	$table = getDBConfigValue('amazon.orderstatus.carrier.trackingcode.table', $mpID, false);
+	if (($table === false) || empty($table['column']) || empty($table['table'])) return '';
+	$cIDAlias = getDBConfigValue('amazon.orderstatus.carrier.trackingcode.alias', $mpID);
+	if (empty($cIDAlias)) {
+		$cIDAlias = 'orders_id';
+	}
+	return (string)MagnaDB::gi()->fetchOne('
+		SELECT `'.$table['column'].'`
+		  FROM `'.$table['table'].'`
+		 WHERE `'.$cIDAlias.'`=\''.MagnaDB::gi()->escape($oID).'\'
+		       AND `'.$table['column'].'` <> \'\'
+	');
 }
 
 function magnaAmazonSaveTrackingCode3rdParty($oID, $tc, $mpID) {
@@ -659,40 +625,18 @@ function magnaAmazonSaveTrackingCode3rdParty($oID, $tc, $mpID) {
 }
 
 function magnaAmazonFetchCarrier3rdParty($oID, $mpID) {
-    $mCarrier = magnaAmazonRunDbMatching(array (
-        'Table' => getDBConfigValue('amazon.orderstatus.carrier.carrierDBMatching.table', $mpID, false),
-        'Alias' => getDBConfigValue('amazon.orderstatus.carrier.carrierDBMatching.alias', $mpID, false),
-    ), 'orders_id', $oID);
-
-    // for Gambio 2.3 > if table "orders_parcel_tracking_codes" exists
-    if (false == $mCarrier && MagnaDB::gi()->tableExists('orders_parcel_tracking_codes')) {
-        $mCarrier = MagnaDB::gi()->fetchOne("
-            SELECT parcel_service_name
-              FROM orders_parcel_tracking_codes
-             WHERE order_id = '".MagnaDB::gi()->escape($oID)."'
-             LIMIT 1
-        ");
-    }
-
-    // for modified 2.0+ > if table "orders_tracking" exists
-    if (false == $mCarrier && MagnaDB::gi()->tableExists('orders_tracking')) {
-        $sCarrierId = MagnaDB::gi()->fetchOne("
-            SELECT carrier_id
-              FROM orders_tracking
-             WHERE orders_id = '".MagnaDB::gi()->escape($oID)."'
-             LIMIT 1
-        ");
-        if (!empty($sCarrierId)) {
-            $mCarrier = MagnaDB::gi()->fetchOne("
-                SELECT carrier_name
-                  FROM carriers
-                 WHERE carrier_id = '".MagnaDB::gi()->escape($sCarrierId)."'
-                 LIMIT 1
-            ");
-        }
-    }
-
-    return $mCarrier;
+	$table = getDBConfigValue('amazon.orderstatus.carrier.carrierDBMatching.table', $mpID, false);
+	if (($table === false) || empty($table['column']) || empty($table['table'])) return '';
+	$cIDAlias = getDBConfigValue('amazon.orderstatus.carrier.carrierDBMatching.alias', $mpID);
+	if (empty($cIDAlias)) {
+		$cIDAlias = 'orders_id';
+	}
+	return (string)MagnaDB::gi()->fetchOne('
+		SELECT `'.$table['column'].'`
+		  FROM `'.$table['table'].'`
+		 WHERE `'.$cIDAlias.'`=\''.MagnaDB::gi()->escape($oID).'\'
+		       AND `'.$table['column'].'` <> \'\'
+	');
 }
 
 function magnaAmazonSaveCarrier3rdParty($oID, $carrier, $mpID) {
@@ -721,6 +665,7 @@ function autoupdateAmazonOrdersStatus($mpID) {
 	     WHERE mo.orders_id=o.orders_id
 	           AND mo.mpID=\''.$mpID.'\'
 	           AND mo.orders_status<>o.orders_status
+	     LIMIT 100
 	', function_exists('ml_debug_out')));
 	if (function_exists('ml_debug_out')) ml_debug_out(print_m($orders, '$orders'));
 	if (empty($orders)) return true;
@@ -737,7 +682,6 @@ function autoupdateAmazonOrdersStatus($mpID) {
 
 	$preparedOrders = array();
 
-	$iCounter = 0;
 	foreach ($orders as $key => &$order) {
 		$order['data'] = @unserialize($order['data']);
 		if (!is_array($order['data'])) {
@@ -754,22 +698,16 @@ function autoupdateAmazonOrdersStatus($mpID) {
 		if (   (($status != $shippedState) && ($status != $cancelledState))
 			|| ($order['internaldata']['FulfillmentChannel'] == 'AFN')
 		) {
-			$unprocessed[$order['orders_id']] = $order['orders_status_shop'];
+			$unprocessed[] = $order['orders_id'];
 			unset($orders[$key]);
 			continue;
 		}
-		$iCounter++;
 
-		if ($status == $shippedState) {
-			$sSortOrder = 'ASC';
-		} else {
-			$sSortOrder = 'DESC';
-		}
 		$date = MagnaDB::gi()->fetchOne('
 		    SELECT date_added FROM `'.TABLE_ORDERS_STATUS_HISTORY.'`
 		     WHERE orders_id='.$order['orders_id'].'
 		           AND orders_status_id='.$status.'
-		  ORDER BY date_added '.$sSortOrder.'
+		  ORDER BY date_added DESC
 		     LIMIT 1
 		');
 
@@ -787,19 +725,6 @@ function autoupdateAmazonOrdersStatus($mpID) {
 			}
 			if (isset($order['internaldata']['Request']['Data'])) {
 				$cfirm = $order['internaldata']['Request']['Data'];
-                // if we send tracking again don't forget the carrier and tracking code
-                if (empty($cfirm['Carrier'])) {
-                    $cfirm['Carrier'] = $carrier;
-                }
-                if (empty($cfirm['TrackingCode'])) {
-                    $cfirm['TrackingCode'] = $trackercode;
-                }
-				if (   array_key_exists('ShippingDate', $cfirm)
-				    && ($cfirm['ShippingDate'] > $date)
-                ) {
-					// use the first found ShippingDate for Shipping confirmations
-					$cfirm['ShippingDate'] = $date;
-				}
 				$cfirm['AmazonOrderID'] = $order['data']['AmazonOrderID'];
 				unset($order['internaldata']['Request']);
 			} else {
@@ -827,14 +752,11 @@ function autoupdateAmazonOrdersStatus($mpID) {
 		}
 		$order['orders_tmp_status'] = $status;
 		//$order['internaldata'] = serialize($order['internaldata']);
-		if (isset($preparedOrders[$order['data']['AmazonOrderID']]) && ($status != $shippedState)) {
+		if (isset($preparedOrders[$order['data']['AmazonOrderID']])) {
 			/* This is a lie, but meh... the result will be correct. */
-			$unprocessed[$preparedOrders[$order['data']['AmazonOrderID']]['orders_id']] = $status;
+			$unprocessed[] = $preparedOrders[$order['data']['AmazonOrderID']]['orders_id'];
 		}
 		$preparedOrders[$order['data']['AmazonOrderID']] = &$order;
-		if ($iCounter > 99) {
-			break;
-		}
 	}
 	$confirmedOrders = array();
 	$cancelledOrders = array();
@@ -862,7 +784,7 @@ function autoupdateAmazonOrdersStatus($mpID) {
 					if (!isset($preparedOrders[$cData['AmazonOrderID']])) continue;
 					$tO = &$preparedOrders[$cData['AmazonOrderID']];
 					if (!isset($tO['orders_tmp_status'])) {
-						$unprocessed[$tO['orders_id']] = $tO['orders_status_shop'];
+						$unprocessed[] = $tO['orders_id'];
 						continue;
 					}
 					$tO['orders_status'] = $tO['orders_tmp_status'];
@@ -896,7 +818,7 @@ function autoupdateAmazonOrdersStatus($mpID) {
 					if (!isset($preparedOrders[$cData['AmazonOrderID']])) continue;
 					$tO = &$preparedOrders[$cData['AmazonOrderID']];
 					if (!isset($tO['orders_tmp_status'])) {
-                        $unprocessed[$tO['orders_id']] = $tO['orders_status_shop'];
+						$unprocessed[] = $tO['orders_id'];
 						continue;
 					}
 					$tO['orders_status'] = $tO['orders_tmp_status'];
@@ -909,16 +831,12 @@ function autoupdateAmazonOrdersStatus($mpID) {
 	}
 	
 	if (!empty($unprocessed)) {
-	    // just set the order status for an order that will not be processed to the value that it have at the beginning of the process
-        //  not that is in the database because while processing it can be changed
-        foreach ($unprocessed as $sOrderId => $sOrderStatus) {
-            MagnaDB::gi()->update(TABLE_MAGNA_ORDERS, array(
-                'orders_status' => $sOrderStatus
-            ), array(
-                'orders_id' => $sOrderId,
-                'mpID' => $mpID,
-            ));
-        }
+		MagnaDB::gi()->query("
+			UPDATE `".TABLE_MAGNA_ORDERS."` mo, `".TABLE_ORDERS."` o 
+			   SET mo.orders_status=o.orders_status
+		     WHERE mo.orders_id=o.orders_id
+		           AND mo.orders_id IN ('".implode("', '", $unprocessed)."')
+		");
 		if (function_exists('ml_debug_out')) ml_debug_out(print_m($unprocessed, '$unprocessed'));
 	}
 	if (empty($successfullySubmittedOrders)) return true;
@@ -948,41 +866,13 @@ function getAmazonOfferLink($sAsin, $sTitle) {
 				}
 			case 'us': {
 					$sAmazonSite = 'com';
-					break;
 				}
 			case 'uk': {
 					$sAmazonSite = 'co.uk';
-					break;
 				}
 			default: {//fr, in, it, ca, es, cn
 				}
 		}
 		return '<a href="http://www.amazon.' . $sAmazonSite . '/gp/offer-listing/' . $sAsin . '" title="' . $sTitle . '" target="_blank">' . $sAsin . '</a>';
 	}
-}
-
-function amazonMfsGetConfigurationValues($sType = null) {
-	global $cacheMFSGetConfigurationValues;
-	if(!isset($cacheMFSGetConfigurationValues)){
-		try {
-		    $aResponse = MagnaConnector::gi()->submitRequest(array(
-			'ACTION' => 'MFS_GetConfigurationValues',
-		    ));
-		    if (array_key_exists('DATA', $aResponse)) {
-			$cacheMFSGetConfigurationValues = $aResponse['DATA'];
-		    } else {
-			$cacheMFSGetConfigurationValues =  array();
-		    }
-		} catch (Exception $oEx) {
-		    return array();
-		}
-	}
-	if ($sType === null) {
-		$return = $cacheMFSGetConfigurationValues;
-	} elseif (array_key_exists($sType, $cacheMFSGetConfigurationValues)) {
-		$return = $cacheMFSGetConfigurationValues[$sType];
-	} else {
-		$return = $sType;
-	}
-	return $return;
 }

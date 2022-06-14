@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: content.php 11561 2019-03-20 16:36:11Z GTB $   
+   $Id:$   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -78,7 +78,7 @@ if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_content.html', $cache_i
       $new_path = '';
       $coid = explode('_', $coPath);
       reset($coid);
-      foreach ($coid as $key => $value) {
+      while (list ($key, $value) = each($coid)) {
         unset($prev_cid);
         unset($first_cid);
         $content_query = xtDBquery("SELECT content_id, 

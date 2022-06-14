@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: order_details.php 6608 2016-04-05 16:34:46Z MaW $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -70,37 +70,15 @@ function magnaGetOrderPlatformIcon($order) {
 	}
 	$filename = '';
 	if ($logo == 'amazon') {
-		$fulfillment = $order['internaldata']['FulfillmentChannel'];
-
-		if ($fulfillment !== 'MFN-Prime' && $fulfillment != 'MFN' && $fulfillment != 'Business') {
+		if ($order['internaldata']['FulfillmentChannel'] != 'MFN') {
 			$filename = 'amazon_fba_orderview';
-		} else {
-			$suffix = '';
-			if ($fulfillment === 'MFN-Prime') {
-				$suffix = '_prime';
-                if (isset($order['internaldata']['ShipServiceLevel'])) {
-                    $sShipServiceLevel = $order['internaldata']['ShipServiceLevel'];
-                    if ($sShipServiceLevel === 'NextDay') {
-                        $suffix .= '_nextday';
-                    } else if ($sShipServiceLevel === 'SameDay') {
-                        $suffix .= '_sameday';
-                    } else if ($sShipServiceLevel === 'SecondDay') {
-                        $suffix .= '_secondday';
-                    }
-                }
-			} elseif ($fulfillment === 'Business') {
-				$suffix = '_business';
-			}
-
-			$filename = 'amazon_orderview'.$suffix;
-			if (isset($order['data']['ML_AMAZON_LABEL_BATCHID']) && !empty($order['data']['ML_AMAZON_LABEL_BATCHID'])) {
-				if (isset($order['data']['ML_ERROR_LABEL'])) {
-					$filename = 'amazon_orderview_error';
-				} else if (isset($order['data']['ML_LABEL_ORDER_CANCELLED'])) {
-					$filename = 'amazon_orderview_cancelled'.$suffix;
-				} else if (isset($order['data']['ML_LABEL_SHIPPING_DATE'])) {
-					$filename = 'amazon_orderview_shipped'.$suffix;
-				}
+		} else if (isset($order['data']['ML_AMAZON_LABEL_BATCHID']) && !empty($order['data']['ML_AMAZON_LABEL_BATCHID'])) {
+			if (isset($order['data']['ML_ERROR_LABEL'])) {
+				$filename = 'amazon_orderview_error';
+			} else if (isset($order['data']['ML_LABEL_ORDER_CANCELLED'])) {
+				$filename = 'amazon_orderview_cancelled';
+			} else if (isset($order['data']['ML_LABEL_SHIPPING_DATE'])) {
+				$filename = 'amazon_orderview_shipped';
 			}
 		}
 	}

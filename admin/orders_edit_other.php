@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: orders_edit_other.php 12044 2019-07-30 15:54:45Z GTB $
+   $Id: orders_edit_other.php 10324 2016-10-19 13:29:09Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -213,7 +213,6 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
         array(
           'title' => '',
           'value' => '',
-          'orders_total_id' => '',
         )
       );
     }
@@ -229,7 +228,7 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
         <?php
           echo xtc_draw_hidden_field('class', $total);
           echo xtc_draw_hidden_field('sort_order', constant('MODULE_ORDER_TOTAL_'.strtoupper($total_name).'_SORT_ORDER'));
-          echo xtc_draw_hidden_field('oID', (int)$_GET['oID']);
+          echo xtc_draw_hidden_field('oID', $_GET['oID']);
           echo '<input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_SAVE . '"/>';
         ?>
         </td>
@@ -237,7 +236,7 @@ defined( '_VALID_XTC' ) or die( 'Direct Access to this location is not allowed.'
       <td class="dataTableContent">
         <?php
           echo xtc_draw_form('ot_delete', FILENAME_ORDERS_EDIT, 'action=ot_delete', 'post');
-          echo xtc_draw_hidden_field('oID', (int)$_GET['oID']);
+          echo xtc_draw_hidden_field('oID', $_GET['oID']);
           echo xtc_draw_hidden_field('otID', $ototal['orders_total_id']);
           if ($total != 'ot_total') {
             echo '<input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_DELETE . '"/>';

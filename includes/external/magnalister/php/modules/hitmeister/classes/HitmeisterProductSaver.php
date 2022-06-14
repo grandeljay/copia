@@ -23,7 +23,6 @@ defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 class HitmeisterProductSaver {
 	const DEBUG = false;
 	public $aErrors = array();
-	public $aMissingFields = array();
 
 	protected $aMagnaSession = array();
 	protected $sMarketplace = '';
@@ -89,7 +88,7 @@ class HitmeisterProductSaver {
 					p.products_ean as EAN,
 					p.products_image as PictureUrl,
 					pd.products_name as Title,
-					'.(MagnaDB::gi()->columnExistsInTable('products_short_description', TABLE_PRODUCTS_DESCRIPTION) ? 'pd.products_short_description' : '"" AS Subtitle').',
+					pd.products_short_description as Subtitle,
 					pd.products_description as Description
 				FROM ' . TABLE_PRODUCTS . ' p
 				LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON pd.products_id = p.products_id AND pd.language_id = "' . $lang . '"
@@ -100,23 +99,8 @@ class HitmeisterProductSaver {
 			$aItemDetails['Subtitle'] = $prod[0]['Subtitle'];
 			$aItemDetails['Description'] = $prod[0]['Description'];
 		}
-		
-		$aProduct = MLProduct::gi()
-            ->setLanguage(getDBConfigValue($this->sMarketplace . '.lang', $this->mpId))
-            ->getProductById($iProductId, array(
-                'sameVariationsToAttributes' => false,
-                'purgeVariations' => true,
-                'useGambioProperties' => (getDBConfigValue('general.options', '0', 'old') == 'gambioProperties'),
-            ));
 
-		if (    array_key_exists('allimages', $aItemDetails)
-		     && $aItemDetails['allimages'] = 'on') {
-			// all images: Leave empty (will be fetched on upload)
-			$aRow['PictureURL'] = '';
-		} else if (!isset($aItemDetails['Images'])) {
-			// multi preparation: Leave empty (will be fetched on upload)
-			$aRow['PictureURL'] = '';
-		} else {
+		if (isset($aItemDetails['Images'])) {
 			$aImages = (array)$aItemDetails['Images'];
 			if (in_array('false', $aImages) && count($aImages) > 1) {
 				array_shift($aImages);
@@ -128,40 +112,35 @@ class HitmeisterProductSaver {
 			}
 			
 			$aRow['PictureURL'] = json_encode($aPictureURL);
+		} else {
+			$aProduct = MLProduct::gi()->setLanguage(getDBConfigValue($this->sMarketplace . '.lang', $this->mpId))->getProductById($iProductId);
+
+			$images = array();
+
+			foreach ($aProduct['Images'] as $image) {
+				$images[$image] = 'true';
+			}
+
+			$aRow['PictureURL'] = json_encode($images);
 		}
 
-		if (!isset($aItemDetails['PrimaryCategory']) || $aItemDetails['PrimaryCategory'] === '') {
+		if (!isset($aItemDetails['mpCategory']) || $aItemDetails['mpCategory'] === '') {
+			$aRow['Verified'] = 'ERROR';
 			$this->aErrors['ML_RICARDO_ERROR_CATEGORY'] = ML_RICARDO_ERROR_CATEGORY;
-			$aRow['Verified'] = 'ERROR';
 		} else {
-			$aRow['MarketplaceCategories'] = $aItemDetails['PrimaryCategory'];
-			$aRow['TopMarketplaceCategory'] = $aItemDetails['PrimaryCategory'];
+			$aRow['MarketplaceCategories'] = $aItemDetails['mpCategory'];
+			$aRow['MarketplaceCategoriesName'] = $aItemDetails['mpCategoryName'];
 		}
-		
-		if ((!isset($aRow['EAN']) || $aRow['EAN'] === '') && count($aProduct['Variations']) === 0) {
-			$this->aMissingFields['ML_HITMEISTER_ERROR_EAN'][$aRow['products_id']] = '';
+
+		if (!isset($aRow['EAN']) || $aRow['EAN'] === '') {
 			$aRow['Verified'] = 'ERROR';
-		} elseif (count($aProduct['Variations']) !== 0) {
-			$aVariantErrors = array();
-			foreach ($aProduct['Variations'] as $aVariation) {
-				if (!isset($aVariation['EAN']) || $aVariation['EAN'] === '') {
-					$aVariantError = array();
-					foreach ($aVariation['Variation'] as $aVariationConfig) {
-						$aVariantError[] = $aVariationConfig['Name'].': '.$aVariationConfig['Value'];
-					}
-					$aVariantErrors[] = implode(' ', $aVariantError);
-				}
-			}
-			if (!empty($aVariantErrors)) {
-				$this->aMissingFields['ML_HITMEISTER_ERROR_EAN'][$aRow['products_id']] = implode(', ', $aVariantErrors);
-				$aRow['Verified'] = 'ERROR';
-			}
+			$this->aErrors['ML_HITMEISTER_ERROR_EAN'] = ML_HITMEISTER_ERROR_EAN;
 		}
 		
 		$aRow['Title'] = $aItemDetails['Title'];
 		if (!isset($aRow['Title']) || $aRow['Title'] === '') {
-			$this->aMissingFields['ML_HITMEISTER_ERROR_TITLE'][$aRow['products_id']] = '';
 			$aRow['Verified'] = 'ERROR';
+			$this->aErrors['ML_HITMEISTER_ERROR_TITLE'] = ML_HITMEISTER_ERROR_TITLE;
 		}
 
 		if (isset($aItemDetails['Subtitle']) === true) {
@@ -170,11 +149,37 @@ class HitmeisterProductSaver {
 		
 		$aRow['Description'] = $aItemDetails['Description'];
 		if (!isset($aRow['Description']) || $aRow['Description'] === '') {
-			$this->aMissingFields['ML_HITMEISTER_ERROR_DESCRIPTION'][$aRow['products_id']] = '';
 			$aRow['Verified'] = 'ERROR';
+			$this->aErrors['ML_HITMEISTER_ERROR_DESCRITPION'] = ML_HITMEISTER_ERROR_DESCRITPION;
+		}		
+		
+		$attributes = array();
+		if (isset($aItemDetails['catAttributes']) && is_array($aItemDetails['catAttributes'])) {
+			foreach ($aItemDetails['catAttributes'] as $key => $attribute) {
+				if ($attribute['required'] === 'true') {
+					if (is_array($attribute['values']) && empty($attribute['values']) === false) {
+						foreach ($attribute['values'] as $value) {
+							if (empty($value)) {
+								$aRow['Verified'] = 'ERROR';
+								$this->aErrors['ML_HITMEISTER_ERROR_CATEGORY_ATTRIBUTE'] = $key . ML_HITMEISTER_ERROR_CATEGORY_ATTRIBUTE;
+								break;
+							} else {
+								$attributes[$key][] = $value;
+							}
+						}
+						continue;
+					} else if (empty($attribute['values'])) {
+						$aRow['Verified'] = 'ERROR';
+						$this->aErrors['ML_HITMEISTER_ERROR_CATEGORY_ATTRIBUTE'] = $key . ML_HITMEISTER_ERROR_CATEGORY_ATTRIBUTE;
+						continue;
+					}
+				}
+
+				$attributes[$key] = $attribute['values'];
+			}
 		}
 
-		$aRow['CategoryAttributes'] = $aItemDetails['CategoryAttributes'];
+		$aRow['CategoryAttributes'] = json_encode($attributes);
 		$aRow['ConditionType'] = $aItemDetails['condition_id'];
 		$aRow['ShippingTime'] = $aItemDetails['shippingtime'];
 		$aRow['Location'] = $aItemDetails['deliverycountry'];
@@ -215,8 +220,8 @@ class HitmeisterProductSaver {
 				'mpID'				=> $this->mpId,
 				'products_id'		=> $pId,
 				'products_model'	=> $productModel,
-				'Title'				=> $itemDetails['matching'][$pId]['title'],
-				'EAN'				=> $itemDetails['matching'][$pId]['ean'],
+				'Title'				=> $itemDetails['title'][$productId],
+				'EAN'				=> $itemDetails['ean'][$productId],
 				'ConditionType'		=> $itemDetails['unit']['condition_id'],
 				'ShippingTime'		=> $itemDetails['unit']['shippingtime'],
 				'Location'			=> $itemDetails['unit']['deliverycountry'],

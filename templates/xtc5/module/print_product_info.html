@@ -19,9 +19,9 @@
   <h1 style="margin-top:0px;">{$PRODUCTS_NAME}</h1>
   <div id="productinfowrap">
     {if $PRODUCTS_IMAGE != ''}
-      <div id="productinfoimages" style="width:{$smarty.const.PRODUCT_IMAGE_THUMBNAIL_WIDTH}px;"><img src="{$PRODUCTS_IMAGE|replace:"info_images":"thumbnail_images"}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" border="0" class="productimage" />
+      <div id="productinfoimages" style="width:{$smarty.const.PRODUCT_IMAGE_THUMBNAIL_WIDTH}px;"><img src="{$PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" border="0" />
       {foreach item=more_images_data from=$more_images}
-        <div class="hrlightgrey"></div><img src="{$more_images_data.PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" border="0" class="productimage" />
+        <div class="hrlightgrey"></div><img src="{$more_images_data.PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" border="0" class="productimage" />
       {/foreach}
     </div>
     {/if}
@@ -31,16 +31,10 @@
       {if $module_content != ''}
         <h2>{#options#}</h2>    
         <ul>{foreach name=aussen item=module_data from=$module_content}
-        <li{if $module_data.CHECKED == 1} class="active"{/if}>{$module_data.GROUP}: {$module_data.NAME}</li>
+        <li>{$module_data.GROUP}: {$module_data.NAME}</li>
         {/foreach}
         </ul>    
       {/if}
-      
-      {if isset($MODULE_product_tags) && $MODULE_product_tags != ''}
-        {$MODULE_product_tags|replace:"<h1":"<h2"|replace:"h1>":"h2>"}
-      {/if}
-    
-      
       <h2>{#price#}</h2>
       <p><strong>{$PRODUCTS_PRICE}</strong>, {$PRODUCTS_TAX_INFO} {$PRODUCTS_SHIPPING_LINK}</p>
       {if $MODULE_graduated_price != ''}<div class="hrlightgrey"></div>{$MODULE_graduated_price}{/if}

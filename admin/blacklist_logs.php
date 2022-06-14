@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: blacklist_logs.php 10842 2017-07-12 12:44:37Z GTB $
+   $Id: blacklist_logs.php 10143 2016-07-26 11:05:50Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -9,7 +9,7 @@
    --------------------------------------------------------------
    Released under the GNU General Public License
    --------------------------------------------------------------*/
-  
+    
   require('includes/application_top.php');
   require_once(DIR_FS_CATALOG.'includes/xss_secure.php');
 
@@ -20,18 +20,6 @@
         $contents_array = xss_read_blacklist();
         unset($contents_array[$_GET['ip']]);
         xss_write_blacklist($contents_array);
-        xtc_redirect(xtc_href_link(FILENAME_BLACKLIST_LOGS));
-        break;
-
-      case 'insert':
-        $blacklist_ip = xtc_db_prepare_input($_POST['blacklist_ip']);
-        $blacklist_time = strtotime($_POST['blacklist_time']) - XSS_BLACKLIST_TIME;
-        if ($blacklist_ip != '' && $blacklist_time > 0) {
-          $contents_array = xss_read_blacklist();
-          $contents_array[$blacklist_ip] = $blacklist_time;
-          xss_write_blacklist($contents_array);
-          xtc_redirect(xtc_href_link(FILENAME_BLACKLIST_LOGS, 'ip='.$blacklist_ip));
-        }
         xtc_redirect(xtc_href_link(FILENAME_BLACKLIST_LOGS));
         break;
     }
@@ -50,14 +38,6 @@
 
   require (DIR_WS_INCLUDES.'head.php');
 ?>  
-  <link type="text/css" href="includes/javascript/jQueryDateTimePicker/jquery.datetimepicker.css" rel="stylesheet" />
-  <script type="text/javascript" src="includes/javascript/jQueryDateTimePicker/jquery.datetimepicker.full.min.js"></script>
-  <script type="text/javascript">
-    $(document).ready(function(){
-      $.datetimepicker.setLocale('<?php echo $_SESSION["language_code"]; ?>');
-      $('#Datepicker1').datetimepicker({format:'Y-m-d H:i'});
-    });
-  </script>
 </head>
 
 <body>
@@ -84,11 +64,6 @@
             <?php echo HEADING_TITLE; ?><br />
             <div class="main pdg2 flt-l">Tools</div>
           </div>
-        <div>
-          <?php 
-            echo '<a class="button" style="margin-left:100px;" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'action=new') . '">'.BUTTON_INSERT.'</a>';
-          ?>
-        </div>
           <table class="tableCenter">
             <tr>
               <td class="boxCenterLeft">
@@ -106,7 +81,6 @@
                         <?php
 
                         foreach ($contents_array as $ip => $time) {
-                          $time += XSS_BLACKLIST_TIME;
                           $entry = $ip;
                           $orders_action_image = '<a href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'ip=' . $ip) . '">' . xtc_image(DIR_WS_IMAGES . 'icon_arrow_grey.gif', IMAGE_ICON_INFO) . '</a>';
                           if ((!isset($_GET['ip']) || ($_GET['ip'] == $ip)) && !isset($buInfo)) {
@@ -154,26 +128,10 @@
                     $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_DELETE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'ip=' . $buInfo->ip) . '">' . BUTTON_CANCEL . '</a><br/><br/>');
                     break;
 
-                  case 'new':
-                    $heading[] = array('text' => '<b>' . TEXT_NEW_ENTRY . '</b>');
-                    $contents = array('form' => xtc_draw_form('insert', FILENAME_BLACKLIST_LOGS, 'action=insert'));
-                    $contents[] = array('text' => '<br /><b>' . TEXT_ENTRY_IP . '</b><br />' . TEXT_ENTRY_IP_INFO . '<br />' . xtc_draw_input_field('blacklist_ip', ''));
-                    $contents[] = array('text' => '<br /><b>' . TEXT_ENTRY_TIME . '</b><br />' . TEXT_ENTRY_TIME_INFO . '<br />' . xtc_draw_input_field('blacklist_time', '', 'id="Datepicker1"'));
-                    $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_SAVE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS) . '">' . BUTTON_CANCEL . '</a><br/><br/>');
-                    break;
-
-                  case 'edit':
-                    $heading[] = array('text' => '<b>' . TEXT_EDIT_ENTRY . '</b>');
-                    $contents = array('form' => xtc_draw_form('insert', FILENAME_BLACKLIST_LOGS, 'action=insert'));
-                    $contents[] = array('text' => '<br /><b>' . TEXT_ENTRY_IP . '</b><br />' . TEXT_ENTRY_IP_INFO . '<br />' . xtc_draw_input_field('blacklist_ip', preg_replace('/[^0-9a-zA-Z:\.]/', '', ((isset($buInfo->ip)) ? $buInfo->ip : $_GET['ip']))));
-                    $contents[] = array('text' => '<br /><b>' . TEXT_ENTRY_TIME . '</b><br />' . TEXT_ENTRY_TIME_INFO . '<br />' . xtc_draw_input_field('blacklist_time', date('Y-m-d H:i', ((isset($buInfo->time)) ? $buInfo->time : time())), 'id="Datepicker1"'));
-                    $contents[] = array('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_SAVE . '"/> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS) . '">' . BUTTON_CANCEL . '</a><br/><br/>');
-                    break;
-                  
                   default:
                     if (isset($buInfo) && is_object($buInfo)) {
                       $heading[] = array('text' => '<b>' . $buInfo->ip . '</b>');
-                      $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'action=edit&ip='.$buInfo->ip) . '">' . BUTTON_EDIT . '</a> <a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'ip=' . $buInfo->ip . '&action=delete') . '">' . BUTTON_DELETE . '</a><br/><br/>');
+                      $contents[] = array('align' => 'center', 'text' => '<a class="button" onclick="this.blur();" href="' . xtc_href_link(FILENAME_BLACKLIST_LOGS, 'ip=' . $buInfo->ip . '&action=delete') . '">' . BUTTON_DELETE . '</a><br/><br/>');
                     }
                     break;
                 }

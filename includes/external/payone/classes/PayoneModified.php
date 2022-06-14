@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayoneModified.php 13384 2021-02-03 16:32:15Z Tomcraft $
+   $Id: PayoneModified.php 10200 2016-08-04 11:29:50Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,7 +25,7 @@ class PayoneModified {
 	protected $_frontend_url;
 	protected $_server_api_url;
   
-  public $integrator_version = '1.08';
+  public $integrator_version = '1.03';
   public $api_version = '3.10';
   public $logging = false;
   
@@ -38,7 +38,7 @@ class PayoneModified {
 		$bootstrap->init();
 		
 		$global_config = $this->getConfig('global');
-		$this->logging = ((isset($global_config['logging']) && $global_config['logging'] == 'true') ? true : false);
+		$this->logging = (($global_config['logging'] == 'true') ? true : false);
 	}
 
 	public function log($message) {
@@ -120,7 +120,6 @@ class PayoneModified {
       ),
       'ewallet' => array(
         'paypal',
-        'paydirekt',
       ),
       'accountbased' => array(
         'lastschrift', 
@@ -801,20 +800,19 @@ class PayoneModified {
 		  xtc_db_perform('payone_transactions', $sql_data_transactions_array, 'update', "txid='".$txstatus['txid']."'");                              
 			
 			if (in_array($txstatus['txaction'], $this->getStatusNames())) {
-			  if ((int)$config['orders_status'][$txstatus['txaction']] > 0) {
-          $sql_data_orders_array = array('orders_status' => (int)$config['orders_status'][$txstatus['txaction']],
-                                         'last_modified' => 'now()');
-          xtc_db_perform(TABLE_ORDERS, $sql_data_orders_array, 'update', "orders_id='".(int)$txstatus['reference']."'");                              
+        $sql_data_orders_array = array('orders_status' => (int)$config['orders_status'][$txstatus['txaction']],
+                                       'last_modified' => 'now()');
+        xtc_db_perform(TABLE_ORDERS, $sql_data_orders_array, 'update', "orders_id='".(int)$txstatus['reference']."'");                              
 
-          $sql_data_array = array('orders_id' => (int)$txstatus['reference'],
-                                  'orders_status_id' => (int)$config['orders_status'][$txstatus['txaction']],
-                                  'date_added' => 'now()',
-                                  'customer_notified' => '0',
-                                  'comments' => STATUS_UPDATED_BY_PAYONE,
-                                  'comments_sent' => '0'
-                                  );
-          xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
-        }
+        $sql_data_array = array('orders_id' => (int)$txstatus['reference'],
+                                'orders_status_id' => (int)$config['orders_status'][$txstatus['txaction']],
+                                'date_added' => 'now()',
+                                'customer_notified' => '0',
+                                'comments' => STATUS_UPDATED_BY_PAYONE,
+                                'comments_sent' => '0'
+                                );
+        xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
+
         // send Transaction Status
         if ($config['orders_status_redirect']['url'][$txstatus['txaction']] != '') {
           $this->sendTransactionStatus($config['orders_status_redirect']['url'][$txstatus['txaction']], $txstatus, $config['orders_status_redirect']['timeout'][$txstatus['txaction']]);

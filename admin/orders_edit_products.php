@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: orders_edit_products.php 13319 2021-02-02 09:36:05Z GTB $
+   $Id: orders_edit_products.php 5338 2013-08-06 13:00:51Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -132,8 +132,9 @@ $currencies = new currencies();
       echo xtc_draw_hidden_field('edit_action', 'products');
       echo xtc_draw_hidden_field('action', 'product_search');
       echo xtc_draw_hidden_field('oID', $_GET['oID']);
+      echo xtc_draw_hidden_field('cID', $_POST['cID']);
       ?>
-      <td class="dataTableContent"><?php echo xtc_draw_input_field('search', ((isset($_GET['search'])) ? $_GET['search'] : ''), 'size="30"');?></td>
+      <td class="dataTableContent" style="width:40px"><?php echo xtc_draw_input_field('search', $_GET['search'], 'size="30"');?></td>
       <td class="dataTableContent">
         <?php
         echo '<input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_SEARCH . '"/>';
@@ -145,7 +146,7 @@ $currencies = new currencies();
 </table>
 <br /><br />
 <?php
-if (isset($_GET['action']) && $_GET['action'] =='product_search') {  
+if ($_GET['action'] =='product_search') {  
   ?>
   <table class="tableBoxCenter collapse">
     <tr class="dataTableHeadingRow">
@@ -169,63 +170,34 @@ if (isset($_GET['action']) && $_GET['action'] =='product_search') {
       <td class="dataTableHeadingContent"><b><?php echo TEXT_QUANTITY;?></b></td>
       <td class="dataTableHeadingContent">&nbsp;</td>
     </tr>
-    <?php
-    $keywords = $_GET['search'] = !empty($_GET['search']) ? stripslashes(trim(urldecode($_GET['search']))) : false;
-
-    $from_str = ''; 
-    if (SEARCH_IN_MANU == 'true') {
-      $from_str .= " LEFT OUTER JOIN ".TABLE_MANUFACTURERS." AS m ON (p.manufacturers_id = m.manufacturers_id) ";
-    }
-    
-    if (SEARCH_IN_FILTER == 'true') {
-      $from_str .= " LEFT JOIN ".TABLE_PRODUCTS_TAGS." pt ON (pt.products_id = p.products_id)
-                     LEFT JOIN ".TABLE_PRODUCTS_TAGS_VALUES." ptv ON (ptv.options_id = pt.options_id AND ptv.values_id = pt.values_id AND ptv.status = '1' AND ptv.languages_id = '".(int)$_SESSION['languages_id']."') ";
-    }
-
-    if (SEARCH_IN_ATTR == 'true') {
-      $from_str .= " LEFT JOIN ".TABLE_PRODUCTS_ATTRIBUTES." AS pa ON (p.products_id = pa.products_id) 
-                     LEFT JOIN ".TABLE_PRODUCTS_OPTIONS_VALUES." AS pov ON (pa.options_values_id = pov.products_options_values_id) ";
-    }
-    
-    $where_str = '';
-    if ($keywords) {
-      require_once (DIR_FS_INC.'xtc_parse_search_string.inc.php');
-      $keywordcheck = xtc_parse_search_string($_GET['search'], $search_keywords);
-
-      if ($keywordcheck) {
-        include(DIR_FS_CATALOG.DIR_WS_INCLUDES.'build_search_query.php');
-        $where_str = ' WHERE '.substr($where_str, 4);
-        $where_str .= " ) GROUP BY p.products_id";
-      }
-    }
-    
-    $products_query_raw = "SELECT p.products_id,
-                                  p.products_model,
-                                  p.products_ean,
-                                  p.products_quantity,
-                                  p.products_image,
-                                  p.products_price,
-                                  p.products_discount_allowed,
-                                  p.products_tax_class_id,
-                                  p.products_date_available,
-                                  p.products_status,
-                                  s.specials_quantity,
-                                  s.specials_new_products_price,
-                                  s.expires_date,
-                                  pd.products_name                                         
-                             FROM " . TABLE_PRODUCTS . " p
-                             JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
-                                  ON p.products_id = pd.products_id 
-                                     AND pd.language_id = '" . (int)$_SESSION['languages_id'] . "'
-                        LEFT JOIN " . TABLE_SPECIALS . " s
-                                  ON p.products_id = s.products_id 
-                                     AND s.status = 1 
-                                     AND (now() >= s.start_date OR s.start_date IS NULL)                      
-                                  ".$from_str."
-                                  ".$where_str."
-                         ORDER BY pd.products_name";
-                              
-    $products_split = new splitPageResults($_GET['page'], MAX_DISPLAY_PRODUCTS_SEARCH_RESULTS, $products_query_raw, $products_query_numrows, 'p.products_id');
+    <?php   
+    $products_query_raw = ("SELECT
+                                   p.products_id,
+                                   p.products_model,
+                                   p.products_ean,
+                                   p.products_quantity,
+                                   p.products_image,
+                                   p.products_price,
+                                   p.products_discount_allowed,
+                                   p.products_tax_class_id,
+                                   p.products_date_available,
+                                   p.products_status,
+                                   s.specials_quantity,
+                                   s.specials_new_products_price,
+                                   s.expires_date,
+                                   pd.products_name                                         
+                              FROM " . TABLE_PRODUCTS . " p
+                              JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
+                                ON p.products_id = pd.products_id AND pd.language_id = '" . (int)$_SESSION['languages_id'] . "'
+                         LEFT JOIN " . TABLE_SPECIALS . " s
+                                ON p.products_id = s.products_id AND s.status = 1                             
+                             WHERE (pd.products_name LIKE ('%" . $_GET['search'] . "%') OR 
+                                    p.products_model LIKE ('%" . $_GET['search'] . "%') OR 
+                                    p.products_ean LIKE ('%" . $_GET['search'] . "%')
+                                   )
+                          ORDER BY pd.products_name");
+                                
+    $products_split = new splitPageResults($_GET['page'], MAX_DISPLAY_PRODUCTS_SEARCH_RESULTS, $products_query_raw, $products_query_numrows);
     $products_query = xtc_db_query($products_query_raw);
     while($products = xtc_db_fetch_array($products_query)) {
       ?>
@@ -265,12 +237,13 @@ if (isset($_GET['action']) && $_GET['action'] =='product_search') {
           }
           
           echo xtc_draw_form('product_ins', FILENAME_ORDERS_EDIT, 'action=product_ins', 'post');
+          echo xtc_draw_hidden_field('cID', $_POST['cID']);
           echo xtc_draw_hidden_field('oID', $_GET['oID']);
           echo xtc_draw_hidden_field('products_id', $products['products_id']);
           ?>
           <td class="dataTableContent">&nbsp;<?php echo $products['products_id'];?></td>
           <td class="dataTableContent">&nbsp;<?php echo $products_status;?></td>
-          <td class="dataTableContent">&nbsp;<?php echo '<a target="_blank" href="'. xtc_href_link(FILENAME_CATEGORIES, xtc_get_all_get_params(array('cPath', 'action', 'pID', 'cID', 'edit_action', 'search', 'page', 'oID')) . 'pID=' . $products['products_id'] ) . '&action=new_product' . '">' . xtc_image(DIR_WS_ICONS . 'icon_edit.gif', ICON_EDIT, '', '', 'style="padding-right:8px;"'). '</a> '. $products['products_name'];?></td>
+          <td class="dataTableContent">&nbsp;<?php echo '<a target="_blank" href="'. xtc_href_link(FILENAME_CATEGORIES, xtc_get_all_get_params(array('cPath', 'action', 'pID', 'cID', 'edit_action', 'search', 'page', 'oID')) . 'pID=' . $products['products_id'] ) . '&action=new_product' . '">' . xtc_image(DIR_WS_ICONS . 'icon_edit.gif', ICON_EDIT, '', '', $icon_padding). '</a> '. $products['products_name'];?></td>
           <td class="dataTableContent">&nbsp;<?php echo xtc_product_thumb_image($products['products_image'], $products['products_name'], '','',$admin_thumbs_size);?></td>
           <td class="dataTableContent">&nbsp;<?php echo $products['products_model'];?></td>
           <td class="dataTableContent">&nbsp;<?php echo $products['products_ean'];?></td>

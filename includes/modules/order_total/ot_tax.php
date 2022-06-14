@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_tax.php 11897 2019-07-17 13:11:02Z GTB $   
+   $Id: ot_tax.php 1002 2005-07-10 16:11:37Z mz $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -24,8 +24,8 @@
       $this->code = 'ot_tax';
       $this->title = MODULE_ORDER_TOTAL_TAX_TITLE;
       $this->description = MODULE_ORDER_TOTAL_TAX_DESCRIPTION;
-      $this->enabled = ((defined('MODULE_ORDER_TOTAL_TAX_STATUS') && MODULE_ORDER_TOTAL_TAX_STATUS == 'true') ? true : false);
-      $this->sort_order = ((defined('MODULE_ORDER_TOTAL_TAX_SORT_ORDER')) ? MODULE_ORDER_TOTAL_TAX_SORT_ORDER : '');
+      $this->enabled = ((MODULE_ORDER_TOTAL_TAX_STATUS == 'true') ? true : false);
+      $this->sort_order = MODULE_ORDER_TOTAL_TAX_SORT_ORDER;
 
       $this->output = array();
     }
@@ -34,26 +34,15 @@
       global $order, $xtPrice;
 
       reset($order->info['tax_groups']);
-      foreach ($order->info['tax_groups'] as $key => $value) {
+      while (list($key, $value) = each($order->info['tax_groups'])) {
         if ($value > 0) {
           if ($_SESSION['customers_status']['customers_status_show_price_tax'] != 0) {
             $this->output[] = array('title' => $key . ':',
                                     'text' => $xtPrice->xtcFormat($value,true),
                                     'value' => $xtPrice->xtcFormat($value, false));
           }
-
           if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 
               && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1
-              ) 
-          {
-            $this->output[] = array('title' => $key .':',
-                                    'text' => $xtPrice->xtcFormat($value,true),
-                                    'value' => $xtPrice->xtcFormat($value, false));
-          }
-
-          if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 
-              && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 0
-              && $order->delivery['country_id'] == STORE_COUNTRY
               ) 
           {
             $this->output[] = array('title' => $key .':',

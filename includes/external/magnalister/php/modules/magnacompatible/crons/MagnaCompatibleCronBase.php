@@ -20,8 +20,6 @@
 
 defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 
-require_once(DIR_MAGNALISTER_MODULES.'magnacompatible/MagnaCompatibleHelper.php');
-
 abstract class MagnaCompatibleCronBase {
 	const DBGLV_NONE = 0;
 	const DBGLV_LOW  = 1;
@@ -51,20 +49,6 @@ abstract class MagnaCompatibleCronBase {
 		$this->mpID = $mpID;
 		$this->marketplace = $marketplace;
 		$this->marketplaceTitle = $_modules[$marketplace]['title'];
-
-		if (!is_array($_MagnaSession)) {
-			$_MagnaSession = array (
-				'mpID' => $this->mpID,
-				'currentPlatform' => $this->marketplace,
-			);
-		} else {
-			if (!isset($_MagnaSession['mpID'])) {
-				$_MagnaSession['mpID'] = $this->mpID;
-			}
-			if (!isset($_MagnaSession['currentPlatform'])) {
-				$_MagnaSession['currentPlatform'] = $this->marketplace;
-			}
-		}
 
 		// $this->specificResource can be set by the inheriting class!
 		if ($this->specificResource === false) {

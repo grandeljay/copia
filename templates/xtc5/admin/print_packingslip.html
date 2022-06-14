@@ -23,7 +23,7 @@
               <td>
                 <p>&nbsp;</p>
                 <p>&nbsp;</p>
-                <p class="small" style="text-decoration:underline;">{$ADDRESS_SMALL}</p>
+                <p class="small" style="text-decoration:underline;">{$store_name}</p>
                 <p class="normal">{$address_label_customer}</p>
                 <p>&nbsp;</p>
                 <p class="small">
@@ -35,19 +35,14 @@
                 </p>
                 <p class="large">{#packingslip#}</p>
               </td>
-              <td width="20%">
-                <img src="{$logo_path}logo.gif" alt="{$store_name}" />
-                <p class="small">
-                {$ADDRESS_LARGE}
-                </p>
-              </td>
+              <td width="1"><img src="{$logo_path}logo.gif" alt="{$store_name}" /></td>
             </tr>
           </table>
           <br />
           <table class="small" style="border-top:1px solid; border-bottom:1px solid;" width="100%" border="0">
             <tr bgcolor="#f1f1f1">
               <td width="50%">
-                <p><strong>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}{#pickup_address#}{else}{#shipping_address#}{/if}</strong></p>
+                <p><strong>{#shipping_address#}</strong></p>
               </td>
               <td>
                 <p><strong>{if $address_label_payment}{#payment_address#}{/if}</strong></p>

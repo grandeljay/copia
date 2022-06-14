@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: check_version_update.inc.php 12408 2019-11-12 12:36:06Z GTB $
+   $Id: check_version_update.inc.php 10381 2016-11-07 08:16:07Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,7 +10,7 @@
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
 
-  require_once (DIR_FS_CATALOG.'includes/classes/modified_api.php');
+  require_once (DIR_FS_INC.'get_external_content.inc.php');
 
   function check_version_update($cache = true) {
     $filename = SQL_CACHEDIR.'version.cache';
@@ -25,13 +25,8 @@
         || $cache === false
         )
     {
-      modified_api::reset();
-      $response = modified_api::request('modified/version');
-      
-      if (is_array($response) && isset($response['stable'])) {
-        $check_version = $response['stable'];
-        file_put_contents($filename, $check_version);
-      }
+      $check_version = get_external_content('http://www.modified-shop.org/VERSION', 3, false);
+      file_put_contents($filename, $check_version);
     }
   
     $check_version = file_get_contents($filename);
@@ -44,7 +39,6 @@
     return array(
       'update' => $update_recomended,
       'version' => $check_version,
-      'version_installed' => $version,
     );
   }
 ?>

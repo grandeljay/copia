@@ -1,3 +1,13 @@
+###############################################################################
+# .htacces Security File
+# Author: Martin Weber
+# Shopgate GmbH
+# website: http://www.shopgate.com
+# Project: http://code.google.com/p/shopgate-framework/
+#
+# Revision: $Rev: 50 $
+###############################################################################
+
 #AddType x-mapp-php5 .php
 #AddHandler x-mapp-php5 .php
 
@@ -14,3 +24,17 @@
 </IfModule>
 
 Options -Indexes
+
+<Files api.php>
+  <IfModule mod_authz_core.c>
+    # Apache 2.4
+    <RequireAll>
+      Require all granted
+    </RequireAll>
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    # Apache 2.2
+    Order Allow,Deny
+    Allow from all
+  </IfModule>
+</Files>

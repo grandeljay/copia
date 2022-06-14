@@ -1,6 +1,6 @@
 <?php
   /*-------------------------------------------------------------
-   $Id: orders.php 13120 2021-01-06 08:23:53Z GTB $
+   $Id: orders.php 10397 2016-11-07 15:10:36Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -32,7 +32,6 @@ require_once (DIR_FS_INC.'xtc_get_attributes_model.inc.php');
 require_once (DIR_FS_INC.'xtc_php_mail.inc.php');
 require_once (DIR_FS_INC.'get_tracking_link.inc.php');
 require_once (DIR_FS_INC.'get_order_total.inc.php');
-require_once (DIR_FS_INC.'get_customers_gender.inc.php');
 
 /* magnalister v1.0.1 */
 if (function_exists('magnaExecute')) magnaExecute('magnaSubmitOrderStatus', array(), array('order_details.php'));
@@ -42,9 +41,39 @@ if (function_exists('magnaExecute')) magnaExecute('magnaSubmitOrderStatus', arra
 if(!defined('MAX_DISPLAY_ORDER_RESULTS')) {
   define('MAX_DISPLAY_ORDER_RESULTS', 30);
 }
-function get_shipping_name($shipping_class, $shipping_method) {
+//New function
+function get_payment_name($payment_method, $order_id = '') {
+  static $static_payment_array;
+  
+  if (!is_array($static_payment_array)) {
+    $static_payment_array = array();
+  }
+  
+  if (!isset($static_payment_array[$payment_method])) {    
+    if (file_exists(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/payment/'.$payment_method.'.php')) {
+      include(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/payment/'.$payment_method.'.php');
+      $static_payment_array[$payment_method] = constant(strtoupper('MODULE_PAYMENT_'.$payment_method.'_TEXT_TITLE'));
+    } else {
+      $static_payment_array[$payment_method] = $payment_method;
+    }
+  }
+
+  $text = '';
+  if ($payment_method == 'paypalplus' && (int)$order_id > 0) {
+    require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalInfo.php');
+    $paypal = new PayPalInfo($payment_method);
+    $payment_array = $paypal->get_payment_data($order_id);
+    if (count($payment_array) > 0 && $payment_array['payment_method'] == 'pay_upon_invoice') {
+      $text = ' - ' . MODULE_PAYMENT_PAYPALPLUS_INVOICE;
+    }
+  }
+  
+  return $static_payment_array[$payment_method] . $text;
+}
+function get_shipping_name($shipping_class) {
   $shipping_class_array = explode('_', $shipping_class);
   $shipping_class = $shipping_class_array[0];
+  $shipping_method = $shipping_class;
   if (file_exists(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/shipping/'.$shipping_class.'.php')){
     include(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/shipping/'.$shipping_class.'.php');
     $shipping_method = constant(strtoupper('MODULE_SHIPPING_'.$shipping_class.'_TEXT_TITLE'));
@@ -65,9 +94,10 @@ $customer = (isset($_GET['customer']) ? xtc_db_prepare_input($_GET['customer']) 
 include('includes/modules/email_preview/email_preview_tabs.php');
 
 if (($action == 'edit' || $action == 'update_order') && $oID) {
-  $orders_query = xtc_db_query("SELECT orders_id
-                                  FROM ".TABLE_ORDERS."
-                                 WHERE orders_id = '".$oID."'");
+  $orders_query = xtc_db_query("-- /admin/orders.php
+                                  SELECT orders_id
+                                    FROM ".TABLE_ORDERS."
+                                   WHERE orders_id = '".$oID."'");
   $order_exists = true;
   if (!xtc_db_num_rows($orders_query)) {
     $order_exists = false;
@@ -110,15 +140,16 @@ while ($carrier = xtc_db_fetch_array($carriers_query)) {
 }
 
 //admin search bar
-if ($action == 'search' && $oID && $customer == '') {
-  $orders_query_raw = "SELECT ".$order_select_fields.",
-                              s.orders_status_name
-                         FROM ".TABLE_ORDERS." o
-                    LEFT JOIN ".TABLE_ORDERS_STATUS." s
-                              ON (o.orders_status = s.orders_status_id 
-                                  AND s.language_id = '".(int)$_SESSION['languages_id']."')
-                        WHERE o.orders_id LIKE '%".$oID."%'
-                     ORDER BY o.orders_id DESC";
+if ($action == 'search' && $oID) {
+  $orders_query_raw = "-- /admin/orders.php
+                     SELECT ".$order_select_fields.",
+                            s.orders_status_name
+                       FROM ".TABLE_ORDERS." o
+                  LEFT JOIN ".TABLE_ORDERS_STATUS." s
+                            ON (o.orders_status = s.orders_status_id 
+                                AND s.language_id = '".(int)$_SESSION['languages_id']."')
+                      WHERE o.orders_id LIKE '%".$oID."%'
+                   ORDER BY o.orders_id DESC";
   $orders_query = xtc_db_query($orders_query_raw);
   $order_exists = false;
   if (xtc_db_num_rows($orders_query) == 1) {
@@ -128,12 +159,11 @@ if ($action == 'search' && $oID && $customer == '') {
      $_GET['action'] = 'edit';
      $action = 'edit';
      $_GET['oID'] = $oID;
-     //$messageStack->add('1 Treffer: ' . $oID, 'success');
+     //$messageStack->add('1 Treffer: ' . $oID, 'notice');
   }
 }
 
-require_once (DIR_WS_CLASSES.'order.php');
-require_once (DIR_FS_CATALOG.DIR_WS_CLASSES . 'payment.php');
+require (DIR_WS_CLASSES.'order.php');
 if (($action == 'edit' || $action == 'update_order') && $order_exists) {
   $order = new order($oID);
   require_once(DIR_FS_CATALOG.DIR_WS_CLASSES.'xtcPrice.php');
@@ -165,19 +195,16 @@ if (!isset($lang_code)) $lang_code = $_SESSION['language_code'];
 if (!isset($lang_charset)) $lang_charset = $_SESSION['language_charset'];
 
 $orders_statuses = array();
-$orders_status_lang_array = array();
+$orders_status_array = array();
 $orders_status_query = xtc_db_query("SELECT orders_status_id,
-                                            orders_status_name,
-                                            language_id
+                                            orders_status_name
                                        FROM ".TABLE_ORDERS_STATUS."
+                                      WHERE language_id = '".$lang."'
                                    ORDER BY sort_order");
 while ($orders_status = xtc_db_fetch_array($orders_status_query)) {
-  if ($orders_status['language_id'] == $_SESSION['languages_id']) {
-    $orders_statuses[] = array ('id' => $orders_status['orders_status_id'], 'text' => $orders_status['orders_status_name']);
-  }
-  $orders_status_lang_array[$orders_status['language_id']][$orders_status['orders_status_id']] = $orders_status['orders_status_name'];
+  $orders_statuses[] = array ('id' => $orders_status['orders_status_id'], 'text' => $orders_status['orders_status_name']);
+  $orders_status_array[$orders_status['orders_status_id']] = $orders_status['orders_status_name'];
 }
-$orders_status_array = $orders_status_lang_array[$_SESSION['languages_id']];
 
 switch ($action) {
   case 'send':
@@ -196,7 +223,118 @@ switch ($action) {
     $status = (int) $_POST['status'];
     $comments = xtc_db_prepare_input($_POST['comments']);
     $order_updated = false;
-    include (DIR_WS_MODULES.'orders_update.php');
+    if ($order->info['orders_status'] != $status || $comments != '' || $email_preview) {
+      if (!$email_preview) {  
+        require_once(DIR_FS_EXTERNAL . 'billpay/utils/billpay_status_requests.php');
+        xtc_db_query("UPDATE ".TABLE_ORDERS."
+                         SET orders_status = ".$status.",
+                             last_modified = now()
+                       WHERE orders_id = ".$oID
+                    );
+      }
+
+      $customer_notified = 0;
+      if ($_POST['notify'] == 'on' || $email_preview) {
+        $notify_comments = ($_POST['notify_comments'] == 'on') ? $comments : '';        
+        //fallback gender modified < 2.00
+        if (!isset($order->customer['gender']) || empty($order->customer['gender'])) {
+          $gender_query = xtc_db_query("SELECT customers_gender
+                                          FROM " . TABLE_CUSTOMERS . "
+                                         WHERE customers_id = '" .$order->customer['id']. "'");
+          $gender_array = xtc_db_fetch_array($gender_query);
+          $order->customer['gender'] = $gender_array['customers_gender'];
+        } 
+        if ($order->customer['gender'] == 'f') {
+          $smarty->assign('GENDER', FEMALE);
+        } elseif ($order->customer['gender'] == 'm') {
+          $smarty->assign('GENDER', MALE);
+        } else {
+          $smarty->assign('GENDER', '');
+        }
+        $smarty->assign('LASTNAME',$order->customer['lastname'] != '' ? $order->customer['lastname'] : $order->customer['name']);
+        
+        $smarty->assign('order', $order);
+        $smarty->assign('order_data', $order->getOrderData($oID));
+
+        $smarty->assign('tpl_path',DIR_WS_BASE.'templates/'.CURRENT_TEMPLATE.'/');
+        $smarty->assign('logo_path', HTTP_SERVER.DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
+        $smarty->assign('NAME', $order->customer['name']);
+        $smarty->assign('ORDER_NR', $order->info['order_id']);
+        $smarty->assign('ORDER_ID', $oID);
+        //send no order link to customers with guest account
+        if ($order->customer['status'] != DEFAULT_CUSTOMERS_STATUS_ID_GUEST) {
+          $smarty->assign('ORDER_LINK', xtc_catalog_href_link(FILENAME_CATALOG_ACCOUNT_HISTORY_INFO, 'order_id='.$oID, 'SSL'));
+        }
+        // track & trace
+        $tracking_array = get_tracking_link($oID, $lang_code, ((isset($_POST['tracking_id']) && is_array($_POST['tracking_id'])) ? $_POST['tracking_id'] : array('0')));
+        $smarty->assign('PARCEL_COUNT', count($tracking_array));
+        $smarty->assign('PARCEL_ARRAY', $tracking_array);
+        
+        $smarty->assign('ORDER_DATE', xtc_date_long($order->info['date_purchased']));
+        $smarty->assign('NOTIFY_COMMENTS', nl2br($notify_comments));
+        $smarty->assign('ORDER_STATUS', $orders_status_array[$status]);
+
+        // assign language
+        $smarty->assign('language', $order->info['language']);
+        
+        // set dirs manual
+        $smarty->caching = false;
+        $smarty->template_dir = DIR_FS_CATALOG.'templates';
+        $smarty->compile_dir = DIR_FS_CATALOG.'templates_c';
+        $smarty->config_dir = DIR_FS_CATALOG.'lang';
+        
+        $html_mail = $smarty->fetch(CURRENT_TEMPLATE.'/admin/mail/'.$order->info['language'].'/change_order_mail.html');
+        $txt_mail = $smarty->fetch(CURRENT_TEMPLATE.'/admin/mail/'.$order->info['language'].'/change_order_mail.txt');
+        $order_subject_search = array('{$nr}', '{$date}', '{$lastname}', '{$firstname}');
+        $order_subject_replace = array($oID, strftime(DATE_FORMAT_LONG), $order->customer['lastname'], $order->customer['firstname']);
+        $order_subject = str_replace($order_subject_search, $order_subject_replace, EMAIL_BILLING_SUBJECT);
+
+        //EMAIL PREVIEW
+        include ('includes/modules/email_preview/email_preview.php');
+        
+        xtc_php_mail(EMAIL_BILLING_ADDRESS,
+                     EMAIL_BILLING_NAME,
+                     $order->customer['email_address'],
+                     $order->customer['name'],
+                     '',
+                     EMAIL_BILLING_REPLY_ADDRESS,
+                     EMAIL_BILLING_REPLY_ADDRESS_NAME,
+                     '',
+                     '',
+                     $order_subject,
+                     $html_mail,
+                     $txt_mail
+                     );
+                     
+        //send copy to admin
+        if (defined('STATUS_EMAIL_SENT_COPY_TO_ADMIN') && STATUS_EMAIL_SENT_COPY_TO_ADMIN == 'true') {
+          xtc_php_mail(EMAIL_BILLING_ADDRESS,
+                       EMAIL_BILLING_NAME,
+                       EMAIL_BILLING_ADDRESS,
+                       STORE_NAME,
+                       EMAIL_BILLING_FORWARDING_STRING,
+                       $order->customer['email_address'],
+                       $order->customer['name'],
+                       '',
+                       '',
+                       $order_subject,
+                       $html_mail,
+                       $txt_mail
+                       );
+        }
+
+        $customer_notified = 1;
+      }
+      $sql_data_array = array('orders_id' => $oID,
+                              'orders_status_id' => $status,
+                              'date_added' => 'now()',
+                              'customer_notified' => $customer_notified,
+                              'comments' => $comments,
+                              'comments_sent' => ($_POST['notify_comments'] == 'on' ? 1 : 0)
+                              );
+      xtc_db_perform(TABLE_ORDERS_STATUS_HISTORY,$sql_data_array);
+      $order_updated = true;
+    }
     if ($order_updated) {
         if(defined('MODULE_PAYMENT_SHOPGATE_STATUS') && MODULE_PAYMENT_SHOPGATE_STATUS=='True'){
           /******* SHOPGATE **********/
@@ -212,12 +350,12 @@ switch ($action) {
     break;
 
   case 'deleteconfirm':
-    xtc_remove_order($oID, ((isset($_POST['restock'])) ? $_POST['restock'] : false), ((STOCK_CHECKOUT_UPDATE_PRODUCTS_STATUS == 'true') ? true : false));
+    xtc_remove_order($oID, xtc_db_prepare_input($_POST['restock']), false);
     xtc_redirect(xtc_href_link(FILENAME_ORDERS, xtc_get_all_get_params(array ('oID', 'action'))));
     break;
 
   case 'stornoconfirm':
-    xtc_reverse_order($oID, ((isset($_POST['restock'])) ? $_POST['restock'] : false), (int)$_POST['status_storno'], ((STOCK_CHECKOUT_UPDATE_PRODUCTS_STATUS == 'true') ? true : false));
+    xtc_reverse_order($oID, xtc_db_prepare_input($_POST['restock']), xtc_db_prepare_input($_POST['status_storno']));
     xtc_redirect(xtc_href_link(FILENAME_ORDERS, xtc_get_all_get_params(array('action'))));
     break;
     
@@ -260,7 +398,7 @@ switch ($action) {
 <style type="text/css">
 .table{width: 100%; border: 1px solid #a3a3a3; margin-bottom:20px; background: #f3f3f3; padding:2px;}
 .heading{font-family: Verdana, Arial, sans-serif; font-size: 12px; font-weight: bold; padding:2px; }
-.last_row{background-color: #fff0cf;}
+.last_row{background-color: #ffdead;}
 textarea#comments{width:99%;}
 </style>
 

@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: CheckinManager.php 4633 2014-09-23 08:19:58Z miguel.heredia $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -257,13 +257,6 @@ class CheckinManager {
 					'used' => $usedListings,
 					'available' => $magnaConfig['maranon']['IncludedListings']
 				);
-
-                $sExceedPopupText = ML_TEXT_LISTING_GOING_TO_EXCEED;
-                if (defined('SHOPSYSTEM_GAMBIO_CLOUD') && SHOPSYSTEM_GAMBIO_CLOUD === true && $usedListings <= 20) {
-                    $listings['available'] = 20;
-                    $sExceedPopupText = ML_TEXT_LISTING_GOING_TO_EXCEED_GAMBIO_CLOUD;
-                }
-
 				$listingsExceeded = (($listings['available'] > 0) && (($listings['used'] + $items) > $listings['available']));
 
 				$addActions = '
@@ -294,7 +287,7 @@ class CheckinManager {
 						<input type="hidden" id="actionType" value="_" name="checkin"/>
 						<div id="confirmDiag" class="dialog2" title="'.ML_HINT_HEADLINE_EXCEEDING_INCLUSIVE_LISTINGS.'">
 							'.sprintf(
-								$sExceedPopupText,
+								ML_TEXT_LISTING_GOING_TO_EXCEED, 
 								($listings['used'] + $items - $listings['available']),
 								$magnaConfig['maranon']['ShopID']
 							).'

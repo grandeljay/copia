@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: accounting.php 13362 2021-02-02 16:59:21Z GTB $
+   $Id: accounting.php 10173 2016-07-29 08:16:20Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,7 +21,7 @@
   $confirm_save_entry = ' onclick="ButtonClicked(this);"';
   $confirm_submit = defined('CONFIRM_SAVE_ENTRY') && CONFIRM_SAVE_ENTRY == 'true' ? ' onsubmit="return confirmSubmit(\'\',\''. SAVE_ENTRY .'\',this)"' : '';
 
-  if (isset($_GET['action'])) {
+  if ($_GET['action']) {
     switch ($_GET['action']) {
       case 'save':
 
@@ -59,11 +59,8 @@
             $exists = true;
           }
         }
-        if ($exists === false && $new_field != '') {
+        if ($exists === false) {
           xtc_db_query("ALTER TABLE ".TABLE_ADMIN_ACCESS." ADD ".$new_field." INT(1) NOT NULL DEFAULT 0;");
-          xtc_db_query("UPDATE ".TABLE_ADMIN_ACCESS."
-                           SET ".$new_field." = '1'
-                         WHERE customers_id = '1'");
         }
         xtc_redirect(xtc_href_link(FILENAME_ACCOUNTING, xtc_get_all_get_params(array('cID','action')).'cID=' . (int)$_GET['cID'], 'NONSSL'));
         break;
@@ -137,6 +134,17 @@ require (DIR_WS_INCLUDES.'head.php');
     $(".access"+val).attr('checked', checked);
   }
 </script>
+<style>
+.multicolumn {
+  -webkit-column-count: 3; /* Chrome, Safari, Opera */
+  -moz-column-count: 3; /* Firefox */
+  column-count: 3;
+  
+  -webkit-column-gap: 20px; /* Chrome, Safari, Opera */
+  -moz-column-gap: 20px; /* Firefox */
+  column-gap: 20px;    
+}
+</style>
 </head>
 <body>
 <!-- header //-->

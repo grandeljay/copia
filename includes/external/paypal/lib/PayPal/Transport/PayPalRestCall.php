@@ -61,11 +61,6 @@ class PayPalRestCall
             )
         );
 
-        // if proxy set via config, add it
-        if (!empty($config['http.Proxy'])) {
-            $httpConfig->setHttpProxy($config['http.Proxy']);
-        }
-
         /** @var \Paypal\Handler\IPayPalHandler $handler */
         foreach ($handlers as $handler) {
             if (!is_object($handler)) {

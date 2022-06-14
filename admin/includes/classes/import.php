@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: import.php 13453 2021-03-08 07:29:09Z GTB $
+   $Id: import.php 9977 2016-06-14 16:48:55Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -69,8 +69,10 @@ class xtcImport {
         $this->CatDefault = CSV_CATEGORY_DEFAULT;
         $this->FileSheme = array ();
         $this->Groups = xtc_get_customers_statuses();
+        //BOC new var to use in for loops, noRiddle
         $this->count_groups = count($this->Groups);
         $this->sizeof_languages = sizeof($this->languages);
+        //EOC new var to use in for loops, noRiddle
     }
 
     /*****************************************************************************
@@ -137,9 +139,6 @@ class xtcImport {
         for ($i = 0; $i < $this->catDepth; $i ++) {
             $file_layout = array_merge($file_layout, array ('p_cat.'.$i => ''));
         }
-        
-        foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/import/file_layout/','php') as $file) require ($file);
-        
         return $file_layout;
     }
 
@@ -260,7 +259,7 @@ class xtcImport {
                 $this->errorLog[] = '<b>ERROR:</b> no Modelnumber, line: '.$row.' dataset: empty field: p_model';
             }
         }
-        return array ($this->counter, $this->errorLog, $this->calcElapsedTime($this->time_start));
+    return array ($this->counter, $this->errorLog, $this->calcElapsedTime($this->time_start));
     }
 
     /*****************************************************************************
@@ -280,9 +279,10 @@ class xtcImport {
                                      WHERE products_model = '".xtc_db_input($model)."'
                                    ");
 
-        if (!xtc_db_num_rows($model_query)) {
+        if (!xtc_db_num_rows($model_query))
             return false;
-        }
+
+
         return true;
     }
 
@@ -304,9 +304,9 @@ class xtcImport {
                                       AND image_nr = '".$imgID."'
                                 ");
 
-        if (!xtc_db_num_rows($img_query)) {
+        if (!xtc_db_num_rows($img_query))
             return false;
-        }
+
         return true;
     }
 
@@ -322,9 +322,9 @@ class xtcImport {
     ****************************************************************************/
     function RemoveTextNotes($data) {
         if(!empty($this->TextSign)) {
-            if (substr($data, -1) == $this->TextSign) {
+            if (substr($data, -1) == $this->TextSign)
                 $data = substr($data, 1, strlen($data) - 2);
-            }
+
             return $data;
         }
     }
@@ -341,13 +341,12 @@ class xtcImport {
     *****************************************************************************/
 
     function getMAN($manufacturer) {
-        if ($manufacturer == '') {
+        if ($manufacturer == '')
             return;
-        }
-        
-        if (isset ($this->mfn[$manufacturer]['id'])) {
+
+        if (isset ($this->mfn[$manufacturer]['id']))
             return $this->mfn[$manufacturer]['id'];
-        }
+
 
         $man_query = xtc_db_query("SELECT manufacturers_id
                                      FROM ".TABLE_MANUFACTURERS."
@@ -355,19 +354,9 @@ class xtcImport {
                                 ");
 
         if (!xtc_db_num_rows($man_query)) {
-            $manufacturers_array = array (
-              'manufacturers_name' => $manufacturer,
-              'date_added' => 'now()'
-            );
+            $manufacturers_array = array ('manufacturers_name' => $manufacturer);
             xtc_db_perform(TABLE_MANUFACTURERS, $manufacturers_array);
             $this->mfn[$manufacturer]['id'] = xtc_db_insert_id();
-            for ($i = 0; $i < $this->sizeof_languages; $i ++) {
-              $insert_sql_data = array(
-                'manufacturers_id' => $this->mfn[$manufacturer]['id'],
-                'languages_id' => $this->languages[$i]['id']
-              );
-              xtc_db_perform(TABLE_MANUFACTURERS_INFO, $insert_sql_data);
-            }
         } else {
             $man_data = xtc_db_fetch_array($man_query);
             $this->mfn[$manufacturer]['id'] = $man_data['manufacturers_id'];
@@ -428,22 +417,20 @@ class xtcImport {
         if ($this->FileSheme['p_sorting'] == 'Y')
             $products_array = array_merge($products_array, array ('products_sort' => (int)$dataArray['p_sorting']));
         //EOC strip potential slashes and type cast inputs
-        
-        foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/import/insert_before/','php') as $file) require ($file);
+        $products_array = array_merge($products_array, array ('products_date_added' => 'now()'));
 
         if ($mode == 'insert') {
-            $products_array = array_merge($products_array, array ('products_date_added' => date("Y-m-d H:i:s")));
             $this->counter['prod_new']++;
             xtc_db_perform(TABLE_PRODUCTS, $products_array);
             $products_id = xtc_db_insert_id();
         } else {
-            $products_array = array_merge($products_array, array ('products_last_modified' => date("Y-m-d H:i:s")));
             $this->counter['prod_upd']++;
             xtc_db_perform(TABLE_PRODUCTS, $products_array, 'update', 'products_model = \''.xtc_db_input($dataArray['p_model']).'\'');
 
             $prod_query = xtc_db_query("SELECT products_id
                                           FROM ".TABLE_PRODUCTS."
-                                         WHERE products_model = '".xtc_db_input($dataArray['p_model'])."'");
+                                         WHERE products_model = '".xtc_db_input($dataArray['p_model'])."'
+                                     ");
 
             $prod_data = xtc_db_fetch_array($prod_query);
             $products_id = $prod_data['products_id'];
@@ -515,8 +502,10 @@ class xtcImport {
                 $prod_desc_array = array_merge($prod_desc_array, array ('products_description' => xtc_db_prepare_input($dataArray['p_desc.'.$this->languages[$i_insert]['code']])));
             if ($this->FileSheme['p_shortdesc.'.$this->languages[$i_insert]['code']] == 'Y')
                 $prod_desc_array = array_merge($prod_desc_array, array ('products_short_description' => xtc_db_prepare_input($dataArray['p_shortdesc.'.$this->languages[$i_insert]['code']])));
+            //BOC include order description
             if ($this->FileSheme['p_orderdesc.'.$this->languages[$i_insert]['code']] == 'Y')
                 $prod_desc_array = array_merge($prod_desc_array, array ('products_order_description' => xtc_db_prepare_input($dataArray['p_orderdesc.'.$this->languages[$i_insert]['code']])));
+            //EOC include order description
             if ($this->FileSheme['p_meta_title.'.$this->languages[$i_insert]['code']] == 'Y')
                 $prod_desc_array = array_merge($prod_desc_array, array ('products_meta_title' => xtc_db_prepare_input($dataArray['p_meta_title.'.$this->languages[$i_insert]['code']])));
             if ($this->FileSheme['p_meta_desc.'.$this->languages[$i_insert]['code']] == 'Y')
@@ -540,9 +529,7 @@ class xtcImport {
         if (!xtc_db_num_rows($categories_check_query)) {
             $this->insertPtoCconnection($products_id, $this->CatDefault);
         }
-    
-        foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/import/insert_end/','php') as $file) require ($file);
-    }
+  }
 
     /*****************************************************************************
     **
@@ -708,7 +695,7 @@ class xtcImport {
         $line_data['data'] = $file_content[$line];
         $lc = 1;
         // check if next line got ; in first 50 chars
-        while (!strpos(substr($file_content[$line + $lc], 0, 6), 'XTSOL') && $line + $lc <= $max_lines) {
+        while (!strstr(substr($file_content[$line + $lc], 0, 6), 'XTSOL') && $line + $lc <= $max_lines) {
             $line_data['data'] .= $file_content[$line + $lc];
             $lc ++;
         }
@@ -768,6 +755,8 @@ class xtcImport {
         $mfn_query = xtc_db_query("SELECT manufacturers_id,
                                           manufacturers_name
                                      FROM ".TABLE_MANUFACTURERS);
+
+
         while ($mfn = xtc_db_fetch_array($mfn_query)) {
             $mfn_array[$mfn['manufacturers_name']] = array ('id' => $mfn['manufacturers_id']);
         }
@@ -812,8 +801,10 @@ class xtcExport {
             $this->seperator = "\t";
 
         $this->Groups = xtc_get_customers_statuses();
+        //BOC new var to use in for loops, noRiddle
         $this->count_groups = count($this->Groups);
         $this->sizeof_languages = sizeof($this->languages);
+        //EOC new var to use in for loops, noRiddle
     }
 
     /*****************************************************************************
@@ -1063,9 +1054,18 @@ class xtcExport {
             $cat_data = xtc_db_fetch_array($cat_query);
             $line .= $this->buildCAT($cat_data['categories_id']);
 
-            fputs($fp, $line."\n");
+
+      fputs($fp, $line."\n");
         }
+
         fclose($fp);
+        /*
+        if (COMPRESS_EXPORT=='true') {
+            $backup_file = DIR_FS_CATALOG.'export/' . $this->filename;
+            exec(LOCAL_EXE_ZIP . ' -j ' . $backup_file . '.zip ' . $backup_file);
+            unlink($backup_file);
+        }
+        */
 
         return array (
             0 => $this->counter, 1 => '',

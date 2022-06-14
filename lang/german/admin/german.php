@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: german.php 13490 2021-04-01 10:15:45Z Tomcraft $
+   $Id: german.php 10387 2016-11-07 10:30:26Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -62,7 +62,6 @@ define('HEADER_TITLE_ADMINISTRATION', 'Administration');
 // text for gender
 define('MALE', 'Herr');
 define('FEMALE', 'Frau');
-define('DIVERSE', 'Divers');
 
 // text for date of birth example
 define('DOB_FORMAT_STRING', 'tt.mm.jjjj');
@@ -104,12 +103,11 @@ define('BOX_CONFIGURATION_14', 'Komprimierung');
 define('BOX_CONFIGURATION_15', 'Sessions');
 define('BOX_CONFIGURATION_16', 'Meta-Tags/Suchmaschinen');
 define('BOX_CONFIGURATION_17', 'Zusatzmodule');
-define('BOX_CONFIGURATION_18', 'USt-IdNr.');
+define('BOX_CONFIGURATION_18', 'UST ID');
 define('BOX_CONFIGURATION_19', 'Partner');
 define('BOX_CONFIGURATION_22', 'Such-Optionen');
-define('BOX_CONFIGURATION_24', 'Google, Matomo &amp; Facebook');
+define('BOX_CONFIGURATION_24', 'Google, Piwik &amp; Facebook');
 define('BOX_CONFIGURATION_25', 'Captcha');
-define('BOX_CONFIGURATION_31', 'Skrill');
 define('BOX_CONFIGURATION_40', 'Popup Fenster Optionen');
 define('BOX_CONFIGURATION_1000', 'Adminbereich Optionen');
 
@@ -147,6 +145,7 @@ define('BOX_FILE_MANAGER', 'Datei-Manager');
 define('BOX_MAIL', 'E-Mail versenden');
 define('BOX_NEWSLETTERS', 'Newsletter Manager');
 define('BOX_SERVER_INFO', 'Server Info');
+define('BOX_BLZ_UPDATE', 'Bankleitzahlen aktualisieren');
 define('BOX_WHOS_ONLINE', 'Wer ist Online');
 define('BOX_TPL_BOXES','Box Reihenfolge');
 define('BOX_CURRENCIES', 'W&auml;hrungen');
@@ -170,10 +169,12 @@ define('BOX_ORDERS_XSELL_GROUP','Cross-Marketing Gruppen');
 define('BOX_REMOVEOLDPICS','Alte Bilder l&ouml;schen'); // Remove old pictures - franky_n - 20110105
 define('BOX_JANOLAW','janolaw AGB Hosting'); // Tomcraft - 2011-06-17 - Added janolaw AGB hosting service
 define('BOX_HAENDLERBUND','H&auml;ndlerbund AGB Service'); // Tomcraft - 2012-12-08 - Added haendlerbund AGB interface
+define('BOX_SAFETERMS','Safeterms - AGB Service'); // Tomcraft - 2013-06-21 - Safeterms AGB interface
 define('BOX_SHOP','Shop');
 define('BOX_LOGOUT','Abmelden');
 define('BOX_CREDITS','Credits');
 define('BOX_UPDATE','Versionscheck');
+define('BOX_EASYMARKETING','EASYMARKETING AG'); // Tomcraft - 2013-08-29 - Added easymarketing
 define('BOX_GV_CUSTOMERS','Kunden-Guthaben');
 define('BOX_IT_RECHT_KANZLEI', 'IT Recht Kanzlei');
 define('BOX_PROTECTEDSHOPS', 'Protected Shops - AGB Service');
@@ -185,12 +186,6 @@ define('BOX_SHIPCLOUD', 'shipcloud');
 define('BOX_SHIPCLOUD_PICKUP', 'shipcloud - Abholung');
 define('BOX_PRODUCTS_TAGS', 'Artikeleigenschaften');
 define('BOX_TRUSTEDSHOPS', 'Trusted Shops');
-define('BOX_NEWSLETTER_RECIPIENTS', 'Newsletter Empf&auml;nger');
-define('BOX_DSGVO_EXPORT', 'DSGVO Export');
-define('BOX_SUPPORT', 'Support');
-define('BOX_CACHING', 'Caching');
-define('BOX_COOKIE_CONSENT', 'Cookie Consent');
-define('BOX_SEMKNOX', 'Site Search 360 Produktsuche');
 
 define('TXT_GROUPS','<b>Gruppen</b>:');
 define('TXT_SYSTEM','System');
@@ -227,7 +222,7 @@ define('JS_FIRST_NAME', '* Der \'Vorname\' muss mindestens aus ' . ENTRY_FIRST_N
 define('JS_LAST_NAME', '* Der \'Nachname\' muss mindestens aus ' . ENTRY_LAST_NAME_MIN_LENGTH . ' Zeichen bestehen.\n');
 define('JS_DOB', '* Das \'Geburtsdatum\' muss folgendes Format haben: xx.xx.xxxx (Tag/Monat/Jahr).\n');
 define('JS_EMAIL_ADDRESS', '* Die \'E-Mail-Adresse\' muss mindestens aus ' . ENTRY_EMAIL_ADDRESS_MIN_LENGTH . ' Zeichen bestehen.\n');
-define('JS_ADDRESS', '* Die \'Stra&szlig;e\' muss mindestens aus ' . ENTRY_STREET_ADDRESS_MIN_LENGTH . ' Zeichen bestehen.\n');
+define('JS_ADDRESS', '* Die \'Strasse\' muss mindestens aus ' . ENTRY_STREET_ADDRESS_MIN_LENGTH . ' Zeichen bestehen.\n');
 define('JS_POST_CODE', '* Die \'Postleitzahl\' muss mindestens aus ' . ENTRY_POSTCODE_MIN_LENGTH . ' Zeichen bestehen.\n');
 define('JS_CITY', '* Die \'Stadt\' muss mindestens aus ' . ENTRY_CITY_MIN_LENGTH . ' Zeichen bestehen.\n');
 define('JS_STATE', '* Das \'Bundesland\' muss ausgew&auml;hlt werden.\n');
@@ -258,9 +253,9 @@ define('ENTRY_EMAIL_ADDRESS_ERROR', '&nbsp;<span class="errorText">mindestens ' 
 define('ENTRY_EMAIL_ADDRESS_CHECK_ERROR', '&nbsp;<span class="errorText">ung&uuml;ltige E-Mail-Adresse! (Umlaute in E-Mail-Adressen werden derzeit nicht unterst&uuml;tzt.)</span>');
 define('ENTRY_EMAIL_ADDRESS_ERROR_EXISTS', '&nbsp;<span class="errorText">Diese E-Mail-Adresse existiert schon!</span>');
 define('ENTRY_COMPANY', 'Firmenname:');
-define('ENTRY_STREET_ADDRESS', 'Stra&szlig;e:');
+define('ENTRY_STREET_ADDRESS', 'Strasse:');
 define('ENTRY_STREET_ADDRESS_ERROR', '&nbsp;<span class="errorText">mindestens ' . ENTRY_STREET_ADDRESS_MIN_LENGTH . ' Buchstaben</span>');
-define('ENTRY_SUBURB', 'Weitere Anschrift:');
+define('ENTRY_SUBURB', 'weitere Anschrift:');
 define('ENTRY_POST_CODE', 'Postleitzahl:');
 define('ENTRY_POST_CODE_ERROR', '&nbsp;<span class="errorText">mindestens ' . ENTRY_POSTCODE_MIN_LENGTH . ' Zahlen</span>');
 define('ENTRY_CITY', 'Stadt:');
@@ -268,7 +263,6 @@ define('ENTRY_CITY_ERROR', '&nbsp;<span class="errorText">mindestens ' . ENTRY_C
 define('ENTRY_STATE', 'Bundesland:');
 define('ENTRY_STATE_ERROR', '&nbsp;<span class="errorText">notwendige Eingabe</font></small>');
 define('ENTRY_COUNTRY', 'Land:');
-define('ENTRY_COUNTRY_ERROR', 'Bitte w&auml;hlen Sie Ihr Land aus der Liste aus.');
 define('ENTRY_TELEPHONE_NUMBER', 'Telefonnummer:');
 define('ENTRY_TELEPHONE_NUMBER_ERROR', '&nbsp;<span class="errorText">mindestens ' . ENTRY_TELEPHONE_MIN_LENGTH . ' Zahlen</span>');
 define('ENTRY_FAX_NUMBER', 'Telefaxnummer:');
@@ -276,7 +270,7 @@ define('ENTRY_NEWSLETTER', 'Newsletter:');
 define('ENTRY_CUSTOMERS_STATUS', 'Kundengruppe:');
 define('ENTRY_NEWSLETTER_YES', 'abonniert');
 define('ENTRY_NEWSLETTER_NO', 'nicht abonniert');
-define('ENTRY_MAIL_ERROR','&nbsp;<span class="errorText">Bitte treffen Sie eine Auswahl</span>');
+define('ENTRY_MAIL_ERROR','&nbsp;<span class="errorText">Bitte treffen sie eine Auswahl</span>');
 define('ENTRY_PASSWORD','Passwort (autom. erstellt)');
 define('ENTRY_PASSWORD_ERROR','&nbsp;<span class="errorText">Ihr Passwort muss aus mindestens ' . ENTRY_PASSWORD_MIN_LENGTH . ' Zeichen bestehen.</span>');
 define('ENTRY_MAIL_COMMENTS','Zus&auml;tzlicher E-Mail-Text:');
@@ -288,7 +282,6 @@ define('SAVE_ENTRY','&Auml;nderungen Speichern?');
 define('TEXT_CHOOSE_INFO_TEMPLATE','Vorlage f&uuml;r Artikeldetails');
 define('TEXT_CHOOSE_OPTIONS_TEMPLATE','Vorlage f&uuml;r Artikeloptionen');
 define('TEXT_SELECT','-- Bitte w&auml;hlen Sie --');
-define('PULL_DOWN_DEFAULT', 'Bitte w&auml;hlen');
 
 // BOF - Tomcraft - 2009-06-10 - added some missing alternative text on admin icons
 // Icons
@@ -322,7 +315,6 @@ define('TEXT_DISPLAY_NUMBER_OF_CURRENCIES', 'Angezeigt werden <b>%d</b> bis <b>%
 define('TEXT_DISPLAY_NUMBER_OF_LANGUAGES', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Sprachen)');
 define('TEXT_DISPLAY_NUMBER_OF_MANUFACTURERS', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Herstellern)');
 define('TEXT_DISPLAY_NUMBER_OF_NEWSLETTERS', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Newslettern)');
-define('TEXT_DISPLAY_NUMBER_OF_NEWSLETTERS_RECIPIENTS', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Newsletterempf&auml;ngern)');
 define('TEXT_DISPLAY_NUMBER_OF_ORDERS', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Bestellungen)');
 define('TEXT_DISPLAY_NUMBER_OF_ORDERS_STATUS', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Bestellstatus)');
 define('TEXT_DISPLAY_NUMBER_OF_XSELL_GROUP', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> Cross-Marketing Gruppen)');
@@ -365,11 +357,11 @@ define('WARNING_NO_FILE_UPLOADED', 'Warnung: Es wurde keine Datei hochgeladen.')
 define('ERROR_FILE_NOT_REMOVEABLE', 'Fehler: Datei konnte nicht entfernt werden.');
 
 define('DELETE_ENTRY','Eintrag l&ouml;schen?');
-define('TEXT_PAYMENT_ERROR','<b>WARNUNG:</b> Bitte aktivieren Sie ein <a href="%s">Zahlungsmodul</a>!');
-define('TEXT_SHIPPING_ERROR','<b>WARNUNG:</b> Bitte aktivieren Sie ein <a href="%s">Versandmodul</a>!');
+define('TEXT_PAYMENT_ERROR','<b>WARNUNG:</b> Bitte aktivieren Sie ein Zahlungsmodul!');
+define('TEXT_SHIPPING_ERROR','<b>WARNUNG:</b> Bitte aktivieren Sie ein Versandmodul!');
 define('TEXT_PAYPAL_CONFIG','<b>WARNUNG:</b> Bitte konfigurieren Sie die PayPal-Zahlungseinstellungen f&uuml;r den "Live Modus" unter: <a href="%s"><strong>Partner -> PayPal</strong></a>'); //DokuMan - 2012-05-31 - show warning if PayPal payment module activated, but not configured for live mode yet
 define('TEXT_NETTO','Netto: ');
-define('TEXT_DUPLICATE_CONFIG_ERROR','<b>WARNUNG:</b> Doppelter Konfigurationsschl&uuml;ssel: ');
+define('TEXT_DUPLUCATE_CONFIG_ERROR','<b>WARNUNG:</b> Duplicate configuration key: ');
 
 define('ENTRY_CID','Kundennummer:');
 define('IP','Bestell IP:');
@@ -417,20 +409,28 @@ define('TEXT_VALID_CATEGORIES_LIST', 'Kategorieliste');
 define('TEXT_VALID_CATEGORIES_ID', 'Kategorie-ID');
 define('TEXT_VALID_CATEGORIES_NAME', 'Kategoriename');
 
+define('SECURITY_CODE_LENGTH_TITLE', 'L&auml;nge des Gutscheincodes');
+define('SECURITY_CODE_LENGTH_DESC', 'Geben Sie hier die L&auml;nge des Gutscheincode ein. (max. 16 Zeichen)');
+
+define('NEW_SIGNUP_GIFT_VOUCHER_AMOUNT_TITLE', 'Willkommens-Geschenk Gutschein Wert');
+define('NEW_SIGNUP_GIFT_VOUCHER_AMOUNT_DESC', 'Willkommens-Geschenk Gutschein Wert: Wenn Sie keinen Gutschein in Ihrer Willkommens-E-Mail versenden wollen, tragen Sie hier 0 ein, ansonsten geben Sie den Wert des Gutscheins an, z.B. 10.00 oder 50.00, aber keine W&auml;hrungszeichen');
+define('NEW_SIGNUP_DISCOUNT_COUPON_TITLE', 'Willkommens-Rabatt Coupon Code');
+define('NEW_SIGNUP_DISCOUNT_COUPON_DESC', 'Willkommens-Rabatt Coupon Code: Wenn Sie keinen Coupon in Ihrer Willkommens-E-Mail versenden wollen, lassen Sie dieses Feld leer, ansonsten tragen Sie den Coupon Code ein, den Sie verwenden wollen');
+
 define('TXT_ALL','Alle');
 
 // UST ID
 define('HEADING_TITLE_VAT','USt-IdNr.');
 define('ENTRY_VAT_ID','USt-IdNr.:');
 define('ENTRY_CUSTOMERS_VAT_ID', 'USt-IdNr.:');
-define('TEXT_VAT_FALSE','<span class="messageStackError">Gepr&uuml;ft/USt-IdNr. ist ung&uuml;ltig!</span>');
-define('TEXT_VAT_TRUE','<span class="messageStackSuccess">Gepr&uuml;ft/USt-IdNr. ist g&uuml;ltig</span>');
+define('TEXT_VAT_FALSE','<span class="messageStackError">Gepr&uuml;ft/USTID ist ung&uuml;ltig!</span>');
+define('TEXT_VAT_TRUE','<span class="messageStackSuccess">Gepr&uuml;ft/USTID ist g&uuml;ltig</span>');
 define('TEXT_VAT_UNKNOWN_COUNTRY','<span class="messageStackError">Nicht gepr&uuml;ft/Land unbekannt!</span>');
-define('TEXT_VAT_INVALID_INPUT','<span class="messageStackError">Nicht gepr&uuml;ft/Der &uuml;bergebene L&auml;ndercode ist ung&uuml;ltig oder die USt-IdNr. ist leer!</span>');
+define('TEXT_VAT_INVALID_INPUT','<span class="messageStackError">Nicht gepr&uuml;ft/Der &uuml;bergebene L&auml;ndercode ist ung&uuml;ltig oder die USTID ist leer!</span>');
 define('TEXT_VAT_SERVICE_UNAVAILABLE','<span class="messageStackError">Nicht gepr&uuml;ft/Der SOAP Service ist nicht erreichbar, versuchen Sie es sp&auml;ter noch einmal!</span>');
 define('TEXT_VAT_MS_UNAVAILABLE','<span class="messageStackError">Nicht gepr&uuml;ft/Der Service des Mitgliedsstaats ist nicht erreichbar, versuchen Sie es sp&auml;ter noch einmal oder mit einem anderen Mitgliedsstaat!</span>');
 define('TEXT_VAT_TIMEOUT','<span class="messageStackError">Nicht gepr&uuml;ft/Der Service des Mitgliedsstaats konnte nicht erreicht werden (timeout), versuchen Sie es sp&auml;ter noch einmal oder mit einem anderen Mitgliedsstaat!</span>');
-define('TEXT_VAT_SERVER_BUSY','<span class="messageStackError">Nicht gepr&uuml;ft/Der Service kann Ihre Anfrage nicht bearbeiten. Versuchen Sie es sp&auml;ter noch einmal!</span>');
+define('TEXT_VAT_SERVER_BUSY','<span class="messageStackError">Nicht gepr&uuml;ft/Der Service kann ihre Anfrage nicht bearbeiten. Versuchen Sie es sp&auml;ter noch einmal!</span>');
 define('TEXT_VAT_NO_PHP5_SOAP_SUPPORT','<span class="messageStackError">Nicht gepr&uuml;ft/Unterst&uumltzung f&uumlr PHP5 SOAP ist nicht vorhanden!</span>');
 define('TEXT_VAT_CONNECTION_NOT_POSSIBLE','<span class="messageStackError">FEHLER: Verbindung zu Webservice nicht m&ouml;glich (SOAP-FEHLER)!</span>');
 
@@ -448,23 +448,27 @@ define('BOX_PAYPAL','PayPal');
 // EOF - Tomcraft - 2009-10-03 - Paypal Express Modul
 
 // BOF - Dokuman - 2009-10-02 - added moneybookers payment module version 2.4
-define('_PAYMENT_MONEYBOOKERS_EMAILID_TITLE','Skrill E-Mail-Adresse');
-define('_PAYMENT_MONEYBOOKERS_EMAILID_DESC','E-Mail-Adresse mit welcher Sie bei Skrill.com registriert sind.<br />Wenn Sie noch &uuml;ber kein Konto verf&uuml;gen, <b>melden Sie sich</b> jetzt bei <a href="https://account.skrill.com/signup/page1" target="_blank"><b>Skrill</b></a> <b>gratis</b> an.');
-define('_PAYMENT_MONEYBOOKERS_MERCHANTID_TITLE','Skrill H&auml;ndler ID');
-define('_PAYMENT_MONEYBOOKERS_MERCHANTID_DESC','Ihre Skrill.com H&auml;ndler ID');
-define('_PAYMENT_MONEYBOOKERS_PWD_TITLE','Skrill Geheimwort');
-define('_PAYMENT_MONEYBOOKERS_PWD_DESC','Mit der Eingabe des Geheimwortes wird die Verbindung beim Bezahlvorgang verschl&uuml;sselt. So wird h&ouml;chste Sicherheit gew&auml;hrleistet. Geben Sie Ihr Skrill Geheimwort ein (dies ist nicht Ihr Passwort!). Das Geheimwort darf nur aus Kleinbuchstaben und Zahlen bestehen. Sie k&ouml;nnen Ihr Geheimwort <b><span class="col-red">nach der Freischaltung</b></span> in Ihrem Skrill-Benutzerkonto definieren (H&auml;ndlereinstellungen).<br /><br /><span class="col-red">So schalten Sie Ihren Skrill.com Account f&uuml;r die Zahlungsabwicklung frei!</span><br /><br />Senden Sie eine E-Mail mit:<br/>- Ihrer Shopdomain<br/>- Ihrer Skrill E-Mail-Adresse<br /><br />An: <a href="mailto:ecommerce@skrill.com?subject=modified eCommerce Shopsoftware: Aktivierung fuer Skrill Quick Checkout">ecommerce@skrill.com</a>');
+define('_PAYMENT_MONEYBOOKERS_EMAILID_TITLE','Moneybookers E-Mail-Adresse');
+define('_PAYMENT_MONEYBOOKERS_EMAILID_DESC','E-Mail-Adresse mit welcher Sie bei Moneybookers.com registriert sind.<br />Wenn Sie noch &uuml;ber kein Konto verf&uuml;gen, <b>melden Sie sich</b> jetzt bei <a href="https://www.moneybookers.com/app/register.pl" target="_blank"><b>Moneybookers</b></a> <b>gratis</b> an.');
+define('_PAYMENT_MONEYBOOKERS_MERCHANTID_TITLE','Moneybookers H&auml;ndler ID');
+define('_PAYMENT_MONEYBOOKERS_MERCHANTID_DESC','Ihre Moneybookers.com H&auml;ndler ID');
+define('_PAYMENT_MONEYBOOKERS_PWD_TITLE','Moneybookers Geheimwort');
+define('_PAYMENT_MONEYBOOKERS_PWD_DESC','Mit der Eingabe des Geheimwortes wird die Verbindung beim Bezahlvorgang verschl&uuml;sselt. So wird h&ouml;chste Sicherheit gew&auml;hrleistet. Geben Sie Ihr Moneybookers Geheimwort ein (dies ist nicht ihr Passwort!). Das Geheimwort darf nur aus Kleinbuchstaben und Zahlen bestehen. Sie k&ouml;nnen Ihr Geheimwort <b><span class="col-red">nach der Freischaltung</b></span> in Ihrem Moneybookers-Benutzerkonto definieren (H&auml;ndlereinstellungen).<br /><br /><span class="col-red">So schalten Sie Ihren Moneybookers.com Account f&uuml;r die Zahlungsabwicklung frei!</span><br /><br />Senden Sie eine E-Mail mit:<br/>- Ihrer Shopdomain<br/>- Ihrer Moneybookers E-Mail-Adresse<br /><br />An: <a href="mailto:ecommerce@moneybookers.com?subject=modified eCommerce Shopsoftware: Aktivierung fuer Moneybookers Quick Checkout">ecommerce@moneybookers.com</a>');
 define('_PAYMENT_MONEYBOOKERS_TMP_STATUS_ID_TITLE','Bestellstatus - Zahlungsvorgang');
 define('_PAYMENT_MONEYBOOKERS_TMP_STATUS_ID_DESC',' Sobald der Kunde im Shop auf "Bestellung absenden" dr&uuml;ckt, wird eine "tempor&auml;re Bestellung" angelegt. Dies hat den Vorteil, dass bei Kunden die den Zahlungsvorgang bei Moneybookes abbrechen eine Bestellung aufgezeichnet wurde.');
 define('_PAYMENT_MONEYBOOKERS_PROCESSED_STATUS_ID_TITLE','Bestellstatus - Zahlung OK');
-define('_PAYMENT_MONEYBOOKERS_PROCESSED_STATUS_ID_DESC','Erscheint, wenn die Zahlung von Skrill best&auml;tigt wurde.');
+define('_PAYMENT_MONEYBOOKERS_PROCESSED_STATUS_ID_DESC','Erscheint, wenn die Zahlung von Moneybookers best&auml;tigt wurde.');
 define('_PAYMENT_MONEYBOOKERS_PENDING_STATUS_ID_TITLE','Bestellstatus - Zahlung in Warteschleife');
-define('_PAYMENT_MONEYBOOKERS_PENDING_STATUS_ID_DESC','Wenn der Kunde kein Guthaben auf seinem Konto hat wird die Zahlung solange schwebend gehalten bis das Konto Skrill ausgeglichen ist.');
+define('_PAYMENT_MONEYBOOKERS_PENDING_STATUS_ID_DESC','Wenn der Kunde kein Guthaben auf seinem Konto hat wird die Zahlung solange schwebend gehalten bis das Konto Moneybookers ausgeglichen ist.');
+
 define('_PAYMENT_MONEYBOOKERS_CANCELED_STATUS_ID_TITLE','Bestellstatus - Zahlung Storniert');
 define('_PAYMENT_MONEYBOOKERS_CANCELED_STATUS_ID_DESC','Wird erscheinen, wenn z.B. eine Kreditkarte abgelehnt wurde');
-define('MB_ERROR_NO_MERCHANT','Es Existiert kein Skrill.com Account mit dieser E-Mail-Adresse!');
-define('MB_MERCHANT_OK','Skrill.com Account korrekt, H&auml;ndler ID %s von Skrill.com empfangen und gespeichert.');
-define('MB_INFO','<img src="../images/icons/moneybookers/MBbanner.jpg" /><br /><br />Sie k&ouml;nnen jetzt Kreditkarten, Lastschrift, Sofort., Giropay sowie alle weiteren wichtigen lokalen Bezahloptionen direkt akzeptieren, mit einer simplen Aktivierung im Shop. Mit Skrill als All-in-One-L&ouml;sung brauchen Sie dabei keine Einzelvertr&auml;ge pro Zahlart abzuschlie&szlig;en. Sie brauchen lediglich einen <a href="https://account.skrill.com/signup/page1" target="_blank"><b>kostenlosen Skrill Account</b></a>, um alle wichtigen Bezahloptionen in Ihrem Shop zu akzeptieren. Zus&auml;tzliche Bezahlarten sind ohne Mehrkosten, das Modul beinhaltet <b>keine monatlichen Fixkosten oder Installationskosten</b>.<br /><br /><b>Ihre Vorteile:</b><br />-Die Akzeptanz der wichtigsten Bezahloptionen steigert Ihren Umsatz<br />-Ein Anbieter reduziert Ihre Aufw&auml;nde und Ihre Kosten<br />-Ihr Kunde bezahlt direkt und ohne Registrierungsprozedur<br />-Ein-Klick-Aktivierung und Integration<br />-Sehr attraktive <a href="https://www.skrill.com/de/fees/" target="_blank"><b>Konditionen</b></a> <br />-sofortige Zahlungsbest&auml;tigung und Pr&uuml;fung der Kundendaten<br />-Bezahlabwicklung auch im Ausland und ohne Mehrkosten<br />-6 Millionen Kunden weltweit vertrauen Skrill');
+define('MB_TEXT_MBDATE', 'Letzte Aktualisierung:');
+define('MB_TEXT_MBTID', 'TR ID:');
+define('MB_TEXT_MBERRTXT', 'Status:');
+define('MB_ERROR_NO_MERCHANT','Es Existiert kein Moneybookers.com Account mit dieser E-Mail-Adresse!');
+define('MB_MERCHANT_OK','Moneybookers.com Account korrekt, H&auml;ndler ID %s von Moneybookers.com empfangen und gespeichert.');
+define('MB_INFO','<img src="../images/icons/moneybookers/MBbanner.jpg" /><br /><br />Sie k&ouml;nnen jetzt Kreditkarten, Lastschrift, Sofort&uuml;berweisung, Giropay sowie alle weiteren wichtigen lokalen Bezahloptionen direkt akzeptieren, mit einer simplen Aktivierung im Shop. Mit Moneybookers als All-in-One-L&ouml;sung brauchen Sie dabei keine Einzelvertr&auml;ge pro Zahlart abzuschlie&szlig;en. Sie brauchen lediglich einen <a href="https://www.moneybookers.com/app/register.pl" target="_blank"><b>kostenlosen Moneybookers Account</b></a>, um alle wichtigen Bezahloptionen in Ihrem Shop zu akzeptieren. Zus&auml;tzliche Bezahlarten sind ohne Mehrkosten, das Modul beinhaltet <b>keine monatlichen Fixkosten oder Installationskosten</b>.<br /><br /><b>Ihre Vorteile:</b><br />-Die Akzeptanz der wichtigsten Bezahloptionen steigert Ihren Umsatz<br />-Ein Anbieter reduziert Ihre Aufw&auml;nde und Ihre Kosten<br />-Ihr Kunde bezahlt direkt und ohne Registrierungsprozedur<br />-Ein-Klick-Aktivierung und Integration<br />-Sehr attraktive <a href="http://www.moneybookers.com/app/help.pl?s=m_fees" target="_blank"><b>Konditionen</b></a> <br />-sofortige Zahlungsbest&auml;tigung und Pr&uuml;fung der Kundendaten<br />-Bezahlabwicklung auch im Ausland und ohne Mehrkosten<br />-6 Millionen Kunden weltweit vertrauen Moneybookers');
 // EOF - Dokuman - 2009-10-02 - added moneybookers payment module version 2.4
 
 // BOF - Tomcraft - 2009-11-02 - set global customers-group-permissions
@@ -476,9 +480,15 @@ define('TEXT_ADMIN_START', 'Start');
 define('BOX_HEADING_CONFIGURATION2','Erw. Konfiguration');
 // EOF - Tomcraft - 2009-11-02 - New admin top menu
 
+// BOF - Tomcraft - 2009-11-28 - Included xs:booster
+define('BOX_HEADING_XSBOOSTER','xs:booster');
+define('BOX_XSBOOSTER_LISTAUCTIONS','Auktionen anzeigen');
+define('BOX_XSBOOSTER_ADDAUCTIONS','Auktionen erstellen');
+define('BOX_XSBOOSTER_CONFIG','Grundkonfiguration');
+// EOF - Tomcraft - 2009-11-28 - Included xs:booster
+
 //BOF - web28 - 2010-04-10 - ADMIN SEARCH BAR
 define('ASB_QUICK_SEARCH_CUSTOMER','Suche Kunde...');
-define('ASB_QUICK_SEARCH_ORDER','Suche Bestellung...');
 define('ASB_QUICK_SEARCH_ORDER_ID','Suche Bestellnummer...');
 define('ASB_QUICK_SEARCH_ARTICLE','Suche Artikel/Kategorie...');
 define('ASB_QUICK_SEARCH_EMAIL', 'Suche E-Mail-Adresse...');
@@ -542,8 +552,7 @@ define('TEXT_DISPLAY_NUMBER_OF_CARRIERS', 'Angezeigt werden <b>%d</b> bis <b>%d<
 define('RSS_FEED_TITLE', 'Aktuelle Information von modified eCommerce Shopsoftware Blog');
 define('RSS_FEED_DESCRIPTION', 'Aktuelle Information von modified eCommerce Shopsoftware Support Forum');
 define('RSS_FEED_LINK', 'http://www.modified-shop.org/blog');
-define('RSS_FEED_ALTERNATIVE', 'Leider k&ouml;nnen die aktuellen Neuigkeiten nicht im RSS Feed dargestellt werden. Bitte besuchen Sie unseren Blog unter <a href="'.RSS_FEED_LINK.'">www.modified-shop.org/blog</a> um wichtige Informationen f&uuml;r Shopbetreiber zu diesen Themen zu erfahren: <ul><li>Wichtige Updates und Fixes</li><li>Funktionserweiterungen</li><li>Rechtsprechungen</li><li>Neuigkeiten</li><li>Klatsch und Tratsch</li></ul>');
-define('RSS_FEED_NOT_REACHABLE', 'Der Newsfeed konnte seit einem l&auml;ngeren Zeitraum nicht aktualisiert werden.<br>Verpassen Sie keine wichtigen Nachrichten, Angebote, uvm. und besuchen uns unter <a target="_blank" href="https://www.modified-shop.org/blog">www.modified-shop.org/blog</a><br>');
+define('RSS_FEED_ALTERNATIVE', 'Leider k&ouml;nnen die aktuellen Neuigkeiten nicht im RSS Feed dargestellt werden. Bitte besuchen sie unseren Blog unter <a href="'.RSS_FEED_LINK.'">www.modified-shop.org/blog</a> um wichtige Informationen f&uuml;r Shopbetreiber zu diesen Themen zu erfahren: <ul><li>Wichtige Updates und Fixes</li><li>Funktionserweiterungen</li><li>Rechtsprechungen</li><li>Neuigkeiten</li><li>Klatsch und Tratsch</li></ul>');
 define('TEXT_DISPLAY_NUMBER_OF_NEWSFEED', 'Angezeigt werden <b>%d</b> bis <b>%d</b> (von insgesamt <b>%d</b> News)');
 
 define('CFG_TXT_YES', 'Ja');
@@ -564,11 +573,6 @@ define('CFG_TXT_ALL', 'alle');
 define('CFG_TXT_WEIGHT', 'Gewicht');
 define('CFG_TXT_PRICE', 'Preis');
 define('CFG_TXT_ITEM', 'St&uuml;ck');
-define('CFG_TXT_WHOS_ONLINE', 'Online');
-define('CFG_TXT_ORDERS', 'Bestellungen');
-define('CFG_TXT_CUSTOMERS', 'Kunden');
-define('CFG_TXT_SALES_REPORT', 'Statistik');
-define('CFG_TXT_BLOG', 'Blog');
 
 define('CSRF_TOKEN_MANIPULATION', 'CSRFToken Manipulation (Aus Sicherheits-Aspekten ist es nicht mehr erlaubt im Adminbereich in verschiedenen Tabs zu arbeiten.)');
 define('CSRF_TOKEN_NOT_DEFINED', 'CSRFToken nicht definiert (Aus Sicherheits-Aspekten ist es nicht mehr erlaubt im Adminbereich in verschiedenen Tabs zu arbeiten.)');
@@ -589,8 +593,8 @@ define('CHECK_LABEL_PRICE', 'Preis abfragen');
 define('TEXT_PAYPAL_TAB_CONFIG', 'PayPal Konfiguration');
 define('TEXT_PAYPAL_TAB_PROFILE', 'PayPal Profil');
 define('TEXT_PAYPAL_TAB_WEBHOOK', 'PayPal Webhook');
-define('TEXT_PAYPAL_TAB_MODULE', 'PayPal Produkte');
-define('TEXT_PAYPAL_TAB_INFO', 'PayPal Informationen');
+define('TEXT_PAYPAL_TAB_MODULE', 'PayPal Module');
+define('TEXT_PAYPAL_TAB_TRANSACTIONS', 'PayPal Transaktionen');
 
 define('TEXT_DEFAULT_SORT_ORDER_TITLE', 'Sortierreihenfolge');
 define('TEXT_DEFAULT_SORT_ORDER_DESC', 'Reihenfolge der Verarbeitung. Kleinste Ziffer wird zuerst ausgef&uuml;hrt.');
@@ -605,15 +609,4 @@ define('DELETE_LOGS_SUCCESSFUL', 'Logfiles erfolgreich gel&ouml;scht.');
 define('BOX_BLACKLIST_LOGS', 'Blacklist Logs');
 
 define('CONTINUE_WITHOUT_SAVE', 'Nicht gespeicherte &Auml;nderungen gehen verloren.');
-
-define('TEXT_SORT_ASC','aufsteigend');
-define('TEXT_SORT_DESC','absteigend');
-
-define('MSRP','UVP');
-define('YOUR_PRICE','Ihr Preis ');
-define('UNIT_PRICE','St&uuml;ckpreis ');
-define('ONLY',' Jetzt nur ');
-define('FROM','ab ');
-define('YOU_SAVE','Sie sparen ');
-define('INSTEAD','Unser bisheriger Preis ');
 ?>

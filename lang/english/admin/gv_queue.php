@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: gv_queue.php 13188 2021-01-18 11:26:27Z Tomcraft $
+   $Id: gv_queue.php 899 2005-04-29 02:40:57Z hhgag $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -44,6 +44,4 @@ define('TEXT_REDEEM_COUPON_MESSAGE_AMOUNT', 'The Gift Voucher(s) you purchased a
 define('TEXT_REDEEM_COUPON_MESSAGE_BODY', '');
 define('TEXT_REDEEM_COUPON_MESSAGE_FOOTER', '');
 define('TEXT_REDEEM_COUPON_SUBJECT', 'Gift Voucher Purchase');
-define('TEXT_INFO_DELETE_INTRO', 'Delete this Gift Voucher?');
-define('TEXT_INFO_REDEEM_INTRO', 'Redeem this Gift Voucher?');
 ?>

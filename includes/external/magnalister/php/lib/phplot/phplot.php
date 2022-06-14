@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+/* $Id: phplot.php 1023 2011-05-01 17:18:55Z derpapst $ */
 /*
  * PHPLOT Version 5.2.0
  *
@@ -216,7 +216,7 @@ class PHPlot
      *   $which_output_file : Filename for output.
      *   $which_input_file : Path to a file to be used as background.
      */
-    function __construct($which_width=600, $which_height=400, $which_output_file=NULL, $which_input_file=NULL)
+    function PHPlot($which_width=600, $which_height=400, $which_output_file=NULL, $which_input_file=NULL)
     {
         $this->SetRGBArray($this->color_array);
 

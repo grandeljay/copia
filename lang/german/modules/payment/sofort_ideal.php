@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: sofort_ideal.php 12398 2019-11-08 13:12:43Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -12,8 +12,8 @@
 
 $sofort_code = 'SOFORT_IDEAL';
 
-define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_TITLE', 'iDEAL');
-define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION', '<b>iDEAL</b><br />Sobald der Kunde diese Zahlungsart und seine Bank ausgew&auml;hlt hat, wird er durch die SOFORT GmbH auf seine Bank weitergeleitet. Dort t&auml;tigt er seine Zahlung und wird danach wieder auf das Shopsystem zur&uuml;ckgeleitet. Bei erfolgreicher Zahlungsbest&auml;tigung findet durch die SOFORT GmbH ein sog. Callback auf das Shopsystem statt, der den Zahlungsstatus der Bestellung entsprechend &auml;ndert.<br />Bereitgestellt durch die SOFORT GmbH');
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_TITLE', 'iDEAL <br /><img src="https://images.sofort.com/de/ideal/logo_90x30.png" alt="Logo iDEAL"/>');
+define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION', '<b>iDEAL</b><br />Sobald der Kunde diese Zahlungsart und seine Bank ausgew&auml;hlt hat, wird er durch die SOFORT AG auf seine Bank weitergeleitet. Dort t&auml;tigt er seine Zahlung und wird danach wieder auf das Shopsystem zur&uuml;ckgeleitet. Bei erfolgreicher Zahlungsbest&auml;tigung findet durch die SOFORT AG ein sog. Callback auf das Shopsystem statt, der den Zahlungsstatus der Bestellung entsprechend &auml;ndert.<br />Bereitgestellt durch die SOFORT AG');
 define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_INFO', 'iDEAL.nl - Online-&Uuml;berweisungen f&uuml;r den elektronischen Handel in den Niederlanden. F&uuml;r die Bezahlung mit iDEAL ben&ouml;tigen Sie ein Konto bei einer der genannten Banken. Sie nehmen die &Uuml;berweisung direkt bei Ihrer Bank vor. Dienstleistungen/Waren werden bei Verf&uuml;gbarkeit SOFORT geliefert bzw. versendet!');
 
 // checkout
@@ -37,7 +37,7 @@ define('MODULE_PAYMENT_'.$sofort_code.'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT',
     <li>Dienstleistungen/Waren werden bei Verf&uuml;gbarkeit SOFORT geliefert bzw. versendet</li>
   </ul>');
 
-define('MODULE_PAYMENT_'.$sofort_code.'_SELECTBOX', 'Bitte w&auml;hlen Sie Ihre Bank aus');
+define('MODULE_PAYMENT_'.$sofort_code.'_SELECTBOX', 'Bitte wählen Sie Ihre Bank aus');
 
 // admin
 define('MODULE_PAYMENT_'.$sofort_code.'_STATUS_TITLE', 'iDeal Modul aktivieren');

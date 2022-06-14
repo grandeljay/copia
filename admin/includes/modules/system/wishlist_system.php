@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: wishlist_system.php 11602 2019-03-21 17:56:53Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -19,9 +19,9 @@ class wishlist_system {
      $this->code = 'wishlist_system';
      $this->title = MODULE_WISHLIST_SYSTEM_TEXT_TITLE;
      $this->description = MODULE_WISHLIST_SYSTEM_TEXT_DESCRIPTION;
-     $this->sort_order = defined('MODULE_WISHLIST_SYSTEM_SORT_ORDER') ? MODULE_WISHLIST_SYSTEM_SORT_ORDER : '';
-     $this->enabled = ((defined('MODULE_WISHLIST_SYSTEM_STATUS') && MODULE_WISHLIST_SYSTEM_STATUS == 'true') ? true : false);
-  }
+     $this->sort_order = defined('MODULE_WISHLIST_SYSTEM_SORT_ORDER') ? MODULE_WISHLIST_SYSTEM_SORT_ORDER : 0;
+     $this->enabled = ((MODULE_WISHLIST_SYSTEM_STATUS == 'true') ? true : false);
+   }
 
   function process($file) {
   }

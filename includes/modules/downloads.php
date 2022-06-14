@@ -1,7 +1,7 @@
 <?php
 
 /* -----------------------------------------------------------------------------------------
-   $Id: downloads.php 13072 2020-12-15 07:17:20Z GTB $   
+   $Id: downloads.php 4245 2013-01-11 14:26:03Z gtb-modified $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -37,7 +37,7 @@ if (isset($send_by_admin)) {
   $customer_id = $orders['customers_id'];
   $language = $orders['language'];
   $order_status = $orders['orders_status'];
-} elseif (basename($PHP_SELF) != FILENAME_ACCOUNT_HISTORY_INFO) {
+} elseif (!strstr($PHP_SELF, FILENAME_ACCOUNT_HISTORY_INFO)) {
   // Get last order id for checkout_success
   $orders_query = xtc_db_query("SELECT orders_id, 
                                        orders_status 
@@ -102,7 +102,6 @@ if (xtc_db_num_rows($downloads_query) > 0) {
       $dl[$jj]['pic_link'] = xtc_href_link(FILENAME_DOWNLOAD, 'order='.$last_order.'&id='.$downloads['orders_products_download_id'].'&key='.md5($last_order.$downloads['orders_products_id'].$downloads['customers_id'].$downloads['customers_email_address'].$downloads['orders_products_filename']));
     }
     $dl[$jj]['download_link'] = '<a href="'.$dl[$jj]['pic_link'].'">'.$downloads['products_name'].'</a>';
-    $dl[$jj]['download_link_plain'] = $downloads['products_name'].': '.$dl[$jj]['pic_link'];
     $dl[$jj]['date'] = xtc_date_long($downloads['download_expiry']);
     $dl[$jj]['count'] = $downloads['download_count'];
     $jj ++;
@@ -113,7 +112,7 @@ if (xtc_db_num_rows($downloads_query) > 0) {
 $module_smarty->assign('language', $language);
 $module_smarty->caching = 0;
 
-if (isset($send_order)) {
+if ($send_order) {
   if (isset($send_by_admin)) {
     $module_smarty->template_dir = DIR_FS_CATALOG.'templates';
     $module_smarty->compile_dir = DIR_FS_CATALOG.'templates_c';

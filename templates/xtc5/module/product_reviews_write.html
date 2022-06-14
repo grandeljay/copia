@@ -11,19 +11,17 @@
     <table width="100%" cellspacing="0" cellpadding="4">
       <tr>
         <td width="120"><strong>{#text_rating#}</strong></td>
-        <td>{#text_bad#}{if isset($INPUT_RATING_ARRAY)}<span class="show_rating">{foreach item=rating from=$INPUT_RATING_ARRAY|@array_reverse}<label>{$rating}</label>{/foreach}</span>{else}&nbsp;{$INPUT_RATING}&nbsp;{/if}{#text_good#}</td>
+        <td>{#text_bad#}&nbsp;{$INPUT_RATING}{#text_good#}</td>
       </tr>
       <tr>
         <td><strong>{#text_author#}</strong></td>
         <td>{$INPUT_AUTHOR}</td>
       </tr>
-      {if $VVIMG}
+      {if $INPUT_CODE}
         <tr>
           <td width="140"><strong>{#text_sec_code#}:</strong></td>
           <td>{$VVIMG}</td>
         </tr>
-      {/if}
-      {if $INPUT_CODE}
         <tr>
           <td><strong>{#text_sec_code#}:</strong></td>
           <td>{$INPUT_CODE}</td>

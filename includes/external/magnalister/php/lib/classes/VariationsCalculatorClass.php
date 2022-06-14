@@ -132,8 +132,6 @@ class VariationsCalculator {
 					$permutations[$offset]['variation_attributes'] .= $oID.','.$vID.'|';
 					if ($dimensions === 1 && $attr['price_prefix'] == '=') {
 						$permutations[$offset]['variation_price'] += (float)$attr['options_values_price'] - (float)$fBaseProductPrice;
-					} else if ('%' == $attr['price_prefix']) {
-						 $permutations[$offset]['variation_price'] += (float)(($fBaseProductPrice * $attr['options_values_price']) / 100.0);
 					} else {
 						$permutations[$offset]['variation_price'] += (float)$attr['options_values_price'] * ($attr['price_prefix'] == '+' ? 1 : -1);
 					}
@@ -161,12 +159,7 @@ class VariationsCalculator {
 							break;
 						}
 					}
-					if (strpos(trim($attr['attributes_model']), trim($base['marketplace_sku'])) === 0) {
-						$tModel = substr(trim($attr['attributes_model']), strlen(trim($base['marketplace_sku'])));
-					} else {
-						$tModel = $attr['attributes_model'];
-					}
-					$tModel = str_replace(array("\n", "\r", "\t" , ' '), array('', '', '', ''), $tModel);
+					$tModel = trim(str_replace($base['marketplace_sku'], '', $attr['attributes_model']), "\n\r\t _,.");
 					if (empty($tModel)) {
 						$tModel = '_'.$oID.'.'.$vID;
 					}
@@ -174,7 +167,7 @@ class VariationsCalculator {
 					$permutations[$offset]['marketplace_sku'] .= $tModel;
 					$permutations[$offset]['marketplace_id'] .= '_'.$oID.'.'.$vID;
 					
-					if (empty($permutations[$offset]['variation_ean'])) {
+					if ($dimensions === 1) {
 						$permutations[$offset]['variation_ean'] = isset($attr['attributes_ean'])
 							? $attr['attributes_ean']
 							: (isset($attr['gm_ean'])
@@ -188,10 +181,6 @@ class VariationsCalculator {
 				++$attrC;
 			}
 		}
-		foreach ($permutations as &$permutation) {
-			$permutation['marketplace_sku'] = trim($permutation['marketplace_sku'], " _,.");
-		}
-		unset($permutation);
 		
 		#echo print_m($permutations, '$permutations');
 		
@@ -234,21 +223,19 @@ class VariationsCalculator {
 	
 	function getAttributesByPID($pID) {
 		if ($GLOBALS['SDB']->columnExistsInTable('sortorder', TABLE_PRODUCTS_ATTRIBUTES)) {
-			$attributesOrderBy = ' a.sortorder, a.options_id, a.options_values_id ';
+			$attributesOrderBy = ' sortorder, options_id, options_values_id ';
 		} else {
-			$attributesOrderBy = ' a.options_id, a.options_values_id ';
+			$attributesOrderBy = ' options_id, options_values_id ';
 		}
 		if (!empty ($this->optionsWhitelist)) {
-			$optConstr = 'AND a.options_id IN ("'.implode('", "', $this->optionsWhitelist).'")';
+			$optConstr = 'AND options_id IN ("'.implode('", "', $this->optionsWhitelist).'")';
 		} else {
 			$optConstr = '';
 		}
 		$attributes = $GLOBALS['SDB']->fetchArray('
-		    SELECT DISTINCT a.* 
-		      FROM '.TABLE_PRODUCTS_ATTRIBUTES.' a
-		      INNER JOIN '.TABLE_PRODUCTS_OPTIONS.' o on a.options_id = o.products_options_id
-		      INNER JOIN '.TABLE_PRODUCTS_OPTIONS_VALUES.' v ON a.options_values_id = v.products_options_values_id
-		     WHERE a.products_id='.$pID.'
+		    SELECT * 
+		      FROM '.TABLE_PRODUCTS_ATTRIBUTES.'
+		     WHERE products_id='.$pID.'
 		           '.$optConstr.'
 		  ORDER BY '.$attributesOrderBy.'
 		');

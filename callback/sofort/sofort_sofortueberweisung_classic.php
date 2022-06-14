@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: sofort_sofortueberweisung_classic.php 11380 2018-07-30 14:21:06Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,7 +10,7 @@
  	 based on:
 	  (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
 	  (c) 2002-2003 osCommerce - www.oscommerce.com
-	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers - http://www.themedia.at & http://www.oscommerce.at
+	  (c) 2001-2003 TheMedia, Dipl.-Ing Thomas Plänkers - http://www.themedia.at & http://www.oscommerce.at
 	  (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com
     (c) 2010 Payment Network AG - http://www.payment-network.com
 
@@ -23,9 +23,6 @@ require_once('includes/application_top.php');
 // include needed classes
 require_once(DIR_WS_CLASSES.'order.php');
 require_once(DIR_FS_EXTERNAL.'sofort/classes/sofortLibNotificationClassic.inc.php');
-
-// include autoloader
-require_once(DIR_FS_EXTERNAL.'sofort/autoload.php');
 
 // set callback type
 $sofort_code = substr(basename($PHP_SELF), 0, -4);
@@ -112,5 +109,14 @@ if (xtc_db_num_rows($orders_query) == 1) {
   // order is missing
   header("HTTP/1.0 404 Not Found");
   header("Status: 404 Not Found");
+  
+  /*
+  if(constant('MODULE_PAYMENT_'.strtoupper($sofort_code).'_TMP_ORDER') == 'False') {
+    // wait before redirect
+    sleep(3);
+    
+    xtc_redirect($sofortLibNotification->getUserVariable(2).'&nonexistorder=true');
+  }
+  */
 
 }

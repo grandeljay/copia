@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: version.php 13499 2021-04-01 16:14:59Z Tomcraft $
+   $Id: version.php 10402 2016-11-09 15:25:16Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -8,18 +8,13 @@
    Copyright (c) 2009 - 2013 [www.modified-shop.org] 
    --------------------------------------------------------------*/
 
-// DB version, used for updates (_installer)
-define('DB_VERSION', 'MOD_2.0.6.0'); // ToDo before release!
-
 define('PROJECT_MAJOR_VERSION', '2');
-define('PROJECT_MINOR_VERSION', '0.6.0');
-define('PROJECT_REVISION', '13500'); // ToDo before release!
-define('PROJECT_SERVICEPACK_VERSION', ''); // currently not in use since new version numbers
-define('PROJECT_RELEASE_DATE', '2021-04-01'); // ToDo before release!
+define('PROJECT_MINOR_VERSION', '0.1.0');
+define('PROJECT_REVISION', '10403'); // ToDo before release!
+define('PROJECT_SERVICEPACK_VERSION', '');
+define('PROJECT_RELEASE_DATE', '2016-11-09'); // ToDo before release!
 define('MINIMUM_DB_VERSION', '200'); // currently not in use
 
 // Define the project version
-$version = 'modified eCommerce Shopsoftware v' . PROJECT_MAJOR_VERSION . '.' . PROJECT_MINOR_VERSION . ' rev ' . PROJECT_REVISION . ((PROJECT_SERVICEPACK_VERSION != '') ? ' SP' . PROJECT_SERVICEPACK_VERSION : ''). ' dated: ' . PROJECT_RELEASE_DATE;
-defined('PROJECT_VERSION') OR define('PROJECT_VERSION', $version);
-
-define('PROJECT_VERSION_NO', PROJECT_MAJOR_VERSION . '.' . PROJECT_MINOR_VERSION);
+$version = 'modified eCommerce Shopssoftware v' . PROJECT_MAJOR_VERSION . '.' . PROJECT_MINOR_VERSION . ' rev ' . PROJECT_REVISION . ((PROJECT_SERVICEPACK_VERSION != '') ? ' SP' . PROJECT_SERVICEPACK_VERSION : ''). ' dated: ' . PROJECT_RELEASE_DATE;
+define('PROJECT_VERSION', $version);

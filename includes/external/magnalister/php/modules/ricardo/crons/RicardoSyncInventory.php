@@ -23,10 +23,6 @@ defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 require_once(DIR_MAGNALISTER_MODULES.'magnacompatible/crons/MagnaCompatibleSyncInventory.php');
 
 class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
-
-	// process every item only once (all variations are checked each time)
-	protected $itemsProcessed = array();
-
 	protected function identifySKU() {
 		if (!empty($this->cItem['MasterSKU'])) {
 			$this->cItem['pID'] = (int)magnaSKU2pID($this->cItem['MasterSKU'], true);
@@ -45,7 +41,7 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 		));
 	}
 
-	protected function updateItem() {
+	protected function updateItem() {	
 		$this->cItem['SKU'] = trim($this->cItem['SKU']);
 		if (empty($this->cItem['SKU'])) {
 			$this->log("\nItemID " . $this->cItem['ItemID'] . ' has an emtpy SKU.');
@@ -64,11 +60,6 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 			$this->log("\n" . $title . ' found (pID: ' . $this->cItem['pID'] . ')');
 		}
 
-		if (in_array($this->cItem['pID'], $this->itemsProcessed)) {
-			$this->log("\n" . $title . ' already processed.');
-			return;
-		}
-
 		// Get lang
 		$langs = getDBConfigValue($this->marketplace.'.lang', $this->mpID);
 
@@ -82,7 +73,6 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 
 		$bSyncStock = ($this->config['StockSync'] != 'no');
 		$bSyncPrice = ($this->config['PriceSync'] != 'no');
-		$bLeadTimeToShipSync = ($this->config['LeadTimeToShipSync'] === true);
 		$data['Process'] = false;
 
 		$data = array();
@@ -90,12 +80,6 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 		$data['SKU'] = magnaPID2SKU($product['ProductId']);
 
 		if ($bSyncStock) {
-            if (   ($this->config['StatusMode'] === 'true')
-                && ($product['Status'] == 0)
-            ) {
-                $product['QuantityTotal'] = 0;
-                $product['Quantity'] = 0;
-            }
 			// Check Quantity variants or master. QuantityTotal is only set if product has variants
 			if ((isset($this->cItem['Variations']) && isset($product['Variations'])) && isset($product['QuantityTotal'])) {
 				$data['IncreaseQuantity'] = false;
@@ -118,7 +102,6 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 
 		$productTax = SimplePrice::getTaxByPID($this->cItem['pID']);
 		$taxFromConfig = getDBConfigValue($this->marketplace . '.checkin.mwst', $this->mpID);
-		$priceSignalConfig = getDBConfigValue($this->marketplace . '.price.signal', $this->mpID);
 		if ($bSyncPrice) {
 			// Check Price master
 			if (isset($this->cItem['Variations']) === false) {
@@ -127,22 +110,13 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 				// If PriceReduced is set use this one
 				if (isset($product['PriceReduced']['Price'])) {
 					$price = $product['PriceReduced']['Price'];
-				}
+				}								
 				
 				if (isset($taxFromConfig) && $taxFromConfig !== '') {
                     $price = $price * 100 / (100 + $productTax);
                     $price = round($price * (($taxFromConfig + 100) / 100), 2);
-					$price = $this->makeSignalPrice($price, $priceSignalConfig);
                 }
 
-                //Check if last digit (second decimal) is 0 or 5. If not set 5 as default last digit
-                $price =
-                    ((int)($price * 100) % 5) == 0
-                        ? $price
-                        : ((int)($price * 10) / 10) + 0.05
-                ;
-
-				$price = round($price, 2);
 				// If price is lower, update it
 				if (isset($price) && (float)$price != (float)$this->cItem['Price']) {
 					$data['Price'] = $price;
@@ -177,11 +151,6 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 				}
 
 				if ($bSyncStock) {
-                    if (   ($this->config['StatusMode'] === 'true')
-                        && ($product['Status'] == 0)
-                    ) {
-                        $variantData['Quantity'] = 0;
-                    }
 					$variant['Quantity'] = $variantData['Quantity'];
 					$variant['Process'] = true;
 					$variant['IncreaseQuantity'] = false;
@@ -201,17 +170,8 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 					if (isset($taxFromConfig) && $taxFromConfig !== '') {
 						$price = $price * 100 / (100 + $productTax);
 						$price = round($price * (($taxFromConfig + 100) / 100), 2);
-						$price = $this->makeSignalPrice($price, $priceSignalConfig);
 					}
 
-                    //Check if last digit (second decimal) is 0 or 5. If not set 5 as default last digit
-                    $price =
-                        ((int)($price * 100) % 5) == 0
-                            ? $price
-                            : ((int)($price * 10) / 10) + 0.05
-                    ;
-
-					$price = round($price, 2);
 					if ((float)$price !== (float)$cVariation['Price']) {
 						$variant['Price'] = $price;
 						$variant['Process'] = true;
@@ -295,7 +255,7 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 				}
 			}
 		}
-		
+
 		if (isset($this->cItem['Variations']) === true) {
 			// Variation product update
 			$variationsToUpdate = array();
@@ -304,11 +264,6 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 					unset($variation['Process']);
 					unset($variation['Variation']);
 					$variation['ParentSKU'] = $data['SKU'];
-					foreach ($product['Variations'] as $aShopVariantData) {
-						if ($bLeadTimeToShipSync && $variation['SKU'] == $aShopVariantData[((getDBConfigValue('general.keytype', '0') == 'artNr') ? 'MarketplaceSku' : 'MarketplaceId')]) {
-							$variation['ShippingTime'] = $this->getShippingTime($product['ShippingTimeId']);
-						}
-					}
 					$variationsToUpdate[] = $variation;
 				}
 			}
@@ -319,36 +274,10 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 		} else if ($data['Process'] === true) {
 			// Simple product update
 			unset($data['Process']);
-			if ($bLeadTimeToShipSync) {
-                $data['ShippingTime'] = $this->getShippingTime($product['ShippingTimeId']);
-			}
 			$this->updateItems(array($data));
 		}
-		$this->itemsProcessed[] = $this->cItem['pID'];
 	}
 	
-	protected function getShippingTime ($iShippingTimeId) {	
-		$iDefaultShippingTime = getDBConfigValue($this->marketplace.'.checkin.availability', $this->mpID, false);
-		return
-			getDBConfigValue(array($this->marketplace.'.leadtimetoshipmatching.prefer', 'val'), $this->mpID, false)
-			? getDBConfigValue(
-				array($this->marketplace.'.leadtimetoshipmatching.values', $iShippingTimeId),
-				$this->mpID,
-				$iDefaultShippingTime
-			)
-			: $iDefaultShippingTime
-		;
-	}
-	
-	protected function getConfigKeys() {
-        $aParent = parent::getConfigKeys();
-        $aParent['LeadTimeToShipSync'] = array(
-            'key' => array('inventorysync.leadtimetoship', 'val'),
-            'default' => false,
-        );
-        return $aParent;
-    }
-    
 	protected function isAutoSyncEnabled() {
 		$this->syncStock = ($this->config['StockSync'] == 'auto') || ($this->config['StockSync'] == 'auto_reduce')  || ($this->config['StockSync'] == 'auto_fast');
 		$this->syncPrice = ($this->config['PriceSync'] == 'auto') || ($this->config['PriceSync'] == 'auto_reduce');
@@ -365,20 +294,5 @@ class RicardoSyncInventory extends MagnaCompatibleSyncInventory {
 			'Sync price: '.($this->syncPrice ? 'true' : 'false')." ==\n"
 		);
 		return true;
-	}
-
-	private function makeSignalPrice($price, $decimalDigits) {
-		if (empty($decimalDigits)) {
-			return $price;
-		}
-
-		//If price signal is single digit then just add price signal as last digit
-		if (strlen((string)$decimalDigits) == 1) {
-			$price = (0.1 * (int)($price * 10)) + ($decimalDigits / 100);
-		} else {
-			$price = ((int)$price) + ($decimalDigits / 100);
-		}
-
-		return $price;
 	}
 }

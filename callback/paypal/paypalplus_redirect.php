@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypalplus_redirect.php 12388 2019-11-08 09:25:40Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,14 +21,6 @@ require (DIR_WS_INCLUDES.'checkout_requirements.php');
 
 // include needed classes
 require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalPayment.php');                                      
-
-// load the selected shipping module
-require_once (DIR_WS_CLASSES . 'shipping.php');
-$shipping_modules = new shipping($_SESSION['shipping']);
-
-// order
-require_once (DIR_WS_CLASSES . 'order.php');
-$order = new order();
 
 $found = false;
 $selection = get_third_party_payments();

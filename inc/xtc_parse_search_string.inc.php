@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_parse_search_string.inc.php 13450 2021-03-05 16:29:46Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -16,7 +16,7 @@
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
    
-  function xtc_parse_search_string($search_str, &$objects) {
+  function xtc_parse_search_string($search_str = '', &$objects) {
     $search_str = trim(strtolower($search_str));
 
     // Break up $search_str on whitespace; quoted string will be reconstructed later
@@ -69,7 +69,7 @@
           // Turn the flag off for future iterations
           $flag = 'off';
 
-          $objects[] = trim($tmpstring);
+          $objects[] = trim($pieces[$k]);
 
           for ($j=0, $x=count($post_objects); $j<$x; $j++) {
             $objects[] = $post_objects[$j];

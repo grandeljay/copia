@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: tax_eel.php 11599 2019-03-21 16:05:39Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -52,8 +52,7 @@ class tax_eel {
     $this->code = 'tax_eel';
     $this->title = MODULE_TAX_EEL_TEXT_TITLE;
     $this->description = MODULE_TAX_EEL_TEXT_DESCRIPTION;
-    $this->enabled = ((defined('MODULE_TAX_EEL_STATUS') && MODULE_TAX_EEL_STATUS == 'true') ? true : false);
-    $this->sort_order = '';
+    $this->enabled = ((MODULE_TAX_EEL_STATUS == 'true') ? true : false);
   }
  
   function process() {

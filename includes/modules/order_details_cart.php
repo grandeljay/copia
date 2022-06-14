@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: order_details_cart.php 11768 2019-04-12 16:27:37Z GTB $
+   $Id: order_details_cart.php 9941 2016-06-07 06:27:47Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -47,9 +47,6 @@ $hidden_options = '';
 
 $products = $_SESSION['cart']->get_products();
 for ($i = 0, $n = sizeof($products); $i < $n; $i ++) {
-  foreach((array)$products[$i] as $key => $entry) {
-    $module_content[$i]['PRODUCTS_'.strtoupper($key)] = $entry;
-  }
 
   if (STOCK_CHECK == 'true') {
     $mark_stock = xtc_check_stock($products[$i]['id'], $products[$i]['quantity']);
@@ -72,8 +69,8 @@ for ($i = 0, $n = sizeof($products); $i < $n; $i ++) {
 
   $del_button = '<a href="' . xtc_href_link(FILENAME_SHOPPING_CART, 'action=remove_product&prd_id=' . $products[$i]['id'], 'NONSSL') . '">' . xtc_image_button('cart_del.gif', IMAGE_BUTTON_DELETE) . '</a>';
   $del_link = '<a href="' . xtc_href_link(FILENAME_SHOPPING_CART, 'action=remove_product&prd_id=' . $products[$i]['id'], 'NONSSL') . '">' . IMAGE_BUTTON_DELETE . '</a>';
-    
-  $module_content_add = array(
+
+  $module_content[$i] = array(
     'PRODUCTS_NAME' => $products[$i]['name'].$mark_stock,
     'PRODUCTS_QTY' => xtc_draw_input_field('cart_quantity[]', $products[$i]['quantity'], 'size="2"').
                       xtc_draw_hidden_field('products_id[]', $products[$i]['id']).
@@ -84,7 +81,7 @@ for ($i = 0, $n = sizeof($products); $i < $n; $i ++) {
     'PRODUCTS_IMAGE' => $image, 
     'IMAGE_ALT' => $products[$i]['name'],
     'BOX_DELETE' => xtc_draw_checkbox_field('cart_delete[]', $products[$i]['id']), 
-    'PRODUCTS_LINK' => xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$products[$i]['id']), 
+    'PRODUCTS_LINK' => xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($products[$i]['id'], $products[$i]['name'])), 
     'BUTTON_DELETE' => $del_button,
     'LINK_DELETE' => $del_link,                  
     'PRODUCTS_PRICE' => $xtPrice->xtcFormat($products[$i]['final_price'], true), // $products[$i]['final_price'] is quantity * plain price including attributes_price
@@ -93,17 +90,15 @@ for ($i = 0, $n = sizeof($products); $i < $n; $i ++) {
     'PRODUCTS_SINGLE_WEIGHT' => $products[$i]['weight'], //$products[$i]['final_weight']  single products_weight including attributes_weight
     'PRODUCTS_SHORT_DESCRIPTION' => xtc_get_short_description($products[$i]['id']), 
     'BUTTON_WISHLIST' => $product->getCartToWishlistLink($products[$i]['id'], $products[$i]['name']), 
-    'ATTRIBUTES' => array(),
+    'ATTRIBUTES' => '',
   );
-  $module_content[$i] = array_merge($module_content[$i], $module_content_add);
-  
+
   foreach(auto_include(DIR_FS_CATALOG.'includes/extra/modules/order_details_cart_content/','php') as $file) require ($file);
-  
   //products attributes
   if (isset ($products[$i]['attributes']) && is_array($products[$i]['attributes'])) {
     $subindex = 0;
     reset($products[$i]['attributes']);
-    foreach ($products[$i]['attributes'] as $option => $value) {
+    while (list ($option, $value) = each($products[$i]['attributes'])) {
       $hidden_options .= xtc_draw_hidden_field('id['.$products[$i]['id'].']['.$option.']', $value);
 
       $attributes = $main->getAttributes($products[$i]['id'],$option,$value);

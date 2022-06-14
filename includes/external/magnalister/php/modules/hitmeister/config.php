@@ -26,13 +26,13 @@ if (!isset($_MagnaSession)) {
 
 require(DIR_MAGNALISTER_MODULES.'magnacompatible/config.php');
 
-$mpconfig['auth']['authkeys'] = array('clientkey', 'secretkey');
+$mpconfig['auth']['authkeys'] = array('clientkey', 'secretkey', 'mpusername', 'mppassword');
 
 $mpconfig['pages']['conf']['class'] = 'HitmeisterConfigure';
 $mpconfig['pages']['prepare']['class'] = 'HitmeisterPrepare';
 
 $mpconfig['checkin']['Categories']['Marketplace'] = 'no';
-$mpconfig['checkin']['Variations'] = 'yes';
+$mpconfig['checkin']['Variations'] = 'no';
 
 if (false === getDBConfigValue('hitmeister.imagepath', $_MagnaSession['mpID'], false)) {
 	$form['prepare']['fields']['imagepath']['default'] = defined('DIR_WS_CATALOG_POPUP_IMAGES')

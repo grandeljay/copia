@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: set_customers_status_by_id.inc.php 12440 2019-12-02 17:54:12Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -12,11 +12,11 @@
 
 
   function set_customers_status_by_id($customers_status_id) {
-    $customers_status_query = xtDBquery("SELECT *
-                                           FROM " . TABLE_CUSTOMERS_STATUS . "
-                                          WHERE customers_status_id = '" . (int)$customers_status_id . "'
-                                            AND language_id = '" . (int)$_SESSION['languages_id'] . "'");
+    $customers_status_query = xtc_db_query("SELECT *
+                                              FROM " . TABLE_CUSTOMERS_STATUS . "
+                                             WHERE customers_status_id = '" . (int)$customers_status_id . "'
+                                               AND language_id = '" . (int)$_SESSION['languages_id'] . "'");
     
-    $_SESSION['customers_status'] = xtc_db_fetch_array($customers_status_query, true);
+    $_SESSION['customers_status'] = xtc_db_fetch_array($customers_status_query);
   }
 ?>

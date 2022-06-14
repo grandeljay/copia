@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_gv.php 13141 2021-01-11 11:55:49Z Tomcraft $
+   $Id: ot_gv.php 899 2005-04-29 02:40:57Z hhgag $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -25,9 +25,11 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-  define('MODULE_ORDER_TOTAL_GV_TITLE', 'Gift Voucher');
-  define('MODULE_ORDER_TOTAL_GV_HEADER', 'Gift Voucher');
-  define('MODULE_ORDER_TOTAL_GV_DESCRIPTION', 'Gift Voucher');
+  define('MODULE_ORDER_TOTAL_GV_TITLE', 'Gift Vouchers');
+  define('MODULE_ORDER_TOTAL_GV_HEADER', 'Gift Vouchers');
+  define('MODULE_ORDER_TOTAL_GV_DESCRIPTION', 'Gift Vouchers');
+  define('SHIPPING_NOT_INCLUDED', ' [Shipping not included]');
+  define('TAX_NOT_INCLUDED', ' [Tax not included]');
   define('MODULE_ORDER_TOTAL_GV_USER_PROMPT', 'Tick to use Gift Voucher account balance ->&nbsp;');
   define('TEXT_ENTER_GV_CODE', 'Enter Redeem Code&nbsp;&nbsp;');
   
@@ -47,6 +49,4 @@
   define('MODULE_ORDER_TOTAL_GV_TAX_CLASS_DESC', 'Use the following tax class when treating Gift Voucher as Credit Note.');
   define('MODULE_ORDER_TOTAL_GV_CREDIT_TAX_TITLE', 'Credit including Tax');
   define('MODULE_ORDER_TOTAL_GV_CREDIT_TAX_DESC', 'Add tax to purchased Gift Voucher when crediting to Account');
-  define('MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT_TITLE', 'Disallowed Payment Modules');
-  define('MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT_DESC', '<strong>DISALLOWED</strong> payment modules for gift products.');
 ?>

@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: logs.php 13259 2021-01-31 10:44:32Z GTB $
+   $Id: logs.php 10141 2016-07-26 08:54:37Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -32,7 +32,7 @@
         break;
         
       case 'deleteconfirm':
-        if (strpos($_GET['file'], '..')) {
+        if (strstr($_GET['file'], '..')) {
           xtc_redirect(xtc_href_link(FILENAME_LOGS));
         }
 
@@ -133,10 +133,10 @@
                               $buInfo = new objectInfo($file_array);
                             }
                             if (isset($buInfo) && is_object($buInfo) && ($entry == $buInfo->file)) {
-                              echo '<tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'">' . "\n";
+                              echo '              <tr class="dataTableRowSelected" onmouseover="this.style.cursor=\'pointer\'">' . "\n";
                               $onclick_link = 'file=' . $buInfo->file . '&action=download';
                             } else {
-                              echo '<tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'">' . "\n";
+                              echo '              <tr class="dataTableRow" onmouseover="this.className=\'dataTableRowOver\';this.style.cursor=\'pointer\'" onmouseout="this.className=\'dataTableRow\'">' . "\n";
                               $onclick_link = 'file=' . $entry;
                             }
                             ?>

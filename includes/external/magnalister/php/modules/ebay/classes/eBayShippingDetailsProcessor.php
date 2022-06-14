@@ -35,7 +35,7 @@ class eBayShippingDetailsProcessor {
 		$this->args = $args;
 		if (isset($this->args['content'])) {
 			foreach($this->args['content'] as $service) {
-				if (array_key_exists('ShipToLocation', $service)) {
+				if (isset($service['ShipToLocation'])) {
 					$this->args['international'] = true;
 				} else {
 					$this->args['international'] = false;

@@ -1,7 +1,6 @@
 <?php
-
 /* -----------------------------------------------------------------------------------------
-   $Id: modified_seo_url.php 11122 2018-04-16 06:11:49Z GTB $
+   $Id: modified_seo_url.php 9894 2016-05-30 14:30:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -11,22 +10,21 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-defined('SPECIAL_CHAR_FR') or define('SPECIAL_CHAR_FR', true);
-defined('SPECIAL_CHAR_ES') or define('SPECIAL_CHAR_ES', true);
-defined('SPECIAL_CHAR_PL') or define('SPECIAL_CHAR_PL', true);
-defined('SPECIAL_CHAR_CZ') or define('SPECIAL_CHAR_CZ', true);
-defined('SPECIAL_CHAR_MORE') or define('SPECIAL_CHAR_MORE', true);
+defined('SPECIAL_CHAR_FR') OR define('SPECIAL_CHAR_FR', true);
+defined('SPECIAL_CHAR_ES') OR define('SPECIAL_CHAR_ES', true);
+defined('SPECIAL_CHAR_PL') OR define('SPECIAL_CHAR_PL', true);
+defined('SPECIAL_CHAR_CZ') OR define('SPECIAL_CHAR_CZ', true);
+defined('SPECIAL_CHAR_MORE') OR define('SPECIAL_CHAR_MORE', true);
 
 
-class modified_seo_url
-{
+class modified_seo_url {
 
   /**
    * instance
    *
    * @var Singleton
    */
-    protected static $_instance = null;
+  protected static $_instance = null;
 
 
   /**
@@ -34,31 +32,31 @@ class modified_seo_url
    *
    * @var host array
    */
-    public static $language = array();
+  public static $language = array();
 
   /**
    * links
    *
    * @var links array
    */
-    public static $names_array = array(
+  public static $names_array = array(
     'categories' => array(),
     'products' => array(),
     'content' => array(),
     'manufacturers' => array(),
-    );
+  );
 
   /**
    * links
    *
    * @var links array
    */
-    public static $links_array = array(
+  public static $links_array = array(
     'categories' => array(),
     'products' => array(),
     'content' => array(),
     'manufacturers' => array(),
-    );
+  );
 
 
   /**
@@ -66,7 +64,7 @@ class modified_seo_url
    *
    * @var host array
    */
-    public static $host_array = array();
+  public static $host_array = array();
 
 
   /**
@@ -74,67 +72,62 @@ class modified_seo_url
    *
    * @return   Singleton
    */
-    public static function getInstance()
-    {
+  public static function getInstance() {
 
-        if (null === self::$_instance) {
-            self::$_instance = new self();
-        }
-
-        return self::$_instance;
+    if (null === self::$_instance) {
+      self::$_instance = new self;
     }
+
+    return self::$_instance;
+  }
 
 
   /**
    * clone
    */
-    protected function __clone()
-    {
-    }
+  protected function __clone() {}
 
 
   /**
    * constructor
    */
-    protected function __construct()
-    {
-
-        self::get_languages();
-    }
+  protected function __construct() {
+  
+    self::get_languages();
+  }
 
   /**
    * get host
    *
    * @return host
    */
-    protected function get_host($connection)
+  protected function get_host($connection) {
+
+    $host = HTTP_SERVER;
+
+    if ($connection == 'SSL'
+        && ENABLE_SSL == true
+        )
     {
+      $host = HTTPS_SERVER;
+    }
+      
+    self::$host_array[$this->language_id][$connection] = $host.DIR_WS_CATALOG;
 
-        $host = HTTP_SERVER;
-
-        if (
-            $connection == 'SSL'
-            && ENABLE_SSL == true
-        ) {
-            $host = HTTPS_SERVER;
-        }
-
-        self::$host_array[$this->language_id][$connection] = $host . DIR_WS_CATALOG;
-
-        if (
-            defined('ADD_LANGUAGE_TO_LINK')
-            && ADD_LANGUAGE_TO_LINK === true
-            && (!defined('ADD_DEFAULT_LANGUAGE_TO_LINK')
+    if (defined('ADD_LANGUAGE_TO_LINK')
+        && ADD_LANGUAGE_TO_LINK === true
+        && (!defined('ADD_DEFAULT_LANGUAGE_TO_LINK')
             || (ADD_DEFAULT_LANGUAGE_TO_LINK == true
                 || (ADD_DEFAULT_LANGUAGE_TO_LINK === false
                     && DEFAULT_LANGUAGE != self::$language[$this->language_id]
                     )
                 )
             )
-        ) {
-            self::$host_array[$this->language_id][$connection] .= self::$language[$this->language_id] . '/';
-        }
+        )
+    {
+      self::$host_array[$this->language_id][$connection] .= self::$language[$this->language_id].'/';
     }
+  }
 
 
   /**
@@ -142,12 +135,11 @@ class modified_seo_url
    *
    * @return cleared link
    */
-    protected function seo_url_href_mask($link)
-    {
-        include_once(DIR_FS_INC . 'seo_url_href_mask.php');
-
-        return seo_url_href_mask($link, true);
-    }
+  protected function seo_url_href_mask($link) {
+    include_once (DIR_FS_INC . 'seo_url_href_mask.php');
+  
+    return seo_url_href_mask($link);
+  }
 
 
   /**
@@ -155,17 +147,16 @@ class modified_seo_url
    *
    * @return language id
    */
-    protected function get_languages()
-    {
-
-        require_once(DIR_WS_CLASSES . 'language.php');
-        $lang = new language();
-
-        foreach ($lang->catalog_languages as $code => $values) {
-            self::$language[$code] = $lang->catalog_languages[$code]['id'];
-            self::$language[$lang->catalog_languages[$code]['id']] = $code;
-        }
+  protected function get_languages() {
+  
+    require_once(DIR_WS_CLASSES.'language.php');
+    $lang = new language();
+  
+    foreach ($lang->catalog_languages as $code => $values) {
+      self::$language[$code] = $lang->catalog_languages[$code]['id'];
+      self::$language[$lang->catalog_languages[$code]['id']] = $code;     
     }
+  }
 
 
   /**
@@ -173,7 +164,7 @@ class modified_seo_url
    *
    * @return SEO link
    */
-    public function create_link($page = '', $parameters = '', $connection = 'NONSSL')
-    {
-    }
+  public function create_link($page = '', $parameters = '', $connection = 'NONSSL') {}
+
 }
+?>

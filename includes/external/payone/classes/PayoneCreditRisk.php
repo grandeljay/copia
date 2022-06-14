@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayoneCreditRisk.php 11487 2019-01-30 09:33:19Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -43,7 +43,7 @@ class PayoneCreditRisk {
  
     $hidden = xtc_draw_hidden_field('p1crcheck', 'true').PHP_EOL;
     foreach ($_POST as $key => $value) {
-      if (!isset(${$key}) || !is_object(${$key})) {
+      if (!is_object(${$key})) {
         $hidden .= xtc_draw_hidden_field($key, $value).PHP_EOL;
       }
     }

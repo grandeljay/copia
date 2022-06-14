@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: ot_gv.php 13141 2021-01-11 11:55:49Z Tomcraft $
+   $Id: ot_gv.php 899 2005-04-29 02:40:57Z hhgag $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -25,9 +25,11 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-  define('MODULE_ORDER_TOTAL_GV_TITLE', 'Gutschein');
-  define('MODULE_ORDER_TOTAL_GV_HEADER', 'Gutschein');
-  define('MODULE_ORDER_TOTAL_GV_DESCRIPTION', 'Gutschein');
+  define('MODULE_ORDER_TOTAL_GV_TITLE', 'Gutscheine');
+  define('MODULE_ORDER_TOTAL_GV_HEADER', 'Gutscheine');
+  define('MODULE_ORDER_TOTAL_GV_DESCRIPTION', 'Gutscheine');
+  define('SHIPPING_NOT_INCLUDED', ' [Versand nicht enthalten]');
+  define('TAX_NOT_INCLUDED', ' [MwSt. nicht enthalten]');
   define('MODULE_ORDER_TOTAL_GV_USER_PROMPT', 'Anw&auml;hlen, wenn Sie Ihr Guthaben verwenden m&ouml;chten');
   define('TEXT_ENTER_GV_CODE', 'Geben Sie bitte hier Ihren Gutscheincode ein &nbsp;&nbsp;');
 
@@ -47,6 +49,4 @@
   define('MODULE_ORDER_TOTAL_GV_TAX_CLASS_DESC', 'Folgenden MwSt. Satz benutzen, wenn Sie den Gutschein als Gutschrift verwenden.');
   define('MODULE_ORDER_TOTAL_GV_CREDIT_TAX_TITLE', 'Guthaben enth&auml;lt MwSt.');
   define('MODULE_ORDER_TOTAL_GV_CREDIT_TAX_DESC', 'MwSt. dem Gutscheinwert anrechnen');
-  define('MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT_TITLE', 'Unerlaubte Zahlungsmodule');
-  define('MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT_DESC', '<strong>NICHT</strong> erlaubte Zahlungsweisen f&uuml;r Gutscheine.');
 ?>

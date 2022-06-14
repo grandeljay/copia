@@ -38,16 +38,15 @@ class MeinpaketApiConfigValues extends MagnaCompatibleApiConfigValues {
 	
 	public function getAvailableVariantConfigurations() {
 		$data = $this->fetchDataFromApi('GetAvailableVariantConfigurations');
-		return array_merge(array('splitAll' => array('Name' => ML_MEINPAKET_DO_NOT_USE_VARIATIONS)), $data);
+		return $data;
 	}
 	
 	public function getVariantConfigurationDefinition($which) {
-		$data = $this->fetchDataFromApi('GetCategoryDetails', array (
+		$data = $this->fetchDataFromApi('GetVariantConfigurationDefinition', array (
 			'DATA' => array (
-				'CategoryID' => $which,
+				'Code' => $which,
 			)
-		), false);
-
+		));
 		return $data;
 	}
 }

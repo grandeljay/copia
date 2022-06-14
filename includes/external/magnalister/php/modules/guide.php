@@ -42,16 +42,16 @@ if ('de' == $_langISO) {
 		-moz-box-sizing: border-box; box-sizing: border-box; -webkit-box-sizing: border-box; 
 		min-height: 500px;
 		margin-bottom: 5px;" 
-	src="//otrs.magnalister.com/otrs/public.pl?Action=PublicFAQExplorer;CategoryID=5">
-	<a href="https://otrs.magnalister.com/otrs/public.pl?Action=PublicFAQExplorer;CategoryID=5">https://otrs.magnalister.com/otrs/public.pl?Action=PublicFAQExplorer;CategoryID=5</a>
+	src="http://wiki.magnalister.com/wiki/Hauptseite">
+	<a href="http://wiki.magnalister.com/wiki/Hauptseite">http://wiki.magnalister.com/</a>
 </iframe>
 
 <script>/*<![CDATA[*/
-$(window.top).resize(function() {
-	$('#wikiframe').css('height', ($(window.top).innerHeight() - 10)+'px');
+$(window).resize(function() {
+	$('#wikiframe').css('height', ($(window).innerHeight() - 10)+'px');
 });
 $(window).load(function() {
-	$(window.top).resize();
+	$(window).resize();
 });
 /*]]>*/</script>
 

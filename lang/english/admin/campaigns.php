@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: campaigns.php 12670 2020-03-24 11:00:54Z Tomcraft $   
+   $Id: campaigns.php 10107 2016-07-20 08:35:11Z GTB $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -38,8 +38,6 @@ define('TEXT_CAMPAIGNS_REFID', 'Campaigns refID:');
 define('TEXT_DISPLAY_NUMBER_OF_CAMPAIGNS', 'Tracked campaigns:');
 
 define('TEXT_DELETE_INTRO', 'Are you sure you want to delete the campaign?');
-define('TEXT_DELETE_REFFERERS', 'Delete Conversions');
-define('TEXT_DELETE_WARNING_REFFERERS', 'Delete all conversions for this campaign?');
 
 define('TEXT_CAMPAIGNS_ERROR_REFID', 'refID is invalid');
 define('TEXT_CAMPAIGNS_ERROR_REFID_EXISTS', 'refID is already in use');

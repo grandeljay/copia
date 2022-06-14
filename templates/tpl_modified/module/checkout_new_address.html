@@ -1,7 +1,5 @@
-{config_load file="$language/lang_$language.conf" section="address_book_process"}
 {config_load file="$language/lang_$language.conf" section="checkout_new_address"}
 {config_load file="lang_`$language`.custom"}
-{config_load file="lang_`$language`.section" section="address_book_process"}
 {config_load file="lang_`$language`.section" section="checkout_new_address"}
     <h4>{#title_new_address#} <span class="pflicht">({#text_must#})</span></h4>
     <p>{#text_new_address#}</p>
@@ -45,12 +43,12 @@
       </tr>
       {/if}
     </table>
-    {if $new == '1'}
     <br />
+    {if $new == '1'}
     <table>
       <tr>
         <td class="checkbox">{$CHECKBOX_PRIMARY}</td>
-        <td class="midi td_full"><label for="primary">{#text_standard#}</label></td>
+        <td class="midi td_full">{#text_standard#}</td>
       </tr>
     </table>
     {/if}

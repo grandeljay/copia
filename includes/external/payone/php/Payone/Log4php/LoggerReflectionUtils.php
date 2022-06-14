@@ -69,7 +69,7 @@ class Payone_Log4php_LoggerReflectionUtils {
 	public function setProperties($properties, $prefix) {
 		$len = strlen($prefix);
 		reset($properties);
-		foreach ($properties as $key => $value) {
+		while(list($key,) = each($properties)) {
 			if(strpos($key, $prefix) === 0) {
 				if(strpos($key, '.', ($len + 1)) > 0) {
 					continue;

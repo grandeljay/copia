@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: MagnaTestDB.php 3513 2014-02-12 22:14:53Z derpapst $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -46,13 +46,6 @@ class MagnaTestDB extends MagnaDB {
 			$object = MagnaDBDriver::fallbackEscape($tObject);
 		}
 		return $object;
-	}
-
-	/**
-	 * dummy, to prevent PHP errors
-	 */
-	public function affectedRows() {
-		return false;
 	}
 
 	/**

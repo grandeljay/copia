@@ -200,9 +200,8 @@ class BillpayOT
         global $order;
 
         /** @noinspection PhpIncludeInspection */
-        if (!function_exists('xtc_calculate_tax')) { //fix #1309
-          require_once(DIR_FS_INC . 'xtc_calculate_tax.inc.php');
-        }
+        require_once(DIR_FS_INC . 'xtc_calculate_tax.inc.php');
+
         $billpay_tax = xtc_get_tax_rate(constant($this->_configPrefix.'TAX_CLASS'), $order->delivery['country']['id'], $order->delivery['zone_id']);
         $value = xtc_calculate_tax($this->calculateFee($total), $billpay_tax);
         $value = round($value, 2);
@@ -307,7 +306,7 @@ class BillpayOT
             $default = (isset($val['default']) ? $val['default'] : '');
             $use = (isset($val['use_function']) ? $val['use_function'] : '');
             $set = (isset($val['set_function']) ? $val['set_function'] : '');
-            xtc_db_query("REPLACE INTO $table (configuration_key, configuration_value, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('$config_key', '$default', '6', '0', '$use', '$set', NOW())");
+            xtc_db_query("INSERT INTO $table (configuration_key, configuration_value, configuration_group_id, sort_order, use_function, set_function, date_added) VALUES ('$config_key', '$default', '6', '0', '$use', '$set', NOW())");
         }
         if (in_array($this->code, array('ot_billpaytc_surcharge', 'ot_z_paylater_fee', 'ot_z_paylater_total'))) {
             $this->ensureEnabled();

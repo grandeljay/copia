@@ -1,16 +1,15 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: coupon_admin.php 13346 2021-02-02 13:12:50Z GTB $
+   $Id: coupon_admin.php 1502 2010-11-16 18:13:52Z dokuman $
 
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
+   XT-Commerce - community made shopping
+   http://www.xt-commerce.com
 
-   Copyright (c) 2009 - 2013 [www.modified-shop.org]
+   Copyright (c) 2003 XT-Commerce
    -----------------------------------------------------------------------------------------
    based on:
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
    (c) 2002-2003 osCommerce(coupon_admin.php,v 1.1.2.5 2003/05/13); www.oscommerce.com
-   (c) 2006 XT-Commerce
 
    Released under the GNU General Public License
    -----------------------------------------------------------------------------------------
@@ -19,7 +18,7 @@
    Credit Class/Gift Vouchers/Discount Coupons (Version 5.10)
    http://www.oscommerce.com/community/contributions,282
    Copyright (c) Strider | Strider@oscworks.com
-   Copyright (c) Nick Stanko of UkiDev.com, nick@ukidev.com
+   Copyright (c  Nick Stanko of UkiDev.com, nick@ukidev.com
    Copyright (c) Andre ambidex@gmx.net
    Copyright (c) 2001,2002 Ian C Wilson http://www.phesis.org
 
@@ -76,7 +75,6 @@ define('COUPON_USES_COUPON', 'Uses per Coupon');
 define('COUPON_USES_USER', 'Uses per Customer');
 define('COUPON_PRODUCTS', 'Valid Product List');
 define('COUPON_CATEGORIES', 'Valid Categories List');
-define('COUPON_CUSTOMERS', 'Valid Customers Group List');
 define('VOUCHER_NUMBER_USED', 'Number Used');
 define('DATE_CREATED', 'Date Created');
 define('DATE_MODIFIED', 'Date Modified');
@@ -89,18 +87,17 @@ define('COUPON_AMOUNT_HELP', 'The value of the discount for the coupon, either f
 define('COUPON_CODE_HELP', 'You can enter your own code here, or leave blank for an auto generated one.');
 define('COUPON_STARTDATE_HELP', 'The date the coupon will be valid from.<br>');
 define('COUPON_FINISHDATE_HELP', 'The date the coupon expires.<br>');
-define('COUPON_FREE_SHIP_HELP', 'The coupon gives free shipping on an order.');
+define('COUPON_FREE_SHIP_HELP', 'The coupon gives free shipping on an order. Note. This overrides the coupon_amount figure but respects the minimum order value');
 define('COUPON_DESC_HELP', 'A description of the coupon for the customer');
 define('COUPON_MIN_ORDER_HELP', 'The minimum order value before the coupon is valid');
 define('COUPON_USES_COUPON_HELP', 'The maximum number of times the coupon can be used, leave blank if you want no limit.');
 define('COUPON_USES_USER_HELP', 'Number of times a user can use the coupon, leave blank for no limit.');
 define('COUPON_PRODUCTS_HELP', 'A comma separated list of Product IDs that this coupon can be used with. Leave blank for no restrictions.');
 define('COUPON_CATEGORIES_HELP', 'A comma separated list of Category IDs that this coupon can be used with, leave blank for no restrictions.');
-define('COUPON_CUSTOMERS_HELP', 'Choose the valid customers groups for this coupon.');
 
 define('COUPON_ID', 'cID');
 define('BUTTON_DELETE_NO_CONFIRM', 'Delete without confirmation');
-define('TEXT_NO_RESTRICTION', 'no restrictions');
+define('TEXT_NONE', 'no restrictions');
 define('TEXT_COUPON_DELETE', 'Delete');
 define('TEXT_COUPON_STATUS', 'Status');
 define('TEXT_COUPON_DETAILS', 'Coupon details');
@@ -130,6 +127,4 @@ define('ERROR_NO_COUPON_AMOUNT', 'ERROR: No Coupon Amount');
 define('COUPON_DATE_START_TT', 'Starting at 00:00:00');
 define('COUPON_DATE_END_TT', 'Ending at midnight (23:59:59)');
 define('ERROR_COUPON_DATE', 'ERROR: Expiry date is older than start date');
-
-define('TEXT_OT_COUPON_STATUS_INFO', 'The coupon module (ot_coupon) still needs to be installed (Module -> <a href="'.xtc_href_link('modules.php','set=ordertotal').'">Order Total</a>)');
 ?>

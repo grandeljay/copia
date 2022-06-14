@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: configuration.php 13409 2021-02-08 17:16:46Z GTB $
+   $Id: configuration.php 10257 2016-08-20 16:06:51Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -47,7 +47,7 @@ define('EXPECTED_PRODUCTS_FIELD_TITLE' , 'Expexted Products Sort Field');
 define('EXPECTED_PRODUCTS_FIELD_DESC' , 'The column to sort by in the expected products box.');
 
 define('USE_DEFAULT_LANGUAGE_CURRENCY_TITLE' , 'Switch to language specific currency');
-define('USE_DEFAULT_LANGUAGE_CURRENCY_DESC' , 'Automatically switch currency to customers country if currency is available.');
+define('USE_DEFAULT_LANGUAGE_CURRENCY_DESC' , 'Automatically switch to language specific currency when language is changed.');
 
 define('SEND_EXTRA_ORDER_EMAILS_TO_TITLE' , 'Send Copies of Order E-Mails to:');
 define('SEND_EXTRA_ORDER_EMAILS_TO_DESC' , 'Send copies of order e-mails to the following e-mail addresses, like: Name1 &lt;e-mail@address1&gt;, Name2 &lt;e-mail@address2&gt;');
@@ -69,6 +69,9 @@ define('STORE_NAME_ADDRESS_DESC' , 'Store details used for display and printing'
 
 define('SHOW_COUNTS_TITLE' , 'Display Number of Products after Category Name');
 define('SHOW_COUNTS_DESC' , 'Display number of products after each category name, counting products recursively');
+
+define('DISPLAY_PRICE_WITH_TAX_TITLE' , 'Display Prices with Tax');
+define('DISPLAY_PRICE_WITH_TAX_DESC' , 'Display prices with tax included (true) or add the tax at the end (false)');
 
 define('DEFAULT_CUSTOMERS_STATUS_ID_ADMIN_TITLE' , 'Customer Status of Administrators for the frontend');
 define('DEFAULT_CUSTOMERS_STATUS_ID_ADMIN_DESC' , 'Choose the default customer status for administrators for the frontend');
@@ -124,9 +127,9 @@ define('MAX_DISPLAY_PAGE_LINKS_DESC' , 'Number of "number" links use for page-se
 define('MAX_DISPLAY_SPECIAL_PRODUCTS_TITLE' , 'Specials');
 define('MAX_DISPLAY_SPECIAL_PRODUCTS_DESC' , 'Maximum number of products to display on special offer');
 define('MAX_DISPLAY_NEW_PRODUCTS_TITLE' , 'New Products Module');
-define('MAX_DISPLAY_NEW_PRODUCTS_DESC' , 'Maximum number of new products to display in a category and as "TOP-products" on startpage');
+define('MAX_DISPLAY_NEW_PRODUCTS_DESC' , 'Maximum number of new products to display in a category');
 define('MAX_DISPLAY_UPCOMING_PRODUCTS_TITLE' , 'Upcoming Products');
-define('MAX_DISPLAY_UPCOMING_PRODUCTS_DESC' , 'Maximum number of upcoming products to display on startpage');
+define('MAX_DISPLAY_UPCOMING_PRODUCTS_DESC' , 'Maximum number of upcoming products to display');
 define('MAX_DISPLAY_MANUFACTURERS_IN_A_LIST_TITLE' , 'Manufacturers List');
 define('MAX_DISPLAY_MANUFACTURERS_IN_A_LIST_DESC' , 'Used in manufacturers box; when the number of manufacturers exceeds this number, a drop-down list or list-box will be displayed instead of the default link-list (depends on what you entered in "Manufacturers Select Size").');
 define('MAX_MANUFACTURERS_LIST_TITLE' , 'Manufacturers Select Size');
@@ -144,15 +147,13 @@ define('MAX_RANDOM_SELECT_SPECIALS_DESC' , 'How many records to select from to c
 define('MAX_DISPLAY_CATEGORIES_PER_ROW_TITLE' , 'Categories To List Per Row');
 define('MAX_DISPLAY_CATEGORIES_PER_ROW_DESC' , 'How many categories to list per row');
 define('MAX_DISPLAY_PRODUCTS_NEW_TITLE' , 'New Products Listing');
-define('MAX_DISPLAY_PRODUCTS_NEW_DESC' , 'Maximum number of new products to display on "new products" (products_new.php) page');
+define('MAX_DISPLAY_PRODUCTS_NEW_DESC' , 'Maximum number of new products to display in new products page');
 define('MAX_DISPLAY_BESTSELLERS_TITLE' , 'Best Sellers');
 define('MAX_DISPLAY_BESTSELLERS_DESC' , 'Maximum number of best sellers to display');
 define('MAX_DISPLAY_BESTSELLERS_DAYS_TITLE' , 'Maximum Age (days) for Best Sellers');
 define('MAX_DISPLAY_BESTSELLERS_DAYS_DESC' , 'Maximum age (in days) for products to be displayed as "Best Sellers"');
 define('MAX_DISPLAY_ALSO_PURCHASED_TITLE' , 'Also Purchased');
 define('MAX_DISPLAY_ALSO_PURCHASED_DESC' , 'Maximum number of products to display in the "This Customer Also Purchased" box');
-define('MAX_DISPLAY_ALSO_PURCHASED_ORDERS_TITLE' , 'Number of orders Also Purchased');
-define('MAX_DISPLAY_ALSO_PURCHASED_ORDERS_DESC' , 'Maximum number of orders to search for also purchased products');
 define('MAX_DISPLAY_PRODUCTS_IN_ORDER_HISTORY_BOX_TITLE' , 'Customer Order History Box');
 define('MAX_DISPLAY_PRODUCTS_IN_ORDER_HISTORY_BOX_DESC' , 'Maximum number of products to display in the customer order history box');
 define('MAX_DISPLAY_ORDER_HISTORY_TITLE' , 'Order History');
@@ -162,88 +163,120 @@ define('MAX_PRODUCTS_QTY_DESC', 'Maximum quantity per product in cart');
 define('MAX_DISPLAY_NEW_PRODUCTS_DAYS_TITLE' , 'Maximum Age (days) for New Products');
 define('MAX_DISPLAY_NEW_PRODUCTS_DAYS_DESC' , 'Maximum age (in days) for products to be displayed as "new products"');
 
-define('PRODUCT_IMAGE_MINI_WIDTH_TITLE' , 'Width of Product Mini Images');
-define('PRODUCT_IMAGE_MINI_WIDTH_DESC' , 'Maximum width of product mini (in pixels) (Standard: 80). For larger values possibly "productPreviewImage" is adjusted in the templates stylesheet.css file.');
-define('PRODUCT_IMAGE_MINI_HEIGHT_TITLE' , 'Height of Product Mini Images');
-define('PRODUCT_IMAGE_MINI_HEIGHT_DESC' , 'Maximum height of product mini (in pixels) (Standard: 80).');
-
 define('PRODUCT_IMAGE_THUMBNAIL_WIDTH_TITLE' , 'Width of Product Thumbnails');
-define('PRODUCT_IMAGE_THUMBNAIL_WIDTH_DESC' , 'Maximum width of product thumbnails (in pixels) (Standard: 240). For larger values possibly "productPreviewImage" is adjusted in the templates stylesheet.css file.');
+define('PRODUCT_IMAGE_THUMBNAIL_WIDTH_DESC' , 'Maximum width of product thumbnails (in pixels) (Standard: 160). For larger values possibly "productPreviewImage" is adjusted in the templates stylesheet.css file.');
 define('PRODUCT_IMAGE_THUMBNAIL_HEIGHT_TITLE' , 'Height of Product Thumbnails');
-define('PRODUCT_IMAGE_THUMBNAIL_HEIGHT_DESC' , 'Maximum height of product thumbnails (in pixels) (Standard: 240).');
-
-define('PRODUCT_IMAGE_MIDI_WIDTH_TITLE' , 'Width of Product Midi Images');
-define('PRODUCT_IMAGE_MIDI_WIDTH_DESC' , 'Maximum width of product midi (in pixels) (Standard: 160). For larger values possibly "productPreviewImage" is adjusted in the templates stylesheet.css file.');
-define('PRODUCT_IMAGE_MIDI_HEIGHT_TITLE' , 'Height of Product Midi Images');
-define('PRODUCT_IMAGE_MIDI_HEIGHT_DESC' , 'Maximum height of product midi (in pixels) (Standard: 160).');
+define('PRODUCT_IMAGE_THUMBNAIL_HEIGHT_DESC' , 'Maximum height of product thumbnails (in pixels) (Standard: 160).');
 
 define('PRODUCT_IMAGE_INFO_WIDTH_TITLE' , 'Width of Product Info Images');
-define('PRODUCT_IMAGE_INFO_WIDTH_DESC' , 'Maximum width of product info images (in pixels) (Standard: 520).');
+define('PRODUCT_IMAGE_INFO_WIDTH_DESC' , 'Maximum width of product info images (in pixels) (Standard: 230).');
 define('PRODUCT_IMAGE_INFO_HEIGHT_TITLE' , 'Height of Product Info Images');
-define('PRODUCT_IMAGE_INFO_HEIGHT_DESC' , 'Maximum height of product info images (in pixels) (Standard: 520).');
+define('PRODUCT_IMAGE_INFO_HEIGHT_DESC' , 'Maximum height of product info images (in pixels) (Standard: 230).');
 
 define('PRODUCT_IMAGE_POPUP_WIDTH_TITLE' , 'Width of Popup Images');
 define('PRODUCT_IMAGE_POPUP_WIDTH_DESC' , 'Maximum width of popup images (in pixels) (Standard: 800).');
 define('PRODUCT_IMAGE_POPUP_HEIGHT_TITLE' , 'Height of Popup Images');
 define('PRODUCT_IMAGE_POPUP_HEIGHT_DESC' , 'Maximum height of popup images (in pixels) (Standard: 800).');
 
-define('CATEGORIES_IMAGE_WIDTH_TITLE' , 'Width of Category Images');
-define('CATEGORIES_IMAGE_WIDTH_DESC' , 'Maximum width of category images (in pixels) (Standard: 985).');
-define('CATEGORIES_IMAGE_HEIGHT_TITLE' , 'Height of Category Images');
-define('CATEGORIES_IMAGE_HEIGHT_DESC' , 'Maximum height of category images (in pixels) (Standard: 370).');
-
-define('CATEGORIES_IMAGE_MOBILE_WIDTH_TITLE' , 'Width of Category Images Mobile');
-define('CATEGORIES_IMAGE_MOBILE_WIDTH_DESC' , 'Maximum width of category images mobile (in pixels) (Standard: 600).');
-define('CATEGORIES_IMAGE_MOBILE_HEIGHT_TITLE' , 'Height of Category Images Mobile');
-define('CATEGORIES_IMAGE_MOBILE_HEIGHT_DESC' , 'Maximum height of category images mobile (in pixels) (Standard: 400).');
-
-define('CATEGORIES_IMAGE_LIST_WIDTH_TITLE' , 'Width of Category Images Listing');
-define('CATEGORIES_IMAGE_LIST_WIDTH_DESC' , 'Maximum width of category images listing (in pixels) (Standard: 225).');
-define('CATEGORIES_IMAGE_LIST_HEIGHT_TITLE' , 'Height of Category Images Listing');
-define('CATEGORIES_IMAGE_LIST_HEIGHT_DESC' , 'Maximum height of category images listing (in pixels) (Standard: 170).');
-
-define('MANUFACTURER_IMAGE_WIDTH_TITLE' , 'Width of Manufacturer Images');
-define('MANUFACTURER_IMAGE_WIDTH_DESC' , 'Maximum width of manufacturer images (in pixels) (Standard: 100).');
-define('MANUFACTURER_IMAGE_HEIGHT_TITLE' , 'Height of Manufacturer Images');
-define('MANUFACTURER_IMAGE_HEIGHT_DESC' , 'Maximum height of manufacturer images (in pixels) (Standard: 60).');
-
-define('BANNERS_IMAGE_WIDTH_TITLE' , 'Width of Banner Images');
-define('BANNERS_IMAGE_WIDTH_DESC' , 'Maximum width of banner images (in pixels) (Standard: 985).');
-define('BANNERS_IMAGE_HEIGHT_TITLE' , 'Height of Banner Images');
-define('BANNERS_IMAGE_HEIGHT_DESC' , 'Maximum height of banner images (in pixels) (Standard: 370).');
-
-define('BANNERS_IMAGE_MOBILE_WIDTH_TITLE' , 'Width of Banner Images Mobile');
-define('BANNERS_IMAGE_MOBILE_WIDTH_DESC' , 'Maximum width of banner images mobile (in pixels) (Standard: 600).');
-define('BANNERS_IMAGE_MOBILE_HEIGHT_TITLE' , 'Height of Banner Images Mobile');
-define('BANNERS_IMAGE_MOBILE_HEIGHT_DESC' , 'Maximum height of banner images mobile (in pixels) (Standard: 600).');
-
 define('SMALL_IMAGE_WIDTH_TITLE' , 'Small Image Width');
 define('SMALL_IMAGE_WIDTH_DESC' , 'Width of small images (in pixels)');
 define('SMALL_IMAGE_HEIGHT_TITLE' , 'Small Image Height');
 define('SMALL_IMAGE_HEIGHT_DESC' , 'Height of small images (in pixels)');
+
+define('HEADING_IMAGE_WIDTH_TITLE' , 'Heading Image Width');
+define('HEADING_IMAGE_WIDTH_DESC' , 'Width of heading images (in pixels)');
+define('HEADING_IMAGE_HEIGHT_TITLE' , 'Heading Image Height');
+define('HEADING_IMAGE_HEIGHT_DESC' , 'Height of heading images (in pixels)');
 
 define('SUBCATEGORY_IMAGE_WIDTH_TITLE' , 'Subcategory Image Width');
 define('SUBCATEGORY_IMAGE_WIDTH_DESC' , 'Width of subcategory images (in pixels)');
 define('SUBCATEGORY_IMAGE_HEIGHT_TITLE' , 'Subcategory Image Height');
 define('SUBCATEGORY_IMAGE_HEIGHT_DESC' , 'Height of subcategory images (in pixels)');
 
+define('CONFIG_CALCULATE_IMAGE_SIZE_TITLE' , 'Calculate Image Size');
+define('CONFIG_CALCULATE_IMAGE_SIZE_DESC' , 'Calculate the size of images?');
+
+define('IMAGE_REQUIRED_TITLE' , 'Image Required');
+define('IMAGE_REQUIRED_DESC' , 'Enable to display broken images. Good for development.');
+
 define('MO_PICS_TITLE','Number of product images');
 define('MO_PICS_DESC','if this number is set > 0 , you will be able to upload/display more images per product');
 
-define('PRODUCT_IMAGE_MINI_MERGE_TITLE' , 'Product Mini Images:Merge<br /><img src="images/config_merge.gif">');
-define('PRODUCT_IMAGE_MINI_MERGE_DESC' , 'Product Mini Images:Merge<br /><br />Default-values: (overlay.gif,10,-50,60,FF0000)<br /><br />overlay merge image<br />Usage:<br />(merge image,x start [neg = from right],y start [neg = from base],opacity, transparent colour on merge image)');
+//This is for the Images showing your products for preview. All the small stuff.
 
-define('PRODUCT_IMAGE_THUMBNAIL_MERGE_TITLE' , 'Product Thumbnails:Merge');
+define('PRODUCT_IMAGE_THUMBNAIL_BEVEL_TITLE' , 'Product Thumbnails:Bevel<br /><img src="images/config_bevel.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_BEVEL_DESC' , 'Product Thumbnails:Bevel<br /><br />Default-values: (8,FFCCCC,330000)<br /><br />shaded bevelled edges<br />Usage:<br />(edge width,hex light colour,hex dark colour)');
+
+define('PRODUCT_IMAGE_THUMBNAIL_GREYSCALE_TITLE' , 'Product Thumbnails:Greyscale<br /><img src="images/config_greyscale.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_GREYSCALE_DESC' , 'Product Thumbnails:Greyscale<br /><br />Default-values: (32,22,22)<br /><br />basic black n white<br />Usage:<br />(int red,int green,int blue)');
+
+define('PRODUCT_IMAGE_THUMBNAIL_ELLIPSE_TITLE' , 'Product Thumbnails:Ellipse<br /><img src="images/config_eclipse.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_ELLIPSE_DESC' , 'Product Thumbnails:Ellipse<br /><br />Default-values: (FFFFFF)<br /><br />ellipse on bg colour<br />Usage:<br />(hex background colour)');
+
+define('PRODUCT_IMAGE_THUMBNAIL_ROUND_EDGES_TITLE' , 'Product Thumbnails:Round-edges<br /><img src="images/config_edge.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_ROUND_EDGES_DESC' , 'Product Thumbnails:Round-edges<br /><br />Default-values: (5,FFFFFF,3)<br /><br />corner trimming<br />Usage:<br />(edge_radius,background colour,anti-alias width)');
+
+define('PRODUCT_IMAGE_THUMBNAIL_MERGE_TITLE' , 'Product Thumbnails:Merge<br /><img src="images/config_merge.gif">');
 define('PRODUCT_IMAGE_THUMBNAIL_MERGE_DESC' , 'Product Thumbnails:Merge<br /><br />Default-values: (overlay.gif,10,-50,60,FF0000)<br /><br />overlay merge image<br />Usage:<br />(merge image,x start [neg = from right],y start [neg = from base],opacity, transparent colour on merge image)');
 
-define('PRODUCT_IMAGE_MIDI_MERGE_TITLE' , 'Product Midi Images:Merge');
-define('PRODUCT_IMAGE_MIDI_MERGE_DESC' , 'Product Midi Images:Merge<br /><br />Default-values: (overlay.gif,10,-50,60,FF0000)<br /><br />overlay merge image<br />Usage:<br />(merge image,x start [neg = from right],y start [neg = from base],opacity, transparent colour on merge image)');
+define('PRODUCT_IMAGE_THUMBNAIL_FRAME_TITLE' , 'Product Thumbnails:Frame<br /><img src="images/config_frame.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_FRAME_DESC' , 'Product Thumbnails:Frame<br /><br />Default-values: (FFFFFF,000000,3,EEEEEE)<br /><br />plain raised border<br />Usage:<br />(hex light colour,hex dark colour,int width of mid bit,hex frame colour [optional - defaults to half way between light and dark edges])');
+
+define('PRODUCT_IMAGE_THUMBNAIL_DROP_SHADOW_TITLE' , 'Product Thumbnails:Drop-Shadow<br /><img src="images/config_shadow.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_DROP_SHADOW_DESC' , 'Product Thumbnails:Drop-Shadow<br /><br />Default-values: (3,333333,FFFFFF)<br /><br />more like a dodgy motion blur [semi buggy]<br />Usage:<br />(shadow width,hex shadow colour,hex background colour)');
+
+define('PRODUCT_IMAGE_THUMBNAIL_MOTION_BLUR_TITLE' , 'Product Thumbnails:Motion-Blur<br /><img src="images/config_motion.gif">');
+define('PRODUCT_IMAGE_THUMBNAIL_MOTION_BLUR_DESC' , 'Product Thumbnails:Motion-Blur<br /><br />Default-values: (4,FFFFFF)<br /><br />fading parallel lines<br />Usage:<br />(int number of lines,hex background colour)');
+
+//And this is for the Images showing your products in single-view
+
+define('PRODUCT_IMAGE_INFO_BEVEL_TITLE' , 'Product Images:Bevel');
+define('PRODUCT_IMAGE_INFO_BEVEL_DESC' , 'Product Images:Bevel<br /><br />Default-values: (8,FFCCCC,330000)<br /><br />shaded bevelled edges<br />Usage:<br />(edge width, hex light colour, hex dark colour)');
+
+define('PRODUCT_IMAGE_INFO_GREYSCALE_TITLE' , 'Product Images:Greyscale');
+define('PRODUCT_IMAGE_INFO_GREYSCALE_DESC' , 'Product Images:Greyscale<br /><br />Default-values: (32,22,22)<br /><br />basic black n white<br />Usage:<br />(int red, int green, int blue)');
+
+define('PRODUCT_IMAGE_INFO_ELLIPSE_TITLE' , 'Product Images:Ellipse');
+define('PRODUCT_IMAGE_INFO_ELLIPSE_DESC' , 'Product Images:Ellipse<br /><br />Default-values: (FFFFFF)<br /><br />ellipse on bg colour<br />Usage:<br />(hex background colour)');
+
+define('PRODUCT_IMAGE_INFO_ROUND_EDGES_TITLE' , 'Product Images:Round-edges');
+define('PRODUCT_IMAGE_INFO_ROUND_EDGES_DESC' , 'Product Images:Round-edges<br /><br />Default-values: (5,FFFFFF,3)<br /><br />corner trimming<br />Usage:<br />( edge_radius, background colour, anti-alias width)');
 
 define('PRODUCT_IMAGE_INFO_MERGE_TITLE' , 'Product Images:Merge');
 define('PRODUCT_IMAGE_INFO_MERGE_DESC' , 'Product Images:Merge<br /><br />Default-values: (overlay.gif,10,-50,60,FF0000)<br /><br />overlay merge image<br />Usage:<br />(merge image,x start [neg = from right],y start [neg = from base],opacity,transparent colour on merge image)');
 
+define('PRODUCT_IMAGE_INFO_FRAME_TITLE' , 'Product Images:Frame');
+define('PRODUCT_IMAGE_INFO_FRAME_DESC' , 'Product Images:Frame<br /><br />Default-values: (FFFFFF,000000,3,EEEEEE)<br /><br />plain raised border<br />Usage:<br />(hex light colour,hex dark colour,int width of mid bit,hex frame colour [optional - defaults to half way between light and dark edges])');
+
+define('PRODUCT_IMAGE_INFO_DROP_SHADOW_TITLE' , 'Product Images:Drop-Shadow');
+define('PRODUCT_IMAGE_INFO_DROP_SHADOW_DESC' , 'Product Images:Drop-Shadow<br /><br />Default-values: (3,333333,FFFFFF)<br /><br />more like a dodgy motion blur [semi buggy]<br />Usage:<br />(shadow width,hex shadow colour,hex background colour)');
+
+define('PRODUCT_IMAGE_INFO_MOTION_BLUR_TITLE' , 'Product Images:Motion-Blur');
+define('PRODUCT_IMAGE_INFO_MOTION_BLUR_DESC' , 'Product Images:Motion-Blur<br /><br />Default-values: (4,FFFFFF)<br /><br />fading parallel lines<br />Usage:<br />(int number of lines,hex background colour)');
+
+define('PRODUCT_IMAGE_POPUP_BEVEL_TITLE' , 'Product Popup Images:Bevel');
+define('PRODUCT_IMAGE_POPUP_BEVEL_DESC' , 'Product Popup Images:Bevel<br /><br />Default-values: (8,FFCCCC,330000)<br /><br />shaded bevelled edges<br />Usage:<br />(edge width,hex light colour,hex dark colour)');
+
+define('PRODUCT_IMAGE_POPUP_GREYSCALE_TITLE' , 'Product Popup Images:Greyscale');
+define('PRODUCT_IMAGE_POPUP_GREYSCALE_DESC' , 'Product Popup Images:Greyscale<br /><br />Default-values: (32,22,22)<br /><br />basic black n white<br />Usage:<br />(int red,int green,int blue)');
+
+define('PRODUCT_IMAGE_POPUP_ELLIPSE_TITLE' , 'Product Popup Images:Ellipse');
+define('PRODUCT_IMAGE_POPUP_ELLIPSE_DESC' , 'Product Popup Images:Ellipse<br /><br />Default-values: (FFFFFF)<br /><br />ellipse on bg colour<br />Usage:<br />(hex background colour)');
+
+define('PRODUCT_IMAGE_POPUP_ROUND_EDGES_TITLE' , 'Product Popup Images:Round-edges');
+define('PRODUCT_IMAGE_POPUP_ROUND_EDGES_DESC' , 'Product Popup Images:Round-edges<br /><br />Default-values: (5,FFFFFF,3)<br /><br />corner trimming<br />Usage:<br />(edge_radius,background colour,anti-alias width)');
+
 define('PRODUCT_IMAGE_POPUP_MERGE_TITLE' , 'Product Popup Images:Merge');
 define('PRODUCT_IMAGE_POPUP_MERGE_DESC' , 'Product Popup Images:Merge<br /><br />Default-values: (overlay.gif,10,-50,60,FF0000)<br /><br />overlay merge image<br />Usage:<br />(merge image,x start [neg = from right],y start [neg = from base],opacity,transparent colour on merge image)');
+
+define('PRODUCT_IMAGE_POPUP_FRAME_TITLE' , 'Product Popup Images:Frame');
+define('PRODUCT_IMAGE_POPUP_FRAME_DESC' , 'Product Popup Images:Frame<br /><br />Default-values: (FFFFFF,000000,3,EEEEEE)<br /><br />plain raised border<br />Usage:<br />(hex light colour,hex dark colour,int width of mid bit,hex frame colour [optional - defaults to half way between light and dark edges])');
+
+define('PRODUCT_IMAGE_POPUP_DROP_SHADOW_TITLE' , 'Product Popup Images:Drop-Shadow');
+define('PRODUCT_IMAGE_POPUP_DROP_SHADOW_DESC' , 'Product Popup Images:Drop-Shadow<br /><br />Default-values: (3,333333,FFFFFF)<br /><br />more like a dodgy motion blur [semi buggy]<br />Usage:<br />(shadow width,hex shadow colour,hex background colour)');
+
+define('PRODUCT_IMAGE_POPUP_MOTION_BLUR_TITLE' , 'Product Popup Images:Motion-Blur');
+define('PRODUCT_IMAGE_POPUP_MOTION_BLUR_DESC' , 'Product Popup Images:Motion-Blur<br /><br />Default-values: (4,FFFFFF)<br /><br />fading parallel lines<br />Usage:<br />(int number of lines,hex background colour)');
 
 define('IMAGE_MANIPULATOR_TITLE','GDlib processing');
 define('IMAGE_MANIPULATOR_DESC','Image Manipulator for GD2 or GD1<br /><br /><b>NOTE:</b> image_manipulator_GD2_advanced.php support transparent PNG\s');
@@ -255,8 +288,8 @@ define('ACCOUNT_DOB_TITLE' , 'Date of Birth');
 define('ACCOUNT_DOB_DESC' , 'Display date of birth upon customer account creation/editing');
 define('ACCOUNT_COMPANY_TITLE' , 'Company');
 define('ACCOUNT_COMPANY_DESC' , 'Display company upon customer account creation/editing');
-define('ACCOUNT_SUBURB_TITLE' , 'Addition to address');
-define('ACCOUNT_SUBURB_DESC' , 'Display addition to address upon customer account creation/editing');
+define('ACCOUNT_SUBURB_TITLE' , 'Suburb');
+define('ACCOUNT_SUBURB_DESC' , 'Display suburb upon customer account creation/editing');
 define('ACCOUNT_STATE_TITLE' , 'State');
 define('ACCOUNT_STATE_DESC' , 'Display state upon customer account creation/editing');
 
@@ -280,17 +313,6 @@ define('SHIPPING_INFOS_DESC' , 'Select content to display shipping costs');
 define('SHIPPING_DEFAULT_TAX_CLASS_METHOD_TITLE' , 'Calculation method of default tax class');
 define('SHIPPING_DEFAULT_TAX_CLASS_METHOD_DESC' , 'none: do not show shipping tax<br />auto proportional: show shipping tax proportional to order<br />auto max: show shipping tax, use tax rate of biggest turnover group');
 
-define('SHOW_SHIPPING_MODULE_TITLE_TITLE' , 'Title of shipping costs');
-define('SHOW_SHIPPING_MODULE_TITLE_DESC' , 'Choose the title of the shipping costs in the order total');
-define('CUSTOM_SHIPPING_TITLE_TITLE' , 'Individual title shipping costs');
-define('CUSTOM_SHIPPING_TITLE_DESC' , 'Enter a name. This setting only applies if the title shipping costs is set to "Custom".');
-define('CFG_TXT_SHIPPING_DEFAULT', 'Standard');
-define('CFG_TXT_SHIPPING_TITLE', 'Title');
-define('CFG_TXT_SHIPPING_CUSTOM', 'Custom');
-
-define('CAPITALIZE_ADDRESS_FORMAT_TITLE' , 'Address in capital letters');
-define('CAPITALIZE_ADDRESS_FORMAT_DESC' , 'Display country and city names in capital letters');
-
 define('PRODUCT_LIST_FILTER_TITLE' , 'Display Category/Manufacturer Filter (false=disable; true=enable)');
 define('PRODUCT_LIST_FILTER_DESC' , 'Do you want to display the Category/Manufacturer Filter?');
 
@@ -301,8 +323,6 @@ define('ATTRIBUTE_STOCK_CHECK_TITLE' , 'Check Attribute Stock Level');
 define('ATTRIBUTE_STOCK_CHECK_DESC' , 'Check to see if sufficent attribute stock is available');
 define('STOCK_LIMITED_TITLE' , 'Subtract stock');
 define('STOCK_LIMITED_DESC' , 'Subtract product quantity in order from quantity of products in stock');
-define('STOCK_LIMITED_DOWNLOADS_TITLE' , 'Subtract stock for downloads');
-define('STOCK_LIMITED_DOWNLOADS_DESC' , 'Should the amount of goods also be deducted for download items?');
 define('STOCK_ALLOW_CHECKOUT_TITLE' , 'Allow Checkout');
 define('STOCK_ALLOW_CHECKOUT_DESC' , 'Allow customer to checkout even if there is insufficient stock');
 define('STOCK_MARK_PRODUCT_OUT_OF_STOCK_TITLE' , 'Mark product out of stock');
@@ -351,8 +371,6 @@ define('SEND_EMAILS_TITLE' , 'Send E-Mails');
 define('SEND_EMAILS_DESC' , 'Send out E-Mails');
 define('SENDMAIL_PATH_TITLE' , 'The Path to sendmail');
 define('SENDMAIL_PATH_DESC' , 'If you use sendmail, please give the right path (default: /usr/bin/sendmail):');
-define('USE_SENDMAIL_OPTIONS_TITLE', 'Sendmail Options');
-define('USE_SENDMAIL_OPTIONS_DESC', 'Whether mail() uses a fully sendmail-compatible MTA');
 define('SMTP_MAIN_SERVER_TITLE' , 'Address of the SMTP Server');
 define('SMTP_MAIN_SERVER_DESC' , 'Please enter the address of your main SMTP Server.');
 define('SMTP_BACKUP_SERVER_TITLE' , 'Address of the SMTP Backup Server');
@@ -365,10 +383,6 @@ define('SMTP_AUTH_TITLE' , 'SMTP-Auth');
 define('SMTP_AUTH_DESC' , 'Enable secure authentication for your SMTP Server');
 define('SMTP_PORT_TITLE' , 'SMTP Port');
 define('SMTP_PORT_DESC' , 'Please enter the SMTP port of your SMTP server(default: 25)?');
-define('SMTP_AUTO_TLS_TITLE' , 'SMTP-Automatic TLS connection');
-define('SMTP_AUTO_TLS_DESC' , 'Connection automatically with STARTTLS if SMTP-SECURE is deactivated? <br> In case of transmission problems deactivate the automatic TLS connection!');
-define('SMTP_DEBUG_TITLE' , 'SMTP-Debug Log-Level');
-define('SMTP_DEBUG_DESC' , '<b>0</b>: no output; <b>1</b>: commands; <b>2</b>: data and commands; <b>3</b>: as 2 plus connection status; <b>4</b>: as 3 plus low-level data output<br>In case of sending problems set to 2, a log is created in the log directory.');
 
 //DokuMan - 2011-09-20 - E-Mail SQL errors
 define('EMAIL_SQL_ERRORS_TITLE','Send SQL error messages to shop owner via email');
@@ -390,9 +404,9 @@ define('CONTACT_US_EMAIL_SUBJECT_DESC' , 'Please enter an e-mail subject for "Co
 
 //Constants for support system
 define('EMAIL_SUPPORT_ADDRESS_TITLE' , 'Technical Support - E-Mail address');
-define('EMAIL_SUPPORT_ADDRESS_DESC' , 'Please enter an e-mail address for sending e-mails over the <b>Support System</b> (account creation, lost password, newsletter system).');
+define('EMAIL_SUPPORT_ADDRESS_DESC' , 'Please enter an e-mail address for sending e-mails over the <b>Support System</b> (account creation, lost password).');
 define('EMAIL_SUPPORT_NAME_TITLE' , 'Technical Support - E-Mail Name');
-define('EMAIL_SUPPORT_NAME_DESC' , 'Please enter a name for sending E-Mails over the <b>Support System</b>.');
+define('EMAIL_SUPPORT_NAME_DESC' , 'Please enter a name for sending E-Mails over the <b>Support System</b> (account creation, lost password).');
 define('EMAIL_SUPPORT_FORWARDING_STRING_TITLE' , 'Technical Support - Forwarding-To');
 define('EMAIL_SUPPORT_FORWARDING_STRING_DESC' , 'Please enter forwarding addresses for mails of the <b>Support System</b> (seperated by , )');
 define('EMAIL_SUPPORT_REPLY_ADDRESS_TITLE' , 'Technical Support - Reply-To');
@@ -414,11 +428,11 @@ define('EMAIL_BILLING_REPLY_ADDRESS_DESC' , 'Please enter an e-mail address for 
 define('EMAIL_BILLING_REPLY_ADDRESS_NAME_TITLE' , 'Billing - Reply-To Name');
 define('EMAIL_BILLING_REPLY_ADDRESS_NAME_DESC' , 'Please enter a name to be used in the reply-to field of billing e-mails.');
 define('EMAIL_BILLING_SUBJECT_TITLE' , 'Billing - E-Mail Subject');
-define('EMAIL_BILLING_SUBJECT_DESC' , 'Please enter an e-mail subject for <b>Billing</b> messages. (For example <b>Your order {$nr} from {$date}</b>)<br />You can use: {$nr},{$date},{$firstname},{$lastname}');
+define('EMAIL_BILLING_SUBJECT_DESC' , 'Please enter an e-mail subject for <b>Billing</b> messages.');
 define('EMAIL_BILLING_SUBJECT_ORDER_TITLE','Billing - Order Mail Subject');
-define('EMAIL_BILLING_SUBJECT_ORDER_DESC','Please enter a subject for order mails. (For example <b>Your order {$nr} from {$date}</b>)<br />You can use: {$nr},{$date},{$firstname},{$lastname}');
+define('EMAIL_BILLING_SUBJECT_ORDER_DESC','Please enter a subject for order mails. (like <b>our order {$nr},{$date}</b>). You can use, {$nr},{$date},{$firstname},{$lastname}');
 define('MODULE_ORDER_MAIL_STEP_SUBJECT_TITLE','Billing - Order Confirmation Mail Subject');
-define('MODULE_ORDER_MAIL_STEP_SUBJECT_DESC','Please enter a subject for order confirmation mails. (For example <b>Your order {$nr} from {$date}</b>)<br />You can use: {$nr},{$date},{$firstname},{$lastname}');
+define('MODULE_ORDER_MAIL_STEP_SUBJECT_DESC','Please enter a subject for order confirmation mails. (like <b>our order {$nr},{$date}</b>). You can use, {$nr},{$date},{$firstname},{$lastname}');
 
 define('DOWNLOAD_ENABLED_TITLE' , 'Enable Download');
 define('DOWNLOAD_ENABLED_DESC' , 'Enable the products download functions.');
@@ -441,7 +455,7 @@ define('SESSION_WARNING', '<br /><br /><span class="col-red"><strong>CAUTION:</s
 define('SESSION_WRITE_DIRECTORY_TITLE' , 'Session Directory');
 define('SESSION_WRITE_DIRECTORY_DESC' , 'If sessions are file based, store them in this directory.');
 define('SESSION_FORCE_COOKIE_USE_TITLE' , 'Force Cookie Use');
-define('SESSION_FORCE_COOKIE_USE_DESC' , 'Force the use of sessions when cookies are only enabled (Default &quot;true&quot;)<br /><br /><span class="col-red"><strong>CAUTION:</strong></span> This feature prevents the session ID in the URL');
+define('SESSION_FORCE_COOKIE_USE_DESC' , 'Force the use of sessions when cookies are only enabled (Default &quot;false&quot;)'.SESSION_WARNING);
 define('SESSION_CHECK_SSL_SESSION_ID_TITLE' , 'Check SSL Session ID');
 define('SESSION_CHECK_SSL_SESSION_ID_DESC' , 'Validate the SSL_SESSION_ID on every secure HTTPS page request. (Default &quot;false&quot;)'.SESSION_WARNING);
 define('SESSION_CHECK_USER_AGENT_TITLE' , 'Check User Agent');
@@ -452,9 +466,7 @@ define('SESSION_RECREATE_TITLE' , 'Recreate Session');
 define('SESSION_RECREATE_DESC' , 'Recreate the session to generate a new session ID when a customer logs on or creates an account (PHP >=4.1 needed). (Default &quot;false&quot;)'.SESSION_WARNING);
 
 define('DISPLAY_CONDITIONS_ON_CHECKOUT_TITLE' , 'Display Conditions on Checkout');
-define('DISPLAY_CONDITIONS_ON_CHECKOUT_DESC' , 'Display terms and conditions on checkout.');
-define('SIGN_CONDITIONS_ON_CHECKOUT_TITLE' , 'Sign Conditions on Checkout');
-define('SIGN_CONDITIONS_ON_CHECKOUT_DESC' , 'Request approval of terms and conditions and on checkout.<br/><b>Attention:</b> "Display Conditions on Checkout" must be enabled.');
+define('DISPLAY_CONDITIONS_ON_CHECKOUT_DESC' , 'Display terms and conditions and request approval on checkout');
 
 define('META_MIN_KEYWORD_LENGTH_TITLE' , 'Min. Meta-Keyword Length');
 define('META_MIN_KEYWORD_LENGTH_DESC' , 'min. length of a single keyword (generated from products description)');
@@ -512,15 +524,7 @@ define('SHOW_IP_LOG_TITLE','IP-Log on Checkout?');
 define('SHOW_IP_LOG_DESC','Show Text "Your IP will be saved", in checkout?');
 
 define('ACTIVATE_GIFT_SYSTEM_TITLE','Activate Gift Voucher System');
-define('ACTIVATE_GIFT_SYSTEM_DESC','Activate gift voucher system<br/><b>Attention:</b> You have to install the Modules ot_coupon <a href="'.xtc_href_link(FILENAME_MODULES, 'set=ordertotal&module=ot_coupon').'"><b>here</b></a> and ot_gv <a href="'.xtc_href_link(FILENAME_MODULES, 'set=ordertotal&module=ot_gv').'"><b>here</b></a>.');
-
-define('SECURITY_CODE_LENGTH_TITLE', 'Length of Gift Voucher Code');
-define('SECURITY_CODE_LENGTH_DESC', 'Enter here the length of the Gift Voucher Code (max. 16 characters)');
-
-define('NEW_SIGNUP_GIFT_VOUCHER_AMOUNT_TITLE', 'Welcome Gift Voucher Amount');
-define('NEW_SIGNUP_GIFT_VOUCHER_AMOUNT_DESC', 'Welcome Gift Voucher Amount: If you do not wish to send a Gift Voucher in your create account E-Mail, put 0 for no amount, else place the amount here, i.e. 10.00 or 50.00, no currency signs. The Gift Voucher Code is generated automatically by the store.<br /><b>Attention:</b> Under "Configuration" -> "<a href="'.xtc_href_link(FILENAME_CONFIGURATION, 'gID=12').'"><strong>"E-Mail Options"</strong></a>" the setting "E-Mail upon Create Account" must be set to "Yes".');
-define('NEW_SIGNUP_DISCOUNT_COUPON_TITLE', 'Welcome Discount Coupon Code');
-define('NEW_SIGNUP_DISCOUNT_COUPON_DESC', 'Welcome Discount Coupon Code: If you do not want to send a Discount Coupon in your create account E-Mail, leave this field blank, else place the coupon code here you wish to use.<br /><b>Attention:</b> Under "Configuration" -> "<a href="'.xtc_href_link(FILENAME_CONFIGURATION, 'gID=12').'"><strong>"E-Mail Options"</strong></a>" the setting "E-Mail upon Create Account" must be set to "Yes" and the coupon code must be created in the <a href="'.xtc_href_link(FILENAME_COUPON_ADMIN).'"><b>Coupon Admin</b></a> before.');
+define('ACTIVATE_GIFT_SYSTEM_DESC','Activate gift voucher system<br/><br/><b>Attention: </b>You have to install the Modules ot_coupon <a href="'.xtc_href_link(FILENAME_MODULES, 'set=ordertotal&module=ot_coupon').'"><b>here</b></a> and ot_gv <a href="'.xtc_href_link(FILENAME_MODULES, 'set=ordertotal&module=ot_gv').'"><b>here</b></a>.');
 
 define('ACTIVATE_SHIPPING_STATUS_TITLE','Display Shipping Status');
 define('ACTIVATE_SHIPPING_STATUS_DESC','Show shipping status? (Different dispatch times can be specified for individual products. If enabled, a new item <b>Delivery Status</b> is displayed on product input)');
@@ -533,19 +537,17 @@ define('GROUP_CHECK_DESC','Restrict access to individual categories, products an
 
 define('ACTIVATE_REVERSE_CROSS_SELLING_TITLE', 'Reverse Cross-Selling');
 define('ACTIVATE_REVERSE_CROSS_SELLING_DESC', 'Activate reverse Cross-selling?');
-define('ACTIVATE_CROSS_SELLING_TITLE', 'Cross-Selling');
-define('ACTIVATE_CROSS_SELLING_DESC', 'Activate Cross-selling?');
 
 define('ACTIVATE_NAVIGATOR_TITLE','Activate Product Navigator?');
-define('ACTIVATE_NAVIGATOR_DESC','Activate/deactivate product navigator in product_info, (deactivate for better performance if lots of articles are present in system)');
+define('ACTIVATE_NAVIGATOR_DESC','activate/deactivate product navigator in product_info, (deactivate for better performance if lots of articles are present in system)');
 
 define('QUICKLINK_ACTIVATED_TITLE','Activate Multilink / Copy Function');
-define('QUICKLINK_ACTIVATED_DESC','Allows selection of multiple categories when performing "copy product to".');
+define('QUICKLINK_ACTIVATED_DESC','Allows selection of multiple categories when performing "copy product to"');
 
 define('DOWNLOAD_UNALLOWED_PAYMENT_TITLE', 'Disallowed Download Payment Modules');
-define('DOWNLOAD_UNALLOWED_PAYMENT_DESC', '<strong>DISALLOWED</strong> payment modules for download products.');
+define('DOWNLOAD_UNALLOWED_PAYMENT_DESC', '<strong>DISALLOWED</strong> payment modules for downloads. Comma separated list, e.g. {banktransfer,cod,invoice,moneyorder}');
 define('DOWNLOAD_MIN_ORDERS_STATUS_TITLE', 'Order Status');
-define('DOWNLOAD_MIN_ORDERS_STATUS_DESC', 'Order status to allow download of files.');
+define('DOWNLOAD_MIN_ORDERS_STATUS_DESC', 'order status to allow download of files.');
 
 // Vat Check
 define('STORE_OWNER_VAT_ID_TITLE' , 'VAT Reg No of Shop Owner');
@@ -591,8 +593,6 @@ define('AFTERBUY_IGNORE_GROUPE_TITLE', 'Customer group ignor');
 define('AFTERBUY_IGNORE_GROUPE_DESC', 'Example: <em>6,5,8</em>.');
 
 // Search-Options
-define('SEARCH_MIN_LENGTH_TITLE', 'Search number of characters');
-define('SEARCH_MIN_LENGTH_DESC', 'Minimum number of characters for the search');
 define('SEARCH_IN_DESC_TITLE','Search in products descriptions');
 define('SEARCH_IN_DESC_DESC','Include products descriptions when searching');
 define('SEARCH_IN_ATTR_TITLE','Search in products attributes');
@@ -600,16 +600,56 @@ define('SEARCH_IN_ATTR_DESC','Include products attributes when searching');
 define('SEARCH_IN_MANU_TITLE','Search in products manufacturers');
 define('SEARCH_IN_MANU_DESC','Include products manufacturers when searching');
 
-define('ADMIN_SEARCH_IN_DESC_TITLE','Search in products descriptions');
-define('ADMIN_SEARCH_IN_DESC_DESC','Include products descriptions when searching');
-define('ADMIN_SEARCH_IN_ATTR_TITLE','Search in products attributes');
-define('ADMIN_SEARCH_IN_ATTR_DESC','Include products attributes when searching');
-
 // changes for 3.0.4 SP2
 define('REVOCATION_ID_TITLE','Revocation');
 define('REVOCATION_ID_DESC','Select content to display revocation');
-define('DISPLAY_REVOCATION_ON_CHECKOUT_TITLE','Display right of revocation');
-define('DISPLAY_REVOCATION_ON_CHECKOUT_DESC','Display right of revocation on checkout_confirmation.<br/><b>Attention:</b> "Display Conditions on Checkout" must be enabled.');
+define('DISPLAY_REVOCATION_ON_CHECKOUT_TITLE','Display right of revocation?');
+define('DISPLAY_REVOCATION_ON_CHECKOUT_DESC','Display right of revocation on checkout_confirmation?');
+
+// BOF - Tomcraft - 2009-10-03 - Paypal Express Modul
+define('PAYPAL_MODE_TITLE','PayPal Mode:');
+define('PAYPAL_MODE_DESC','Live (Default) or Test (Sandbox). Depending on the mode, you first have to create the PayPal API access: <br/>Link: <a href="https://www.paypal.com/de/cgi-bin/webscr?cmd=_get-api-signature&generic-flow=true" target="_blank"><strong>Create API-access for live-mode</strong></a><br/>Link: <a href="https://www.sandbox.paypal.com/de/cgi-bin/webscr?cmd=_get-api-signature&generic-flow=true" target="_blank"><strong>Create API-access for sandbox-mode</strong></a><br/>You still have no PayPal account? <a href="https://www.paypal.com/de/cgi-bin/webscr?cmd=_registration-run" target="_blank"><strong>Click here to create one.</strong></a>');
+define('PAYPAL_API_USER_TITLE','PayPal API-User (Live)');
+define('PAYPAL_API_USER_DESC','Enter user name (live)');
+define('PAYPAL_API_PWD_TITLE','PayPal API-Password (Live)');
+define('PAYPAL_API_PWD_DESC','Enter password (live)');
+define('PAYPAL_API_SIGNATURE_TITLE','PayPal API-Signature (Live)');
+define('PAYPAL_API_SIGNATURE_DESC','Enter API signature (live)');
+define('PAYPAL_API_SANDBOX_USER_TITLE','PayPal-API-User (Sandbox)');
+define('PAYPAL_API_SANDBOX_USER_DESC','Enter user name (sandbox)');
+define('PAYPAL_API_SANDBOX_PWD_TITLE','PayPal API-Password (Sandbox)');
+define('PAYPAL_API_SANDBOX_PWD_DESC','Enter password (sandbox)');
+define('PAYPAL_API_SANDBOX_SIGNATURE_TITLE','PayPal API-Signature (Sandbox)');
+define('PAYPAL_API_SANDBOX_SIGNATURE_DESC','Enter API signature (sandbox)');
+define('PAYPAL_API_VERSION_TITLE','PayPal API-Version');
+define('PAYPAL_API_VERSION_DESC','Enter PayPal API version, e.g. 119.0');
+define('PAYPAL_API_IMAGE_TITLE','PayPal Shop Logo');
+define('PAYPAL_API_IMAGE_DESC','Please enter the name of the logo file to be displayed with PayPal.<br />Note: Only displayed if the shop uses SSL.<br />Max. width: 750px, max. height: 90px.<br />The logo file is called from: '.DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
+define('PAYPAL_API_CO_BACK_TITLE','PayPal Background Colour');
+define('PAYPAL_API_CO_BACK_DESC','Enter a background colour to be displayed with PayPal. e.g. FEE8B9');
+define('PAYPAL_API_CO_BORD_TITLE','PayPal Border Colour');
+define('PAYPAL_API_CO_BORD_DESC','Enter a border colour to be displayed with PayPal. e.g. E4C558');
+define('PAYPAL_ERROR_DEBUG_TITLE','PayPal Error Message');
+define('PAYPAL_ERROR_DEBUG_DESC','Display PayPal error message? default=false');
+define('PAYPAL_ORDER_STATUS_TMP_ID_TITLE','Order Status "cancel"');
+define('PAYPAL_ORDER_STATUS_TMP_ID_DESC','Select the order status for aborted transaction (e.g. PayPal abort)');
+define('PAYPAL_ORDER_STATUS_SUCCESS_ID_TITLE','Order Status OK');
+define('PAYPAL_ORDER_STATUS_SUCCESS_ID_DESC','Select the order status for a successful transaction (e.g. open PP paid)');
+define('PAYPAL_ORDER_STATUS_PENDING_ID_TITLE','Order Status "pending"');
+define('PAYPAL_ORDER_STATUS_PENDING_ID_DESC','Select the order status for a transaction which hasn\'t been fully processed by PayPal (e.g. open PP waiting)');
+define('PAYPAL_ORDER_STATUS_REJECTED_ID_TITLE','Order Status "rejected"');
+define('PAYPAL_ORDER_STATUS_REJECTED_ID_DESC','Select the order status for a rejected transaction (e.g. PayPal rejected)');
+define('PAYPAL_COUNTRY_MODE_TITLE','PayPal Country Mode');
+define('PAYPAL_COUNTRY_MODE_DESC','Select a country mode. Some PayPal functions are available only in the UK (e.g. DirectPayment)');
+define('PAYPAL_EXPRESS_ADDRESS_CHANGE_TITLE','PayPal-Express Address Data');
+define('PAYPAL_EXPRESS_ADDRESS_CHANGE_DESC','Permits changing address data transferred by PayPal.');
+define('PAYPAL_EXPRESS_ADDRESS_OVERRIDE_TITLE','Ship-To-Address Overwrite');
+define('PAYPAL_EXPRESS_ADDRESS_OVERRIDE_DESC','Permits changing address data transferred by PayPal (existing account)');
+define('PAYPAL_INVOICE_TITLE','Shop prefix for PayPal invoice no.');
+define('PAYPAL_INVOICE_DESC','Arbitrary string of letters (prefix), which is placed in front of each order number and is used for generating the PayPal invoice number.<br />This allows multiple store operation with only one PayPal account. Conflicts regarding the order numbers are avoided. Each order has its own invoice numbers within the PayPal account.');
+define('PAYPAL_BRANDNAME_TITLE','PayPal shop-name');
+define('PAYPAL_BRANDNAME_DESC','Enter the name wich should be displayed at PayPal.');
+// EOF - Tomcraft - 2009-10-03 - Paypal Express Modul
 
 // BOF - Tomcraft - 2009-11-02 - New admin top menu
 define('USE_ADMIN_TOP_MENU_TITLE' , 'Admin Top Navigation');
@@ -638,6 +678,11 @@ define('DELETE_CACHE_SUCCESSFUL', 'Cache deleted successfully.');
 define('DELETE_TEMP_CACHE_SUCCESSFUL', 'Templatecache deleted successfully.');
 // EOF - Dokuman - 2010-02-04 - delete cache files in admin section
 
+// BOF - DokuMan - 2010-08-13 - set Google RSS Feed in admin section
+define('GOOGLE_RSS_FEED_REFID_TITLE' , 'Google RSS Feed - refID');
+define('GOOGLE_RSS_FEED_REFID_DESC' , 'Enter your campaign ID here. It will be appended to every link of the Google RSS Feed automaticallyt.');
+// EOF - DokuMan - 2010-08-13 - set Google RSS Feed in admin section
+
 // BOF - web28 - 2010-08-17 -  Bildgrößenberechnung kleinerer Bilder
 define('PRODUCT_IMAGE_NO_ENLARGE_UNDER_DEFAULT_TITLE','Upscaling low-res images)');
 define('PRODUCT_IMAGE_NO_ENLARGE_UNDER_DEFAULT_DESC','If set to <strong>false</strong>, upscaling of low-res images to default settings for image size is disabled. Set to <strong>true</strong> to enable upscaling of low-res images. In this case those images will be shown blurry.');
@@ -656,8 +701,20 @@ define('SHOW_BUTTON_BUY_NOW_DESC', '<span class="col-red"><strong>CAUTION:</stro
 //EOC - h-h-h - 2011-12-23 - Button "Buy Now" optional - default off
 
 //split page results
+define('MAX_DISPLAY_ORDER_RESULTS_TITLE', 'Number of orders per page');
+define('MAX_DISPLAY_ORDER_RESULTS_DESC', 'Maximum number of orders that are to be displayed in the grid per page.');
 define('MAX_DISPLAY_LIST_PRODUCTS_TITLE', 'Number of products per page');
 define('MAX_DISPLAY_LIST_PRODUCTS_DESC', 'Maximum number of products that are to be displayed in the grid per page.');
+define('MAX_DISPLAY_LIST_CUSTOMERS_TITLE', 'Number of customers per page');
+define('MAX_DISPLAY_LIST_CUSTOMERS_DESC', 'Maximum number of customers that are to be displayed in the grid per page.');
+define ('MAX_ROW_LISTS_ATTR_OPTIONS_TITLE', 'Product Options: Number of Product Options per page');
+define ('MAX_ROW_LISTS_ATTR_OPTIONS_DESC', 'Maximum number of Product Options to be displayed per page.');
+define ('MAX_ROW_LISTS_ATTR_VALUES_TITLE', 'Product Options: Number of Option Values per page');
+define ('MAX_ROW_LISTS_ATTR_VALUES_DESC', 'Maximum number of Option Values to be displayed per page.');
+define('MAX_DISPLAY_STATS_RESULTS_TITLE', 'Number of statistic results per page');
+define('MAX_DISPLAY_STATS_RESULTS_DESC', 'Maximum number of statistic results to be displayed per page.');
+define('MAX_DISPLAY_COUPON_RESULTS_TITLE', 'Number of coupons per page');
+define('MAX_DISPLAY_COUPON_RESULTS_DESC', 'Maximum number of coupons to be displayed per page.');
 
 // Whos online
 define ('WHOS_ONLINE_TIME_LAST_CLICK_TITLE', 'Who\'s Online - Display period in seconds');
@@ -680,8 +737,8 @@ define ('CHECKOUT_SHOW_PRODUCTS_MODEL_TITLE', 'Order Confirmation Page: Item no.
 define ('CHECKOUT_SHOW_PRODUCTS_MODEL_DESC', 'on the order confirmation page you want the item number will be displayed.');
 
 // Billing email attachments
-define ('EMAIL_BILLING_ATTACHMENTS_TITLE', 'Billing - E-Mail attachments for orders');
-define ('EMAIL_BILLING_ATTACHMENTS_DESC', 'Example of attachments - assumed that the files are in the shop directory <b>/media/content/</b>, separate multiple attachments with comma and no space:<br />media/content/agb.pdf,media/content/widerruf.pdf,media/content/datenschutz.pdf');
+define ('EMAIL_BILLING_ATTACHMENTS_TITLE', 'Billing - e-mail attachments for orders');
+define ('EMAIL_BILLING_ATTACHMENTS_DESC', 'Example of attachments - assumed that the files are in the shop directory <b>/media/content/</b>, separate multiple attachments with comma and no space:<br /> media/content/agb.pdf,media/content/widerruf.pdf.');
 
 // email images
 define ('SHOW_IMAGES_IN_EMAIL_TITLE', 'Product Images in Order - Insert email');
@@ -722,14 +779,14 @@ define('TRACKING_GOOGLEANALYTICS_ACTIVE_DESC' , 'By activating this option, all 
 define('TRACKING_GOOGLEANALYTICS_ID_TITLE' , 'Google Analytics account number');
 define('TRACKING_GOOGLEANALYTICS_ID_DESC' , 'Enter your Google Analytics account number in the format "UA-XXXXXXXX-X" which you received after successfully creating an account.');
 
-define('TRACKING_PIWIK_ACTIVE_TITLE' , 'Activate Matomo Web-Analytics tracking');
-define('TRACKING_PIWIK_ACTIVE_DESC' , 'In order to use Matomo at all, you have to download and install it to your webspace at first. See also <a href="https://matomo.org/" target="_blank"><b>Matomo Web-Analytics</b></a>. In comparison to Google Analytics all data will be stored locally, i.e. you as show owner have complete control over all data.');
-define('TRACKING_PIWIK_LOCAL_PATH_TITLE' , 'Matomo install path (without "http://")');
-define('TRACKING_PIWIK_LOCAL_PATH_DESC' , 'Enter the path when Matomo was installed successfully. The complete path of the domain has to be given, but without "http://", e.g. "www.example.com/matomo".');
-define('TRACKING_PIWIK_ID_TITLE' , 'Matomo page ID');
-define('TRACKING_PIWIK_ID_DESC' , 'In the Matomo administration a page ID will be created per domain (usually "1")');
-define('TRACKING_PIWIK_GOAL_TITLE' , 'Matomo campaign number (optional)');
-define('TRACKING_PIWIK_GOAL_DESC' , 'Enter your campaign number, if you want to track predefined goals. Details see <a href="https://matomo.org/docs/tracking-goals-web-analytics/" target="_blank"><b>Matomo: Tracking Goal Conversions</b></a>');
+define('TRACKING_PIWIK_ACTIVE_TITLE' , 'Activate Piwik Web-Analytics tracking');
+define('TRACKING_PIWIK_ACTIVE_DESC' , 'In order to use Piwik at all, you have to download and install it to your webspace at first. See also <a href="http://piwik.org/" target="_blank"><b>Piwik Web-Analytics</b></a>. In comparison to Google Analytics all data will be stored locally, i.e. you as show owner have complete control over all data.');
+define('TRACKING_PIWIK_LOCAL_PATH_TITLE' , 'Piwik install path (without "http://")');
+define('TRACKING_PIWIK_LOCAL_PATH_DESC' , 'Enter the path when Piwik was installed successfully. The complete path of the domain has to be given, but without "http://", e.g. "www.domain.de/piwik".');
+define('TRACKING_PIWIK_ID_TITLE' , 'Piwik page ID');
+define('TRACKING_PIWIK_ID_DESC' , 'In the Piwik administration a page ID will be created per domain (usually "1")');
+define('TRACKING_PIWIK_GOAL_TITLE' , 'Piwik campaign number (optional)');
+define('TRACKING_PIWIK_GOAL_DESC' , 'Enter your campaign number, if you want to track predefined goals.. Details see <a href="http://piwik.org/docs/tracking-goals-web-analytics/" target="_blank"><b>Piwik: Tracking Goal Conversions</b></a>');
 
 define ('CONFIRM_SAVE_ENTRY_TITLE', 'Confirmation when saving articles/category');
 define ('CONFIRM_SAVE_ENTRY_DESC', 'Should be made a confirmation message when saving products/categories? Default: true (yes)');
@@ -760,8 +817,8 @@ define('DISPLAY_BREADCRUMB_OPTION_DESC', '<strong>name:</strong> In the breadcru
 define('EMAIL_WORD_WRAP_TITLE', 'WordWrap for text e-mails');
 define('EMAIL_WORD_WRAP_DESC', 'Indicate number of characters for one line in text e-mails before text will be wrapped (only whole numbers).<br /><strong>Attention:</strong> A character count greater than 76 may cause the shop mails to be categorized as SPAM by SpamAssassin.<br />More infos <a href="http://wiki.apache.org/spamassassin/Rules/MIME_QP_LONG_LINE" target="_blank">here</a>.');
 
-//define('USE_PAGINATION_LIST_TITLE', 'Pagination List'); // Tomcraft - 2017-07-12 - Not used anymore since r10840, see: http://trac.modified-shop.org/ticket/1238
-//define('USE_PAGINATION_LIST_DESC', 'Use a HTML list (ul / li Tag) for Pagination.<br/><b>Attention:</b> This only works with a shop version 2.0.0.0 compatible template!'); // Tomcraft - 2017-07-12 - Not used anymore since r10840, see: http://trac.modified-shop.org/ticket/1238
+define('USE_PAGINATION_LIST_TITLE', 'Pagination List');
+define('USE_PAGINATION_LIST_DESC', 'Use a HTML list (ul / li Tag) for Pagination.<br/><b>Attention:</b> This only works with a shop version 2.0.0.0 compatible template!');
 
 define('ORDER_STATUSES_FOR_SALES_STATISTICS_TITLE', 'Sales Report Filter');
 define('ORDER_STATUSES_FOR_SALES_STATISTICS_DESC', 'Choose the order statuses which shall be considered on the admin startpage and in the sales report when choosing "Sales Report Filter" in the status dropdown.<br />(To show only the real sales volume, choose the order status for completed orders.)<br /><b>Note:</b> For the "Sales Report Filter" to be displayed in the status dropdown, you have to choose at least two statuses. Otherwise you can directly choose the desired status in the dropdown.');
@@ -800,12 +857,28 @@ define('MODULE_CAPTCHA_ACTIVE_TITLE', 'Activate Captcha');
 define('MODULE_CAPTCHA_ACTIVE_DESC', 'For which shop sections shall the Captcha be activated?');
 define('MODULE_CAPTCHA_LOGGED_IN_TITLE', 'Logged in Customers');
 define('MODULE_CAPTCHA_LOGGED_IN_DESC', 'Show Captcha for logged in customers');
-define('MODULE_CAPTCHA_LOGIN_NUM_TITLE', 'Login attempts');
-define('MODULE_CAPTCHA_LOGIN_NUM_DESC', 'Number of failed login attempts before the captcha is displayed.');
-define('CAPTCHA_MOD_CLASS_TITLE', 'Captcha Module');
-define('CAPTCHA_MOD_CLASS_DESC', 'Choose the Captcha module to use. Make sure that the module is also installed.');
-define('CFG_TXT_MODIFIED_CAPTCHA', 'Standard');
-define('CFG_TXT_PHP_CAPTCHA', 'PhpCaptcha');
+define('MODULE_CAPTCHA_USE_COLOR_TITLE', 'Random Color');
+define('MODULE_CAPTCHA_USE_COLOR_DESC', 'Show lines and signs in random color');
+define('MODULE_CAPTCHA_USE_SHADOW_TITLE', 'Shadow');
+define('MODULE_CAPTCHA_USE_SHADOW_DESC', 'Additional shadow for the signs');
+define('MODULE_CAPTCHA_CODE_LENGTH_TITLE', 'Captcha Length');
+define('MODULE_CAPTCHA_CODE_LENGTH_DESC', 'Number of Signs<br/>(default: 6)');
+define('MODULE_CAPTCHA_NUM_LINES_TITLE', 'Number of lines');
+define('MODULE_CAPTCHA_NUM_LINES_DESC', 'Set number of lines<br/>(default: 70)');
+define('MODULE_CAPTCHA_MIN_FONT_TITLE', 'Min font size');
+define('MODULE_CAPTCHA_MIN_FONT_DESC', 'Set minimum font size in px.<br/>(default: 24)');
+define('MODULE_CAPTCHA_MAX_FONT_TITLE', 'Max font size');
+define('MODULE_CAPTCHA_MAX_FONT_DESC', 'Set maximum font size in px<br/>(default: 28)');
+define('MODULE_CAPTCHA_BACKGROUND_RGB_TITLE', 'Background color');
+define('MODULE_CAPTCHA_BACKGROUND_RGB_DESC', 'Set background color in RGB<br/>(default: 192,192,192)');
+define('MODULE_CAPTCHA_LINES_RGB_TITLE', 'Line color');
+define('MODULE_CAPTCHA_LINES_RGB_DESC', 'Set line color in RGB<br/>(default: 220,148,002)');
+define('MODULE_CAPTCHA_CHARS_RGB_TITLE', 'Zeichenfarbe');
+define('MODULE_CAPTCHA_CHARS_RGB_DESC', 'Set line color in RGB<br/>(default: 112,112,112)');
+define('MODULE_CAPTCHA_WIDTH_TITLE', 'Width');
+define('MODULE_CAPTCHA_WIDTH_DESC', 'Set width in px');
+define('MODULE_CAPTCHA_HEIGHT_TITLE', 'Height');
+define('MODULE_CAPTCHA_HEIGHT_DESC', 'Set height in px');
 
 define('SHIPPING_STATUS_INFOS_TITLE', 'Shippingtime');
 define('SHIPPING_STATUS_INFOS_DESC', 'Select content to display Information for Shippingtime');
@@ -837,8 +910,8 @@ define('COMPRESS_STYLESHEET_DESC', 'Compress Stylesheet?<br/><b>Attention:</b> T
 define('COMPRESS_JAVASCRIPT_TITLE', 'JavaScript Compression');
 define('COMPRESS_JAVASCRIPT_DESC', 'Compress JavaScript?<br/><b>Attention:</b> This only works with a shop version 2.0.1.0 compatible template!');
 
-define('USE_ATTRIBUTES_IFRAME_TITLE', 'Attributes and Features in iframe');
-define('USE_ATTRIBUTES_IFRAME_DESC', 'Open Attribute and Features Manager in the Category / Product view in an iframe');
+define('USE_ATTRIBUTES_IFRAME_TITLE', 'Edit Attributes in iframe');
+define('USE_ATTRIBUTES_IFRAME_DESC', 'Open Attribute Manager in the Category / Product view in an iframe');
 
 define('ADMIN_HEADER_X_FRAME_OPTIONS_TITLE', 'Admin Clickjacking Protection');
 define('ADMIN_HEADER_X_FRAME_OPTIONS_DESC', 'Protect Adminarea with Header "X-Frame-Options: SAMEORIGIN"<br>Supported Browsers: FF 3.6.9+ Chrome 4.1.249.1042+ IE 8+ Safari 4.0+ Opera 10.50+ ');
@@ -848,9 +921,6 @@ define('SEND_MAIL_ACCOUNT_CREATED_DESC', 'Send an E-Mail to customer upon accoun
 
 define('STATUS_EMAIL_SENT_COPY_TO_ADMIN_TITLE', 'E-Mail upon status change');
 define('STATUS_EMAIL_SENT_COPY_TO_ADMIN_DESC', 'Send an E-Mail to admin upon status change of order?');
-
-define('ORDER_EMAIL_SEND_COPY_TO_ADMIN_TITLE', 'E-Mail order confirmation to admin');
-define('ORDER_EMAIL_SEND_COPY_TO_ADMIN_DESC', 'Send a copy of the order confirmation E-Mail to admin?');
 
 define('STOCK_CHECK_SPECIALS_TITLE', 'Check Specials Stock');
 define('STOCK_CHECK_SPECIALS_DESC', 'Check to see if sufficent specials stock is available<br/><br/><b>ATTENTION:</b> If there is insufficient specials stock, the order can only be processed after a reduction of the quantity.');
@@ -863,6 +933,8 @@ define('GUEST_ACCOUNT_EDIT_DESC', 'enable guest accounts to see and edit avvount
 
 define('EMAIL_SIGNATURE_ID_TITLE', 'E-Mail signature');
 define('EMAIL_SIGNATURE_ID_DESC', 'Select the content to be used for the signature in shop E-Mails.');
+
+define('TEXT_PAYPAL_NOT_INSTALLED', '<div class="important_info">PayPal not installed. This can be done <a href="'.xtc_href_link(FILENAME_MODULES, 'set=payment&module=paypal').'">here</a>.</div>');
 
 define('POLICY_MIN_LOWER_CHARS_TITLE', 'Password lower case');
 define('POLICY_MIN_LOWER_CHARS_DESC', 'How many lower case signs should to the password at least have?');
@@ -880,17 +952,15 @@ define('ACCOUNT_TELEPHONE_OPTIONAL_TITLE', 'Telephone number optional');
 define('ACCOUNT_TELEPHONE_OPTIONAL_DESC', 'Telephone number only optional on registration?');
 
 define('TRACKING_GOOGLEANALYTICS_UNIVERSAL_TITLE' , 'Google Universal Analytics');
-define('TRACKING_GOOGLEANALYTICS_UNIVERSAL_DESC' , 'Use Google Universal Analytics Code?<br/><b>Attention:</b> This only works with a shop version 2.0.0.0 compatible template!');
-define('TRACKING_GOOGLEANALYTICS_DOMAIN_TITLE' , 'Google Universal Analytics Cookie Domain');
-define('TRACKING_GOOGLEANALYTICS_DOMAIN_DESC' , 'Please enter the Cookie Domain (<i>auto</i> or <i>example.com</i> or <i>www.example.com</i>). Only works with Google Universal Analytics.');
-define('TRACKING_GOOGLE_LINKID_TITLE' , 'Google Universal Analytics/Google Analytics GTAG LinkID');
-define('TRACKING_GOOGLE_LINKID_DESC' , 'You can see separate information on multiple links on a page that all have the same goal. If there is for example two links are on the same side, both lead to the contact page, you will see separate click information for each link. Only works with Google Universal Analytics &amp; Google Analytics GTAG.');
-define('TRACKING_GOOGLE_DISPLAY_TITLE' , 'Google Universal Analytics/Google Analytics GTAG Displayfeature');
-define('TRACKING_GOOGLE_DISPLAY_DESC' , 'The areas to demographics and interests included an overview and new reports about the performance by age, gender and interest categories. Only works with Google Universal Analytics &amp; Google Analytics GTAG.');
+define('TRACKING_GOOGLEANALYTICS_UNIVERSAL_DESC' , 'Use Google Universal Analytics Code?<br/><br/><b>Attention:</b> After switching to Google Universal Analytics it is not possible to go back to the old one!<br/><b>Attention:</b> This only works with a shop version 2.0.0.0 compatible template!');
+define('TRACKING_GOOGLEANALYTICS_DOMAIN_TITLE' , 'Google Universal Analytics Shop-URL');
+define('TRACKING_GOOGLEANALYTICS_DOMAIN_DESC' , 'Please enter the Shop-URL (example.com oder www.example.com). Only works with Google Universal Analytics.');
+define('TRACKING_GOOGLE_LINKID_TITLE' , 'Google Universal Analytics LinkID');
+define('TRACKING_GOOGLE_LINKID_DESC' , 'You can see separate information on multiple links on a page that all have the same goal. If there is for example two links are on the same side, both lead to the contact page, you will see separate click information for each link. Only works with Google Universal Analytics.');
+define('TRACKING_GOOGLE_DISPLAY_TITLE' , 'Google Universal Analytics Displayfeature');
+define('TRACKING_GOOGLE_DISPLAY_DESC' , 'The areas to demographics and interests included an overview and new reports about the performance by age, gender and interest categories. Only works with Google Universal Analytics.');
 define('TRACKING_GOOGLE_ECOMMERCE_TITLE' , 'Google E-Commerce Tracking');
 define('TRACKING_GOOGLE_ECOMMERCE_DESC' , 'Set up an E-Commerce tracking to find out what visitors buy from your website or app. In addition, you receive the following information:<br><br><strong>Products:</strong> Purchased products and the quantities and the revenues from these products<br><strong>Transactions:</strong> Information about sales, tax, shipping costs and quantities for each transaction<br><strong>time to Purchase:</strong> Number of days and visits, starting from the current campaign until the completion of the transaction');
-define('TRACKING_GOOGLEANALYTICS_GTAG_TITLE' , 'Google Analytics GTAG');
-define('TRACKING_GOOGLEANALYTICS_GTAG_DESC' , 'Use Google global Site Tag?');
 
 define('NEW_ATTRIBUTES_STYLING_TITLE', 'Attribute Manager Styling');
 define('NEW_ATTRIBUTES_STYLING_DESC', 'Enable styling of the checkboxes/dropdowns in the attribute manager? Set it to "No" if you experience problems with a huge number of attributes and performance problems.');
@@ -919,7 +989,7 @@ define('META_SEARCH_SHOP_TITLE_DESC', 'Add Shop-Title to search results?');
 define('META_OTHER_SHOP_TITLE_TITLE', 'Shop-Title other pages');
 define('META_OTHER_SHOP_TITLE_DESC', 'Add Shop-Title all other pages?');
 define('META_GOOGLE_VERIFICATION_KEY_TITLE', 'Google Verification Key');
-define('META_GOOGLE_VERIFICATION_KEY_DESC', '<meta name="google-site-verification">');
+define('META_GOOGLE_VERIFICATION_KEY_DESC', '<meta name="verify-v1">');
 define('META_BING_VERIFICATION_KEY_TITLE', 'Bing Verification Key');
 define('META_BING_VERIFICATION_KEY_DESC', '<meta name="msvalidate.01">');
 
@@ -956,8 +1026,8 @@ define('WYSIWYG_SKIN_DESC' , 'Choose the skin for the WYSIWYG Editor.');
 define('CHECK_CHEAPEST_SHIPPING_MODUL_TITLE', 'Preselect cheapest shipping method');
 define('CHECK_CHEAPEST_SHIPPING_MODUL_DESC', 'Shall the cheapest shipping method be preselected in checkout for the customer?');
 
-define('DISPLAY_PRIVACY_CHECK_TITLE', 'Sign privacy notice');
-define('DISPLAY_PRIVACY_CHECK_DESC', 'Request approval of privacy notice during account creation, contact page, newsletter registration and checkout?)');
+define('DISPLAY_PRIVACY_CHECK_TITLE', 'Show privacy checkbox');
+define('DISPLAY_PRIVACY_CHECK_DESC', 'Shall the privacy checkbox be displayed during account creation? (Obligation for B2C businesses)');
 
 define('SHOW_SELFPICKUP_FREE_TITLE', 'Shipping module "Self Pickup" on "free shipping"');
 define('SHOW_SELFPICKUP_FREE_DESC', 'Shall the shipping module "Self Pickup (selfpickup)" be displayed upon reaching the amount for "free shipping" in module "Shipping (ot_shipping)"?');
@@ -980,11 +1050,7 @@ define('SEARCH_AC_STATUS_TITLE','Autocomplete search');
 define('SEARCH_AC_STATUS_DESC','Activate for autocomplete search<br/><b>Attention:</b> This only works with a shop version 2.0.0.0 compatible template!');
 define('SEARCH_AC_MIN_LENGTH_TITLE', 'Autocomplete number of characters');
 define('SEARCH_AC_MIN_LENGTH_DESC', 'Number of characters to display first search results<br/><b>Attention:</b> This only works with a shop version 2.0.0.0 compatible template!');
-define('SEARCH_AC_CATEGORIES_TITLE', 'Categories dropdown in search box');
-define('SEARCH_AC_CATEGORIES_DESC', 'Activate for displaying a categories dropdown in front of the search field in search box.');
 
-define('DISPLAY_PRIVACY_ON_CHECKOUT_TITLE', 'Display privacy notice on checkout');
-define('DISPLAY_PRIVACY_ON_CHECKOUT_DESC', 'Display an additional privacy notice on checkout?<br/><b>Attention:</b> If an additional checkbox shall be displayed, you need to set "Sign privacy notice" to "Yes"');
 define('DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT_TITLE', 'Display right of withdrawal for Downloads');
 define('DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT_DESC', 'Display a checkbox to inform the customer, that the right of withdrawal expires for downloads?');
 define('ORDER_STATUSES_DISPLAY_DEFAULT_TITLE', 'Display Orders');
@@ -1005,19 +1071,10 @@ define('MODULE_BANNER_MANAGER_STATUS_DESC', 'Activate Banner Manager?');
 define('MODULE_NEWSLETTER_STATUS_TITLE', 'Newsletter');
 define('MODULE_NEWSLETTER_STATUS_DESC', 'Activate Newsletter System?');
 
-define('EMAIL_ARCHIVE_ADDRESS_TITLE', 'Archive - E-Mail-Address');
-define('EMAIL_ARCHIVE_ADDRESS_DESC', 'Please enter an e-mail address for archiving all outgoing e-mails. This is used to send the e-mails to an archive mailbox via BCC.');
-
-define('DISPLAY_HEADQUARTER_ON_CHECKOUT_TITLE', 'Company Headquarter on Checkout');
-define('DISPLAY_HEADQUARTER_ON_CHECKOUT_DESC', 'Display Company Headquarter during checkout?');
-
-define('MODULE_NEWSLETTER_VOUCHER_AMOUNT_TITLE', 'Newsletter Voucher Amount');
-define('MODULE_NEWSLETTER_VOUCHER_AMOUNT_DESC', 'For newsletter registration gift voucher place the amount, put 0 for no amount.');
-define('MODULE_NEWSLETTER_DISCOUNT_COUPON_TITLE', 'Newsletter Coupon Code');
-define('MODULE_NEWSLETTER_DISCOUNT_COUPON_DESC', 'For newsletter registration coupon place the coupon code you wish to use or leave this field blank to disable.');
-
-define('ADMIN_START_TAB_SELECTED_TITLE', 'Tabs startpage');
-define('ADMIN_START_TAB_SELECTED_DESC', 'Which tab on the start page should be selected by default?');
-
-define('CACHE_LIFETIME_NOTE', '<b>Attention:</b> If the cache is activated, changes will only become visible in the shop after the cache lifetime expires!');
+define('GOOGLE_CERTIFIED_SHOPS_MERCHANT_ACTIVE_TITLE', 'Activate Google Certified Shops Merchant');
+define('GOOGLE_CERTIFIED_SHOPS_MERCHANT_ACTIVE_DESC', 'Use Google Certified Shops Merchant?<br/><br/><b>Attention:</b> This only works with a shop version 2.0.1.0 compatible template!');
+define('GOOGLE_SHOPPING_ID_TITLE', 'Google Shopping ID');
+define('GOOGLE_SHOPPING_ID_DESC', 'Your Google shopping ID');
+define('GOOGLE_TRUSTED_ID_TITLE', 'Google Trusted ID');
+define('GOOGLE_TRUSTED_ID_DESC', 'Your Google trusted ID');
 ?>

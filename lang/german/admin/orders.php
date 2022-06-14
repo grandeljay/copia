@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: orders.php 12773 2020-05-22 07:47:16Z GTB $   
+   $Id: orders.php 10326 2016-10-19 14:06:18Z Tomcraft $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -61,14 +61,25 @@ define('TABLE_HEADING_DATE_ADDED', 'hinzugef&uuml;gt am:');
 
 define('ENTRY_CUSTOMER', 'Kunde:');
 define('ENTRY_SOLD_TO', 'Rechnungsadresse:');
+define('ENTRY_STREET_ADDRESS', 'Strasse:');
+define('ENTRY_SUBURB', 'zus. Anschrift:');
+define('ENTRY_CITY', 'Stadt:');
+define('ENTRY_POST_CODE', 'PLZ:');
+define('ENTRY_STATE', 'Bundesland:');
+define('ENTRY_COUNTRY', 'Land:');
 define('ENTRY_TELEPHONE', 'Telefon:');
+define('ENTRY_EMAIL_ADDRESS', 'E-Mail-Adresse:');
 define('ENTRY_DELIVERY_TO', 'Lieferanschrift:');
 define('ENTRY_SHIP_TO', 'Lieferanschrift:');
 define('ENTRY_SHIPPING_ADDRESS', 'Versandadresse:');
-define('ENTRY_PICKUP_ADDRESS', 'Abholadresse:');
 define('ENTRY_BILLING_ADDRESS', 'Rechnungsadresse:');
 define('ENTRY_PAYMENT_METHOD', 'Zahlungsweise:');
 define('ENTRY_SHIPPING_METHOD', 'Versandart:');
+define('ENTRY_CREDIT_CARD_TYPE', 'Kreditkartentyp:');
+define('ENTRY_CREDIT_CARD_OWNER', 'Kreditkarteninhaber:');
+define('ENTRY_CREDIT_CARD_NUMBER', 'Kreditkartennummer:');
+define('ENTRY_CREDIT_CARD_CVV', 'Sicherheitscode (CVV)):');
+define('ENTRY_CREDIT_CARD_EXPIRES', 'Kreditkarte l&auml;uft ab am:');
 define('ENTRY_SUB_TOTAL', 'Zwischensumme:');
 define('ENTRY_TAX', 'MwSt.:');
 define('ENTRY_SHIPPING', 'Versandkosten:');
@@ -105,14 +116,19 @@ define('WARNING_ORDER_NOT_UPDATED', 'Hinweis: Es wurde nichts ge&auml;ndert. Dah
 
 define('TABLE_HEADING_DISCOUNT','Rabatt');
 define('ENTRY_CUSTOMERS_GROUP','Kundengruppe:');
+define('ENTRY_CUSTOMERS_VAT_ID','USt-IdNr.:');
 define('TEXT_VALIDATING','Nicht best&auml;tigt');
+
+// BOF - Tomcraft - 2009-10-03 - Paypal Express Modul
+define('TEXT_INFO_PAYPAL_DELETE', 'PayPal Transaktions Daten auch löschen.'); // ACHTUNG hier keine HTML-Entities verwenden
+// EOF - Tomcraft - 2009-10-03 - Paypal Express Modul
 
 // BOF - Tomcraft - 2010-04-22 - Added a missing language definition
 define('TEXT_PRODUCTS', 'Artikel');
 // EOF - Tomcraft - 2010-04-22 - Added a missing language definition
 
 //BOF - web28 - 2010-03-20 - Send Order by Admin
-define('COMMENT_SEND_ORDER_BY_ADMIN' , 'Auftragsbest&auml;tigung gesendet');
+define('COMMENT_SEND_ORDER_BY_ADMIN' , 'Auftragsbestätigung gesendet'); // ACHTUNG hier keine HTML-Entities verwenden
 define('BUTTON_ORDER_CONFIRMATION', 'Auftragsbest&auml;tigung senden');
 define('SUCCESS_ORDER_SEND', 'Auftragsbest&auml;tigung erfolgreich gesendet');
 //EOF - web28 - 2010-03-20 - Send Order by Admin
@@ -144,22 +160,13 @@ define('TEXT_SHIPCLOUD_RETURNS', 'Retour');
 define('TEXT_SHIPCLOUD_LETTER', 'Post Brief');
 define('TEXT_SHIPCLOUD_BOOKS', 'Post B&uuml;chersendung');
 define('TEXT_SHIPCLOUD_PARCEL_LETTER', 'Post Warensendung');
-define('TEXT_WEIGHT_PLACEHOLDER', 'Gewicht / Kg');
-define('TEXT_SHIPCLOUD_INSURANCE_NO', 'H&ouml;herversicherung Nein');
-define('TEXT_SHIPCLOUD_INSURANCE_YES', 'H&ouml;herversicherung JA');
-define('TEXT_SHIPCLOUD_BULK', 'Sperrgut');
-define('TEXT_SHIPCLOUD_PARCEL', 'Paket');
-define('TEXT_SHIPCLOUD_DPAG_WARENPOST', 'Warenpost');
-define('TEXT_SHIPCLOUD_DPAG_WARENPOST_UNTRACKED', 'Warenpost (untracked)');
-define('TEXT_SHIPCLOUD_DPAG_WARENPOST_SIGNATURE', 'Warenpost (signature)');
 
 define('DOWNLOAD_LABEL', 'Paketschein herunterladen');
 define('CREATE_LABEL', 'Paketschein erstellen');
 define('TEXT_DELETE_SHIPMENT_SUCCESS', 'shipcloud Paketschein gel&ouml;scht.');
 define('TEXT_LABEL_CREATED', 'Paketschein erfolgreich erstellt.');
 define('TEXT_CARRIER_ERROR', 'Paketdienstleister nicht in Ihrem shipcloud Account freigeschaltet oder ung&uuml;ltiger API-Key.');
-define('TEXT_CARRIER_PLACEHOLDER_1', 'Paketbeschreibung');
-define('TEXT_CARRIER_PLACEHOLDER_2', 'Sendungsbeschreibung');
+define('TEXT_CARRIER_PLACEHOLDER', 'Beschreibung (optional)');
 
 define('TEXT_DOWNLOADS', 'Downloads');
 define('TABLE_HEADING_FILENAME', 'Dateiname');
@@ -174,8 +181,6 @@ define('TEXT_ORDERS_STATUS_FILTER', 'Bestellstatus Filter');
 define('TABLE_HEADING_DATE', 'Datum');
 
 define('BUTTON_ORDER_MAIL_STEP', 'Bestellbest&auml;tigung senden');
-define('COMMENT_SEND_ORDER_MAIL_STEP' , 'Bestellbest&auml;tigung gesendet');
+define('COMMENT_SEND_ORDER_MAIL_STEP' , 'Bestellbestätigung gesendet'); // ACHTUNG hier keine HTML-Entities verwenden
 define('SUCCESS_ORDER_MAIL_STEP_SEND', 'Bestellbest&auml;tigung erfolgreich gesendet');
-
-define('BILLPAY_ORDER_UPDATE_HIGH', 'Fehler: Bei einer BillPay Bestellung darf der neue Bestellwert nicht h&ouml;her sein als der alte Bestellwert');
 ?>

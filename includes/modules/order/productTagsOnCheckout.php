@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: productTagsOnCheckout.php 11951 2019-07-21 13:11:33Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -16,11 +16,26 @@ class productTagsOnCheckout {  //Important same name as filename
     function __construct()
     {
         $this->code = 'productTagsOnCheckout'; //Important same name as class name
+        $this->title = 'ProductFeaturesOnCheckout';
+        $this->description = 'Show product tags in checkout';        
         $this->name = 'MODULE_ORDER_'.strtoupper($this->code);
-        $this->title = defined($this->name.'_TITLE') ? constant($this->name.'_TITLE') : '';        
-        $this->description = defined($this->name.'_DESCRIPTION') ? constant($this->name.'_DESCRIPTION') : '';        
         $this->enabled = defined($this->name.'_STATUS') && constant($this->name.'_STATUS') == 'true' ? true : false;
-        $this->sort_order = defined($this->name.'_SORT_ORDER') ? constant($this->name.'_SORT_ORDER') : '';        
+        $this->sort_order = defined($this->name.'_SORT_ORDER') ? constant($this->name.'_SORT_ORDER') : '';
+        
+        $this->translate();
+    }
+    
+    function translate() {
+        switch ($_SESSION['language_code']) {
+          case 'de':
+            $this->title = 'Artikeleigenschaften im Checkout';
+            $this->description = 'Artikeleigenschaften werden auf Bestellbest&auml;tigungsseite zus&auml;tzlich zur Bestellbeschreibung angezeigt';
+            break;
+          default:
+            $this->title = 'Product features in checkout';
+            $this->description = 'Product features are displayed additional to the order description on checkout comfirmation';
+            break;
+        }
     }
     
     function check() {
@@ -57,18 +72,10 @@ class productTagsOnCheckout {  //Important same name as filename
 
     function cart_products($products_data, $products_id) 
     {
-      $tags_query = xtDBquery("SELECT ".ADD_TAGS_SELECT."
-                                      pto.options_id,
+      $tags_query = xtDBquery("SELECT pto.options_id,
                                       pto.options_name,
-                                      pto.options_description,
-                                      pto.sort_order AS options_sort_order,
-                                      pto.options_content_group,
                                       ptv.values_id,
-                                      ptv.values_name,
-                                      ptv.values_description,
-                                      ptv.sort_order AS values_sort_order,
-                                      ptv.values_image,
-                                      ptv.values_content_group
+                                      ptv.values_name
                                  FROM ".TABLE_PRODUCTS_TAGS." pt
                                  JOIN ".TABLE_PRODUCTS_TAGS_OPTIONS." pto
                                       ON pt.options_id = pto.options_id
@@ -78,32 +85,28 @@ class productTagsOnCheckout {  //Important same name as filename
                                       ON ptv.values_id = pt.values_id
                                          AND ptv.status = '1'
                                          AND ptv.languages_id = '".(int)$_SESSION['languages_id']."'
-                                WHERE pt.products_id = '".(int)$products_id."'
-                             ORDER BY pt.sort_order, pto.sort_order, ptv.sort_order");
+                                WHERE pt.products_id = '".xtc_get_prid($products_id)."'
+                             ORDER BY pto.sort_order, ptv.sort_order");
 
       if (xtc_db_num_rows($tags_query, true) > 0) {
         $module_content = array();
         while ($tags = xtc_db_fetch_array($tags_query, true)) {
           if (!isset($module_content[$tags['options_id']])) {
             $module_content[$tags['options_id']] = array('OPTIONS_NAME' => $tags['options_name'],
-                                                         'OPTIONS_ID' => $tags['options_id'],
-                                                         'OPTIONS_SORT_ORDER' => $tags['options_sort_order'],
-                                                         'OPTIONS_DESCRIPTION' => $tags['options_description'],
-                                                         'OPTIONS_CONTENT_LINK' => (($tags['options_content_group'] != '') ? xtc_href_link(FILENAME_POPUP_CONTENT, 'coID='.$tags['options_content_group'], 'NONSSL') : ''),
                                                          'DATA' => array());
           }
-          $module_content[$tags['options_id']]['DATA'][] = array('VALUES_NAME' => $tags['values_name'],
-                                                                 'VALUES_ID' => $tags['values_id'],
-                                                                 'VALUES_SORT_ORDER' => $tags['values_sort_order'],
-                                                                 'VALUES_DESCRIPTION' => $tags['values_description'],
-                                                                 'VALUES_IMAGE' => (($tags['values_image'] != '' && is_file(DIR_FS_CATALOG.DIR_WS_IMAGES.$tags['values_image'])) ? DIR_WS_BASE.DIR_WS_IMAGES.$tags['values_image'] : ''),
-                                                                 'VALUES_CONTENT_LINK' => (($tags['values_content_group'] != '') ? xtc_href_link(FILENAME_POPUP_CONTENT, 'coID='.$tags['values_content_group'], 'NONSSL') : ''),
-                                                                 );
-          foreach(auto_include(DIR_FS_CATALOG.'includes/extra/modules/products_tags_data/','php') as $file) require ($file);
+          $module_content[$tags['options_id']]['DATA'][] = array('VALUES_NAME' => $tags['values_name']);
         }
-        
-        foreach(auto_include(DIR_FS_CATALOG.'includes/extra/modules/products_tags_end/','php') as $file) require ($file);
-        $products_data['products_tags'] = $module_content;        
+  
+        if (count($module_content) > 0) {
+          foreach ($module_content as $option) {
+            $products_data['order_description'] .= '<b>'.$option['OPTIONS_NAME'].':</b> ';
+            foreach ($option['DATA'] as $value) {
+              $products_data['order_description'] .= $value['VALUES_NAME'].', ';
+            }
+            $products_data['order_description'] = substr($products_data['order_description'], 0, -2).'<br/>';
+          }
+        }
       }
       return $products_data;    
     }

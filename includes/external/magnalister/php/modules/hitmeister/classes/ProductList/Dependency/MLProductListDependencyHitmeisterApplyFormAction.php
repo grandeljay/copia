@@ -97,8 +97,8 @@ class MLProductListDependencyHitmeisterApplyFormAction extends MLProductListDepe
 					       aa.*
 					  FROM '.TABLE_MAGNA_HITMEISTER_PREPARE.' aa
 				INNER JOIN '.TABLE_PRODUCTS.' p ON p.products_model = aa.products_model
-					 WHERE     p.products_id IN (\''.implode('\', \'', $pIDs).'\')
-						   AND aa.PrepareType=\'Apply\'
+					 WHERE p.products_id IN (\''.implode('\', \'', $pIDs).'\')
+						 AND AND aa.PrepareType=\'Apply\'
 				');
 			}
 			foreach ($aProducts as $aRow) {				
@@ -138,7 +138,7 @@ class MLProductListDependencyHitmeisterApplyFormAction extends MLProductListDepe
 		$prod = MagnaDB::gi()->fetchArray('
 			SELECT p.products_model,
 				   pd.products_name as Title,
-				   '.(MagnaDB::gi()->columnExistsInTable('products_short_description', TABLE_PRODUCTS_DESCRIPTION) ? 'pd.products_short_description' : '"" AS Subtitle').',
+				   pd.products_short_description as Subtitle,
 				   pd.products_description as Description
 			  FROM ' . TABLE_PRODUCTS . ' p
 		 LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON pd.products_id = p.products_id AND pd.language_id = "' . $langID . '"

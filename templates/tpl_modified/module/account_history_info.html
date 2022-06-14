@@ -7,13 +7,12 @@
   <span class="headline_right">{#text_date#} {$ORDER_DATE}</span>
 </h1>
 
-{if $info_message}<div class="errormessage">{$info_message}</div>{/if}
-{if $success_message != ''}<div class="infomessage">{$success_message}</div>{/if}
+{if $info_message}<div class="{if isset($smarty.get.info) && $smarty.get.info == '1'}info{else}error{/if}message">{$info_message}</div>{/if}
 
 <div class="highlightbox">
   <div class="twoColums">
     <div class="highlightbox plainleft">
-      <h4>{if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}{#text_pickup_address#}{else}{#text_shipping_address#}{/if}</h4>
+      <h4>{#text_shipping_address#}</h4>
       <p>{$DELIVERY_LABEL}</p>
     </div>
   </div>
@@ -111,7 +110,7 @@
           {$order_values.BUTTON_CART}
         </span>
       </td>
-      <td class="ord_table_right ord_width120">{$order_values.PRODUCTS_MODEL}{$order_values.PRODUCTS_ATTRIBUTES_MODEL}</td>
+      <td class="ord_table_right ord_width120">{$order_values.PRODUCTS_MODEL}</td>
       <td class="ord_table_right ord_width110">{$order_values.PRODUCTS_SINGLE_PRICE}</td>
       <td class="ord_table_right ord_width120">{$order_values.PRODUCTS_PRICE}</td>
     </tr>

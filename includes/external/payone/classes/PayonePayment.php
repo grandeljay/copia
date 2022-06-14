@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayonePayment.php 13368 2021-02-03 09:22:39Z GTB $
+   $Id: PayonePayment.php 10251 2016-08-19 08:55:02Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -34,21 +34,18 @@ class PayonePayment {
 		global $order;
 
 		$this->payone = new PayoneModified();
-		if ($this->check() > 0) {
-			$this->config = $this->payone->getConfig();
-			if (is_object($order)) {
-        $this->pg_config = $this->config[$this->_getActiveGenreIdentifier()];
-        $this->global_config = $this->pg_config['global_override'] == 'true' ? $this->pg_config['global'] : $this->config['global'];
-        $this->tmpStatus = $this->config['orders_status']['tmp'];
-			}
-  		$this->order_status = $this->config['orders_status']['paid'];
-		}
+		$this->config = $this->payone->getConfig();
+		$this->pg_config = $this->config[$this->_getActiveGenreIdentifier()];
+		$this->global_config = $this->pg_config['global_override'] == 'true' ? $this->pg_config['global'] : $this->config['global'];
+		$this->tmpStatus = $this->config['orders_status']['tmp'];
+    
 		!empty($this->code) OR $this->code = 'payone';
 		$this->title = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_TITLE')) ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_TITLE') : ''); 
 		$this->description = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_DESCRIPTION')) ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_DESCRIPTION').((defined('RUN_MODE_ADMIN')) ? MODULE_PAYMENT_PAYONE_LP : '') : ''); 
 		$this->sort_order = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_SORT_ORDER')) ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_SORT_ORDER') : '');
 		$this->enabled = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_STATUS') && constant('MODULE_PAYMENT_'.strtoupper($this->code).'_STATUS') == 'True') ? true : false);
 		$this->info = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_INFO')) ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_INFO') : ''); 
+		$this->order_status = $this->config['orders_status']['paid'];
 
 		if (is_object($order)) {
 			$this->update_status();
@@ -527,14 +524,14 @@ class PayonePayment {
     $this->delivery_data->setShippingAddressaddition($order->billing['suburb']);
 		$this->delivery_data->setShippingZip($order->delivery['postcode']);
 		$this->delivery_data->setShippingCity($order->delivery['city']);
-    if (isset($order->delivery['country_iso_2'])) {
-      $this->delivery_data->setShippingCountry($order->delivery['country_iso_2']);
-      $order->delivery['country']['iso_code_2'] = $order->delivery['country_iso_2'];
+    if (isset($order->billing['country_iso_2'])) {
+      $this->delivery_data->setShippingCountry($order->billing['country_iso_2']);
+      $order->billing['country']['iso_code_2'] = $order->billing['country_iso_2'];
     } else {
-      $this->delivery_data->setShippingCountry($order->delivery['country']['iso_code_2']);
+      $this->delivery_data->setShippingCountry($order->billing['country']['iso_code_2']);
     }
-    if (in_array($order->delivery['country']['iso_code_2'], array('US', 'CA'))) {
-      $this->delivery_data->setShippingState($order->delivery['state']);
+    if (in_array($order->billing['country']['iso_code_2'], array('US', 'CA'))) {
+      $this->delivery_data->setShippingState($order->billing['state']);
     }
 	}
 	
@@ -559,26 +556,12 @@ class PayonePayment {
   function _request_parameters($clearingtype) {
 	  global $order, $insert_id;
 
-    $amount = 0;
-    if (isset($order->info['pp_total'])) {
-      $amount = $order->info['pp_total'];
-    } else {
-      $amount = $order->info['total'];
-      
-      if ($_SESSION['customers_status']['customers_status_show_price_tax'] == '0'
-          && $_SESSION['customers_status']['customers_status_add_tax_ot'] == '1'
-          )
-      {
-        $amount += $order->info['tax'];
-      }
-    }
-    
 		$request_parameters = array(
 			'aid' => $this->global_config['subaccount_id'],
 			'key' => $this->global_config['key'],
 			'clearingtype' => $clearingtype,
 			'reference' => $insert_id,
-			'amount' => round($amount, 2),
+			'amount' => round(((isset($order->info['pp_total'])) ? $order->info['pp_total'] : $order->info['total']), 2),
 			'currency' => $order->info['currency'],
 			'personal_data' => $this->personal_data,
 			'delivery_data' => $this->delivery_data,

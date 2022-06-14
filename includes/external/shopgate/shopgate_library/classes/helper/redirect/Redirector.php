@@ -112,9 +112,12 @@ class Shopgate_Helper_Redirect_Redirector implements Shopgate_Helper_Redirect_Re
 		header("Location: " . $url, true, 301);
 		exit;
 	}
-
-	public function isMobile()
+	
+	/**
+	 * @return bool
+	 */
+	protected function isMobile()
 	{
-		return (bool) preg_match($this->keywordManager->toRegEx(), $this->userAgent);
+		return preg_match($this->keywordManager->toRegEx(), $this->userAgent);
 	}
 }

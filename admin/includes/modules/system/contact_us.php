@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: contact_us.php 12761 2020-05-13 13:39:09Z Tomcraft $
+   $Id: contact_us.php 10116 2016-07-20 10:18:51Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,8 +21,8 @@ class contact_us
         $this->code = 'contact_us';
         $this->title = MODULE_CONTACT_US_TEXT_TITLE;
         $this->description = MODULE_CONTACT_US_TEXT_DESCRIPTION;
-        $this->sort_order = ((defined('MODULE_CONTACT_US_SORT_ORDER')) ? MODULE_CONTACT_US_SORT_ORDER : '');
-        $this->enabled = ((defined('MODULE_CONTACT_US_STATUS') && MODULE_CONTACT_US_STATUS == 'true') ? true : false);
+        $this->sort_order = MODULE_CONTACT_US_SORT_ORDER;
+        $this->enabled = ((MODULE_CONTACT_US_STATUS == 'true') ? true : false);
     }
 
     function process($file) 
@@ -48,7 +48,7 @@ class contact_us
 
     function install() 
     {
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CONTACT_US_STATUS', 'true',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CONTACT_US_STATUS', 'false',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
         xtc_db_query("CREATE TABLE IF NOT EXISTS `contact_us_log` (
                         `customers_id` int(11) NOT NULL,
                         `customers_name` varchar(128) NOT NULL,
@@ -56,7 +56,7 @@ class contact_us
                         `customers_ip` varchar(50) NOT NULL,
                         `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
                         KEY `idx_customers_id` (`customers_id`)
-                      );");
+                      ) ENGINE=MyISAM;");
     }
 
     function remove()

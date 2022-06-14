@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: products_tags.php 11751 2019-04-12 08:23:55Z GTB $   
+   $Id: geo_TAGs.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -64,7 +64,6 @@ define('TEXT_INFO_HEADING_EDIT_OPTION', 'Edit feature');
 define('TEXT_INFO_EDIT_OPTION_INTRO', 'Please make any necessary changes.');
 define('TEXT_INFO_HEADING_DELETE_OPTION', 'Delete feature');
 define('TEXT_INFO_DELETE_OPTION_INTRO', 'Are you sure you want to delete this feature?');
-define('TEXT_INFO_WARNING_PRODUCTS', '<b>WARNING:</b> There are still %s products that have assigned this tag. This assignment gets deleted!');
 
 define('TEXT_DISPLAY_NUMBER_OF_OPTIONS', 'Displaying <b>%d</b> to <b>%d</b> (of <b>%d</b> features)');
 
@@ -76,10 +75,4 @@ define('TEXT_INFO_ATTRIBUTES_DELETE', 'Attributes - Delete mappings from deleted
 define('TEXT_INFO_IMPORT_WAIT', 'Please wait...');
 define('TEXT_INFO_IMPORT_FINISHED', 'Import finished.');
 
-define('SORT_ORDER','Sort order');
-define('TEXT_SORTORDER', 'Sorting');
-define('TEXT_OPTION_ID', 'Option ID');
-define('TEXT_OPTION_NAME', 'Option Name');
-define('TITLE_EDIT','Edit product features');
-define('ATTR_SAVE_ACTIVE', 'Save Unfold Features');
 ?>

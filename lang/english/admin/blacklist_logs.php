@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: blacklist_logs.php 10584 2017-01-20 10:45:19Z Tomcraft $
+   $Id: blacklist_logs.php 10143 2016-07-26 11:05:50Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -15,13 +15,6 @@ define('HEADING_TITLE', 'Blacklist Logs');
 define('TABLE_HEADING_IP', 'IP adress');
 define('TABLE_HEADING_BANNED', 'Time banned');
 define('TABLE_HEADING_ACTION', 'Action');
-
-define('TEXT_EDIT_ENTRY', 'Edit entry');
-define('TEXT_NEW_ENTRY', 'New entry');
-define('TEXT_ENTRY_IP', 'IP Address');
-define('TEXT_ENTRY_IP_INFO', 'Enter IP Address to block.');
-define('TEXT_ENTRY_TIME', 'Time');
-define('TEXT_ENTRY_TIME_INFO', 'Enter date and time the IP Address should be blocked.');
 
 define('TEXT_DELETE_INTRO', 'Are you sure you want to delete this IP address?');
 

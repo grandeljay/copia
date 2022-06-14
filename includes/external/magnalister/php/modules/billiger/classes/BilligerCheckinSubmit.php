@@ -78,7 +78,8 @@ class BilligerCheckinSubmit extends ComparisonShoppingCheckinSubmit {
 
 	protected function appendAdditionalData($pID, $product, &$data) {
 		parent::appendAdditionalData($pID, $product, $data);
-		$catname = $this->getcategoriesname($product['ProductId']);
+		$data['submit']['Quantity'] = $product['products_quantity'];
+		$catname = $this->getcategoriesname($product['products_id']);
 		if (!empty($catname)) {
 			$data['submit']['MerchantCategory'] = $catname;
 		}

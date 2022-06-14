@@ -16,13 +16,13 @@
 <div class="checkout_infos">
 
   <div class="{if $REVOCATION}checkoutInfoBoxes{else}checkoutInfoBoxesLarge{/if}" style="text-align: justify;">
-    {#text_information#|sprintf:$HEADQUARTER}
+    {#text_information#}
     {if $IP_LOG == 'true'}
     <p>{#text_ip#}&nbsp;<strong>{$CUSTOMERS_IP}</strong></p>
     {/if}
   </div>
 
-  {if $TEXT_AGB_CHECKOUT}
+  {if $REVOCATION}
   <div class="checkoutInfoBoxes red">
     {$TEXT_AGB_CHECKOUT}
   </div>
@@ -46,12 +46,8 @@
   
   {if $DELIVERY_LABEL}
   <div class="checkoutNavBoxes">
-    {if isset($SHIPPING_CLASS) && strpos($SHIPPING_CLASS, 'selfpickup')}
-      <h2>{#text_pickup_address#}</h2>
-    {else}
-      <h2>{#text_shipping_address#}</h2>
-      <div class="text">&nbsp;<a href="{$SHIPPING_ADDRESS_EDIT}">{#text_edit#}</a></div>
-    {/if}
+    <h2>{#text_shipping_address#}</h2>
+    <div class="text">&nbsp;<a href="{$SHIPPING_ADDRESS_EDIT}">{#text_edit#}</a></div>
     <div style="clear:both">{$DELIVERY_LABEL}<br /></div>
   </div>
   {/if}
@@ -86,7 +82,7 @@
   {if $ORDER_COMMENTS != ''}
     <br />
     <h2>{#text_comments#}</h2>
-    <div class="text">&nbsp;{if isset($PAYMENT_EDIT)}<a href="{$PAYMENT_EDIT}">{#text_edit#}</a>{/if}</div>
+    <div class="text">&nbsp;<a href="{$PAYMENT_EDIT}">{#text_edit#}</a></div>
     <div style="clear:both;padding: 0 5px;">{$ORDER_COMMENTS}</div>
   {/if}
 
@@ -102,12 +98,6 @@
         </tr>
       {/foreach}
     </table>
-  {/if}
-
-  {if $MODULE_gift_cart}
-    <br />
-    {$MODULE_gift_cart}
-    <div style="clear:both"></div>
   {/if}
 
   <br />
@@ -135,26 +125,12 @@
         <div style="width:90px; float:left;">{$data.image}</div>
         {/if}
         <div style="width:420px; float:left;">
-          {if isset($data.link_more)}<strong>{$data.name}</strong> {$data.link_more}{else}{$data.link}{/if}
+          {$data.link}
           {if $data.order_description}<div class="small">{$data.order_description}</div>{/if}
-          {if isset($data.products_tags)}
-            <div class="ol_tags_row">
-              {foreach item=module_data from=$data.products_tags}
-                <div class="ol_tags_item">     
-                  <strong>{$module_data.OPTIONS_NAME}</strong>:       
-                  {foreach name=inner item=item_data from=$module_data.DATA}
-                    {$item_data.VALUES_NAME}{if $smarty.foreach.inner.last}{else}, {/if}
-                  {/foreach}
-                </div>
-              {/foreach} 
-            </div>
-          {/if}
           {if $data.shipping_time}<br /><span class="nobr small">{$smarty.const.SHIPPING_TIME} {$data.shipping_time}</span>{/if}
-          {if is_array($data.attributes) && count($data.attributes) > 0}
-            {foreach key=a_data item=attrib_data from=$data.attributes}
-              {if $attrib_data.value != ''}<br /><span class="nobr small">&nbsp;<i> - {$attrib_data.option} : {$attrib_data.value}</i></span>{/if}
-            {/foreach}
-          {/if}
+          {foreach key=a_data item=attrib_data from=$data.attributes}
+            {if $attrib_data.value != ''}<br /><span class="nobr small">&nbsp;<i> - {$attrib_data.option} : {$attrib_data.value}</i></span>{/if}
+          {/foreach}
         </div>
       </td>
       <td class="main_row" align="right" valign="top">{$data.model}</td>

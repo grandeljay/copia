@@ -167,13 +167,6 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 		return $this->o['orderInfo']['eBayOrderID'];
 	}
 
-	protected function getExtendedOrderID() {
-		return (isset($this->o['orderInfo']['ExtendedOrderID']))
-			? "\nExtendedOrderID: ".$this->o['orderInfo']['ExtendedOrderID']
-			: ''
-		;
-	}
-
 	/**
 	 * last function called in processSingleOrder,
 	 * adding the old GeteBayOrders_PostOrderImport Hook-Point here
@@ -224,17 +217,6 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 		;
 	}
 
-    /**
-     * In new version of Gambio it is not possible to use html in comment of status
-     * @return string
-     */
-    private function getEbayRefundUrl () {
-        return (empty($this->o['orderInfo']['EbayRefundUrl']))
-            ? ''
-            : sprintf(ML_EBAY_ORDER_DETAIL_INFORMATION_TO_EBAY_SELLER_HUB, $this->o['orderInfo']['EbayRefundUrl'])
-            ;
-    }
-
 	private function getEbayPlus () {
 		return (empty($this->o['orderInfo']['eBayPlus']))
 			? ''
@@ -253,7 +235,6 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 		return trim(
 			sprintf(ML_GENERIC_AUTOMATIC_ORDER_MP_SHORT, $this->marketplaceTitle)."\n".
 			'eBayOrderID: '.$this->getMarketplaceOrderID().
-			$this->getExtendedOrderID().
 			$this->getEbaySalesRecordNumber().
 			$this->getEbayBuyerUserName()."\n\n".
 			$this->comment
@@ -263,29 +244,16 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 	protected function generateOrdersStatusComment() {
 		if ('true' === $this->config['ImportOnlyPaid']) {
 			if (strpos($this->o['orderComment'], 'PayPal')) {
-				/*
-				 * eBay PUI is PayPal with instruction
-				 * If the table orders_payment_instruction exists, use it
-				 */
-				$blPaymentInstructionSet = false;
-				if (MagnaDB::gi()->tableExists('orders_payment_instruction')) {
-					$blPaymentInstructionSet = fillOrdersPaymentInstructionTable($this->o['orderComment'], $this->cur['OrderID']);
-				}
-				if (!$blPaymentInstructionSet) {
-					$PUIcomment = ML_EBAY_PUI_MSG_TO_BUYER.
-					$this->o['orderComment'];
-				} 
+				$PUIcomment = ML_EBAY_PUI_MSG_TO_BUYER.
+				$this->o['orderComment'];
 			}
 		}
 		return trim(
 			sprintf(ML_GENERIC_AUTOMATIC_ORDER_MP, $this->marketplaceTitle)."\n".
 			'eBayOrderID: '.$this->getMarketplaceOrderID().
-			$this->getExtendedOrderID().
 			$this->getEbayBuyerUserName().
 			$this->getEbayPlus()."\n\n".
 			$this->comment . (isset($PUIcomment)?$PUIcomment:'')
-//            ."\n\n".
-//            $this->getEbayRefundUrl()
 		);
 	}
 	
@@ -334,20 +302,11 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 			$this->o['order']['comments'] = $this->generateOrderComment();
 		}
 		
-		if ($this->config['DBColumnExists']['orders.customers_status_name']) {
-			$this->o['order']['customers_status_name'] = $this->config['CustomerGroupProperties']['customers_status_name'];
-		}
-		if ($this->config['DBColumnExists']['orders.customers_status_image']) {
-			$this->o['order']['customers_status_image'] = $this->config['CustomerGroupProperties']['customers_status_image'];
-		}
 		if ($this->config['DBColumnExists']['orders.gm_send_order_status']) {
 			$this->o['order']['gm_send_order_status'] = 1;
 		}
 		if ($this->config['DBColumnExists']['orders.customers_status_discount']) {
 			$this->o['order']['customers_status_discount'] = '0.0';
-		}
-		if ($this->config['DBColumnExists']['orders.orders_hash']) {
-			$this->o['order']['orders_hash'] = md5(strtotime($this->o['order']['date_purchased']) + mt_rand());
 		}
 		
 		/* Change Shipping and Payment Methods */
@@ -380,25 +339,12 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 			# don't merge if "don't megre" array empty, or if we import only complete orders
 			$existingOpenOrder = false;
 		} else {
-			if (   MagnaDB::gi()->columnExistsInTable('delivery_firstname', TABLE_ORDERS)
-			    && MagnaDB::gi()->columnExistsInTable('delivery_lastname', TABLE_ORDERS)) {
-				$sAndDeliveryName = 
-			           'AND o.delivery_firstname = \''.$this->o['order']['delivery_firstname'].'\' 
-			           AND o.delivery_lastname = \''.MagnaDB::gi()->escape($this->o['order']['delivery_lastname']).'\'';
-			} elseif (MagnaDB::gi()->columnExistsInTable('delivery_name', TABLE_ORDERS)) {
-				$sAndDeliveryName = 
-			           'AND o.delivery_name = \''.$this->o['order']['delivery_name'].'\''; 
-			}
 			$existingOpenOrder = MagnaDB::gi()->fetchRow(eecho('
 			    SELECT o.orders_id, mo.special, mo.data, mo.internaldata
 			      FROM '.TABLE_ORDERS.' o, '.TABLE_MAGNA_ORDERS.' mo
-			     WHERE o.customers_email_address = \''.$this->o['order']['customers_email_address'].'\' 
-			           '.$sAndDeliveryName.'
-			           AND substring(o.delivery_street_address,1,64) = \''.substr(MagnaDB::gi()->escape($this->o['order']['delivery_street_address']), 0, 64).'\' 
-			           AND o.delivery_postcode = \''.$this->o['order']['delivery_postcode'].'\' 
-			           AND substring(o.delivery_city,1,32) = \''.substr(MagnaDB::gi()->escape($this->o['order']['delivery_city']), 0,32).'\' 
+			     WHERE o.customers_id = '.$this->o['order']['customers_id'].'
+			           AND o.customers_email_address = \''.$this->o['order']['customers_email_address'].'\' 
 			           AND o.orders_status NOT IN ("'.implode('", "', $this->config['OrderStatusClosed']).'")
-			           AND o.currency = \''.$this->o['order']['currency'].'\'
 			           AND mo.mpID = '.$this->mpID.'
 			           AND o.orders_id = mo.orders_id 
 			  ORDER BY o.orders_id DESC LIMIT 1
@@ -421,20 +367,6 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 			# filter keys (if hooks have changed sth.)
 			$this->db->insert(TABLE_ORDERS, array_filter_keys($this->o['order'], MagnaDB::gi()->getTableColumns(TABLE_ORDERS)));
 			$this->cur['OrderID'] = $this->db->getLastInsertID();
-			# Falls es doch verlorengeht (passiert)
-			if (empty($this->cur['OrderID'])) {
-				$iInsertId = (int)$this->db->fetchOne("SELECT LAST_INSERT_ID()");
-				$sOrderId = (int)$this->db->fetchOne("
-					SELECT orders_id
-					  FROM ".TABLE_ORDERS."
-					 WHERE customers_email_address = '".MagnaDB::gi()->escape($this->o['order']['customers_email_address'])."'
-					ORDER BY orders_id DESC
-					LIMIT 1
-				");
-				if ($iInsertId == $sOrderId) {
-					$this->cur['OrderID'] = $iInsertId;
-				}
-			}
 			$magnaOrdersData = serialize($this->o['magnaOrders']);
 			$magnaOrdersSpecial = $this->getMarketplaceOrderID();
 			$this->o['internaldata'] = $this->calculateInternalData($this->o['orderTotal']['Shipping']['value']);
@@ -746,7 +678,7 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 				'value' => 0.0,
 				'title' => $this->marketplaceTitle,
 				'class' => 'ot_shipping',
-				'sort_order' => defined('MODULE_ORDER_TOTAL_SHIPPING_SORT_ORDER') ? MODULE_ORDER_TOTAL_SHIPPING_SORT_ORDER : 50
+				'sort_order' => 50,
 			);
 		}
 		
@@ -844,7 +776,7 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 							if (!defined('MODULE_ORDER_TOTAL_TAX_STATUS') || (MODULE_ORDER_TOTAL_TAX_STATUS != 'true')) {
 								break;
 							}
-							$iTaxSortOrder = defined('MODULE_ORDER_TOTAL_TAX_SORT_ORDER') ? MODULE_ORDER_TOTAL_TAX_SORT_ORDER : max($aDbTotal['sort_order'], $iTaxSortOrder);
+							$iTaxSortOrder = max($aDbTotal['sort_order'], $iTaxSortOrder);
 							$aTax = array_pop($aTaxes);
 							$fTax = $aTax['products_tax'];
 							$fValue = $aTax['final_price'] - ($aTax['final_price'] / (1 + $fTax / 100)) + ($fTax == $fShippingTax ? $fShippingTaxValue : 0);
@@ -871,6 +803,7 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 			}
 			if (defined('MODULE_ORDER_TOTAL_TAX_STATUS') && (MODULE_ORDER_TOTAL_TAX_STATUS == 'true')) {
 				while ($aTax = array_pop($aTaxes)) { // add missing taxes
+					$iTaxSortOrder ++;
 					$fTax = round($aTax['products_tax'], 2);
 					$fValue = $aTax['final_price'] - ($aTax['final_price'] / (1 + $fTax / 100)) + ($fTax == $fShippingTax ? $fShippingTaxValue : 0);
 					$aTotals['ot_tax'.$fTax] = array(
@@ -928,8 +861,8 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 		$useDiscount = true;
 
 		if (0 != $products_id) {
-			$currProductsShippingDetailsAndSellerProfiles = MagnaDB::gi()->fetchRow(eecho("
-				SELECT ShippingDetails, SellerProfiles
+			$currProductsShippingDetails = MagnaDB::gi()->fetchOne(eecho("
+				SELECT ShippingDetails
 				  FROM ".TABLE_MAGNA_EBAY_PROPERTIES."
 				 WHERE     ".(('artNr' != getDBConfigValue('general.keytype', '0'))
 				               ? "products_id = '".$products_id."'"
@@ -938,10 +871,6 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 				       AND mpID = '".$this->mpID."'",
 				false
 			));
-			if (!empty($currProductsShippingDetailsAndSellerProfiles['SellerProfiles'])) {
-				$this->takeShippingDetailsFromSellerProfile($currProductsShippingDetailsAndSellerProfiles);
-			}
-			$currProductsShippingDetails = $currProductsShippingDetailsAndSellerProfiles['ShippingDetails'];
 			if (false != $currProductsShippingDetails) {
 				$currProductsShippingDetailsArr = json_decode($currProductsShippingDetails, true);
 				if ($domestic) {
@@ -1054,47 +983,6 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 		return $newInternaldata;
 	}
 
-	private function takeShippingDetailsFromSellerProfile(&$currProductsShippingDetailsAndSellerProfiles) {
-		$aShippingDetails = json_decode($currProductsShippingDetailsAndSellerProfiles['ShippingDetails'], true);
-		$aSellerProfiles  = json_decode($currProductsShippingDetailsAndSellerProfiles['SellerProfiles'], true);
-		if (!isset($aSellerProfiles['Shipping'])) return;
-		$aSellerProfileContents = getDBConfigValue('ebay.sellerprofile.contents', $this->mpID, '');
-                if(empty($aSellerProfileContents)) return;
-		if (    !is_array($aSellerProfileContents)
-		     || !array_key_exists('Shipping', $aSellerProfileContents)
-		     || !array_key_exists($aSellerProfiles['Shipping'], $aSellerProfileContents['Shipping'])) {
-			return;
-		}
-		$jShippingProfile = str_replace(array(
-			  'shipping.local',
-			  'shipping.international',
-			  'location',
-			  'service',
-			  'cost',
-			  'shippingprofile.local',
-			  'shippingprofile.international',
-			  'shippingdiscount.local',
-			  'shippingdiscount.international',
-			  '{\"val\":true}',
-			  '{\"val\":false}'),
-			array('ShippingServiceOptions',
-			  'InternationalShippingServiceOption',
-			  'ShipToLocation',
-			  'ShippingService',
-			  'ShippingServiceCost',
-			  'LocalProfile',
-			  'InternationalProfile',
-			  'LocalPromotionalDiscount',
-			  'InternationalPromotionalDiscount',
-			  'true',
-			  'false'),
-			json_encode($aSellerProfileContents['Shipping'][$aSellerProfiles['Shipping']]));
-		if ($this->verbose) {
-			echo print_m(json_decode($jShippingProfile, true), 'takeShippingDetailsFromSellerProfile, Details updated');
-		}
-		$currProductsShippingDetailsAndSellerProfiles['ShippingDetails'] = $jShippingProfile;
-	}
-
 	/**
 	 * Returns an array with the replacement keys and the content for the promotion mail.
 	 * @return array
@@ -1110,63 +998,5 @@ class EbayImportOrders extends MagnaCompatibleImportOrders {
 			)
 		);
 	}
-
-	/*
-	 * For newer Gambio versions: set total weight in the orders table
-	 * Keep the old weight for combined orders
-	 */
-	protected function setOrderWeight() {
-		if (!MagnaDB::gi()->columnExistsInTable('order_total_weight', TABLE_ORDERS)) {
-			return;
-		}
-		$iExistingWeight = $this->db->fetchOne('SELECT order_total_weight
-			 FROM '.TABLE_ORDERS.'
-			WHERE orders_id = '.$this->cur['OrderID']);
-		parent::setOrderWeight();
-		if ($iExistingWeight > 0) {
-			$this->db->query('UPDATE '.TABLE_ORDERS.'
-				SET order_total_weight = order_total_weight + '.$iExistingWeight.'
-				WHERE orders_id = '.$this->cur['OrderID']);
-		}
-	}
 	
-	protected function insertProductAttribute($iProductsId, $aOption, $sSKU) {
-		if (empty($aOption['options_name'])) {
-			return;
-		}
-
-		$aOrderProductsAttribute = array(
-			'orders_id' => $this->p['orders_id'],
-			'orders_products_id' => $iProductsId,
-			'products_options' => $aOption['options_name'],
-			'products_options_values' => $aOption['options_values_name'],
-			'options_values_price' => 0.0,
-			'price_prefix' => ''
-		);
-
-		if ($this->config['DBColumnExists']['orders_products_attributes.products_options_id']) {
-			$aOrderProductsAttribute['products_options_id'] = $aOption['options_id'];
-			$aOrderProductsAttribute['products_options_values_id'] = $aOption['options_values_id'];
-		}
-		/**
-		 * ebay supports multiple variations so attribute-sku will be calculated like this
-		 */
-		if ($this->config['DBColumnExists']['orders_products_attributes.products_attributes_model']) {
-			$aOrderProductsAttribute['products_attributes_model'] = $this->getProductAttributeData((int) $this->p['products_id'], (int) $aOption['options_id'], (int) $aOption['options_values_id'], 'attributes_model');
-		}
-		
-		if ($this->config['DBColumnExists']['orders_products_attributes.attributes_model']) {//modified 2.0.0
-			$aOrderProductsAttribute['attributes_model'] = $this->getProductAttributeData((int) $this->p['products_id'], (int) $aOption['options_id'], (int) $aOption['options_values_id'], 'attributes_model');
-		}
-		
-		if ($this->config['DBColumnExists']['orders_products_attributes.attributes_ean']) {//modified 2.0.0
-			$aOrderProductsAttribute['attributes_ean'] = $this->getProductAttributeData((int)$this->p['products_id'],(int)$aOption['options_id'], (int)$aOption['options_values_id'], 'attributes_ean');
-		}
-
-		if ($this->config['DBColumnExists']['orders_products_attributes.products_attributes_id']) {
-			$aOrderProductsAttribute['products_attributes_id'] = ($aOption['id'] == false) ? 0 : $aOption['id'];
-		}
-
-		$this->insert(TABLE_ORDERS_PRODUCTS_ATTRIBUTES, $aOrderProductsAttribute);
-	}
 }

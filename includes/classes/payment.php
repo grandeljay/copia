@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: payment.php 13391 2021-02-05 14:30:12Z GTB $
+   $Id: payment.php 9861 2016-05-25 07:05:22Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -81,7 +81,7 @@
           );
         } else {
           reset($this->modules);
-          foreach ($this->modules as $value) {
+          while (list(, $value) = each($this->modules)) {
             $class = substr($value, 0, strrpos($value, '.'));
             $include_modules[] = array(
               'class' => $class,
@@ -105,24 +105,13 @@
           {
             $unallowed_modules_string .= (($unallowed_modules_string != '') ? ',' : '').DOWNLOAD_UNALLOWED_PAYMENT;
           }
-          if ($_SESSION['cart']->count_contents_virtual() != $_SESSION['cart']->count_contents()) {
-            $unallowed_modules_string .= (($unallowed_modules_string != '') ? ',' : '').MODULE_ORDER_TOTAL_GV_UNALLOWED_PAYMENT;
-          }
         }
 
         // unallowed payment / shipping
-        if (defined('MODULE_EXCLUDE_PAYMENT_STATUS')
-            && MODULE_EXCLUDE_PAYMENT_STATUS == 'True'
-            )
-        {
+        if (MODULE_EXCLUDE_PAYMENT_STATUS == 'True') {
           for ($i=1; $i<=MODULE_EXCLUDE_PAYMENT_NUMBER; $i++) {
             $shipping_exclude = explode(',', constant('MODULE_EXCLUDE_PAYMENT_SHIPPING_'.$i));
-            if (isset($_SESSION['shipping']) 
-                && is_array($_SESSION['shipping'])
-                && array_key_exists('id', $_SESSION['shipping']) 
-                && in_array(substr($_SESSION['shipping']['id'], 0, (strpos($_SESSION['shipping']['id'], '_'))), $shipping_exclude) !== false
-                )
-            {
+            if (in_array(substr($_SESSION['shipping']['id'], 0, (strpos($_SESSION['shipping']['id'], '_'))), $shipping_exclude) !== false) {
               $unallowed_modules_string .= (($unallowed_modules_string != '') ? ',' : '').constant('MODULE_EXCLUDE_PAYMENT_PAYMENT_'.$i);
             }
           }
@@ -137,17 +126,14 @@
 
         for ($i = 0, $n = sizeof($include_modules); $i < $n; $i++) {
           if (!in_array($include_modules[$i]['class'], $unallowed_modules)) {
-            // check if zone is allowed to see module
-            $allowed_zones = array();
-            if (defined('MODULE_PAYMENT_' . strtoupper($include_modules[$i]['class']) . '_ALLOWED')
-                && constant('MODULE_PAYMENT_' . strtoupper($include_modules[$i]['class']) . '_ALLOWED') != ''
-                ) 
-            {
-              $allowed_zones = explode(',', constant('MODULE_PAYMENT_' . strtoupper($include_modules[$i]['class']) . '_ALLOWED'));
+            // check if zone is alowed to see module
+            $unallowed_zones = array();
+            if (constant('MODULE_PAYMENT_' . strtoupper($include_modules[$i]['class']) . '_ALLOWED') != '') {
+              $unallowed_zones = explode(',', constant('MODULE_PAYMENT_' . strtoupper($include_modules[$i]['class']) . '_ALLOWED'));
             }
-            if ((isset($_SESSION['billing_zone']) 
-                 && in_array($_SESSION['billing_zone'], $allowed_zones) == true
-                 ) || count($allowed_zones) == 0
+            if ((isset($_SESSION['delivery_zone']) 
+                 && in_array($_SESSION['delivery_zone'], $unallowed_zones) == true
+                 ) || count($unallowed_zones) == 0
                 )
             {
               if ($include_modules[$i]['file'] != 'no_payment') {
@@ -208,7 +194,7 @@
       $js = '';
       if (is_array($this->modules)) {
         $js = '<script type="text/javascript"><!-- ' . "\n" .
-              'function check_form_payment() {' . "\n" .
+              'function check_form() {' . "\n" .
               '  var error = 0;' . "\n" .
               '  var error_message = unescape("' . xtc_js_lang(JS_ERROR) . '");' . "\n" .
               '  var payment_value = null;' . "\n" .
@@ -227,7 +213,7 @@
               '  }' . "\n\n";
 
         reset($this->modules);
-        foreach ($this->modules as $value) {
+        while (list(, $value) = each($this->modules)) {
           $class = substr($value, 0, strrpos($value, '.'));
           if (isset($GLOBALS[$class]) 
               && is_object($GLOBALS[$class]) 
@@ -254,16 +240,9 @@
                '    }' . "\n" .       
                '  }' . "\n\n";
 
-        if (DISPLAY_CONDITIONS_ON_CHECKOUT == 'true' && SIGN_CONDITIONS_ON_CHECKOUT == 'true') {
+        if (DISPLAY_CONDITIONS_ON_CHECKOUT == 'true') {
           $js .= "\n" . '  if (!document.getElementById("checkout_payment").conditions.checked) {' . "\n" .
                  '    error_message = error_message + unescape("' . xtc_js_lang(JS_ERROR_CONDITIONS_NOT_ACCEPTED) . '");' . "\n" .
-                 '    error = 1;' . "\n" .
-                 '  }' . "\n\n";
-        }
-
-        if (DISPLAY_PRIVACY_ON_CHECKOUT == 'true' && DISPLAY_PRIVACY_CHECK == 'true') {
-          $js .= "\n" . '  if (!document.getElementById("checkout_payment").privacy.checked) {' . "\n" .
-                 '    error_message = error_message + unescape("' . xtc_js_lang(JS_ERROR_PRIVACY_NOTICE_NOT_ACCEPTED) . '");' . "\n" .
                  '    error = 1;' . "\n" .
                  '  }' . "\n\n";
         }
@@ -307,7 +286,7 @@
       $selection_array = array();
       if (is_array($this->modules)) {
         reset($this->modules);
-        foreach ($this->modules as $value) {
+        while (list(, $value) = each($this->modules)) {
           $class = substr($value, 0, strrpos($value, '.'));
           if (isset($GLOBALS[$class]) 
               && is_object($GLOBALS[$class])
@@ -370,8 +349,7 @@
 
     function process_button() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'process_button')
             )
@@ -383,8 +361,7 @@
 
     function before_process() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'before_process')
             ) 
@@ -396,8 +373,7 @@
 
     function payment_action() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'payment_action')
             ) 
@@ -409,8 +385,7 @@
 
     function before_send_order() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'before_send_order')
             ) 
@@ -422,8 +397,7 @@
 
     function after_process() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'after_process')
             ) 
@@ -435,8 +409,7 @@
 
     function success() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             ) 
         {
@@ -451,8 +424,7 @@
 
     function get_error() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'get_error')
             ) 
@@ -464,8 +436,7 @@
 
     function iframeAction() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'iframeAction')
             ) 
@@ -477,8 +448,7 @@
 
     function create_paypal_link() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module])
+        if (is_object($GLOBALS[$this->selected_module])
             && $GLOBALS[$this->selected_module]->enabled
             && method_exists($GLOBALS[$this->selected_module], 'create_paypal_link')
             ) 
@@ -490,8 +460,7 @@
 
     function info() {
       if (is_array($this->modules)) {
-        if (isset($GLOBALS[$this->selected_module])
-            && is_object($GLOBALS[$this->selected_module]) 
+        if (is_object($GLOBALS[$this->selected_module]) 
             && $GLOBALS[$this->selected_module]->enabled
             ) 
         {
@@ -501,38 +470,6 @@
             return array();          
           }
         }
-      }
-    }
-
-    public static function payment_title($payment_method, $order_id = '') {
-      static $static_payment_array;
-
-      if (!is_array($static_payment_array)) {
-        $static_payment_array = array();
-      }
-    
-      if ($payment_method != '' && $payment_method != 'no_payment') {
-        if (!isset($static_payment_array[$payment_method][(int)$order_id])) { 
-          if (is_file(DIR_FS_CATALOG . 'includes/modules/payment/' . $payment_method . '.php')) {
-            include_once(DIR_FS_CATALOG . 'lang/' . $_SESSION['language'] . '/modules/payment/' . $payment_method . '.php');
-            $payment_name = strip_tags(constant(strtoupper('MODULE_PAYMENT_' . $payment_method . '_TEXT_TITLE')));
-
-            if ($payment_method == 'paypalplus' && (int)$order_id > 0) {
-              require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalInfo.php');
-              $paypal = new PayPalInfo($payment_method);
-              $payment_array = $paypal->get_payment_data($order_id);
-              if (count($payment_array) > 0 && $payment_array['payment_method'] == 'pay_upon_invoice') {
-                $payment_name = $payment_name . ' - ' . MODULE_PAYMENT_PAYPALPLUS_INVOICE;
-              }
-            }
-          } else {
-            $payment_name = $payment_method;
-          }
-          $static_payment_array[$payment_method][(int)$order_id] = $payment_name;
-        }
-        return $static_payment_array[$payment_method][(int)$order_id];
-      } else {
-        return false;
       }
     }
     

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: payone_wlt.php 10405 2016-11-10 07:27:10Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,23 +27,6 @@ class payone_wlt extends PayonePayment {
 		parent::__construct();
 		$this->form_action_url = '';
 	}
-
-  function update_status() {
-    parent::update_status();
-    
-    if ($this->enabled === true) {
-      $genre_config = $this->config[$this->_getActiveGenreIdentifier()];		
-      
-      foreach ($genre_config['types'] as $key => $value) {
-        if ($genre_config['types'][$key]['active'] != 'true'
-            && $genre_config['types'][$key]['name'] == 'paymenttype_paypal'
-            ) 
-        {
-          $this->enabled = false;
-        }
-      }
-    }
-  }
 
 	function selection() {
 		$selection = parent::selection();

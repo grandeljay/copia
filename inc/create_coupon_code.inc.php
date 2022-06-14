@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: create_coupon_code.inc.php 12438 2019-12-02 15:52:46Z GTB $
+   $Id: create_coupon_code.inc.php 899 2005-04-29 02:40:57Z hhgag $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -30,20 +30,16 @@
 // Create a Coupon Code. length may be between 1 and 16 Characters
 // $salt needs some thought.
 
-  // include needed functions
-  require_once(DIR_FS_INC . 'xtc_rand.inc.php');
-
-  function create_coupon_code($salt = "secret", $length = SECURITY_CODE_LENGTH) {
+  function create_coupon_code($salt="secret", $length = SECURITY_CODE_LENGTH) {
     $ccid = md5(uniqid("","salt"));
     $ccid .= md5(uniqid("","salt"));
     $ccid .= md5(uniqid("","salt"));
     $ccid .= md5(uniqid("","salt"));
-
-    $random_start = xtc_rand(0, (128-$length));
-    
+    srand((double)microtime()*1000000); // seed the random number generator
+    $random_start = @rand(0, (128-$length));
     $good_result = 0;
     while ($good_result == 0) {
-      $id1 = substr($ccid, $random_start, $length);
+      $id1=substr($ccid, $random_start,$length);
       $query = xtc_db_query("SELECT coupon_code 
                                FROM " . TABLE_COUPONS . " 
                               WHERE coupon_code = '" . xtc_db_input($id1) . "'");
@@ -51,4 +47,7 @@
     }
     return $id1;
   }
+
+
+
 ?>

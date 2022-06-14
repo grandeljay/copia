@@ -1,7 +1,6 @@
 <?php
-
 /* -----------------------------------------------------------------------------------------
-   $Id: logoff.php 13177 2021-01-16 09:50:28Z GTB $
+   $Id: logoff.php 3072 2012-06-18 15:01:13Z hhacker $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -28,54 +27,59 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-include('includes/application_top.php');
+include ('includes/application_top.php');
 
 // create smarty elements
-$smarty = new Smarty();
+$smarty = new Smarty;
 
 if ($messageStack->size('logoff') > 0) {
-    $smarty->assign('info_message', $messageStack->output('logoff'));
-}
-if ($messageStack->size('logoff', 'success') > 0) {
-    $smarty->assign('success_message', $messageStack->output('logoff', 'success'));
-}
+  $smarty->assign('info_message', $messageStack->output('logoff'));
+}    
 
-if (
-    isset($_SESSION['account_type'])
-    && $_SESSION['account_type'] == '1'
-    && DELETE_GUEST_ACCOUNT == 'true'
-) {
-    xtc_db_query("DELETE FROM " . TABLE_CUSTOMERS . " WHERE customers_id = '" . (int)$_SESSION['customer_id'] . "'");
-    xtc_db_query("DELETE FROM " . TABLE_ADDRESS_BOOK . " WHERE customers_id = '" . (int)$_SESSION['customer_id'] . "'");
-    xtc_db_query("DELETE FROM " . TABLE_CUSTOMERS_INFO . " WHERE customers_info_id = '" . (int)$_SESSION['customer_id'] . "'");
-    xtc_db_query("DELETE FROM " . TABLE_CUSTOMERS_IP . " WHERE customers_id = '" . (int)$_SESSION['customer_id'] . "'");
-}
-
-$_SESSION['cart']->reset();
-if (defined('MODULE_WISHLIST_SYSTEM_STATUS') && MODULE_WISHLIST_SYSTEM_STATUS == 'true') {
-    $_SESSION['wishlist']->reset();
+if ($_SESSION['account_type'] == '1' && DELETE_GUEST_ACCOUNT == 'true') {
+  xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS." WHERE customers_id = '".(int)$_SESSION['customer_id']."'");
+  xtc_db_query("DELETE FROM ".TABLE_ADDRESS_BOOK." WHERE customers_id = '".(int)$_SESSION['customer_id']."'");
+  xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS_INFO." WHERE customers_info_id = '".(int)$_SESSION['customer_id']."'");
+  xtc_db_query("DELETE FROM ".TABLE_CUSTOMERS_IP." WHERE customers_id = '".(int)$_SESSION['customer_id']."'");
 }
 
 xtc_session_destroy();
-xtc_session_reset();
+
+unset ($_SESSION['customer_id']);
+unset ($_SESSION['customer_default_address_id']);
+unset ($_SESSION['customer_first_name']);
+unset ($_SESSION['customer_country_id']);
+unset ($_SESSION['customer_zone_id']);
+unset ($_SESSION['comments']);
+unset ($_SESSION['user_info']);
+unset ($_SESSION['customers_status']);
+unset ($_SESSION['selected_box']);
+unset ($_SESSION['navigation']);
+unset ($_SESSION['shipping']);
+unset ($_SESSION['payment']);
+unset ($_SESSION['ccard']);
+unset ($_SESSION['gv_id']);
+unset ($_SESSION['cc_id']);
+
+$_SESSION['cart']->reset();
 
 // write customers status guest in session again
-require(DIR_WS_INCLUDES . 'write_customers_status.php');
+require (DIR_WS_INCLUDES.'write_customers_status.php');
 
 // include boxes
-require(DIR_FS_CATALOG . 'templates/' . CURRENT_TEMPLATE . '/source/boxes.php');
+require (DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/source/boxes.php');
 
 $breadcrumb->add(NAVBAR_TITLE_LOGOFF);
 
-require(DIR_WS_INCLUDES . 'header.php');
+require (DIR_WS_INCLUDES.'header.php');
 
-$smarty->assign('BUTTON_CONTINUE', '<a href="' . xtc_href_link(FILENAME_DEFAULT) . '">' . xtc_image_button('button_continue.gif', IMAGE_BUTTON_CONTINUE) . '</a>');
+$smarty->assign('BUTTON_CONTINUE', '<a href="'.xtc_href_link(FILENAME_DEFAULT).'">'.xtc_image_button('button_continue.gif', IMAGE_BUTTON_CONTINUE).'</a>');
 $smarty->assign('language', $_SESSION['language']);
-$main_content = $smarty->fetch(CURRENT_TEMPLATE . '/module/logoff.html');
+$main_content = $smarty->fetch(CURRENT_TEMPLATE.'/module/logoff.html');
 $smarty->assign('main_content', $main_content);
 $smarty->caching = 0;
-if (!defined('RM')) {
-    $smarty->load_filter('output', 'note');
-}
-$smarty->display(CURRENT_TEMPLATE . '/index.html');
-include('includes/application_bottom.php');
+if (!defined('RM'))
+  $smarty->load_filter('output', 'note');
+$smarty->display(CURRENT_TEMPLATE.'/index.html');
+include ('includes/application_bottom.php');
+?>

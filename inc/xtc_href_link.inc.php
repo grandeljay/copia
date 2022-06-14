@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_href_link.inc.php 12661 2020-03-24 07:35:00Z GTB $
+   $Id: xtc_href_link.inc.php 10220 2016-08-10 08:58:17Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -18,13 +18,8 @@
 
   // The HTML href link wrapper function
   function xtc_href_link($page = '', $parameters = '', $connection = 'NONSSL', $add_session_id = true, $search_engine_safe = true, $urlencode = false, $admin = false) {
-    global $request_type, $session_started, $http_domain, $https_domain, $truncate_session_id, $cookie, $products_link_cat_id, $canonical_flag;
-    static $session_id, $href_link_array;
-    
-    if (!isset($href_link_array)) {
-      $href_link_array = array();
-    }
-        
+    global $request_type, $session_started, $http_domain, $https_domain, $truncate_session_id, $cookie;
+
     $parameters = str_replace('&amp;', '&', $parameters); // undo W3C-Conform link
 
     $link = $connection == 'SSL' && (ENABLE_SSL || $request_type == 'SSL') ? HTTPS_SERVER : HTTP_SERVER;
@@ -42,11 +37,6 @@
     }
 
     $link .= $page;
-    
-    parse_str($parameters, $params_array);
-    ksort($params_array);
-    $link_cache = md5('link_cache:'.$link);
-    $param_cache = md5('param_cache:'.http_build_query($params_array, '', '|').((isset($params_array['products_id'])) ? $products_link_cat_id.((isset($canonical_flag)) ? '|'.$canonical_flag : '') : ''));
 
     $separator = '?';
     if (xtc_not_null($parameters)) {
@@ -57,19 +47,11 @@
     $link = rtrim($link, '&?'); // strip ?/& from the end of link
 
     if ($admin === false && SEARCH_ENGINE_FRIENDLY_URLS == 'true' && $search_engine_safe === true) {
-      if (!isset($href_link_array[$link_cache][$param_cache])) {
-        require_once (DIR_FS_INC . 'seo_url_mod.php');
-        list($link, $separator) = seo_url_mod($link, $page, $parameters, $connection, $separator);
-        if ($link == '#') {
-          return $link;
-        }
-        $href_link_array[$link_cache][$param_cache] = array(
-          'link' => $link,
-          'separator' => $separator
-        );
+      require_once (DIR_FS_INC . 'seo_url_mod.php');
+      list($link, $separator) = seo_url_mod($link, $page, $parameters, $connection, $separator);
+      if ($link == '#') {
+        return $link;
       }
-      $link = $href_link_array[$link_cache][$param_cache]['link'];
-      $separator = $href_link_array[$link_cache][$param_cache]['separator'];
     }
 
     // Add the session ID when moving from different HTTP and HTTPS servers, or when SID is defined
@@ -79,22 +61,16 @@
         && (SESSION_FORCE_COOKIE_USE == 'False' && ($admin === true || $cookie === false))
        ) 
     {
-      if (!isset($session_id)) {
-        if (defined('SID')
-            && constant('SID') != ''
-            && session_id() != '')
-        {
-          $session_id = session_name() . '=' . session_id();
-        } elseif ( 
-          ( ( ($request_type == 'NONSSL') && ($connection == 'SSL') && (ENABLE_SSL == true) )
-            || ( ($request_type == 'SSL') && ($connection == 'NONSSL') )
-          ) && $http_domain != $https_domain) {
-          $session_id = session_name() . '=' . session_id();
-        }
-      }
-      
-      if (isset($session_id) && $session_id != '') {
-        $link .= $separator . $session_id;
+      if (defined('SID')
+          && constant('SID') != ''
+          && session_id() != '')
+      {
+        $link .= $separator . session_name() . '=' . session_id();
+      } elseif ( 
+        ( ( ($request_type == 'NONSSL') && ($connection == 'SSL') && (ENABLE_SSL == true) )
+          || ( ($request_type == 'SSL') && ($connection == 'NONSSL') )
+        ) && $http_domain != $https_domain) {
+        $link .= $separator . session_name() . '=' . session_id();
       }
     }
 

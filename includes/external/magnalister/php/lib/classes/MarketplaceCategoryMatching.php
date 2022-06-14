@@ -34,13 +34,6 @@ abstract class MarketplaceCategoryMatching {
 	
 	protected $hasPlatformCol = true;
 	protected $columns = array();
-	
-	/**
-	 * caches calcluted categoriepaths for dont get multiple parents everytime from database
-	 * 
-	 * @var array
-	 */
-	public static $aCategoriePathCache = array();
 
 	public function __construct() {
 		global $_url, $_MagnaSession;
@@ -147,7 +140,7 @@ abstract class MarketplaceCategoryMatching {
 		return true;
 	}
 
-	protected function getMPCategories($parentID = 0, $purge = false) {
+	private function getMPCategories($parentID = 0, $purge = false) {
 		if ($purge) {
 			$where = array (
 				'ParentID' => $parentID,
@@ -237,8 +230,6 @@ abstract class MarketplaceCategoryMatching {
 		}
 		$topLevelList = '';
 		foreach ($subCats as $item) {
-			$disabledClass = '';
-
 			$classes = array('toggle');
 			if ($item['LeafCategory'] == 1) {
 				$classes[] = 'leaf';
@@ -247,8 +238,6 @@ abstract class MarketplaceCategoryMatching {
 			}
 			if ($item['Selectable'] == '1') {
 				$classes[] = 'selectable';
-			}elseif($item['LeafCategory'] == 1){
-				$disabledClass = 'disabled';
 			}
 			$cssId = $this->cssId($item['CategoryID']);
 			$escId = htmlspecialchars($item['CategoryID']);
@@ -256,7 +245,7 @@ abstract class MarketplaceCategoryMatching {
 				<div class="catelem" id="y_'.$cssId.'">
 					<span class="'.implode(' ', $classes).'" id="y_toggle_'.$cssId.'" data-id="'.$escId.'">&nbsp;</span>
 					<div class="catname" id="y_select_'.$cssId.'" data-id="'.$escId.'">
-						<span class="catname '.$disabledClass.'">'.fixHTMLUTF8Entities($item['CategoryName']).'</span>
+						<span class="catname">'.fixHTMLUTF8Entities($item['CategoryName']).'</span>
 					</div>
 				</div>';
 		}
@@ -264,13 +253,8 @@ abstract class MarketplaceCategoryMatching {
 	}
 	
 	public function getMPCategory($categoryID, $secondCall = false) {
-		if ($this->isStoreCategory) {
-			$mpID = $this->mpID;
-			$validTo = gmdate('Y-m-d H:i:s', time() - $this->getCategoryValidityPeriod());
-		} else {
-			$mpID = '0';
-			$validTo = gmdate('Y-m-d H:i:s', time() - $this->getStoreCategoryValidityPeriod());
-		}
+		$mpID = ($this->isStoreCategory) ? $this->mpID : '0';
+		
 		# Ermittle Namen, CategoryID und ParentID,
 		# dann das gleiche fuer die ParentCategory usw.
 		# bis bei Top angelangt (CategoryID = ParentID)
@@ -279,7 +263,6 @@ abstract class MarketplaceCategoryMatching {
 			  FROM '.$this->getTableName().'
 			 WHERE CategoryID="'.$categoryID.'"
 			       AND mpID="'.$mpID.'"
-			       AND InsertTimestamp > "'.$validTo.'"
 			       '.($this->hasPlatformCol ? 'AND platform="'.$this->marketplace.'"' : '').'
 			 LIMIT 1
 		', false));
@@ -303,19 +286,11 @@ abstract class MarketplaceCategoryMatching {
 		}
 		$appendedText = '&nbsp;<span class="cp_next">&gt;</span>&nbsp;';
 		$catPath = '';
-		$sCatIdent = get_class($this).'-'.$this->isStoreCategory ? 'store' : 'mp';
-		self::$aCategoriePathCache[$sCatIdent] = array_key_exists($sCatIdent, self::$aCategoriePathCache) ? self::$aCategoriePathCache[$sCatIdent] : array();
 		do {
-			if (array_key_exists($categoryID, self::$aCategoriePathCache[$sCatIdent])) {
-				$yCP = self::$aCategoriePathCache[$sCatIdent][$categoryID];
-			} else {
-				$yCP = $this->getMPCategory($categoryID);
-			}
+			$yCP = $this->getMPCategory($categoryID);
 			if ($yCP === false) {
-				self::$aCategoriePathCache[$sCatIdent][$categoryID] = false;
 				break;
 			}
-			self::$aCategoriePathCache[$sCatIdent][$categoryID] = array('CategoryName' => $yCP['CategoryName'], 'ParentID' => $yCP['ParentID']);
 			if (empty($catPath)) {
 				$catPath = fixHTMLUTF8Entities($yCP['CategoryName']);
 			} else {
@@ -323,6 +298,7 @@ abstract class MarketplaceCategoryMatching {
 			}
 			$categoryID = $yCP['ParentID'];
 		} while ($yCP['ParentID'] != '0');
+
 		if ($yCP === false) {
 			return '<span class="invalid">'.ML_LABEL_INVALID.'</span>';
 		}
@@ -458,7 +434,7 @@ var mpCategorySelector = (function() {
 	function returnCategoryID() {
 		if (selectedCategory == '') {
 			$('#messageDialog').html(
-				'<?php echo ML_ERROR_NOTE_CATEGORY_NOT_SELECTED; ?>'
+				'Bitte w&auml;hlen Sie eine Kategorie aus.'
 			).jDialog({
 				title: '<?php echo ML_LABEL_NOTE; ?>'
 			});
@@ -528,25 +504,18 @@ var mpCategorySelector = (function() {
 		$('#mpCategorySelector').jDialog({
 			width: '75%',
 			minWidth: '300px',
-			buttons: [
-				{
-					"text": "<?php echo ML_BUTTON_LABEL_ABORT; ?>",
-					"class": 'ml-btnreset',
-					"click": function () {
-						$(this).dialog("close");
-					}
+			buttons: {
+				'<?php echo ML_BUTTON_LABEL_ABORT; ?>': function() {
+					$(this).dialog('close');
 				},
-				{
-					"text": "<?php echo ML_BUTTON_LABEL_OK; ?>",
-					"click": function () {
-						cID = returnCategoryID();
-						if (cID != false) {
-							callback(cID, tmpSelectedCat.html());
-							$(this).dialog('close');
-						}
+				'<?php echo ML_BUTTON_LABEL_OK; ?>': function() {
+					cID = returnCategoryID();
+					if (cID != false) {
+						callback(cID, tmpSelectedCat.html());
+						$(this).dialog('close');
 					}
 				}
-			],
+			},
 			open: function(event, ui) {
 				//if (isStoreCategory) {
 				//	return;
@@ -624,10 +593,16 @@ $(document).ready(function() {
 				</table>
 			</form>';
 	}
-
+	
 	public function renderAjax() {
-		$id = $this->getPostCategoryId();
-
+		$id = '';
+		if (isset($_POST['id'])) {
+			if (($pos = strrpos($_POST['id'], '_')) !== false) {
+				$id = substr($_POST['id'], $pos+1);
+			} else {
+				$id = $_POST['id'];
+			}
+		}
 		$this->isStoreCategory = (array_key_exists('isStoreCategory', $_POST))
 			? (($_POST['isStoreCategory'] == 'false')
 				? false
@@ -661,20 +636,6 @@ $(document).ready(function() {
 				));
 			}
 		}
-	}
-
-	public function getPostCategoryId()
-	{
-		$id = '';
-		if (isset($_POST['id'])) {
-			if (($pos = strrpos($_POST['id'], '_')) !== false) {
-				$id = substr($_POST['id'], $pos + 1);
-			} else {
-				$id = $_POST['id'];
-			}
-		}
-
-		return $id;
 	}
 	
 }

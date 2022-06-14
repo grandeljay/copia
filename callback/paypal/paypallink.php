@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypallink.php 12537 2020-01-22 14:21:42Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -55,36 +55,23 @@ if (isset($_GET['oID'])
       $paypal->complete_cart();
       
       if (isset($_SESSION['customer_id'])) {
-        $messageStack->add_session('paypallink', MODULE_PAYMENT_PAYPALLINK_TEXT_COMPLETED, 'success');
-        xtc_redirect(xtc_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id='.(int)$_GET['oID'], 'SSL'));
+        $messageStack->add_session('paypallink', MODULE_PAYMENT_PAYPALLINK_TEXT_COMPLETED);
+        xtc_redirect(xtc_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'info=1&order_id='.(int)$_GET['oID'], 'SSL'));
       } else {
-        $messageStack->add_session('logoff', MODULE_PAYMENT_PAYPALLINK_TEXT_COMPLETED, 'success');
-        xtc_redirect(xtc_href_link(FILENAME_LOGOFF, '', 'SSL'));
+        $messageStack->add_session('logoff', MODULE_PAYMENT_PAYPALLINK_TEXT_COMPLETED);
+        xtc_redirect(xtc_href_link(FILENAME_LOGOFF, 'info=1', 'SSL'));
       }
     } else {
-      $payment_data = $paypal->get_payment_data($_GET['oID']);
-      
-      if (!isset($_GET['payment_error'])
-          && count($payment_data) < 1
-          )
-      {
+      if (!isset($_GET['payment_error'])) {
         $redirect = $paypal->payment_redirect(false, true, true);
         xtc_redirect($redirect);
       } else {
         if (isset($_SESSION['customer_id'])) {
-          if (count($payment_data) > 0) {
-            $messageStack->add_session('paypallink', TEXT_PAYPAL_ERROR_ALREADY_PAID);          
-          } else {
-            $messageStack->add_session('paypallink', MODULE_PAYMENT_PAYPALLINK_TEXT_ERROR_MESSAGE);
-          }
-          xtc_redirect(xtc_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id='.(int)$_GET['oID'], 'SSL'));
+          $messageStack->add_session('paypallink', MODULE_PAYMENT_PAYPALLINK_TEXT_ERROR_MESSAGE);
+          xtc_redirect(xtc_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'info=2&order_id='.(int)$_GET['oID'], 'SSL'));
         } else {
-          if (count($payment_data) > 0) {
-            $messageStack->add_session('logoff', TEXT_PAYPAL_ERROR_ALREADY_PAID);          
-          } else {
-            $messageStack->add_session('logoff', MODULE_PAYMENT_PAYPALLINK_TEXT_ERROR_MESSAGE);
-          }
-          xtc_redirect(xtc_href_link(FILENAME_LOGOFF, '', 'SSL'));
+          $messageStack->add_session('logoff', MODULE_PAYMENT_PAYPALLINK_TEXT_ERROR_MESSAGE);
+          xtc_redirect(xtc_href_link(FILENAME_LOGOFF, 'info=2', 'SSL'));
         }      
       }
     }

@@ -24,13 +24,8 @@ require_once(DIR_MAGNALISTER_MODULES.'magnacompatible/listings/MagnaCompatibleIn
 class TradoriaInventoryView extends MagnaCompatibleInventoryView {
 	
 	protected function getFields() {
-		$isSplitField['IsSplit'] = array (
-			'Label' => ML_GENERAL_INVENTORY_IS_SPLIT,
-			'Sorter' => 'isSplit',
-			'Getter' => 'isSplit',
-			'Field' => null,
-		);
-		return array_merge(parent::getFields(), $isSplitField);
+		//echo 'whee';
+		return parent::getFields();
 	}
 	
 	protected function getItemPrice($item) {
@@ -39,10 +34,5 @@ class TradoriaInventoryView extends MagnaCompatibleInventoryView {
 		}
 		$item['Currency'] = isset($item['Currency']) ? $item['Currency'] : $this->mpCurrency;
 		return '<td>'.$this->simplePrice->setPriceAndCurrency($item['Price'], $item['Currency'])->format().'</td>';
-	}
-
-	protected function isSplit($item)
-	{
-		return '<td>' . (empty($item['IsSplit']) ? ML_BUTTON_LABEL_NO : ML_BUTTON_LABEL_YES) . '</td>';
 	}
 }

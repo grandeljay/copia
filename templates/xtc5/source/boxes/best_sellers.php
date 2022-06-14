@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: best_sellers.php 12294 2019-10-23 09:15:59Z GTB $
+   $Id: best_sellers.php 6176 2013-12-15 15:10:00Z hhacker $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,7 +23,7 @@
 include(DIR_FS_BOXES_INC . 'smarty_default.php');
 
 // set cache id
-$cache_id = md5($_SESSION['currency'].$_SESSION['language'].$current_category_id);
+$cache_id = md5($_SESSION['language'].$current_category_id);
 
 if (MIN_DISPLAY_BESTSELLERS > 0 && (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_best_sellers.html', $cache_id) || !$cache)) {
 	
@@ -39,7 +39,7 @@ if (MIN_DISPLAY_BESTSELLERS > 0 && (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/b
                        FROM ".TABLE_ORDERS_PRODUCTS." op
                        JOIN ".TABLE_ORDERS." o
                             ON o.orders_id = op.orders_id
-                               AND o.date_purchased > '".date("Y-m-d", mktime(1, 1, 1, date("m"), date("d") - (int)MAX_DISPLAY_BESTSELLERS_DAYS, date("Y")))."'
+                               AND o.date_purchased > '".date("Y-m-d", mktime(1, 1, 1, date("m"), date("d") - MAX_DISPLAY_BESTSELLERS_DAYS, date("Y")))."'
                    GROUP BY op.products_id
                    ORDER BY op.orders_id DESC";
     $orders_query = xtc_db_query($orders_query);
@@ -59,7 +59,14 @@ if (MIN_DISPLAY_BESTSELLERS > 0 && (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/b
 	$check_num = 0;
   if (isset($current_category_id) && $current_category_id > 0) {
     $best_sellers_query = "SELECT ".$select."
-                                  ".$product->default_select."
+                                  p.products_id,
+                                  p.products_price,
+                                  p.products_tax_class_id,
+                                  p.products_image,
+                                  p.products_vpe,
+                                  p.products_vpe_status,
+                                  p.products_vpe_value,
+                                  pd.products_name
                              FROM ".TABLE_PRODUCTS." p
                                   ".$join."
                              JOIN ".TABLE_PRODUCTS_DESCRIPTION." pd
@@ -90,13 +97,19 @@ if (MIN_DISPLAY_BESTSELLERS > 0 && (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/b
   
   if ($check_num < 1) {
     $best_sellers_query = "SELECT ".$select."
-                                  ".$product->default_select."
+                                  p.products_id,
+                                  p.products_image,
+                                  p.products_price,
+                                  p.products_vpe,
+                                  p.products_vpe_status,
+                                  p.products_vpe_value,
+                                  p.products_tax_class_id,
+                                  pd.products_name 
                              FROM ".TABLE_PRODUCTS." p
                                   ".$join."
                              JOIN ".TABLE_PRODUCTS_DESCRIPTION." pd
                                   ON p.products_id = pd.products_id
                                      AND pd.language_id = '".(int)$_SESSION['languages_id']."'
-                                     AND trim(pd.products_name) != ''
                             WHERE p.products_status = 1
                               AND p.products_ordered > 0
                                   ".$where."

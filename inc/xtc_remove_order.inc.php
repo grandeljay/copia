@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_remove_order.inc.php 13103 2020-12-18 10:25:40Z GTB $
+   $Id: header.php 3808 2012-10-28 20:39:04Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -22,7 +22,6 @@
     xtc_db_query("DELETE FROM ".TABLE_ORDERS_STATUS_HISTORY." WHERE orders_id = '".(int)$order_id."'");
     xtc_db_query("DELETE FROM ".TABLE_ORDERS_TOTAL." WHERE orders_id = '".(int)$order_id."'");
     xtc_db_query("DELETE FROM ".TABLE_ORDERS_PRODUCTS_DOWNLOAD." WHERE orders_id = '".(int)$order_id."'");
-    xtc_db_query("DELETE FROM ".TABLE_COUPON_GV_QUEUE." WHERE order_id = '".(int)$order_id."'");
 
     /******** SHOPGATE **********/
     if(defined('MODULE_PAYMENT_SHOPGATE_STATUS') && MODULE_PAYMENT_SHOPGATE_STATUS=='True') {

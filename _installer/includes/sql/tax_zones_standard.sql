@@ -2,16 +2,16 @@
 -- Daten für Tabelle `tax_class`
 -- 
 
-INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `last_modified`, `date_added`) VALUES (1, 'DE::Standardsatz||EN::Standard rate', '', NULL, NOW());
-INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `last_modified`, `date_added`) VALUES (2, 'DE::ermäßigter Steuersatz||EN::reduced tax rate', '', NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `last_modified`, `date_added`) VALUES (1, 'Standardsatz', '', NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `last_modified`, `date_added`) VALUES (2, 'ermäßigter Steuersatz', '', NULL, NOW());
 
 -- 
 -- Daten für Tabelle `geo_zones`
 -- 
 
-INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(5, 'DE::Steuerzone EU||EN::Tax zone EU', 'DE::Steuerzone für EU||EN::Tax zone for EU', '0', NULL, NOW());
-INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(6, 'DE::Steuerzone Nicht-EU-Ausland||EN::Tax zone for non-EU countries', 'DE::Steuerzone für Nicht-EU-Ausland||EN::Tax zone for non-EU countries', '1', NULL, NOW());
-INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(7, 'DE::Steuerzone B2B||EN::Tax zone B2B', 'DE::Steuerzone für B2B||EN::Tax zone for B2B', '0', NULL, NOW());
+INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(5, 'Steuerzone EU', 'Steuerzone für EU', '0', NULL, NOW());
+INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(6, 'Steuerzone Nicht-EU-Ausland', 'Steuerzone für Nicht-EU-Ausland', '1', NULL, NOW());
+INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(7, 'Steuerzone B2B', 'Steuerzone für B2B', '0', NULL, NOW());
 
 -- 
 -- Daten für Tabelle `zones_to_geo_zones`
@@ -43,7 +43,7 @@ INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (190, 190, 0, 5, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (195, 195, 0, 5, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (203, 203, 0, 5, NULL, NOW());
-INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (222, 222, 0, 6, NULL, NOW());
+INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (222, 222, 0, 5, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (1, 1, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (2, 2, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (3, 3, 0, 6, NULL, NOW());
@@ -108,7 +108,7 @@ INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (69, 69, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (70, 70, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (71, 71, 0, 6, NULL, NOW());
-#INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (74, 74, 0, 6, NULL, NOW());
+INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (74, 74, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (75, 75, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (76, 76, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (77, 77, 0, 6, NULL, NOW());
@@ -166,7 +166,7 @@ INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (138, 138, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (139, 139, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (140, 140, 0, 6, NULL, NOW());
-INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (141, 141, 0, 5, NULL, NOW());
+INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (141, 141, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (142, 142, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (143, 143, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (144, 144, 0, 6, NULL, NOW());
@@ -252,12 +252,10 @@ INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (233, 233, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (234, 234, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (235, 235, 0, 6, NULL, NOW());
-#INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (236, 236, 0, 6, NULL, NOW());
+INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (236, 236, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (237, 237, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (238, 238, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (239, 239, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (240, 240, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (241, 241, 0, 6, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (242, 242, 0, 6, NULL, NOW());
-
-# Keep an empty line at the end of this file for the installer to work properly

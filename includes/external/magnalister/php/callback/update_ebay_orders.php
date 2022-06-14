@@ -216,12 +216,6 @@ function magnaUpdateEbayOrders($mpID) {
 	                unset($order['delivery_firstname']);
 	                unset($order['delivery_lastname']);
 	            }
-	            if (    (!MagnaDB::gi()->columnExistsInTable('delivery_additional_info', TABLE_ORDERS)) 
-	                 || ((SHOPSYSTEM == 'gambio') && (@constant('ACCOUNT_ADDITIONAL_INFO') !== 'true'))) {
-	                if(!empty($order['delivery_additional_info']))
-	                	$order['delivery_street_address'] .= ' '.$order['delivery_additional_info'];
-	                	unset($order['delivery_additional_info']);
-	            }
 	            if ($paymentMethod == 'matching') {
 	            	$order['payment_method'] = getPaymentClassForEbayPaymentMethod($order['PaymentMethod']);
 	            } else {
@@ -230,37 +224,10 @@ function magnaUpdateEbayOrders($mpID) {
 	            if (MagnaDB::gi()->columnExistsInTable('payment_class', TABLE_ORDERS)) {
 	                $order['payment_class'] = $order['payment_method'];
 	            }
-				if (array_key_exists('PaymentInstruction', $order)) {
-					$blPaymentInstructionSet = false;
-					if (MagnaDB::gi()->tableExists('orders_payment_instruction')) {
-						$blPaymentInstructionSet = fillOrdersPaymentInstructionTable($order['PaymentInstruction'], $order['orders_id']);
-					}
-					if ($blPaymentInstructionSet) {
-						# eBay PayUponInvoice ist an sich PayPal, nur dass der Kunde
-						# spaeter an payPal zahlt. Wenn die OrderInstruction
-						# korrekt uebernommen werden konnte (entspr. Tabelle ist da),
-						# behandle es weiter wie payPal.
-						if ('PayUponInvoice' == $order['PaymentMethod']) {
-							$order['PaymentMethod'] = 'PayPal';
-						}
-						$order['PaymentInstruction'] = ML_EBAY_ORDER_PAID_PUI;
-						if (    ('PayPal' == $order['PaymentMethod'])
-					     	&& array_key_exists('ExternalTransactionID', $order)
-					     	&& !empty($order['ExternalTransactionID'])) {
-							$order['PaymentInstruction'] .= "\n".ML_EBAY_PP_TRANSACTION_ID
-							.': '.$order['ExternalTransactionID'];
-						}
-					} else {
-						$order['PaymentInstruction'] = ML_EBAY_PUI_MSG_TO_BUYER.$order['PaymentInstruction'];
-					}
-				} else {
+				if (!array_key_exists('PaymentInstruction', $order)) {
 					$order['PaymentInstruction'] = ML_EBAY_ORDER_PAID;
-					if (    ('PayPal' == $order['PaymentMethod'])
-					     && array_key_exists('ExternalTransactionID', $order)
-					     && !empty($order['ExternalTransactionID'])) {
-						$order['PaymentInstruction'] .= "\n".ML_EBAY_PP_TRANSACTION_ID
-							.': '.$order['ExternalTransactionID'];
-					}
+				} else {
+					$order['PaymentInstruction'] = ML_EBAY_PUI_MSG_TO_BUYER.$order['PaymentInstruction'];
 				}
 	            unset ($order['PaymentMethod']);
 	            if ($updateOrdersStatus && in_array($order['orders_id'], $paidOrders)) {
@@ -281,9 +248,7 @@ function magnaUpdateEbayOrders($mpID) {
 					$PaymentInstructionAlreadyInserted = (boolean)MagnaDB::gi()->fetchOne('SELECT COUNT(*)
 						FROM '.TABLE_ORDERS.'
 					   WHERE orders_id = '.$order['orders_id'].'
-						 AND (    comments LIKE \''.ML_EBAY_PUI_MSG_TO_BUYER.'%\'
-						       OR comments LIKE \''.ML_EBAY_ORDER_PAID.'%\' )'
-						);
+						 AND comments LIKE \''.ML_EBAY_PUI_MSG_TO_BUYER.'%\'');
 						# Keine Status-Aenderung, aber PaymentInstruction uebermittelt
 						# (bei PayUponInvoice, nur wenn wir die payment_method updaten
 						#  - ggf. gibt es für beide Zahlarten kein match, daher
@@ -398,42 +363,7 @@ function magnaUpdateEbayOrders($mpID) {
 					$sMagnaOrdersData = serialize(array_merge($aOldMagnaOrdersData, $order['magnaOrders']));
 					$MagnaDB->update(TABLE_MAGNA_ORDERS, array ('data' => $sMagnaOrdersData), array('orders_id' => $currentOrderID));
 				}
-				# ExtendedOrderID, wenn neu vorhanden
-				if (array_key_exists('ExtendedOrderID', $order)) {
-					if (isset($sMagnaOrdersData)) {
-						$aOldMagnaOrdersData = unserialize($sMagnaOrdersData);
-					} else {
-						$aOldMagnaOrdersData = unserialize(MagnaDB::gi()->fetchOne('SELECT data FROM '.TABLE_MAGNA_ORDERS.' WHERE orders_id = '.$currentOrderID));
-						
-					}
-					if (!array_key_exists('ExtendedOrderID', $aOldMagnaOrdersData)) {
-						$aMagnaOrdersData = array();
-						foreach ($aOldMagnaOrdersData as $k => $v) {
-							$aMagnaOrdersData[$k] = $v;
-							if ($k == 'eBayOrderID') {
-							# nach eBayOrderID einfügen
-								$aMagnaOrdersData['ExtendedOrderID'] = $order['ExtendedOrderID'];
-							}
-						}
-						unset($k); unset($v);
-						$sMagnaOrdersData = serialize($aMagnaOrdersData);
-						$MagnaDB->update(TABLE_MAGNA_ORDERS, array ('data' => $sMagnaOrdersData), array('orders_id' => $currentOrderID));
-						$sOrdersComment = MagnaDB::gi()->fetchOne('SELECT comments FROM '.TABLE_ORDERS.' WHERE orders_id = '.$currentOrderID, true);
-						if (!strpos($sOrdersComment, 'ExtendedOrderID')) {
-							$iInsertPos = strpos($sOrdersComment, "\n", strpos($sOrdersComment, 'eBayOrderID'));
-							$sNewOrdersComment = substr($sOrdersComment, 0, $iInsertPos) . "\nExtendedOrderID: ".$order['ExtendedOrderID']. substr($sOrdersComment, $iInsertPos);
-							$MagnaDB->update(TABLE_ORDERS,  array ('comments' => $sNewOrdersComment), array('orders_id' => $currentOrderID));
-						}
-						
-					}
-				}
-				# für die nächste Bestellung
-				if (isset($aOldMagnaOrdersData)) unset($aOldMagnaOrdersData);
-				if (isset($aMagnaOrdersData))    unset($aMagnaOrdersData);
-				if (isset($sMagnaOrdersData))    unset($sMagnaOrdersData);
-
-	            $blUpdateMainAddress = array_key_exists('MainAddressTakenFromShippingAddress', $order);
-
+				
 	            ## Werte aus der Tabelle holen fuer die Info-mail was sich geaendert hat
 				## Mail noch zu bauen
 				$order = array_filter_keys($order, MagnaDB::gi()->getTableColumns(TABLE_ORDERS));
@@ -445,10 +375,6 @@ function magnaUpdateEbayOrders($mpID) {
 	           	if ($verbose) echo print_m($oldValues, '$oldValues');
 	            $updatedValues = array_diff_assoc($order, $oldValues);
 	            $MagnaDB->update(TABLE_ORDERS, $order, array('orders_id' => $currentOrderID));
-	            if (    $blUpdateMainAddress
-	                 && (get_class($MagnaDB) != 'MagnaTestDB')) {
-	                updateMainAddressFromOrder($currentOrderID);
-	            }
 	            $processedOrderIDs[] = $currentOrderID;
 	
 				/* {Hook} "UpdateeBayOrders_PostOrderUpdate": Is called after the eBay order in <code>$order</code> is updated.

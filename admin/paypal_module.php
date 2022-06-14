@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypal_module.php 13078 2020-12-15 13:44:14Z GTB $
+   $Id: paypal_module.php 10343 2016-10-26 11:54:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -54,7 +54,6 @@ $payment_array = array(
   'paypalcart',
   'paypallink',
   'paypalpluslink',
-  'paypalsubscription',
 );
 
 $payment_disallowed_array = array(
@@ -63,6 +62,7 @@ $payment_disallowed_array = array(
   'billpaydebit',
   'billpaypaylater',
   'billpaytransactioncredit',
+  'billsafe_2',
   'payone_installment',
   'payone_otrans',
 );
@@ -114,7 +114,7 @@ if (isset($_GET['action'])) {
           foreach ($_POST['config']['profile'] as $key => $value) {
             $sql_data_array[] = array(
               'config_key' => $key,
-              'config_value' => ((preg_replace('/[^0-9,.]/', '', $value) == $value) ? str_replace(',', '.', $value) : $value),
+              'config_value' => $value,
             );
           }
           $paypal->save_config($sql_data_array);
@@ -130,7 +130,6 @@ if (isset($_GET['action'])) {
 
     case 'install':
       if (in_array($_GET['module'], $payment_array)) {                  
-        include_once(DIR_FS_LANGUAGES.$_SESSION['language'].'/modules/payment/'.$_GET['module'].'.php');
         require_once(DIR_FS_CATALOG.'includes/modules/payment/'.$_GET['module'].'.php');
         $module = new $_GET['module']();
         $module->install();
@@ -175,7 +174,6 @@ require (DIR_WS_INCLUDES.'head.php');
           <div class="pageHeadingImage"><?php echo xtc_image(DIR_WS_ICONS.'heading/icon_configuration.png'); ?></div>
           <div class="flt-l">
             <div class="pageHeading pdg2"><?php echo TEXT_PAYPAL_MODULE_HEADING_TITLE; ?></div>
-            <div class="main">v<?php echo $paypal->paypal_version; ?></div>
           </div>
           <?php
             include_once(DIR_FS_EXTERNAL.'paypal/modules/admin_menu.php');
@@ -196,7 +194,7 @@ require (DIR_WS_INCLUDES.'head.php');
                   $mInfo = new objectInfo($module_info);
 
                   reset($mInfo->keys);
-                  foreach ($mInfo->keys as $key => $value) {
+                  while (list($key, $value) = each($mInfo->keys)) {
                     ?>
                     <tr>
                       <td class="dataTableConfig col-left"><?php echo $value['title']; ?></td>
@@ -231,6 +229,11 @@ require (DIR_WS_INCLUDES.'head.php');
 
                   if ($module->code == 'paypalcart') {
                     ?>
+                    <tr>
+                      <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_MODULE_SHIPPING_COST; ?></td>
+                      <td class="dataTableConfig col-middle"><?php echo xtc_draw_input_field('config[profile][MODULE_PAYMENT_'.strtoupper($module->code).'_SHIPPING_COST]', $paypal->get_config('MODULE_PAYMENT_'.strtoupper($module->code).'_SHIPPING_COST'), 'style="width: 300px;"'); ?></td>
+                      <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_MODULE_SHIPPING_COST_INFO; ?></td>
+                    </tr>
                     <tr>
                       <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_MODULE_LINK_PRODUCT; ?></td>
                       <td class="dataTableConfig col-middle"><?php echo draw_on_off_selection('config[profile][MODULE_PAYMENT_'.strtoupper($module->code).'_SHOW_PRODUCT]', $status_array, (($paypal->get_config('MODULE_PAYMENT_'.strtoupper($module->code).'_SHOW_PRODUCT') == '1') ? true : false)); ?></td>
@@ -267,7 +270,7 @@ require (DIR_WS_INCLUDES.'head.php');
                     </tr>
                     <?php
                     if (xtc_not_null(MODULE_PAYMENT_INSTALLED)) {
-                      $thirdparty_module = explode(';', ((defined('MODULE_PAYMENT_PAYPAL_PLUS_THIRDPARTY_PAYMENT')) ? MODULE_PAYMENT_PAYPAL_PLUS_THIRDPARTY_PAYMENT : ''));
+                      $thirdparty_module = explode(';', MODULE_PAYMENT_PAYPAL_PLUS_THIRDPARTY_PAYMENT);
                       $module_array = explode(';', MODULE_PAYMENT_INSTALLED);
                       
                       $thirdparty_exists = false;
@@ -337,51 +340,49 @@ require (DIR_WS_INCLUDES.'head.php');
                   </tr>
                   <?php
                   foreach ($payment_array as $payment_module) {
-                    if (is_file(DIR_FS_CATALOG.'includes/modules/payment/'.$payment_module.'.php')) {
-                      require_once(DIR_FS_CATALOG.'includes/modules/payment/'.$payment_module.'.php');
-                      require_once(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/payment/'.$payment_module.'.php');
-                      $module = new $payment_module;
-                      ?>
-                        <tr class="dataTableRow">
-                          <td class="dataTableContent">
-                            <?php
-                              echo $module->title;
-                              if (isset($module->icons_available)) {
-                                echo '<br />'.$module->icons_available;
-                              }
-                            ?>
-                          </td>
-                          <td class="dataTableContent">
-                            <?php
-                              echo $payment_module;
-                            ?>
-                          </td>
-                          <td class="dataTableContent txta-r">
-                          <?php if (isset($module->sort_order) && is_numeric($module->sort_order)) echo $module->sort_order; ?>&nbsp;</td>
-                          <td class="dataTableContent txta-c">
-                            <?php
-                              if ($module->check() > 0) {
-                                if (isset($module->enabled) && $module->enabled) {
-                                  echo xtc_image(DIR_WS_IMAGES . 'icon_lager_green.gif', ICON_ARROW_RIGHT);
-                                } else {
-                                  echo xtc_image(DIR_WS_IMAGES . 'icon_lager_red.gif', ICON_ARROW_RIGHT);
-                                }
-                              }
-                            ?>
-                            &nbsp;
-                          </td>
-                          <td class="dataTableContent txta-r">
-                            <?php
-                              if ($module->_check == 1) {
-                                echo '<a class="button" href="'.xtc_href_link(basename($PHP_SELF), 'action=edit&module='.$module->code).'">'.BUTTON_EDIT.'</a>';
+                    require_once(DIR_FS_CATALOG.'includes/modules/payment/'.$payment_module.'.php');
+                    require_once(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/payment/'.$payment_module.'.php');
+                    $module = new $payment_module;
+                    ?>
+                      <tr class="dataTableRow">
+                        <td class="dataTableContent">
+                          <?php
+                            echo $module->title;
+                            if (isset($module->icons_available)) {
+                              echo '<br />'.$module->icons_available;
+                            }
+                          ?>
+                        </td>
+                        <td class="dataTableContent">
+                          <?php
+                            echo $payment_module;
+                          ?>
+                        </td>
+                        <td class="dataTableContent txta-r">
+                        <?php if (isset($module->sort_order) && is_numeric($module->sort_order)) echo $module->sort_order; ?>&nbsp;</td>
+                        <td class="dataTableContent txta-c">
+                          <?php
+                            if ($module->check() > 0) {
+                              if (isset($module->enabled) && $module->enabled) {
+                                echo xtc_image(DIR_WS_IMAGES . 'icon_lager_green.gif', ICON_ARROW_RIGHT);
                               } else {
-                                echo '<a class="button" href="'.xtc_href_link(basename($PHP_SELF), 'action=install&module='.$module->code).'">'.BUTTON_MODULE_INSTALL.'</a>';                            
+                                echo xtc_image(DIR_WS_IMAGES . 'icon_lager_red.gif', ICON_ARROW_RIGHT);
                               }
-                            ?>
-                          </td>
-                        </tr>
-                      <?php                  
-                    }
+                            }
+                          ?>
+                          &nbsp;
+                        </td>
+                        <td class="dataTableContent txta-r">
+                          <?php
+                            if ($module->_check == 1) {
+                              echo '<a class="button" href="'.xtc_href_link(basename($PHP_SELF), 'action=edit&module='.$module->code).'">'.BUTTON_EDIT.'</a>';
+                            } else {
+                              echo '<a class="button" href="'.xtc_href_link(basename($PHP_SELF), 'action=install&module='.$module->code).'">'.BUTTON_MODULE_INSTALL.'</a>';                            
+                            }
+                          ?>
+                        </td>
+                      </tr>
+                    <?php                  
                   }
               }
             ?>

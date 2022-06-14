@@ -1,12 +1,12 @@
 {config_load file="$language/lang_$language.conf" section="product_info"}
 {$FORM_ACTION}
-  <h1>{if $PRODUCTS_HEADING_TITLE != ''}{$PRODUCTS_HEADING_TITLE}{else}{$PRODUCTS_NAME}{/if}</h1>
+  <h1>{$PRODUCTS_NAME}</h1>
   <div id="productinfowrap">
     <table>
       <tr>
         <td style="padding-right:20px;">
           {if $PRODUCTS_IMAGE != ''}
-            <a title="{$PRODUCTS_NAME|onlytext}" href="{$PRODUCTS_IMAGE|replace:"info_images":"popup_images"}" class="thickbox" rel="{$PRODUCTS_ID}"><img src="{$PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" class="productimage" /><br /><br /><img src="{$tpl_path}img/magnifier.gif" alt="Zoom" border="0" />&nbsp;{#text_zoom#}</a>
+            <a title="{$PRODUCTS_NAME|onlytext}" href="{$PRODUCTS_IMAGE|replace:"info_images":"popup_images"}" class="thickbox" rel="{$PRODUCTS_ID}"><img src="{$PRODUCTS_IMAGE}" alt="{$PRODUCTS_NAME|onlytext}" class="productimage" />{if $PRODUCTS_POPUP_LINK != ''}<br /><br /><img src="{$tpl_path}img/magnifier.gif" alt="Zoom" border="0" />&nbsp;{#text_zoom#}{/if}</a>
           {/if}
         </td>
         <td style="vertical-align:top">
@@ -62,10 +62,11 @@
               <div class="hrlightgrey"></div>{$EXPRESS_LINK}
             {/if}
             <br />
+            {if $KLARNA_PPBOX}{$KLARNA_PPBOX}{/if}
             <div style="margin-top:10px"></div>
             {$PRODUCTS_PRINT}
-            {if $PRODUCTS_DATE_AVAILABLE != ''}
-              <p>{$PRODUCTS_DATE_AVAILABLE}</p>
+            {if $PRODUCTS_DATE_AVIABLE != ''}
+              <p>{$PRODUCTS_DATE_AVIABLE}</p>
             {/if}
             {* if $ADD_CART_BUTTON_WISHLIST_TEXT}{$ADD_CART_BUTTON_WISHLIST_TEXT}{/if *}
           </div>
@@ -73,12 +74,11 @@
         </td>
       </tr>
     </table>
-    {if $PAYPALPLAN}
-      <br class="clearfix" />
-      {$PAYPALPLAN}
-    {/if}
     {if $MODULE_product_options != ''}
       <div class="productoptions">{$MODULE_product_options}</div>
+    {/if}
+    {if $XTB_REDIRECT_USER_TO == 'product'}
+      <div style='width:400px;padding:10px;color:white;background-color:green;'><strong>Sie haben die eBay Auktion gewonnen!</strong><br />Bitte w&auml;hlen Sie nun noch die gew&uuml;nschten Produkteigenschaften und legen Sie den Artikel danach in den Warenkorb, um mit der Zahlung fortzufahren und das Produkt versandfertig zu machen!</div>
     {/if}
     <div class="addtobasket">
       {if $ADD_CART_BUTTON != ''}
@@ -93,7 +93,7 @@
             <td>{$ADD_CART_BUTTON_WISHLIST}</td>
           </tr>
         {/if}
-        {if isset($ADD_CART_BUTTON_EXPRESS) && !$PAYPALPLAN}
+        {if isset($ADD_CART_BUTTON_EXPRESS)}
           <tr>
             <td style="width:100%; padding-right:5px;">&nbsp;</td>
             <td>{$ADD_CART_BUTTON_EXPRESS}</td>
@@ -103,7 +103,7 @@
             <td colspan="2" style="text-align:right;"><a href="{$ACTIVATE_EXPRESS_LINK}">{#checkout_express_activate#}</a></td>
           </tr>
         {/if}
-        {if $ADD_CART_BUTTON_PAYPAL && !$PAYPALPLAN}
+        {if $ADD_CART_BUTTON_PAYPAL}
           <tr>
             <td style="width:100%; padding-right:5px;">&nbsp;</td>
             <td>{$ADD_CART_BUTTON_PAYPAL}</td>
@@ -111,17 +111,6 @@
         {/if}
       </table>
       {/if}
-
-      {if $PAYPAL_INSTALLMENT && !$PAYPALPLAN}
-        <br class="clearfix" />
-        {$PAYPAL_INSTALLMENT}
-      {/if}
-
-      {if $EASYCREDIT && !$PAYPALPLAN}
-        <br class="clearfix" />
-        {$EASYCREDIT}
-      {/if}
-
       {if $ADD_CART_BUTTON == '' && $PRODUCTS_GIFT_FORBIDDEN == 'true'}<p>{#products_gift_forbidden#}</p>{/if}
     </div>
   </div>
@@ -132,7 +121,7 @@
   <ul>
     {if $PRODUCTS_DESCRIPTION != ''}<li><a href="#tab_description">{#description#}</a></li>{/if}
     {if $MODULE_product_tags != ''}<li><a href="#tab_tags">{#products_tags#}</a></li>{/if}
-    {if isset($more_images) && count($more_images) > 0}<li><a href="#tab_more_images">{#more_images#}</a></li>{/if}
+    {if $more_images|@count > 0}<li><a href="#tab_more_images">{#more_images#}</a></li>{/if}
     {if $MODULE_products_media != ''}<li><a href="#tab_media">{#products_media#}</a></li>{/if}
     {if $MODULE_products_reviews != ''}<li><a href="#tab_reviews">{#products_reviews#}</a></li>{/if}
     {if $MODULE_cross_selling != '' || $MODULE_reverse_cross_selling != ''}<li><a href="#tab_cross_selling">{#cross_selling#}</a></li>{/if}
@@ -141,12 +130,12 @@
   </ul>
   {if $PRODUCTS_DESCRIPTION != ''}<div id="tab_description">{$PRODUCTS_DESCRIPTION}</div>{/if}
   {if $MODULE_product_tags != ''}<div id="tab_tags">{$MODULE_product_tags}</div>{/if}
-  {if isset($more_images) && count($more_images) > 0}
+  {if $more_images|@count > 0}
     <div id="tab_more_images">
       {* More Pictures *}
       <div class="morepics">
         {foreach item=more_images_data from=$more_images}
-          <a class="thickbox" rel="{$PRODUCTS_ID}" title="{$PRODUCTS_NAME|onlytext}" href="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img align="left" src="{$more_images_data.PRODUCTS_IMAGE|onlytext}" alt="{$PRODUCTS_NAME|onlytext}" title="{$PRODUCTS_NAME|onlytext}" /></a>
+          <a class="thickbox" rel="{$PRODUCTS_ID}" title="{$PRODUCTS_NAME|onlytext}" href="{$more_images_data.PRODUCTS_IMAGE|replace:"info_images":"popup_images"}"><img align="left" src="{$more_images_data.PRODUCTS_IMAGE|onlytext}" alt="{$PRODUCTS_NAME|onlytext}" /></a>
         {/foreach}
       </div>
       <div style="clear:both;"></div>

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: categories.php 13237 2021-01-26 13:30:03Z GTB $
+   $Id: categories.php 10211 2016-08-07 08:15:31Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -70,8 +70,6 @@ define('TEXT_EDIT_CATEGORIES_NAME', 'Category Name:');
 define('TEXT_EDIT_CATEGORIES_HEADING_TITLE', 'Category Heading:');
 define('TEXT_EDIT_CATEGORIES_DESCRIPTION', 'Category Description:');
 define('TEXT_EDIT_CATEGORIES_IMAGE', 'Category Image:');
-define('TEXT_EDIT_CATEGORIES_IMAGE_LIST', 'Category Image Listing:');
-define('TEXT_EDIT_CATEGORIES_IMAGE_MOBILE', 'Category Image Mobile:');
 
 define('TEXT_EDIT_SORT_ORDER', 'Sort Order:');
 
@@ -125,7 +123,6 @@ define('TEXT_PRODUCT_NOT_AVAILABLE', 'Deactivated');
 define('TEXT_PRODUCTS_MANUFACTURER', 'Products Manufacturer:');
 define('TEXT_PRODUCTS_MANUFACTURER_MODEL', 'Manufacturer model no. (MPN):');
 define('TEXT_PRODUCTS_NAME', 'Products Name:');
-define('TEXT_PRODUCTS_HEADING_TITLE', 'Products Heading:');
 define('TEXT_PRODUCTS_DESCRIPTION', 'Products Description:');
 define('TEXT_PRODUCTS_QUANTITY', 'Products Stock:');
 define('TEXT_PRODUCTS_MODEL', 'Products Model:');
@@ -194,7 +191,7 @@ define('TEXT_PRODUCTS_VPE_VALUE',' Value:');
 
 define('CROSS_SELLING_1','Cross selling');
 define('CROSS_SELLING_2','for product');
-define('CROSS_SELLING_SEARCH','Search product:');
+define('CROSS_SELLING_SEARCH','Search product:<br/><small><i>enter model no.</i></small>');
 define('BUTTON_EDIT_CROSS_SELLING','Cross selling');
 define('HEADING_DEL','Delete');
 define('HEADING_ADD','Add?');
@@ -204,6 +201,11 @@ define('HEADING_MODEL','Model');
 define('HEADING_NAME','Article');
 define('HEADING_CATEGORY','Category');
 define('HEADING_IMAGE','Image');
+
+// BOF - Tomcraft - 2009-11-02 - Admin language tabs
+define('TEXT_SORT_ASC','ascending');
+define('TEXT_SORT_DESC','descending');
+// EOF - Tomcraft - 2009-11-02 - Admin language tabs
 
 // BOF - Tomcraft - 2009-11-06 - Use variable TEXT_PRODUCTS_DATE_FORMAT
 define('TEXT_PRODUCTS_DATE_FORMAT', 'JJJJ-MM-TT');
@@ -258,6 +260,4 @@ define('TEXT_TAGS_COPY', 'Also copy product features');
 define('TEXT_TAGS_COPY_INFO', 'Also copy product features<br />Only recommended for single copy (1 item)');
 
 define('TEXT_PRODUCTS_LAST_MODIFIED', 'Last modified:');
-define('TEXT_STOCK_UPDATE_SUCCESS', 'Stock saved');
-define('TEXT_STOCK_UPDATE_ERROR', 'Stock not saved');
 ?>

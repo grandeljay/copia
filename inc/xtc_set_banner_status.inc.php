@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_set_banner_status.inc.php 13081 2020-12-15 17:04:30Z GTB $   
+   $Id: xtc_set_banner_status.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,12 +23,14 @@
                        SET status = '".(int)$status."', 
                            date_status_change = now(), 
                            date_scheduled = NULL 
-                     WHERE banners_group_id = '" . (int)$banners_id . "'");
+                     WHERE banners_id = '" . (int)$banners_id . "'");
     } elseif ($status == '0') {
       xtc_db_query("UPDATE " . TABLE_BANNERS . " 
                        SET status = '".(int)$status."', 
                            date_status_change = now()
-                     WHERE banners_group_id = '" . (int)$banners_id . "'");
+                     WHERE banners_id = '" . (int)$banners_id . "'");
+    } else {
+      return -1;
     }
   }
 ?>

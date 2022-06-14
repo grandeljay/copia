@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: order_mail_step.php 12761 2020-05-13 13:39:09Z Tomcraft $
+   $Id: order_mail_step.php 9863 2016-05-25 10:56:31Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,9 +21,8 @@ class order_mail_step
         $this->code = 'order_mail_step';
         $this->title = MODULE_ORDER_MAIL_STEP_TEXT_TITLE;
         $this->description = MODULE_ORDER_MAIL_STEP_TEXT_DESCRIPTION;
-        $this->sort_order = ((defined('MODULE_ORDER_MAIL_STEP_SORT_ORDER')) ? MODULE_ORDER_MAIL_STEP_SORT_ORDER : '');
-        $this->enabled = ((defined('MODULE_ORDER_MAIL_STEP_STATUS') && MODULE_ORDER_MAIL_STEP_STATUS == 'true') ? true : false);
-        $this->sort_order = '';
+        $this->sort_order = MODULE_ORDER_MAIL_STEP_SORT_ORDER;
+        $this->enabled = ((MODULE_ORDER_MAIL_STEP_STATUS == 'true') ? true : false);
     }
 
     function process($file) 
@@ -49,7 +48,7 @@ class order_mail_step
 
     function install() 
     {
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_ORDER_MAIL_STEP_STATUS', 'true',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_ORDER_MAIL_STEP_STATUS', 'false',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
         xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('MODULE_ORDER_MAIL_STEP_ORDERS_STATUS_ID', '1',  '6', '1', 'xtc_cfg_pull_down_order_statuses(', 'xtc_get_orders_status_name', now())");
         
         xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_ORDER_MAIL_STEP_SUBJECT', 'DE::Ihre Bestellung \{\$nr\} vom \{\$date\}||EN::Your order \{\$nr\} from \{\$date\}', '12', '39', 'xtc_cfg_input_email_language;MODULE_ORDER_MAIL_STEP_SUBJECT', now())");

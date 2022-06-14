@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: webhook.php 12356 2019-10-30 16:41:39Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,35 +23,24 @@ require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalPayment.php');
 $request_json = get_external_content('php://input', 3, false);
 $request = json_decode($request_json, true);
 
-if (is_array($request)
-    && isset($request['resource'])
-    && is_array($request['resource'])
-    && array_key_exists('parent_payment', $request['resource'])
-    )
-{
-  $check_query = xtc_db_query("SELECT p.orders_id,
-                                      o.orders_status
-                                 FROM ".TABLE_PAYPAL_PAYMENT." p
-                                 JOIN ".TABLE_ORDERS." o
-                                      ON o.orders_id = p.orders_id
-                                WHERE p.payment_id = '".xtc_db_input($request['resource']['parent_payment'])."'");
+$check_query = xtc_db_query("SELECT p.orders_id,
+                                    o.orders_status
+                               FROM ".TABLE_PAYPAL_PAYMENT." p
+                               JOIN ".TABLE_ORDERS." o
+                                    ON o.orders_id = p.orders_id
+                              WHERE p.payment_id = '".xtc_db_input($request['resource']['parent_payment'])."'");
 
-  if (xtc_db_num_rows($check_query) > 0) {
-    $check = xtc_db_fetch_array($check_query);
+if (xtc_db_num_rows($check_query) > 0) {
+  $check = xtc_db_fetch_array($check_query);
   
-    $paypal = new PayPalPayment('paypal');
+  $paypal = new PayPalPayment('paypal');
   
-    $orders_status_id = $paypal->get_config($request['event_type']);
-    if ($orders_status_id < 0) {
-      $orders_status_id = $check['orders_status'];
-    }
-  
-    $paypal->update_order($request['summary'], $orders_status_id, $check['orders_id']);
-  } else {
-    // order is missing
-    header("HTTP/1.0 404 Not Found");
-    header("Status: 404 Not Found");
+  $orders_status_id = $paypal->get_config($request['event_type']);
+  if ($orders_status_id < 0) {
+    $orders_status_id = $check['orders_status'];
   }
+  
+  $paypal->update_order($request['summary'], $orders_status_id, $check['orders_id']);
 } else {
   // order is missing
   header("HTTP/1.0 404 Not Found");

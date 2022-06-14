@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------------------
-#  $Id: update_2.0.0.0_to_2.0.1.0.sql 10760 2017-06-07 10:33:38Z Tomcraft $
+#  $Id: update_2.0.0.0_to_2.0.1.0.sql 10267 2016-08-22 17:51:32Z Tomcraft $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -240,7 +240,7 @@ CREATE TABLE customers_login (
   customers_login_tries int(11) NOT NULL, 
   KEY idx_customers_ip (customers_ip), 
   KEY idx_customers_email_address (customers_email_address) 
-); 
+) ENGINE=MyISAM; 
 ALTER TABLE newsletter_recipients MODIFY customers_email_address VARCHAR(255) NOT NULL DEFAULT '';
 ALTER TABLE newsletter_recipients MODIFY ip_date_added VARCHAR(50) DEFAULT NULL;
 ALTER TABLE newsletter_recipients MODIFY ip_date_confirmed VARCHAR(50) DEFAULT NULL;

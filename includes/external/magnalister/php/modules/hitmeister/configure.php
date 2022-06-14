@@ -29,8 +29,9 @@ class HitmeisterConfigure extends MagnaCompatibleConfigure {
 		$nSecretKey = trim($_POST['conf'][$this->marketplace.'.secretkey']);
 		$nSecretKey = $this->processPasswordFromPost('secretkey', $nSecretKey);
 		
-		
-		
+		$nMPUser = trim($_POST['conf'][$this->marketplace.'.mpusername']);
+		$nMPPass = trim($_POST['conf'][$this->marketplace.'.mppassword']);
+		$nMPPass = $this->processPasswordFromPost('mppassword', $nMPPass);
 
 		if (empty($nClientKey)) {
 			unset($_POST['conf'][$this->marketplace.'.clientkey']);
@@ -40,11 +41,21 @@ class HitmeisterConfigure extends MagnaCompatibleConfigure {
 			unset($_POST['conf'][$this->marketplace.'.secretkey']);
 			return false;
 		}
-							
+		
+		if (empty($nMPUser)) {
+			unset($_POST['conf'][$this->marketplace.'.mpusername']);
+		}
+		
+		if ($nMPPass === false) {
+			unset($_POST['conf'][$this->marketplace.'.mppassword']);
+			return false;
+		}
+		
 		$data = array (
 			'CLIENTKEY' => $nClientKey,
 			'SECRETKEY' => $nSecretKey,
-			
+			'MPUSERNAME' => $nMPUser,
+			'MPPASSWORD' => $nMPPass,
 		);
 		#echo print_m($data);
 		return $data;
@@ -60,14 +71,7 @@ class HitmeisterConfigure extends MagnaCompatibleConfigure {
 	
 	public function confShippingtimeMatching($args, &$value = '') {
 		if (!defined('TABLE_SHIPPING_STATUS') || !MagnaDB::gi()->tableExists(TABLE_SHIPPING_STATUS)) {
-			setDBConfigValue('hitmeister.shippingtimematching.prefer', $this->mpID, false, true);
-			return ML_ERROR_NO_SHIPPINGTIME_MATCHING.'
-<script type="text/javascript">/*<![CDATA[*/
-	$(document).ready(function() {
-		$(\'input[id="conf_hitmeister.shippingtimematching.prefer_val"]\').prop(\'checked\', false);
-		$(\'input[id="conf_hitmeister.shippingtimematching.prefer_val"]\').prop(\'disabled\', true);
-	});
-/*]]>*/</script>';
+			return ML_ERROR_NO_SHIPPINGTIME_MATCHING;
 		}
 		$shippingtimes = MagnaDB::gi()->fetchArray('
 		    SELECT shipping_status_id as id, shipping_status_name as name
@@ -118,8 +122,7 @@ class HitmeisterConfigure extends MagnaCompatibleConfigure {
 			$this->form['prepare']['fields']['shippingtimeMatching']['procFunc'] = array($this, 'confShippingtimeMatching');
 			mlGetOrderStatus($this->form['orderSyncState']['fields']['shippedstatus']);
 			mlGetOrderStatus($this->form['orderSyncState']['fields']['cancelstatus']);
-            mlPresetTrackingCodeMatching($this->mpID, 'hitmeister.orderstatus.carrier.dbmatching', 'hitmeister.orderstatus.trackingcode.dbmatching');
-
+			
 			try {
 				$orderStatusConditions = MagnaConnector::gi()->submitRequest(array('ACTION' => 'GetOrderStatusData'));
 			} catch (MagnaException $me) {
@@ -152,19 +155,9 @@ class HitmeisterConfigure extends MagnaCompatibleConfigure {
 		if (!$this->isAuthed) {
 			global $magnaConfig;
 
-			unset($magnaConfig['db'][$this->mpID]['hitmeister.secretkey']);			
+			unset($magnaConfig['db'][$this->mpID]['hitmeister.secretkey']);
+			unset($magnaConfig['db'][$this->mpID]['hitmeister.mppassword']);
 		}
 	}
 	
-	public function process() {
-		parent::process();
-		if (!$this->isAjax) {
-			$cG = new MLConfigurator($this->form, $this->mpID, 'conf_magnacompat');
-			echo $cG->checkboxAlert('conf_hitmeister.multipleeans_val',
-				ML_HITMEISTER_TITLE_WARNING_ALLOW_MULTIPLE_EAN,
-				ML_HITMEISTER_TEXT_WARNING_ALLOW_MULTIPLE_EAN,
-				ML_BUTTON_LABEL_YES,
-				ML_BUTTON_LABEL_NO);
-		}
-	}
 }

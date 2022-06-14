@@ -70,17 +70,8 @@
         </div>
       </div>
       <div class="checkoutconditions">
-      {if "SIGN_CONDITIONS_ON_CHECKOUT"|defined}
-        {if $smarty.const.SIGN_CONDITIONS_ON_CHECKOUT == 'true'}{$AGB_checkbox} {/if}<strong><label for="conditions">{#text_accept_agb#}</label></strong>&nbsp;{$AGB_LINK}
-      {else}
         {$AGB_checkbox} <strong><label for="conditions">{#text_accept_agb#}</label></strong>&nbsp;{$AGB_LINK}
-      {/if}
       </div>
-      {if isset($PRIVACY_LINK)}
-        <div class="checkoutconditions">
-          {if $PRIVACY_checkbox}{$PRIVACY_checkbox} {/if}<strong><label for="privacy">{if $PRIVACY_checkbox}{#text_privacy_accept#}{else}{#text_privacy_notice#}{/if}</label></strong>&nbsp;{$PRIVACY_LINK}
-        </div>
-      {/if}
       {if isset($REVOCATION_checkbox)}
         <div class="checkoutconditions">
           {$REVOCATION_checkbox} <strong><label for="revocation">{#text_accept_revocation#}</label></strong>&nbsp;{$REVOCATION_LINK}
@@ -89,11 +80,6 @@
     {else}
       <h4 class="checkout">{#title_comments_short#}</h4>
       <div class="checkoutcomment">{$COMMENTS}</div>
-      {if isset($PRIVACY_LINK)}
-        <div class="checkoutconditions">
-          {if $PRIVACY_checkbox}{$PRIVACY_checkbox} {/if}<strong><label for="privacy">{if $PRIVACY_checkbox}{#text_privacy_accept#}{else}{#text_privacy_notice#}{/if}</label></strong>&nbsp;{$PRIVACY_LINK}
-        </div>
-      {/if}
       {if isset($REVOCATION_checkbox)}
         <div class="checkoutconditions">
           {$REVOCATION_checkbox} <strong><label for="revocation">{#text_accept_revocation#}</label></strong>&nbsp;{$REVOCATION_LINK}
@@ -105,6 +91,6 @@
 
 </div>
 <br class="clearfix" />
-{if isset($BUTTON_BACK)}<div class="button_left">{$BUTTON_BACK}</div>{/if}
+<div class="button_left">{$BUTTON_BACK}</div>
 <div class="button_right">{$BUTTON_CONTINUE}</div>
 {$FORM_END}

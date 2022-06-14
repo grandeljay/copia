@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: sessions.php 13179 2021-01-18 07:05:50Z GTB $
+   $Id: sessions.php 10085 2016-07-15 20:32:29Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -18,18 +18,18 @@
 
   define('SESSION_LIFE_ADMIN_DEFAULT', 7200);
 
-  $SESS_LIFE = ((defined('SESSION_LIFE_CUSTOMERS')) ? (int)SESSION_LIFE_CUSTOMERS : 1440);
-  if (defined('RUN_MODE_ADMIN')) {
-    $SESS_LIFE = defined('SESSION_LIFE_ADMIN') ? (int)SESSION_LIFE_ADMIN : (int)SESSION_LIFE_ADMIN_DEFAULT;
-  }
-  
-  @ini_set("session.gc_maxlifetime", $SESS_LIFE);
+  @ini_set("session.gc_maxlifetime", 1440);
   @ini_set("session.gc_probability", 100);
   @ini_set('session.cookie_httponly', true);
-  
-  foreach(auto_include(DIR_FS_CATALOG.'includes/extra/sessions/','php') as $file) require_once ($file);
-  
+
   if (STORE_SESSIONS == 'mysql') {  
+    if (!$SESS_LIFE = xtc_get_cfg_var('session.gc_maxlifetime')) {
+      $SESS_LIFE = 1440;
+    }
+    if (defined('SESSION_LIFE_CUSTOMERS')) {
+      $SESS_LIFE = (int)SESSION_LIFE_CUSTOMERS;
+    }
+
     function _sess_open($save_path, $session_name) {
       return true;
     }
@@ -46,7 +46,7 @@
       if (xtc_db_num_rows($value_query) == 1) {
         $value = xtc_db_fetch_array($value_query);
 
-        if (isset($value['value']) && $value['value'] != '') {
+        if (isset($value['value']) && $value['value']!='') {
           return base64_decode($value['value']);
         }
       }
@@ -72,7 +72,11 @@
                               VALUES ('". xtc_db_input($key) ."', '".(int)$expiry."', '".xtc_db_input($value)."', '".xtc_db_input($flag)."')
                               ON DUPLICATE KEY UPDATE expiry = '".(int)$expiry."', value = '".xtc_db_input($value)."', flag = '".xtc_db_input($flag)."'");
 
-      return true;
+      if (xtc_db_affected_rows() > 0) {
+        return true;
+      }
+  
+      return false;
     }
 
     function _sess_destroy($key) {
@@ -145,25 +149,16 @@
   }
 
   function xtc_session_destroy() {
+    global $current_domain;
+    
     if (isset($_COOKIE[xtc_session_name()])) {
-      $cookie_params = session_get_cookie_params();
-      xtc_setcookie(xtc_session_name(), '', time()-3600, $cookie_params['path'], $cookie_params['domain']);
+      xtc_setcookie(xtc_session_name(), '', time()-3600, DIR_WS_CATALOG, (xtc_not_null($current_domain) ? '.'.$current_domain : ''));
     }
-    if (session_status() === PHP_SESSION_ACTIVE) {
-      return session_destroy();
-    }
+    return session_destroy();
   }
 
   function xtc_session_save_path($path = '') {
     if (!empty($path)) {
-      $path = realpath($path);
-      if (strpos($path, '/') === false
-          || !is_dir($path) 
-          || !is_writeable($path)
-          )
-      {
-        $path = sys_get_temp_dir();
-      }      
       return session_save_path($path);
     } else {
       return session_save_path();
@@ -188,6 +183,8 @@
       $_SESSION = $session_backup;
 
       if (STORE_SESSIONS == 'mysql') {
+        session_set_save_handler('_sess_open', '_sess_close', '_sess_read', '_sess_write', '_sess_destroy', '_sess_gc');
+        register_shutdown_function('session_write_close');
         xtc_db_query("DELETE FROM " . TABLE_SESSIONS . " WHERE sesskey = '" . xtc_db_input($old_session_id) . "'");
       }
 
@@ -199,9 +196,7 @@
   }
   
   function xtc_generate_session_id() {
-    require_once (DIR_FS_INC.'xtc_random_charcode.inc.php');
-    
-    $session_id = md5(xtc_random_charcode(256));
+    $session_id = md5(openssl_random_pseudo_bytes(128));
     $check_query = xtc_db_query("SELECT sesskey
                                    FROM " . TABLE_SESSIONS . "
                                   WHERE sesskey = '" . xtc_db_input($session_id) . "'");
@@ -209,29 +204,6 @@
       xtc_generate_session_id();
     }
     return $session_id;
-  }
-  
-  function xtc_session_reset() {
-    $valid_session_array = array(
-      'customers_status',
-      'language',
-      'languages_id',
-      'language_charset',
-      'language_code',
-      'tracking',
-      'currency',
-      'cart',
-    );
-
-    if (defined('MODULE_WISHLIST_SYSTEM_STATUS') && MODULE_WISHLIST_SYSTEM_STATUS == 'true') {
-      $valid_session_array[] = 'wishlist';
-    }
-
-    foreach ($_SESSION as $k => $v) {
-      if (!in_array($k, $valid_session_array)) {
-        unset($_SESSION[$k]);
-      }
-    }
   }
   
   function unserialize_session_data( $session_data ) {
@@ -243,9 +215,9 @@
    
     if ($session_data != '') {
       $variables = array();
-      $a = preg_split("/(\w+)\|/", $session_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-      for($i = 0, $n = count($a); $i < $n; $i = $i+2) {
-        $variables[$a[$i]] = unserialize($a[$i+1]);
+      $a = preg_split( "/(\w+)\|/", $session_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
+      for( $i = 0; $i < count( $a ); $i = $i+2 ) {
+        $variables[$a[$i]] = unserialize( $a[$i+1] );
       }
       return($variables);
     }

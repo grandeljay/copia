@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_manufacturers.inc.php 13237 2021-01-26 13:30:03Z GTB $   
+   $Id: xtc_get_manufacturers.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -22,19 +22,12 @@
     
     if (!is_array($manufacturers_array)) $manufacturers_array = array();
 
-    $manufacturers_query = xtDBquery("SELECT *
-                                        FROM " . TABLE_MANUFACTURERS . " m
-                                        JOIN " . TABLE_MANUFACTURERS_INFO . " mi
-                                             ON m.manufacturers_id = mi.manufacturers_id
-                                                AND mi.languages_id = '" . (int)$_SESSION['languages_id'] . "'
-                                    ORDER BY m.manufacturers_name");
-    while ($manufacturers = xtc_db_fetch_array($manufacturers_query, true)) {
-      $manufacturers['manufacturers_image'] = str_replace('manufacturers/', '', $manufacturers['manufacturers_image']);
-      $manufacturers_array[$manufacturers['manufacturers_id']] = $manufacturers;
-      
-      // dropdown
-      $manufacturers_array[$manufacturers['manufacturers_id']]['id'] = $manufacturers['manufacturers_id'];
-      $manufacturers_array[$manufacturers['manufacturers_id']]['text'] = $manufacturers['manufacturers_name'];
+    $manufacturers_query = xtc_db_query("SELECT manufacturers_id, 
+                                                manufacturers_name 
+                                           FROM " . TABLE_MANUFACTURERS . " 
+                                       ORDER BY manufacturers_name");
+    while ($manufacturers = xtc_db_fetch_array($manufacturers_query)) {
+      $manufacturers_array[$manufacturers['manufacturers_id']] = array('id' => $manufacturers['manufacturers_id'], 'text' => $manufacturers['manufacturers_name']);
     }
     $manufacturers_cache = $manufacturers_array;
     

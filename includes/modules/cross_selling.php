@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: cross_selling.php 13283 2021-02-01 08:49:41Z GTB $ 
+   $Id: cross_selling.php 1243 2005-09-25 09:33:02Z mz $ 
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -15,30 +15,18 @@
    (c) 2003	 nextcommerce (also_purchased_products.php,v 1.9 2003/08/17); www.nextcommerce.org 
    ---------------------------------------------------------------------------------------*/
 
-// include needed functions
-require_once (DIR_FS_INC.'get_pictureset_data.inc.php');
-
 $module_smarty = new Smarty;
 $module_smarty->assign('tpl_path', DIR_WS_BASE.'templates/'.CURRENT_TEMPLATE.'/');
 
-if (ACTIVATE_CROSS_SELLING == 'true') {
-  $data = $product->getCrossSells();
-  if (count($data) > 0) {
-    $module_smarty->assign('language', $_SESSION['language']);
-    $module_smarty->assign('module_content', $data);
+$data = $product->getCrossSells();
+if (count($data) > 0) {
+	$module_smarty->assign('language', $_SESSION['language']);
+	$module_smarty->assign('module_content', $data);
 
-    if (defined('PICTURESET_BOX')) {
-      $module_smarty->assign('pictureset_box', get_pictureset_data(PICTURESET_BOX));
-    }
-    if (defined('PICTURESET_ROW')) {
-      $module_smarty->assign('pictureset_row', get_pictureset_data(PICTURESET_ROW));
-    }
-
-    // set cache ID
-    $module_smarty->caching = 0;
-    $module = $module_smarty->fetch(CURRENT_TEMPLATE.'/module/cross_selling.html');
-    $info_smarty->assign('MODULE_cross_selling', $module);
-  }
+	// set cache ID
+	$module_smarty->caching = 0;
+	$module = $module_smarty->fetch(CURRENT_TEMPLATE.'/module/cross_selling.html');
+	$info_smarty->assign('MODULE_cross_selling', $module);
 }
 
 // reverse cross selling
@@ -48,13 +36,6 @@ if (ACTIVATE_REVERSE_CROSS_SELLING == 'true') {
     $module_smarty->assign('language', $_SESSION['language']);
     $module_smarty->assign('module_content', $data);
     
-    if (defined('PICTURESET_BOX')) {
-      $module_smarty->assign('pictureset_box', get_pictureset_data(PICTURESET_BOX));
-    }
-    if (defined('PICTURESET_ROW')) {
-      $module_smarty->assign('pictureset_row', get_pictureset_data(PICTURESET_ROW));
-    }
-
     // set cache ID
     $module_smarty->caching = 0;
     $module = $module_smarty->fetch(CURRENT_TEMPLATE.'/module/reverse_cross_selling.html');

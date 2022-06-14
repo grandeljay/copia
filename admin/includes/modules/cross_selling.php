@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: cross_selling.php 13169 2021-01-15 13:51:37Z GTB $
+   $Id: cross_selling.php 10389 2016-11-07 10:52:45Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -27,64 +27,52 @@
   $confirm_submit = defined('CONFIRM_SAVE_ENTRY') && CONFIRM_SAVE_ENTRY == 'true' ? ' onsubmit="return confirmSubmit(\'\',\''. SAVE_ENTRY .'\',this)"' : '';
 
   // select article data
-  $article_query = xtc_db_query(
-     "SELECT products_name
-        FROM ".TABLE_PRODUCTS_DESCRIPTION."
-       WHERE products_id='".(int) $_GET['current_product_id']."'
-         AND language_id = '".(int)$_SESSION['languages_id']."'
-     ");
-  $article_data = xtc_db_fetch_array($article_query);
+  $article_query = "SELECT products_name
+                      FROM ".TABLE_PRODUCTS_DESCRIPTION."
+                     WHERE products_id='".(int) $_GET['current_product_id']."'
+                       AND language_id = '".(int)$_SESSION['languages_id']."'";
+  $article_data = xtc_db_fetch_array(xtc_db_query($article_query));
   $cross_sell_groups = xtc_get_cross_sell_groups();
 
   function buildCAT($catID) {
-    static $categories;
+    $cat = array ();
+    $tmpID = $catID;
 
-    if (!isset($categories)) {
-      $categories = array();
+    while (getParent($catID) != 0 || $catID != 0) {
+      $cat_select = xtc_db_query("SELECT categories_name
+                                    FROM ".TABLE_CATEGORIES_DESCRIPTION."
+                                   WHERE categories_id='".$catID."'
+                                     AND language_id='".(int)$_SESSION['languages_id']."'");
+      $cat_data = xtc_db_fetch_array($cat_select);
+      $catID = getParent($catID);
+      $cat[] = $cat_data['categories_name'];
     }
-  
-    if (!isset($categories[$catID])) {
-      $cat = array();
-      while (getParent($catID) != 0 || $catID != 0) {
-        $cat_select = xtc_db_query("SELECT categories_name
-                                      FROM ".TABLE_CATEGORIES_DESCRIPTION."
-                                     WHERE categories_id='".(int)$catID."'
-                                       AND language_id='".(int)$_SESSION['languages_id']."'");
-        $cat_data = xtc_db_fetch_array($cat_select);
-        $catID = getParent($catID);
-        $cat[] = $cat_data['categories_name'];
-      }
-      $categories[$catID] = implode(' > ', $cat);
+    $catStr = '';
+    for ($i = count($cat); $i > 0; $i --) {
+      $catStr .= $cat[$i -1].' > ';
     }
-  
-    return $categories[$catID];
+    return $catStr;
   }
 
   function getParent($catID) {
-    static $parent;
-  
-    if (!isset($parent)) {
-      $parent = array();
-    }
-  
-    if (!isset($parent[$catID])) {
-      $parent_query = xtc_db_query("SELECT parent_id 
-                                      FROM ".TABLE_CATEGORIES." 
-                                     WHERE categories_id = '".(int)$catID."'");
-      $parent_data = xtc_db_fetch_array($parent_query);
-      $parent[$catID] = $parent_data['parent_id'];
-    }
-  
-    return $parent[$catID];
+    $parent_query = xtc_db_query("SELECT parent_id FROM ".TABLE_CATEGORIES." WHERE categories_id='".$catID."'");
+    $parent_data = xtc_db_fetch_array($parent_query);
+    return $parent_data['parent_id'];
   }
   ?>
     <div class="pageHeadingImage"><?php echo xtc_image(DIR_WS_ICONS.'heading/icon_news.png'); ?></div>
     <div class="pageHeading"><?php echo CROSS_SELLING_1; ?></div>
     <div class="main pdg2 flt-l"><?php echo CROSS_SELLING_2 . ' "' . $article_data['products_name'] . '"'; ?></div>
+    <div class="clear mrg5">
+      <a class="button" onClick="this.blur()" href="<?php echo xtc_href_link(FILENAME_CATEGORIES,'cPath='.$_GET['cpath'].'&pID='.$_GET['current_product_id']); ?>"><?php echo BUTTON_BACK; ?></a>
+    </div>
 
       <?php
-      echo xtc_draw_form('cross_selling', FILENAME_CATEGORIES, xtc_get_all_get_params(array('search', 'special')), 'POST', $confirm_submit);
+      echo xtc_draw_form('cross_selling', FILENAME_CATEGORIES, '', 'GET', $confirm_submit);
+        echo xtc_draw_hidden_field('action', 'edit_crossselling');
         echo xtc_draw_hidden_field('special', 'edit');
+        echo xtc_draw_hidden_field('current_product_id', $_GET['current_product_id']);
+        echo xtc_draw_hidden_field('cpath', $_GET['cpath']);
         ?>
         <table class="tableBoxCenter collapse">
           <tr>
@@ -102,22 +90,22 @@
             <td class="dataTableHeadingContent" style="width:<?php echo (( USE_ADMIN_THUMBS_IN_LIST=='true' ) ? '37%' : '42%'); ?>"><?php echo HEADING_CATEGORY; ?></td>
           </tr>
         <?php
-          $cross_query = xtc_db_query("SELECT cs.ID,
-                                              cs.products_id,
-                                              cs.sort_order,
-                                              cs.products_xsell_grp_name_id,
-                                              p.products_model,
-                                              p.products_id,
-                                              p.products_image,
-                                              pd.products_name
-                                         FROM ".TABLE_PRODUCTS_XSELL." cs
-                                         JOIN ".TABLE_PRODUCTS." p
-                                              ON cs.xsell_id = p.products_id
-                                         JOIN ".TABLE_PRODUCTS_DESCRIPTION." pd
-                                              ON p.products_id = pd.products_id
-                                                 AND pd.language_id = '".(int)$_SESSION['languages_id']."'
-                                        WHERE cs.products_id = '".(int)$_GET['current_product_id']."'                             
-                                     ORDER BY cs.sort_order");
+          $cross_query = "SELECT cs.ID,cs.products_id,
+                                 pd.products_name,
+                                 cs.sort_order,
+                                 p.products_model,
+                                 p.products_id,
+                                 p.products_image,
+                                 cs.products_xsell_grp_name_id
+                            FROM ".TABLE_PRODUCTS_XSELL." cs,
+                                 ".TABLE_PRODUCTS_DESCRIPTION." pd,
+                                 ".TABLE_PRODUCTS." p
+                           WHERE cs.products_id = '".(int) $_GET['current_product_id']."'
+                             AND cs.xsell_id = p.products_id
+                             AND p.products_id = pd.products_id
+                             AND pd.language_id = '".(int)$_SESSION['languages_id']."'
+                        ORDER BY cs.sort_order";
+          $cross_query = xtc_db_query($cross_query);
           if (!xtc_db_num_rows($cross_query)) {
             ?>
             <tr>
@@ -155,52 +143,43 @@
           ?>
         </table>
         <div class="mrg5">
-          <div class="flt-l">
-            <a class="button" onClick="this.blur()" href="<?php echo xtc_href_link(FILENAME_CATEGORIES, xtc_get_all_get_params(array('action', 'current_product_id', 'cpath', 'keywords', 'last_action')).'cPath='.$_GET['cpath'].'&pID='.$_GET['current_product_id'].'&action='.$_GET['last_action']); ?>"><?php echo BUTTON_BACK; ?></a>
-            <?php if (!isset($_GET['keywords']) || $_GET['keywords'] == '') { ?>
-              <input type="submit" class="button" value="<?php echo BUTTON_SAVE; ?>" <?php echo $confirm_save_entry;?>>
-            <?php } ?>
-          </div>
+          <input type="submit" class="button" value="<?php echo BUTTON_SAVE; ?>" <?php echo $confirm_save_entry;?>>
         </div>
       </form>
-      
-      <div class="mrg5">
-        <div class="flt-r">
-          <div class="main" style="display:inline-block; padding: 5px; vertical-align:top;">
-            <?php
-            echo xtc_draw_form('product_keywords', FILENAME_CATEGORIES, '', 'GET').PHP_EOL;
-            echo xtc_draw_hidden_field('action', 'edit_crossselling').PHP_EOL;
-            echo xtc_draw_hidden_field('current_product_id', $_GET['current_product_id']).PHP_EOL;
-            echo xtc_draw_hidden_field('last_action', $_GET['last_action']).PHP_EOL;
-            echo xtc_draw_hidden_field('sorting', $_GET['sorting']).PHP_EOL;
-            echo xtc_draw_hidden_field('cpath', $_GET['cpath']).PHP_EOL;
-            echo xtc_draw_hidden_field('page', $_GET['page']).PHP_EOL;
-            echo CROSS_SELLING_SEARCH.'&nbsp;'.xtc_draw_input_field('keywords', ((isset($_GET['keywords'])) ? $_GET['keywords'] : ''), 'size="30"');
-            echo '&nbsp;<input type="submit" class="button no_top_margin"  style="vertical-align:top;" onclick="this.blur();" value="' . BUTTON_SEARCH . '"/>';
-            if (isset($_GET['keywords']) && $_GET['keywords'] != '') {
-              echo '<a class="button no_top_margin" style="vertical-align:top;" href="'.xtc_href_link(FILENAME_CATEGORIES, xtc_get_all_get_params(array('keywords'))).'">'.BUTTON_RESET.'</a>';
-            }
-            ?>
-            </form>
-          </div>
-        </div>
+
+      <hr>
+      <div class="pageHeading pdg2"><?php echo CROSS_SELLING_SEARCH; ?></div>
+      <?php
+        echo xtc_draw_form('product_search', FILENAME_CATEGORIES, '', 'GET').PHP_EOL;
+        echo xtc_draw_hidden_field('action', 'edit_crossselling').PHP_EOL;
+        echo xtc_draw_hidden_field('current_product_id', $_GET['current_product_id']).PHP_EOL;
+        echo xtc_draw_hidden_field('cpath', $_GET['cpath']).PHP_EOL;
+      ?>
+      <div class="main pdg2 flt-l"><?php echo xtc_draw_input_field('search', '', 'size="30"');?></div>
+      <div class="main pdg2 flt-l">
+      <?php
+        echo '<input type="submit" class="button" onclick="this.blur();" value="' . BUTTON_SEARCH . '"/>';
+      ?>
       </div>
+      </form>
       <div class="clear"></div>
-      
       <script type="text/javascript">
         $("#deleteall").click(function() {
           var checked = $("#deleteall").is(':checked');
           $('.delete').attr('checked', checked);
         });
       </script>
-    
+      
+      <hr>
       <?php
       // search results
-      if ($_GET['keywords']) {
-        echo xtc_draw_form('product_keywords', FILENAME_CATEGORIES, xtc_get_all_get_params(array('keywords', 'special')), 'POST', $confirm_submit).PHP_EOL;
+      if ($_GET['search']) {
+        echo xtc_draw_form('product_search', FILENAME_CATEGORIES, '', 'GET', $confirm_submit).PHP_EOL;
+        echo xtc_draw_hidden_field('action', 'edit_crossselling').PHP_EOL;
         echo xtc_draw_hidden_field('special', 'add_entries').PHP_EOL;
+        echo xtc_draw_hidden_field('current_product_id', $_GET['current_product_id']).PHP_EOL;
+        echo xtc_draw_hidden_field('cpath', $_GET['cpath']).PHP_EOL;
         ?>
-        <br>
         <table class="tableBoxCenter collapse">
           <tr>
             <td class="dataTableHeadingContent" align="center" style="width:4%"><?php echo HEADING_ADD.'<br/>'.xtc_draw_checkbox_field('addall', '', false, '', 'id="addall"'); ?></td>
@@ -216,67 +195,98 @@
             <td class="dataTableHeadingContent" style="width:<?php echo (( USE_ADMIN_THUMBS_IN_LIST=='true' ) ? '37%' : '42%'); ?>"><?php echo HEADING_CATEGORY; ?></td>
           </tr>
           <?php
-            $keywords = $_GET['keywords'] = !empty($_GET['keywords']) ? stripslashes(trim(urldecode($_GET['keywords']))) : false;
+/*
+            $search_query = "SELECT * 
+                               FROM ".TABLE_PRODUCTS_DESCRIPTION." AS pd,
+                                    ".TABLE_PRODUCTS." AS p
+                              WHERE p.products_id=pd.products_id
+                                AND pd.language_id='".$_SESSION['languages_id']."'
+                                AND p.products_id!='".$_GET['current_product_id']."'
+                                AND (pd.products_name LIKE '%".$_GET['search']."%' OR p.products_model LIKE '%".$_GET['search']."%')";
+            $search_query = xtc_db_query($search_query);
+*/
+            include(DIR_FS_INC . 'xtc_parse_search_string.inc.php');
+            define(ADMIN_SEARCH_IN_ATTR, true); // true = search in attributes
+            define(ADMIN_SEARCH_IN_DESC, false); // true = search in description
+            //build query
+            $select_str = "SELECT DISTINCT p.products_tax_class_id,
+                                           p.products_id,
+                                           pd.products_name,
+                                           p.products_sort,
+                                           p.products_quantity,
+                                           p.products_image,
+                                           p.products_model,
+                                           p.products_price,
+                                           p.products_discount_allowed,
+                                           p.products_date_added,
+                                           p.products_last_modified,
+                                           p.products_date_available,
+                                           p.products_status,
+                                           p.products_startpage,
+                                           p.products_startpage_sort";
 
-            $from_str = ''; 
-            if (SEARCH_IN_MANU == 'true') {
-              $from_str .= " LEFT OUTER JOIN ".TABLE_MANUFACTURERS." AS m ON (p.manufacturers_id = m.manufacturers_id) ";
+            $from_str  = " FROM ".TABLE_PRODUCTS." AS p ";
+            $from_str .= "LEFT JOIN ".TABLE_PRODUCTS_DESCRIPTION." AS pd ON (p.products_id = pd.products_id) ";
+            if (ADMIN_SEARCH_IN_ATTR == 'true') {
+              $from_str .= "LEFT OUTER JOIN ".TABLE_PRODUCTS_ATTRIBUTES." AS pa ON (p.products_id = pa.products_id) ";
+              $from_str .= "LEFT OUTER JOIN ".TABLE_PRODUCTS_OPTIONS_VALUES." AS pov ON (pa.options_values_id = pov.products_options_values_id) ";
             }
-    
-            if (SEARCH_IN_FILTER == 'true') {
-              $from_str .= " LEFT JOIN ".TABLE_PRODUCTS_TAGS." pt ON (pt.products_id = p.products_id)
-                             LEFT JOIN ".TABLE_PRODUCTS_TAGS_VALUES." ptv ON (ptv.options_id = pt.options_id AND ptv.values_id = pt.values_id AND ptv.status = '1' AND ptv.languages_id = '".(int)$_SESSION['languages_id']."') ";
-            }
-
-            if (SEARCH_IN_ATTR == 'true') {
-              $from_str .= " LEFT JOIN ".TABLE_PRODUCTS_ATTRIBUTES." AS pa ON (p.products_id = pa.products_id) 
-                             LEFT JOIN ".TABLE_PRODUCTS_OPTIONS_VALUES." AS pov ON (pa.options_values_id = pov.products_options_values_id) ";
-            }
-    
+            //where-string
             $where_str = " WHERE p.products_id NOT IN (
                                     SELECT xsell_id
                                       FROM ".TABLE_PRODUCTS_XSELL."
                                      WHERE products_id = ".(int)$_GET['current_product_id']."
                                     )";
             $where_str .= " AND p.products_id != ".(int)$_GET['current_product_id'];
+            $where_str .= " AND pd.language_id = '".(int) $_SESSION['languages_id']."'";
 
-            if ($keywords) {
-              require_once (DIR_FS_INC.'xtc_parse_search_string.inc.php');
-              $keywordcheck = xtc_parse_search_string($_GET['keywords'], $search_keywords);
-
-              if ($keywordcheck) {
-                include(DIR_FS_CATALOG.DIR_WS_INCLUDES.'build_search_query.php');
+            //$where_str = '';
+            //where-string
+            //$where_str = " WHERE pd.language_id = '".(int) $_SESSION['languages_id']."'";
+            //go for keywords... this is the main search process
+            if (isset ($_GET['search']) && xtc_not_null($_GET['search'])) {
+              if (xtc_parse_search_string(stripslashes($_GET['search']), $search_keywords)) {
+                $where_str .= " AND ( ";
+                for ($i = 0, $n = sizeof($search_keywords); $i < $n; $i ++) {
+                  switch ($search_keywords[$i]) {
+                    case '(' :
+                    case ')' :
+                    case 'and' :
+                    case 'or' :
+                      $where_str .= " ".$search_keywords[$i]." ";
+                      break;
+                    default :
+                      $ent_keyword = encode_htmlentities($search_keywords[$i]);
+                      $ent_keyword = ($ent_keyword != $search_keywords[$i]) ? xtc_db_input($ent_keyword) : false;
+                      $keyword = xtc_db_input($search_keywords[$i]);
+                      $where_str .= " ( ";
+                      $where_str .= "pd.products_keywords LIKE ('%".$keyword."%') ";
+                      $where_str .= ($ent_keyword) ? "OR pd.products_keywords LIKE ('%".$ent_keyword."%') " : '';
+                      if (ADMIN_SEARCH_IN_DESC == 'true') {
+                        $where_str .= "OR pd.products_description LIKE ('%".$keyword."%') ";
+                        $where_str .= ($ent_keyword) ? "OR pd.products_description LIKE ('%".$ent_keyword."%') " : '';
+                        $where_str .= "OR pd.products_short_description LIKE ('%".$keyword."%') ";
+                        $where_str .= ($ent_keyword) ? "OR pd.products_short_description LIKE ('%".$ent_keyword."%') " : '';
+                      }
+                      $where_str .= "OR pd.products_name LIKE ('%".$keyword."%') ";
+                      $where_str .= ($ent_keyword) ? "OR pd.products_name LIKE ('%".$ent_keyword."%') " : '';
+                      $where_str .= "OR p.products_model LIKE ('%".$keyword."%') ";
+                      $where_str .= ($ent_keyword) ? "OR p.products_model LIKE ('%".$ent_keyword."%') " : '';
+                      if (ADMIN_SEARCH_IN_ATTR == 'true') {
+                        $where_str .= "OR pa.attributes_model LIKE ('%".$keyword."%') ";
+                        $where_str .= ($ent_keyword) ? "OR pa.attributes_model LIKE ('%".$ent_keyword."%') " : '';
+                        $where_str .= "OR (pov.products_options_values_name LIKE ('%".$keyword."%') ";
+                        $where_str .= ($ent_keyword) ? "OR pov.products_options_values_name LIKE ('%".$ent_keyword."%') " : '';
+                        $where_str .= "AND pov.language_id = '".(int) $_SESSION['languages_id']."')";
+                      }
+                      $where_str .= " ) ";
+                      break;
+                  }
+                }
                 $where_str .= " ) GROUP BY p.products_id";
               }
             }
-    
-            $search_query_raw = "SELECT p.products_id,
-                                        p.products_model,
-                                        p.products_ean,
-                                        p.products_quantity,
-                                        p.products_image,
-                                        p.products_price,
-                                        p.products_discount_allowed,
-                                        p.products_tax_class_id,
-                                        p.products_date_available,
-                                        p.products_status,
-                                        s.specials_quantity,
-                                        s.specials_new_products_price,
-                                        s.expires_date,
-                                        pd.products_name                                         
-                                   FROM " . TABLE_PRODUCTS . " p
-                                   JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd
-                                        ON p.products_id = pd.products_id 
-                                           AND pd.language_id = '" . (int)$_SESSION['languages_id'] . "'
-                              LEFT JOIN " . TABLE_SPECIALS . " s
-                                        ON p.products_id = s.products_id 
-                                           AND s.status = 1 
-                                           AND (now() >= s.start_date OR s.start_date IS NULL)                      
-                                        ".$from_str."
-                                        ".$where_str."
-                               ORDER BY pd.products_name";
-            
-            $search_query = xtc_db_query($search_query_raw);
+            $search_query = xtc_db_query($select_str.$from_str.$where_str);
 
             while ($search_data = xtc_db_fetch_array($search_query)) {
               $categorie_query = xtc_db_query("SELECT categories_id
@@ -306,7 +316,7 @@
             }
             ?>
           </table>
-          <div class="mrg5 txta-l">
+          <div class="mrg5">
             <input type="submit" class="button" value="<?php echo BUTTON_SAVE; ?>" <?php echo $confirm_save_entry;?>>
           </div>
         </form>
@@ -318,4 +328,4 @@
         </script>
         <?php
       } 
-?>
+      ?>

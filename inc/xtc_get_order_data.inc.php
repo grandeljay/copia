@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_order_data.inc.php 11503 2019-02-05 21:33:48Z GTB $   
+   $Id: xtc_get_order_data.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -29,9 +29,8 @@ function xtc_get_order_data($order_id) {
   $order_data['orders_status'] = $order_status_data['orders_status_name'];
   
   // get language name for payment method
-  require_once (DIR_WS_CLASSES . 'payment.php');
-  $payment_modules = new payment($order_data['payment_method']);
-  $order_data['payment_method'] = $payment_modules::payment_title($order_data['payment_method'],(int)$_GET['oID']);
+  include(DIR_WS_LANGUAGES.$_SESSION['language'].'/modules/payment/'.$order_data['payment_method'].'.php');
+  $order_data['payment_method'] = constant(strtoupper('MODULE_PAYMENT_'.$order_data['payment_method'].'_TEXT_TITLE'));	
   
   return $order_data; 
 }

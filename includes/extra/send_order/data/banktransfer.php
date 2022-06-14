@@ -20,17 +20,15 @@
       $smarty->assign('PAYMENT_BANKTRANSFER_MANDATE_REFERENCE', MODULE_PAYMENT_BANKTRANSFER_REFERENCE_PREFIX . $oID);
       $smarty->assign('PAYMENT_BANKTRANSFER_IBAN', substr($rec['banktransfer_iban'], 0, 8) . str_repeat('*', (strlen($rec['banktransfer_iban']) - 10)) . substr($rec['banktransfer_iban'], -2));
       $smarty->assign('PAYMENT_BANKTRANSFER_BANKNAME', $rec['banktransfer_bankname']);
-      
-      $smarty->caching = 0;
+    
       $sepa_info = $smarty->fetch(CURRENT_TEMPLATE.'/mail/'.$order->info['language'].'/sepa_info.html');
     
       $smarty->assign('PAYMENT_INFO_HTML', $sepa_info);
-      $smarty->assign('PAYMENT_INFO_TXT', strip_tags(str_replace(array('<br />', '<br/>', '<br>'), "\n", $sepa_info)));
+      $smarty->assign('PAYMENT_INFO_TXT', str_replace("<br />", "\n", $sepa_info));
     
       // separate pre-notification necessary?
       if ($rec['banktransfer_owner_email'] != $order->customer['email_address']) {
         $banktransfer_owner_email = $rec['banktransfer_owner_email'];
-        $banktransfer_owner = $rec['banktransfer_owner'];
         $sepa_html_mail = $smarty->fetch(CURRENT_TEMPLATE.'/mail/'.$order->info['language'].'/sepa_mail.html');
         $sepa_txt_mail = $smarty->fetch(CURRENT_TEMPLATE.'/mail/'.$order->info['language'].'/sepa_mail.txt');
       

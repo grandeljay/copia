@@ -23,30 +23,31 @@ defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 require_once('magnacompatible.php');
 
 class HitmeisterMarketplace extends MagnaCompatMarketplace {
-    # Hitmeister uses EANs to identify products. Don't allow multiple products with the same EAN,
-    # as this would make the identification unpredictable and break the synchronisation.
-    protected function extraChecks() {
-        global $_MagnaSession;
-        if (($hp = magnaContribVerify('HitmeisterExtraChecksReplacement', 1)) !== false) {
-            require($hp);
-        } else {
 
-		# skip EAN check If switched off by user
-		if (getDBConfigValue(array('hitmeister.multipleeans', 'val'), $_MagnaSession['mpID'], false)) {
-			return;
-		}
+	public function __construct() {
+		global $_MagnaSession;
+		parent::__construct($_MagnaSession['currentPlatform']);
+	}
+
+	# Hitmeister uses EANs to identify products. Don't allow multiple products with the same EAN,
+	# as this would make the identification unpredictable and break the synchronisation.
+
+	protected function extraChecks() {
+	  if (($hp = magnaContribVerify('HitmeisterExtraChecksReplacement', 1)) !== false) {
+		require($hp);
+	  } else {
 
 		$distinctEANCount = MagnaDB::gi()->fetchOne('SELECT COUNT(DISTINCT products_ean)
-				FROM '.TABLE_PRODUCTS.' WHERE products_ean <> \'\' AND products_ean IS NOT NULL AND products_ean <> \'0\'');
+				FROM '.TABLE_PRODUCTS.' WHERE products_ean <> \'\' AND products_ean IS NOT NULL');
 		$totalEANCount = MagnaDB::gi()->fetchOne('SELECT COUNT(*)
-				FROM '.TABLE_PRODUCTS.' WHERE products_ean <> \'\' AND products_ean IS NOT NULL AND products_ean <> \'0\'');
+				FROM '.TABLE_PRODUCTS.' WHERE products_ean <> \'\' AND products_ean IS NOT NULL');
 		if ($distinctEANCount != $totalEANCount) {
 			$this->resources['query']['mode'] = 'conf';
     		$this->resources['query']['messages'][] = '<p class="errorBox">'.ML_HITMEISTER_ERROR_PRODUCTS_WITHDOUBLE_EAN_EXIST.'</p>';
     		$dblEANQuery = MagnaDB::gi()->query('
 				SELECT products_ean, COUNT(products_ean) as cnt
           		FROM '.TABLE_PRODUCTS.' 
-         		WHERE products_ean <> \'\' AND products_ean IS NOT NULL AND products_ean <> \'0\'
+         		WHERE products_ean <> \'\' AND products_ean IS NOT NULL
       		GROUP BY products_ean
         		HAVING cnt > 1'
     		);
@@ -79,7 +80,7 @@ class HitmeisterMarketplace extends MagnaCompatMarketplace {
 								<td style="width: 1px;">'.$item['products_id'].'</td>
 								<td style="width: 1px;">'.(empty($item['products_model']) ? '<i class="grey">'.ML_LABEL_NOT_SET.'</i>' : $item['products_model']).'</td>
 								<td style="width: 1px;"><a href="http://www.hitmeister.de/item/search/?search_value='.$item['products_ean'].'" target="_blank">'.$item['products_ean'].'</a></td>
-								<td>'.(empty($item['products_name']) ? '<i class="grey">'.ML_LABEL_UNKNOWN.'</i>' : fixHTMLUTF8Entities($item['products_name'])).'</td>
+								<td>'.(empty($item['products_name']) ? '<i class="grey">'.ML_LABEL_UNKNOWN.'</i>' : $item['products_name']).'</td>
 								<td class="textcenter" style="width: 1px;">
 									<a class="gfxbutton edit" title="'.ML_LABEL_EDIT.'" target="_blank" href="categories.php?pID='.$item['products_id'].'&action=new_product">&nbsp;</a>
 								</td>
@@ -96,4 +97,4 @@ class HitmeisterMarketplace extends MagnaCompatMarketplace {
 
 }
 
-new HitmeisterMarketplace($_MagnaSession['currentPlatform']);
+new HitmeisterMarketplace();

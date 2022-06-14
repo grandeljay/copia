@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: janolaw.php 11561 2019-03-20 16:36:11Z GTB $
+   $Id: janolaw.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -56,7 +56,7 @@ class janolaw_content {
         $this->get_page_content('datasecurity', $this->get_configuration('MODULE_JANOLAW_TYPE_DATASECURITY'));
         $this->get_page_content('terms', $this->get_configuration('MODULE_JANOLAW_TYPE_TERMS'));
         $this->get_page_content('legaldetails', $this->get_configuration('MODULE_JANOLAW_TYPE_LEGALDETAILS'));
-        $this->get_page_content('model-withdrawal-form', $this->get_configuration('MODULE_JANOLAW_TYPE_WITHDRAWAL'));
+        $this->get_page_content('model-withdrawal-form', $this->get_configuration('MODULE_JANOLAW_TYPE_WITHDRAWL'));
         $this->get_page_content('revocation', $this->get_configuration('MODULE_JANOLAW_TYPE_REVOCATION'));
                 
         xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value='".xtc_db_input(time())."', last_modified = NOW() where configuration_key='MODULE_JANOLAW_LAST_UPDATED'");
@@ -110,11 +110,11 @@ class janolaw_content {
 
     if (count($lng->catalog_languages) > 0) {
       reset($lng->catalog_languages);
-      foreach ($lng->catalog_languages as $key => $value) {
+      while (list($key, $value) = each($lng->catalog_languages)) {
         
         $language = $this->get_language($key);
         
-        $url = 'https://www.janolaw.de/agb-service/shops/'.
+        $url = 'http://www.janolaw.de/agb-service/shops/'.
                $this->user_id .'/'.
                $this->shop_id .'/'.
                $language .'/';
@@ -147,7 +147,7 @@ class janolaw_content {
                 fwrite($fp, $content_pdf);
                 fclose($fp);
                 if ($module_name == 'withdrawal' && $this->get_configuration('MODULE_JANOLAW_WITHDRAWAL_COMBINE') == 'True') {
-                  $this->withdrawal_link[$key] = ((ENABLE_SSL === true) ? HTTPS_SERVER : HTTP_SERVER).DIR_WS_CATALOG.$filename;
+                  $this->withdrawal_link[$key] = DIR_WS_CATALOG.$filename;
                 }
                 if (($this->format == 'html' 
                     && $this->get_configuration('MODULE_JANOLAW_PDF_'.strtoupper($module_name)) == 'True'
@@ -159,11 +159,11 @@ class janolaw_content {
                       ) 
                   {
                     if ($this->get_configuration('MODULE_JANOLAW_PDF_'.strtoupper($module_name)) == 'True') {
-                      $content .= '<br /><br /><a href="'.((ENABLE_SSL === true) ? HTTPS_SERVER : HTTP_SERVER).DIR_WS_CATALOG.$filename.'" target="_blank">PDF - '.$this->document_name[strtoupper($language)][$module_name].'</a>';
+                      $content .= '<br /><br /><a href="'.DIR_WS_CATALOG.$filename.'" target="_blank">PDF - '.$this->document_name[strtoupper($language)][$module_name].'</a>';
                     }
                     $content .= '<br /><a href="'.$this->withdrawal_link[$key].'" target="_blank">PDF - '.$this->document_name[strtoupper($language)]['withdrawal'].'</a>';
                   } else {
-                    $content .= '<br /><br /><a href="'.((ENABLE_SSL === true) ? HTTPS_SERVER : HTTP_SERVER).DIR_WS_CATALOG.$filename.'" target="_blank">PDF - '.$this->document_name[strtoupper($language)][$module_name].'</a>';            
+                    $content .= '<br /><br /><a href="'.DIR_WS_CATALOG.$filename.'" target="_blank">PDF - '.$this->document_name[strtoupper($language)][$module_name].'</a>';            
                   }
                 }
               }

@@ -1,27 +1,27 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: chp.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: chp.php 5127 2013-07-18 13:38:22Z Tomcraft $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on:
+   based on: 
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(chp.php,v 1.02 2003/02/18); www.oscommerce.com
+   (c) 2002-2003 osCommerce(chp.php,v 1.02 2003/02/18); www.oscommerce.com 
    (c) 2003	 nextcommerce (chp.php,v 1.11 2003/08/24); www.nextcommerce.org
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   swiss_post_1.02       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
+   swiss_post_1.02       	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
-
-
+   
+   
 
 
   class chp {
@@ -36,10 +36,10 @@
       $this->code = 'chp';
       $this->title = MODULE_SHIPPING_CHP_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_CHP_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_CHP_SORT_ORDER')) ? MODULE_SHIPPING_CHP_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_CHP_SORT_ORDER;
       $this->icon = DIR_WS_ICONS . 'shipping_chp.gif';
-      $this->tax_class = ((defined('MODULE_SHIPPING_CHP_TAX_CLASS')) ? MODULE_SHIPPING_CHP_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_CHP_STATUS') && MODULE_SHIPPING_CHP_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_CHP_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_CHP_STATUS == 'True') ? true : false);
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_CHP_ZONE > 0) && is_object($order)) {
         $check_flag = false;
@@ -97,9 +97,9 @@
         $error = true;
       } else {
         $shipping = -1;
-        $chp_cost_eco = defined('MODULE_SHIPPING_CHP_COST_ECO_' . $dest_zone) ? constant('MODULE_SHIPPING_CHP_COST_ECO_' . $dest_zone) : '';
-        $chp_cost_pri = defined('MODULE_SHIPPING_CHP_COST_PRI_' . $dest_zone) ? constant('MODULE_SHIPPING_CHP_COST_PRI_' . $dest_zone) : '';
-        $chp_cost_urg = defined('MODULE_SHIPPING_CHP_COST_URG_' . $dest_zone) ? constant('MODULE_SHIPPING_CHP_COST_URG_' . $dest_zone) : '';
+        $chp_cost_eco = @constant('MODULE_SHIPPING_CHP_COST_ECO_' . $dest_zone);
+        $chp_cost_pri = @constant('MODULE_SHIPPING_CHP_COST_PRI_' . $dest_zone);
+        $chp_cost_urg = @constant('MODULE_SHIPPING_CHP_COST_URG_' . $dest_zone);
 
         $methods = array();
 
@@ -149,7 +149,7 @@
                                'title' => 'Priority',
                                'cost' => $shipping_cost_2 * $shipping_num_boxes);
           }
-        }
+        }  
 
         if ($chp_cost_urg != '') {
           $chp_table_urg = preg_split("/[:,]/" , $chp_cost_urg); // Hetfield - 2009-08-18 - replaced deprecated function split with preg_split to be ready for PHP >= 5.3
@@ -177,7 +177,7 @@
       }
 
       $this->quotes = array('id' => $this->code,
-                            'module' => $this->title . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_CHP_TEXT_UNITS .')');
+                            'module' => $this->title . ' (' . $shipping_num_boxes . ' x ' . $shipping_weight . ' ' . MODULE_SHIPPING_CHP_TEXT_UNITS .')');
       $this->quotes['methods'] = $methods;
 
       if ($this->tax_class > 0) {
@@ -255,11 +255,11 @@
     }
 
     function keys() {
-      $keys = array('MODULE_SHIPPING_CHP_STATUS',
+      $keys = array('MODULE_SHIPPING_CHP_STATUS', 
                     'MODULE_SHIPPING_CHP_HANDLING',
-                    'MODULE_SHIPPING_CHP_ALLOWED',
-                    'MODULE_SHIPPING_CHP_TAX_CLASS',
-                    'MODULE_SHIPPING_CHP_ZONE',
+                    'MODULE_SHIPPING_CHP_ALLOWED', 
+                    'MODULE_SHIPPING_CHP_TAX_CLASS', 
+                    'MODULE_SHIPPING_CHP_ZONE', 
                     'MODULE_SHIPPING_CHP_SORT_ORDER');
 
       for ($i=1; $i <= $this->num_chp; $i++) {
@@ -268,16 +268,16 @@
         $keys[] = 'MODULE_SHIPPING_CHP_COST_PRI_' . $i;
         $keys[] = 'MODULE_SHIPPING_CHP_COST_URG_' . $i;
       }
-
+            
       $exclude_array = array('MODULE_SHIPPING_CHP_COST_URG_1');
-
+      
       for ($x=0, $n=sizeof($keys); $x<$n; $x++) {
         if (in_array($keys[$x], $exclude_array)) {
           unset($keys[$x]);
         }
       }
       $keys = array_values($keys);
-
+      
       return $keys;
     }
   }

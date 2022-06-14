@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: payone_callback.php 12277 2019-10-14 15:50:58Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -35,8 +35,8 @@ $payone->log("received status from ".$_SERVER['REMOTE_ADDR'], $logfile);
 $payone->log(print_r($_POST, true), $logfile);
 
 // include language
-require_once (DIR_WS_CLASSES.'language.php');
-$lng = new language(xtc_input_validation(DEFAULT_LANGUAGE, 'lang'));
+include (DIR_WS_CLASSES.'language.php');
+$lng = new language(xtc_input_validation(DEFAULT_LANGUAGE, 'char', ''));
 require_once (DIR_FS_EXTERNAL.'payone/lang/'.$lng->language['directory'].'.php');
 
 // make callback

@@ -11,7 +11,9 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id$
+ *
+ * (c) 2010 - 2014 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -148,7 +150,7 @@ class Check24InventoryView extends MagnaCompatibleInventoryView {
 	/**
 	 * Overriden from base class because of asynchronous upload concept
 	 */
-	protected function getInventory() {
+	private function getInventory() {
 		try {
 			$request = array(
 				'ACTION' => 'GetInventory',

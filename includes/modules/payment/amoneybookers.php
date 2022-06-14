@@ -1,7 +1,7 @@
 <?php
 
 /* -----------------------------------------------------------------------------------------
-   $Id: amoneybookers.php 11615 2019-03-22 11:07:51Z GTB $
+   $Id: amoneybookers.php 150 2007-01-24 09:54:08Z mzanier $
 
    xt:Commerce - community made shopping
    http://www.xt-commerce.com
@@ -38,13 +38,13 @@ class amoneybookers {
 		$this->version = '2.1';
 		$this->title = MODULE_PAYMENT_AMONEYBOOKERS_TEXT_TITLE;
 		$this->description = MODULE_PAYMENT_AMONEYBOOKERS_TEXT_DESCRIPTION;
-		$this->sort_order = ((defined('MODULE_PAYMENT_AMONEYBOOKERS_SORT_ORDER')) ? MODULE_PAYMENT_AMONEYBOOKERS_SORT_ORDER : '');
-		$this->enabled = ((defined('MODULE_PAYMENT_AMONEYBOOKERS_STATUS') && MODULE_PAYMENT_AMONEYBOOKERS_STATUS == 'True') ? true : false);
+		$this->sort_order = MODULE_PAYMENT_AMONEYBOOKERS_SORT_ORDER;
+		$this->enabled = ((MODULE_PAYMENT_AMONEYBOOKERS_STATUS == 'True') ? true : false);
 		$this->info = MODULE_PAYMENT_AMONEYBOOKERS_TEXT_INFO;
 		$this->logo = xtc_image(DIR_WS_ICONS . 'logo_moneybookers.jpg');
 		$this->landingPage = 'http://www.moneybookers.com/ecommerce_btc/de/index.html';
 		$this->tmpOrders = true;
-		$this->tmpStatus = ((defined('MODULE_PAYMENT_AMONEYBOOKERS_TMP_STATUS_ID')) ? MODULE_PAYMENT_AMONEYBOOKERS_TMP_STATUS_ID : 0);
+		$this->tmpStatus = MODULE_PAYMENT_AMONEYBOOKERS_TMP_STATUS_ID;
 		$this->icons_available = xtc_image(DIR_WS_ICONS . 'cc_amex_small.jpg') . ' ' .
 		xtc_image(DIR_WS_ICONS . 'cc_mastercard_small.jpg') . ' ' .
 		xtc_image(DIR_WS_ICONS . 'cc_visa_small.jpg') . ' ' .
@@ -54,7 +54,7 @@ class amoneybookers {
 		xtc_image(DIR_WS_ICONS . 'swift_small.jpg') . ' ' .
 		xtc_image(DIR_WS_ICONS . 'elv_small.jpg') . ' ' .
 		xtc_image(DIR_WS_ICONS . 'cheque_small.jpg');
-				
+
 		$this->repost = false;
 		$this->Error = '';
 		$this->oID = 0;
@@ -73,14 +73,15 @@ class amoneybookers {
 		if ($this->enabled) {
 
 			$result = xtc_db_query("SELECT mb_currID FROM payment_AMONEYBOOKERS_currencies");
-			while ($res = xtc_db_fetch_array($result)) {
-				$this->mbCurrencies[] = $res['mb_currID'];
+			while (list ($currID) = mysql_fetch_row($result)) {
+				$this->mbCurrencies[] = $currID;
 			}
 
 			$result = xtc_db_query("SELECT code FROM currencies");
-			while ($res = xtc_db_fetch_array($result)) {
-				$this->aCurrencies[] = $res['code'];
+			while (list ($currID) = mysql_fetch_row($result)) {
+				$this->aCurrencies[] = $currID;
 			}
+
 
 			$this->defCurr = DEFAULT_CURRENCY;
 
@@ -91,6 +92,9 @@ class amoneybookers {
 			}
 		}
 
+				if ((int) MODULE_PAYMENT_AMONEYBOOKERS_ORDER_STATUS_ID > 0) {
+					$this->order_status = MODULE_PAYMENT_AMONEYBOOKERS_ORDER_STATUS_ID;
+				}
 		//
 		if (is_object($order))
 			$this->update_status();
@@ -205,7 +209,7 @@ class amoneybookers {
 		global $order, $xtPrice,$insert_id;
 
 		$result = xtc_db_query("SELECT code FROM languages WHERE languages_id = '" . (int)$_SESSION['languages_id'] . "'");
-		list ($lang_code) = xtc_db_fetch_row($result);
+		list ($lang_code) = mysql_fetch_row($result);
 		$mbLanguage = strtoupper($lang_code);
 		if ($mbLanguage == "US") {
 			$mbLanguage = "EN";
@@ -220,7 +224,7 @@ class amoneybookers {
 		}
 
 		$result = xtc_db_query("SELECT mb_cID FROM payment_AMONEYBOOKERS_countries, countries WHERE (xtc_cID = countries_id) AND (countries_id = '{$order->billing['country']['id']}')");
-		list ($mbCountry) = xtc_db_fetch_row($result);
+		list ($mbCountry) = mysql_fetch_row($result);
 
 		$this->transaction_id = $this->generate_trid();
 		$result = xtc_db_query("INSERT INTO payment_moneybookers (mb_TRID, mb_DATE) VALUES ('{$this->transaction_id}', NOW())");
@@ -255,10 +259,9 @@ class amoneybookers {
 		'amount2_description'=>  'Summe:',
 		'amount2'=>  $amount,
 
-		'merchant_fields'=>  'Field1,platform',
+		'merchant_fields'=>  'Field1',
 		'Field1'=>  md5(MODULE_PAYMENT_AMONEYBOOKERS_MERCHANTID),
-    'platform' => '87039772',
-    
+
 		'firstname'=>  $order->billing['firstname'],
 		'lastname'=>  $order->billing['lastname'],
 		'address'=>  $order->billing['street_address'],
@@ -587,23 +590,36 @@ class amoneybookers {
 		xtc_db_query("INSERT INTO payment_AMONEYBOOKERS_currencies VALUES ('ZAR', 'South-African Rand')");
 
 		$result = xtc_db_query("SELECT mb_currID FROM payment_AMONEYBOOKERS_currencies");
-		while ($res = xtc_db_fetch_array($result)) {
-			$this->mbCurrencies[] = $res['mb_currID'];
+			while (list ($currID) = mysql_fetch_row($result)) {
+				$this->mbCurrencies[] = $currID;
+			}
+
+			$result = xtc_db_query("SELECT code FROM currencies");
+			while (list ($currID) = mysql_fetch_row($result)) {
+				$this->aCurrencies[] = $currID;
+			}
+			
+						$this->defCurr = DEFAULT_CURRENCY;
+
+			$this->defLang = DEFAULT_LANGUAGE;
+			$this->defLang = strtoupper($this->defLang);
+			if (!in_array($this->defLang, $this->mbLanguages)) {
+				$this->defLang = "EN";
+			}
+			
+			$mb_installed = false;
+			//BOF - Hetfield - 2010-01-28 - replace mysql_list_tables with query SHOW TABLES -> PHP5.3 deprecated
+			//$tables = mysql_list_tables(DB_DATABASE);
+			$tables = xtc_db_query("SHOW TABLES LIKE 'payment_moneybookers'");			
+			while ($checktables = mysql_fetch_array($tables, MYSQL_NUM)) {
+				if ($checktables[0] == 'payment_moneybookers')  $mb_installed=true;
+			}
+			//EOF - Hetfield - 2010-01-28 - replace mysql_list_tables with query SHOW TABLES -> PHP5.3 deprecated
+
+		if ($mb_installed==false) {
+		xtc_db_query("CREATE TABLE payment_moneybookers (mb_TRID varchar(255) NOT NULL default '',mb_ERRNO smallint(3) unsigned NOT NULL default '0',mb_ERRTXT varchar(255) NOT NULL default '',mb_DATE datetime NOT NULL default '0000-00-00 00:00:00',mb_MBTID bigint(18) unsigned NOT NULL default '0',mb_STATUS tinyint(1) NOT NULL default '0',mb_ORDERID int(11) unsigned NOT NULL default '0',PRIMARY KEY  (mb_TRID))");
 		}
 
-		$result = xtc_db_query("SELECT code FROM currencies");
-		while ($res = xtc_db_fetch_array($result)) {
-			$this->aCurrencies[] = $res['code'];
-		}
-		
-		$this->defCurr = DEFAULT_CURRENCY;
-
-		$this->defLang = DEFAULT_LANGUAGE;
-		$this->defLang = strtoupper($this->defLang);
-		if (!in_array($this->defLang, $this->mbLanguages)) {
-			$this->defLang = "EN";
-		}
-		
 		xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) values ('MODULE_PAYMENT_AMONEYBOOKERS_STATUS', 'True',  '6', '0', 'xtc_cfg_select_option(array(\'True\', \'False\'), ', now())");
 		xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_PAYMENT_AMONEYBOOKERS_EMAILID', '', '6', '1', now())");
 		xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_PAYMENT_AMONEYBOOKERS_PWD', '',  '6', '2', now())");
@@ -620,7 +636,8 @@ class amoneybookers {
 		xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value,  configuration_group_id, sort_order, date_added) values ('MODULE_PAYMENT_AMONEYBOOKERS_ICONS', 'elv.jpg,giropay.gif,cc_visa.jpg,visa_electron.jpg,cc_mastercard.jpg,cc_amex.jpg,cc_diners.jpg,swift.jpg,cheque.jpg',  '6', '0', now())");
 
 		// tables
-		xtc_db_query("CREATE TABLE IF NOT EXISTS payment_moneybookers (mb_TRID varchar(255) NOT NULL default '',mb_ERRNO smallint(3) unsigned NOT NULL default '0',mb_ERRTXT varchar(255) NOT NULL default '',mb_DATE datetime NOT NULL default '0000-00-00 00:00:00',mb_MBTID bigint(18) unsigned NOT NULL default '0',mb_STATUS tinyint(1) NOT NULL default '0',mb_ORDERID int(11) unsigned NOT NULL default '0',PRIMARY KEY  (mb_TRID))");
+
+
 	}
 
 	function remove() {
@@ -677,7 +694,7 @@ class amoneybookers {
 			$trid = xtc_create_random_value(16, "digits");
 			$trid = 'XTC' . $trid;
 			$result = xtc_db_query("SELECT mb_TRID FROM payment_moneybookers WHERE mb_TRID = '".$trid."'");
-		} while (xtc_db_num_rows($result));
+		} while (mysql_num_rows($result));
 
 		return $trid;
 

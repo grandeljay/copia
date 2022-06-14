@@ -1,17 +1,19 @@
 <?php
 /**
- * 888888ba                 dP  .88888.                    dP
- * 88    `8b                88 d8'   `88                   88
- * 88aaaa8P' .d8888b. .d888b88 88        .d8888b. .d8888b. 88  .dP  .d8888b.
- * 88   `8b. 88ooood8 88'  `88 88   YP88 88ooood8 88'  `"" 88888"   88'  `88
- * 88     88 88.  ... 88.  .88 Y8.   .88 88.  ... 88.  ... 88  `8b. 88.  .88
- * dP     dP `88888P' `88888P8  `88888'  `88888P' `88888P' dP   `YP `88888P'
+ * 888888ba                 dP  .88888.                    dP                
+ * 88    `8b                88 d8'   `88                   88                
+ * 88aaaa8P' .d8888b. .d888b88 88        .d8888b. .d8888b. 88  .dP  .d8888b. 
+ * 88   `8b. 88ooood8 88'  `88 88   YP88 88ooood8 88'  `"" 88888"   88'  `88 
+ * 88     88 88.  ... 88.  .88 Y8.   .88 88.  ... 88.  ... 88  `8b. 88.  .88 
+ * dP     dP `88888P' `88888P8  `88888'  `88888P' `88888P' dP   `YP `88888P' 
  *
  *                          m a g n a l i s t e r
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id$
+ *
+ * (c) 2011 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -25,6 +27,8 @@ class TradoriaConfigure extends MagnaCompatibleConfigure {
 	protected function getAuthValuesFromPost() {
 		$nAPIKey = trim($_POST['conf'][$this->marketplace.'.apikey']);
 		$nMPUser = trim($_POST['conf'][$this->marketplace.'.mpusername']);
+		$nMPPass = trim($_POST['conf'][$this->marketplace.'.mppassword']);
+		$nMPPass = $this->processPasswordFromPost('mppassword', $nMPPass);
 
 		if (empty($nAPIKey)) {
 			unset($_POST['conf'][$this->marketplace.'.apikey']);
@@ -32,10 +36,14 @@ class TradoriaConfigure extends MagnaCompatibleConfigure {
 		if (empty($nMPUser)) {
 			unset($_POST['conf'][$this->marketplace.'.mpusername']);
 		}
-		
+		if ($nMPPass === false) {
+			unset($_POST['conf'][$this->marketplace.'.mppassword']);
+			return false;
+		}
 		return array (
 			'KEY' => $nAPIKey,
 			'MPUSERNAME' => $nMPUser,
+			'MPPASSWORD' => $nMPPass,
 		);
 	}
 	
@@ -46,8 +54,8 @@ class TradoriaConfigure extends MagnaCompatibleConfigure {
 		$forms[] = 'checkinShippingGroup';
 		$forms[] = 'checkinSubmitVariations';
 		$forms[] = 'orderStatus';
-		$forms[] = 'catMatch';
-		$forms[] = 'manufacturerPartNumberMatching';
+		$forms[] = 'prepare/catMatch';
+		$forms[] = 'useShopCatsAsOwn';
 		$forms[] = 'orderImportExtras';
 		$forms[] = 'promotionmail';
 		return $forms;
@@ -66,16 +74,6 @@ class TradoriaConfigure extends MagnaCompatibleConfigure {
 		}
 		if (isset($this->form['orderSyncState']['fields']['cancelstatus'])) {
 			mlGetOrderStatus($this->form['orderSyncState']['fields']['cancelstatus']);
-		}
-		if (isset($this->form['price']['fields']['whichstrikeprice'])) {
-			mlGetCustomersStatus($this->form['price']['fields']['whichstrikeprice'], false);
-			if (!empty($this->form['price']['fields']['whichstrikeprice'])) {
-				$this->form['price']['fields']['whichstrikeprice']['values']['-1'] = ML_LABEL_DONT_USE;
-				$this->form['price']['fields']['whichstrikeprice']['values']['0'] = ML_LABEL_SHOP_PRICE;
-				ksort($this->form['price']['fields']['whichstrikeprice']['values']);
-			} else {
-				unset($this->form['price']['fields']['whichstrikeprice']);
-			}
 		}
 	}
 	

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: customers.php 13133 2021-01-08 13:12:31Z GTB $   
+   $Id: customers.php 10228 2016-08-10 16:37:45Z GTB $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -23,7 +23,6 @@ define('TABLE_HEADING_FIRSTNAME', 'Firstname');
 define('TABLE_HEADING_LASTNAME', 'Lastname');
 define('TABLE_HEADING_ACCOUNT_CREATED', 'created');
 define('TABLE_HEADING_ACTION', 'Action');
-define('TABLE_HEADING_EDIT','Edit');
 
 define('TEXT_DATE_ACCOUNT_CREATED', 'Account Created:');
 define('TEXT_DATE_ACCOUNT_LAST_MODIFIED', 'Last Modified:');
@@ -70,15 +69,10 @@ define('TEXT_INFO_DELETE_DEFAULT', '<b>The address book entry can not be deleted
 define('TABLE_HEADING_AMOUNT','Credit');
 define('WARNING_CUSTOMER_ALREADY_EXISTS', 'Customer group can not be changed. This email address is already in use for a customer account.');
 
+define('TEXT_SORT_ASC','ascending');
+define('TEXT_SORT_DESC','descending');
+
 define('TEXT_INFO_HEADING_STATUS_NEW_ORDER','New order');
 define('TEXT_INFO_PAYMENT','Payment:');
 define('TEXT_INFO_SHIPPING','Shipping:');
-define('TEXT_INFO_NEWSLETTER_AT_REGISTRATION', 'Newsletter at registration:');
-define('TEXT_INFO_NEWSLETTER_STATUS', 'Newsletter subscribed:');
-
-define('TEXT_ACTIVE_ELEMENT','Active Element');
-define('TEXT_MARKED_ELEMENTS','Marked Elements');
-define('TEXT_INFO_HEADING_DELETE_ELEMENTS', 'Delete Elements');
-define('TEXT_INFO_HEADING_STATUS_ELEMENTS', 'Customers Group Elements');
-define('TEXT_DELETE_REVIEWS_ELEMENTS', 'Delete reviews');
 ?>

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: set_ids_by_url_parameters.php 12277 2019-10-14 15:50:58Z GTB $
+   $Id: set_ids_by_url_parameters.php 10288 2016-09-21 14:31:56Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -14,12 +14,11 @@
 if (isset($_GET['info'])) {
   $site = explode('_', $_GET['info']);
   $pID = $site[0];
-  $_GET['products_id'] = xtc_input_validation(str_replace('p', '', $pID), 'products_id');
+  $_GET['products_id'] = xtc_input_validation(str_replace('p', '', $pID), 'products_id', '');
   $actual_products_id = (int) $_GET['products_id'];
   $product = new product($actual_products_id);
-  unset($_GET['info']);
 } elseif (isset($_GET['products_id'])) {
-  $_GET['products_id'] = xtc_input_validation($_GET['products_id'], 'products_id');
+  $_GET['products_id'] = xtc_input_validation($_GET['products_id'], 'products_id', '');
   $actual_products_id = (int) $_GET['products_id'];
   $product = new product($actual_products_id);
 }
@@ -30,7 +29,6 @@ if (isset($_GET['cat'])) {
   $cID = $site[0];
   $cID = str_replace('c', '', $cID);
   $_GET['cPath'] = xtc_get_category_path($cID);
-  unset($_GET['cat']);
 }
 
 // manufacturer URLS
@@ -44,7 +42,6 @@ if (isset($_GET['manufacturers_id']) && $_GET['manufacturers_id'] != '') {
   $mID = $site[0];
   $mID = (int)str_replace('m', '', $mID);
   $_GET['manufacturers_id'] = $mID;
-  unset($_GET['manu']);
   $_GET['manufacturers_id'] = manufacturer_redirect($_GET['manufacturers_id']);
 }
 
@@ -55,13 +52,8 @@ if (isset($_GET['cpID']) && (int)$_GET['cpID'] > 0) {
   unset($_GET['cpID']);
 }
 if (isset ($_GET['cPath']) && (!isset($product) || !is_object($product))) {
-  $cPath = $_GET['cPath'] = xtc_input_validation($_GET['cPath'], 'cPath');
-} elseif (isset($product) 
-          && is_object($product) 
-          && !isset($_GET['manufacturers_id'])
-          && basename($PHP_SELF) == FILENAME_PRODUCT_INFO
-          )
-{
+  $cPath = $_GET['cPath'] = xtc_input_validation($_GET['cPath'], 'cPath', '');
+} elseif (isset($product) && is_object($product) && !isset($_GET['manufacturers_id'])) {
   if ($product->isProduct() === true) {
     require_once (DIR_FS_INC.'product_redirect.inc.php');
     $cPath = product_redirect($actual_products_id);

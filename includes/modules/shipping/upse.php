@@ -1,30 +1,30 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: upse.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: upse.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
 
    Copyright (c) 2009 - 2013 [www.modified-shop.org]
    -----------------------------------------------------------------------------------------
-   based on:
+   based on: 
    (c) 2000-2001 The Exchange Project  (earlier name of osCommerce)
-   (c) 2002-2003 osCommerce(dp.php,v 1.36 2003/03/09 02:14:35); www.oscommerce.com
+   (c) 2002-2003 osCommerce(dp.php,v 1.36 2003/03/09 02:14:35); www.oscommerce.com 
    (c) 2003	 nextcommerce (dp.php,v 1.12 2003/08/24); www.nextcommerce.org
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    -----------------------------------------------------------------------------------------
    Third Party contributions:
-   German Post (Deutsche Post WorldNet)         	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
+   German Post (Deutsche Post WorldNet)         	Autor:	Copyright (C) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
 
-   Released under the GNU General Public License
+   Released under the GNU General Public License 
    UPS - Modul
    ---------------------------------------------------------------------------------------*/
+   
+   
 
-
-
-
+ 
   class upse {
     var $code, $title, $description, $icon, $enabled, $num_upse;
 
@@ -35,10 +35,10 @@
       $this->code = 'upse';
       $this->title = MODULE_SHIPPING_UPSE_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_UPSE_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_UPSE_SORT_ORDER')) ? MODULE_SHIPPING_UPSE_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_UPSE_SORT_ORDER;
       $this->icon = DIR_WS_ICONS . 'shipping_ups.gif';
-      $this->tax_class = ((defined('MODULE_SHIPPING_UPSE_TAX_CLASS')) ? MODULE_SHIPPING_UPSE_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_UPSE_STATUS') && MODULE_SHIPPING_UPSE_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_UPSE_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_UPSE_STATUS == 'True') ? true : false);
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_UPSE_ZONE > 0) && is_object($order)) {
         $check_flag = false;
@@ -114,7 +114,7 @@
       $this->quotes = array('id' => $this->code,
                             'module' => MODULE_SHIPPING_UPSE_TEXT_TITLE,
                             'methods' => array(array('id' => $this->code,
-                                                     'title' => $shipping_method . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_UPSE_TEXT_UNITS .')',
+                                                     'title' => $shipping_method . ' (' . $shipping_num_boxes . ' x ' . $shipping_weight . ' ' . MODULE_SHIPPING_UPSE_TEXT_UNITS .')',
                                                      'cost' => $shipping_cost * $shipping_num_boxes)));
 
       if ($this->tax_class > 0) {

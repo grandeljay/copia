@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: cleverreach.php 11602 2019-03-21 17:56:53Z Tomcraft $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,9 +20,9 @@ class cleverreach {
      $this->code = 'cleverreach';
      $this->title = MODULE_CLEVERREACH_TEXT_TITLE;
      $this->description = MODULE_CLEVERREACH_TEXT_DESCRIPTION;
-     $this->sort_order = defined('MODULE_CLEVERREACH_SORT_ORDER') ? MODULE_CLEVERREACH_SORT_ORDER : '';
-     $this->enabled = ((defined('MODULE_CLEVERREACH_STATUS') && MODULE_CLEVERREACH_STATUS == 'true') ? true : false);
-  }
+     $this->sort_order = defined('MODULE_CLEVERREACH_SORT_ORDER') ? MODULE_CLEVERREACH_SORT_ORDER : 0;
+     $this->enabled = ((MODULE_CLEVERREACH_STATUS == 'true') ? true : false);
+   }
 
   function process($file) {
 

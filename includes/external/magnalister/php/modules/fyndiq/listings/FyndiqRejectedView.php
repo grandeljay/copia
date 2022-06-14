@@ -11,7 +11,9 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * (c) 2010 - 2019 RedGecko GmbH -- http://www.redgecko.de
+ * $Id$
+ *
+ * (c) 2010 - 2014 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
  * -----------------------------------------------------------------------------
  */
@@ -19,7 +21,8 @@
 defined('_VALID_XTC') or die('Direct Access to this location is not allowed.');
 require_once(DIR_MAGNALISTER_MODULES . 'magnacompatible/listings/MagnaCompatibleInventoryView.php');
 
-class FyndiqRejectedView extends MagnaCompatibleInventoryView {
+class FyndiqRejectedView extends MagnaCompatibleInventoryView
+{
 
     public function prepareInventoryData() {
         global $magnaConfig;
@@ -56,7 +59,7 @@ class FyndiqRejectedView extends MagnaCompatibleInventoryView {
         }
     }
 
-    protected function getInventory() {
+    private function getInventory() {
         try {
             $request = array(
                 'ACTION' => 'GetInventory',

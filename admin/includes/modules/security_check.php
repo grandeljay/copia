@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: security_check.php 12646 2020-03-17 10:19:44Z GTB $
+   $Id: security_check.php 3561 2012-08-29 18:11:38Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -38,34 +38,30 @@ if (!empty($check)) {
 /*******************************************************************************
  ** check file permissions
  ******************************************************************************/
-if (WARN_CONFIG_WRITEABLE == 'true') {
-  $check = array();
-  foreach($configFiles as $file) {
-    if (is_file($file) && is_writable($file)) {
-      $check[] = $file;
-    }
-  }
-  if (!empty($check)) {
-    $warnings[] = '<p>'.TEXT_FILE_WARNING_WRITABLE.'</p><ul><li>'.implode('</li><li>',$check).'</li></ul>';
+$check = array();
+foreach($configFiles as $file) {
+  if (is_writable($file)) {
+    $check[] = $file;
   }
 }
+if (!empty($check)) {
+  $warnings[] = '<p>'.TEXT_FILE_WARNING_WRITABLE.'</p><ul><li>'.implode('</li><li>',$check).'</li></ul>';
+}
 
-if (WARN_FILES_WRITEABLE == 'true') {
-  $check = array();
-  foreach($writeableFiles as $file) {
-    if (is_file($file) && !is_writable($file)) {
-      $check[] = $file;
-    }
+$check = array();
+foreach($writeableFiles as $file) {
+  if (!is_writable($file)) {
+    $check[] = $file;
   }
-  if (!empty($check)) {
-    $warnings[] = '<p>'.TEXT_FILE_WARNING.'</p><ul><li>'.implode('</li><li>',$check).'</li></ul>';
-  }
+}
+if (!empty($check)) {
+  $warnings[] = '<p>'.TEXT_FILE_WARNING.'</p><ul><li>'.implode('</li><li>',$check).'</li></ul>';
 }
 
 if(defined('MODULE_JANOLAW_STATUS') && MODULE_JANOLAW_STATUS == 'True' && defined('MODULE_JANOLAW_TYPE') && MODULE_JANOLAW_TYPE == 'File') {
   $check = array();
   foreach($writeableJanolawFiles as $file) {
-    if (is_file($file) && !is_writable($file)) {
+    if (!is_writable($file)) {
       $check[] = $file;
     }
   }
@@ -78,29 +74,27 @@ if(defined('MODULE_JANOLAW_STATUS') && MODULE_JANOLAW_STATUS == 'True' && define
  ** check folder permissions
  ******************************************************************************/
 
-// writeable dirs - only check if dir exists
-if (WARN_DIRS_WRITEABLE == 'true') {
-  $check = array();
-  foreach($writeableDirs as $dir) {
-    if (is_dir($dir) && !is_writable($dir)) {
-      $check[] = $dir;
-    }
+// writeable dirs - only check if dir exssts
+$check = array();
+foreach($writeableDirs as $dir) {
+  if (is_file($dir) && !is_writable($dir)) {
+    $check[] = $dir;
   }
-  if (!empty($check)) {
-    $warnings[] = '<p>'.TEXT_FOLDER_WARNING.'</p><ul><li>'.implode('</li><li>',$check).'</li></ul>';
-  }
+}
+if (!empty($check)) {
+  $warnings[] = TEXT_FOLDER_WARNING.'<ul><li>'.implode('</li><li>',$check).'</li></ul>';
 }
 
 /* //for further use
   // non writeable dirs
   $check = array();
   foreach($nonWriteableDirs as $dir) {
-    if (is_dir($dir) && is_writable($dir)) {
+    if (is_writable($dir)) {
       $check[] = $dir;
     }
   }
   if (!empty($check)) {
-    $warnings[] = '<p>'.TEXT_FOLDER_WARNING_IS_WRITEABLE.'</p><ul><li>'.implode('</li><li>',$check).'</li></ul>';
+    $warnings[] = TEXT_FOLDER_WARNING_IS_WRITEABLE.'<ul><li>'.implode('</li><li>',$check).'</li></ul>';
   }
 */ //for further use
 
@@ -115,10 +109,10 @@ while ($check = xtc_db_fetch_array($query)) {
   if ($check['configuration_value'] == '') {
     switch($check['configuration_key']) {
     case 'MODULE_PAYMENT_INSTALLED' :
-      $warnings[] = '<p>'.sprintf(TEXT_PAYMENT_ERROR,xtc_href_link(FILENAME_MODULES, 'set=payment')).'</p>';
+      $warnings[] = '<p>'.TEXT_PAYMENT_ERROR.'</p>';
       break;
     case 'MODULE_SHIPPING_INSTALLED' :
-      $warnings[] = '<p>'.sprintf(TEXT_SHIPPING_ERROR,xtc_href_link(FILENAME_MODULES, 'set=shipping')).'</p>';
+      $warnings[] = '<p>'.TEXT_SHIPPING_ERROR.'</p>';
       break;
     }
   }
@@ -172,16 +166,6 @@ while ($row = xtc_db_fetch_array($stmt)) {
 */
 
 /*******************************************************************************
- ** umlaut domain
- ******************************************************************************/
-if (filter_var(HTTP_SERVER, FILTER_VALIDATE_URL) === false
-    || filter_var(HTTPS_SERVER, FILTER_VALIDATE_URL) === false
-    )
-{
-  $warnings[] = WARNING_DOMAIN_INVALID;
-}
-
-/*******************************************************************************
  ** register_globals = off check:
  ******************************************************************************/
 $registerGlobals = ini_get('register_globals');
@@ -193,52 +177,19 @@ if (($registerGlobals == '1') || (strtolower($registerGlobals) == 'on')) {
 /*******************************************************************************
  ** duplicate configuration check:
  ******************************************************************************/
-if (isset($duplicate_configuration) 
-    && count($duplicate_configuration) > 0 
-    && isset($_POST['action']) 
-    && $_POST['action'] == 'delete_duplicate_configuration'
-    ) 
-{
-  xtc_db_query("DELETE FROM ".TABLE_CONFIGURATION."
-                      USING configuration, configuration as duplicate
-                  WHERE NOT configuration.configuration_id = duplicate.configuration_id
-                        AND configuration.configuration_id > duplicate.configuration_id
-                        AND configuration.configuration_key = duplicate.configuration_key");
-  
-  unset($duplicate_configuration);
-}
-
 if (isset($duplicate_configuration) && count($duplicate_configuration) > 0) {
   foreach ($duplicate_configuration as $key) {
-    $warnings[] = TEXT_DUPLICATE_CONFIG_ERROR.$key.'<br/>';
+    $warnings[] = TEXT_DUPLUCATE_CONFIG_ERROR.$key.'<br/>';
   }
-  $warnings[] = xtc_draw_form('configuration', basename($PHP_SELF)).xtc_draw_hidden_field('action', 'delete_duplicate_configuration').'<input class="button" type="submit" value="'.BUTTON_DELETE.'"/></form>';
-} else {
+} 
+/*
+else {
   $check_unique = xtc_db_query("SHOW INDEX FROM ".TABLE_CONFIGURATION." WHERE key_name = 'idx_configuration_key'");
   if (xtc_db_num_rows($check_unique) < 1) {
     xtc_db_query("ALTER TABLE ".TABLE_CONFIGURATION." ADD UNIQUE idx_configuration_key (configuration_key)");
   }
 }
-
-/*******************************************************************************
- ** newsfeed check:
- ******************************************************************************/
-if (isset($_POST['action']) 
-    && $_POST['action'] == 'delete_newsfeed'
-    ) 
-{
-  $time = time();
-  xtc_db_query("UPDATE ".TABLE_CONFIGURATION." SET configuration_value = '".$time."' WHERE configuration_key = 'NEWSFEED_LAST_UPDATE'");
-  xtc_db_query("UPDATE ".TABLE_CONFIGURATION." SET configuration_value = '".$time."' WHERE configuration_key = 'NEWSFEED_LAST_UPDATE_TRY'");
-
-} elseif (defined('NEWSFEED_LAST_UPDATE_TRY')
-          && abs((int)NEWSFEED_LAST_UPDATE_TRY - (int)NEWSFEED_LAST_UPDATE) >= 3600
-          && time() - (int)NEWSFEED_LAST_UPDATE > 86400
-          )
-{
-  $warnings[] = RSS_FEED_NOT_REACHABLE;
-  $warnings[] = xtc_draw_form('configuration', basename($PHP_SELF)).xtc_draw_hidden_field('action', 'delete_newsfeed').'<input class="button" type="submit" value="OK"/></form>';
-}
+*/
 
 /*******************************************************************************
  ** output warnings:

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_browser_detect.inc.php 12439 2019-12-02 17:40:51Z GTB $   
+   $Id: xtc_browser_detect.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -16,6 +16,7 @@
    ---------------------------------------------------------------------------------------*/
    
   function xtc_browser_detect($component) {
+
     return stristr($_SERVER['HTTP_USER_AGENT'], $component);
   }
-?>
+ ?>

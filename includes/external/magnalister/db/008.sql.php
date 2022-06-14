@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: 008.sql.php 2332 2013-04-04 16:12:19Z derpapst $
  *
  * (c) 2011 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -32,17 +32,17 @@ $queries[] = "
 		`LeafCategory` enum('0','1') NOT NULL default '0',
 		`InsertTimestamp` datetime NOT NULL,
 		UNIQUE KEY `UniqueEntry` (`mpID`,`CategoryID`)
-	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+	) ENGINE=MyISAM;
 ";
 $queries[] = "
 	CREATE TABLE IF NOT EXISTS `".TABLE_MAGNA_MEINPAKET_CATEGORYMATCHING."` (
 		`mpID` int(11) NOT NULL,
 		`products_id` int(11) NOT NULL,
-		`products_model` varchar(64) NOT NULL,
+		`products_model` varchar(255) NOT NULL,
 		`mp_category_id` varchar(30) NOT NULL,
 		`store_category_id` varchar(255) NOT NULL,
 		UNIQUE KEY `UniqueEntry` (`mpID`,`products_id`,`products_model`)
-	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+	) ENGINE=MyISAM;
 ";	
 $queries[] = "
 	CREATE TABLE IF NOT EXISTS `".TABLE_MAGNA_MEINPAKET_ERRORLOG."` (
@@ -53,5 +53,5 @@ $queries[] = "
 		`additionaldata` longtext NOT NULL,
 		PRIMARY KEY  (`id`),
 		KEY `mpID` (`mpID`)
-	) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+	) ENGINE=MyISAM;
 ";

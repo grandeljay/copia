@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: 100_xss_secure.php 12064 2019-08-05 14:43:29Z GTB $
+   $Id: 100_xss_secure.php 10140 2016-07-26 08:21:45Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -11,7 +11,7 @@
    --------------------------------------------------------------*/
 
   if (defined('XSS_SEND_LOG') && XSS_SEND_LOG === true) {
-    $xss_files_array = glob(DIR_FS_LOG.'*.mail');
+    $xss_files_array = glob(DIR_FS_LOG.'*.mail', GLOB_BRACE);
     if (count($xss_files_array) > 0) {
       foreach ($xss_files_array as $xss_file) {
         $mail_txt = file_get_contents($xss_file);

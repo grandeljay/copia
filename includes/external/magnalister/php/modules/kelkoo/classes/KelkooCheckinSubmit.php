@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: KelkooCheckinSubmit.php 6046 2015-09-23 15:08:33Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -77,7 +77,8 @@ class KelkooCheckinSubmit extends ComparisonShoppingCheckinSubmit {
 		
 	protected function appendAdditionalData($pID, $product, &$data) {
 		parent::appendAdditionalData($pID, $product, $data);
-		$catname = $this->getcategoriesname($product['ProductId']);
+		$data['submit']['Quantity'] = $product['products_quantity'];
+		$catname = $this->getcategoriesname($product['products_id']);
 		if (!empty($catname)) {
 			$data['submit']['MerchantCategory'] = $catname;
 		}

@@ -39,11 +39,16 @@
       <li class="togglemenu">
         <a class="togglelink" href="{$CATEGORIES}"><img src="{$tpl_path}img/adminbar_categories.png" alt="{#ab_category#}" /></a>
         <ul>
-          {if isset($EDIT_PRODUCT)}<li><a href="{$EDIT_PRODUCT}">{#ab_edit_product#}</a></li>{/if}
-          {if isset($EDIT_XSELL)}<li><a href="{$EDIT_XSELL}">{#ab_edit_xsell#}</a></li>{/if}
-          {if isset($EDIT_PRODUCT_ATTRIBUTES)}<li><a href="{$EDIT_PRODUCT_ATTRIBUTES}">{#ab_edit_attributes#}</a></li>{/if}
-          {if isset($EDIT_PRODUCT_TAGS)}<li><a href="{$EDIT_PRODUCT_TAGS}">{#ab_edit_tags#}</a></li>{/if}
-          {if isset($EDIT_CATEGORY)}<li><a href="{$EDIT_CATEGORY}">{#ab_edit_category#}</a></li>{/if}
+          {if isset($EDIT_PRODUCT) || isset($EDIT_CATEGORY)}
+            {if isset($EDIT_PRODUCT)}
+              <li><a href="{$EDIT_PRODUCT}">{#ab_edit_product#}</a></li>
+              <li><a href="{$EDIT_XSELL}">{#ab_edit_xsell#}</a></li>
+              <li><a href="{$EDIT_PRODUCT_ATTRIBUTES}">{#ab_edit_attributes#}</a></li>
+            {/if}
+            {if isset($EDIT_CATEGORY)}
+              <li><a href="{$EDIT_CATEGORY}">{#ab_edit_category#}</a></li>
+            {/if}
+          {/if}
           <li class="info">{$PRODUCTS_INFO}</li>
           <li class="info">{$REVIEWS_INFO}</li>
         </ul>
@@ -61,12 +66,6 @@
       </li>
     {/if}
   
-    {if isset($CACHING)}
-      <li class="togglemenu">
-        {if isset($CACHING_LINK)}<a class="togglelink" href="{$CACHING_LINK}" title="{#ab_caching#}">{/if}<img src="{$tpl_path}img/adminbar_attention.png" alt="{#ab_caching#}" />{if isset($CACHING_LINK)}</a>{/if}
-      </li>
-    {/if}
-
     {if isset($SHOP_OFFLINE)}
       <li class="togglemenu">
         {if isset($SHOP_OFFLINE_LINK)}<a class="togglelink" href="{$SHOP_OFFLINE_LINK}" title="{#ab_offline#}">{/if}<img src="{$tpl_path}img/adminbar_offline.png" alt="{#ab_offline#}" />{if isset($SHOP_OFFLINE_LINK)}</a>{/if}
@@ -92,14 +91,5 @@
         </a>
       </li>
     {/if}
-
-    {if isset($SUPPORT)}
-      <li class="right">
-        <a class="togglelink" href="{$SUPPORT}" title="Support"><img src="{$tpl_path}img/adminbar_support.png" alt="{#ab_support#}" /></a>
-      </li>
-    {/if}
-    <li class="right">
-      <a class="togglelink" target="_blank" href="https://www.modified-shop.org/shop/" title="Shop"><img src="{$tpl_path}img/adminbar_shop.png" alt="{#ab_shop#}" /></a>
-    </li>
   </ul>
 </div>

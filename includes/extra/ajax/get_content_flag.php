@@ -1,6 +1,6 @@
 <?php
 /**
- * $Id: get_content_flag.php 12566 2020-02-16 06:54:48Z GTB $
+ * $Id: get_content_flag.php 9911 2016-06-01 09:17:34Z GTB $
  *
  * modified eCommerce Shopsoftware
  * http://www.modified-shop.org
@@ -11,11 +11,10 @@
  */
 
 if (isset($_REQUEST['speed'])) {
+  // auto include
   require_once (DIR_FS_INC.'auto_include.inc.php');
 
   require_once (DIR_FS_INC.'db_functions_'.DB_MYSQL_TYPE.'.inc.php');
-  require_once (DIR_FS_INC.'db_functions.inc.php');
-  
   require_once (DIR_WS_INCLUDES.'database_tables.php');
 }
 

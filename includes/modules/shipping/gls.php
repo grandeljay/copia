@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: gls.php 12901 2020-09-24 13:02:08Z Tomcraft $
+   $Id: gls.php 4200 2013-01-10 19:47:11Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -17,7 +17,7 @@
    -----------------------------------------------------------------------------------------
    Third Party contributions:
    GLS (German Logistic Service) based on DP (Deutsche Post)
-   (c) 2002 - 2003 TheMedia, Dipl.-Ing Thomas PlÃ¤nkers | http://www.themedia.at & http://www.oscommerce.at
+   (c) 2002 - 2003 TheMedia, Dipl.-Ing Thomas Plänkers | http://www.themedia.at & http://www.oscommerce.at
    GLS contribution made by shd-media (c) 2009 shd-media - www.shd-media.de
 
    updated version by franky_n
@@ -34,10 +34,10 @@
       $this->code = 'gls';
       $this->title = MODULE_SHIPPING_GLS_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_GLS_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_GLS_SORT_ORDER')) ? MODULE_SHIPPING_GLS_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_GLS_SORT_ORDER;
       $this->icon = DIR_WS_ICONS . 'shipping_gls.gif';
-      $this->tax_class = ((defined('MODULE_SHIPPING_GLS_TAX_CLASS')) ? MODULE_SHIPPING_GLS_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_GLS_STATUS') && MODULE_SHIPPING_GLS_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_GLS_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_GLS_STATUS == 'True') ? true : false);
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_GLS_ZONE > 0) && is_object($order)) {
         $check_flag = false;
@@ -144,13 +144,13 @@
         $this->quotes = array('id' => $this->code,
                               'module' => MODULE_SHIPPING_GLS_TEXT_TITLE,
                               'methods' => array(array('id' => $this->code,
-                                                       'title' => $shipping_method . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_GLS_TEXT_UNITS . ' = ' . $shipping_cost_normal_formatted . ' ' . $tax_text . ')' . ' ' . MODULE_SHIPPING_GLS_POSTCODE_INFO_TEXT . ': (' . $shipping_cost_extra_formatted . ' ' . $tax_text . ')',
+                                                       'title' => $shipping_method.' ('.$shipping_num_boxes.' x '.$shipping_weight.' '.MODULE_SHIPPING_GLS_TEXT_UNITS.' = ' . $shipping_cost_normal_formatted . ' '.$tax_text.')'.' '.MODULE_SHIPPING_GLS_POSTCODE_INFO_TEXT.': ('.$shipping_cost_extra_formatted.' '.$tax_text.')',
                                                        'cost' => $shipping_cost * $shipping_num_boxes)));
       } else {
         $this->quotes = array('id' => $this->code,
                               'module' => MODULE_SHIPPING_GLS_TEXT_TITLE,
                               'methods' => array(array('id' => $this->code,
-                                                       'title' => $shipping_method . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_GLS_TEXT_UNITS .')',
+                                                       'title' => $shipping_method . ' (' . $shipping_num_boxes . ' x ' . $shipping_weight . ' ' . MODULE_SHIPPING_GLS_TEXT_UNITS .')',
                                                        'cost' => $shipping_cost * $shipping_num_boxes)));
       }
 

@@ -17,8 +17,8 @@
       <div class="lb_inner">
         <div class="lb_image">
         {if $module_data.PRODUCTS_IMAGE != ''}
-          <a href="{$module_data.PRODUCTS_LINK}"><img class="unveil" src="{$tpl_path}css/images/loading.gif" data-src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" title="{$module_data.PRODUCTS_NAME|onlytext}" /></a>
-          <noscript><a href="{$module_data.PRODUCTS_LINK}"><img src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" title="{$module_data.PRODUCTS_NAME|onlytext}" /></a></noscript>
+          <a href="{$module_data.PRODUCTS_LINK}"><img class="unveil" src="{$tpl_path}css/images/loading.gif" data-src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" /></a>
+          <noscript><a href="{$module_data.PRODUCTS_LINK}"><img src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" /></a></noscript>
         {else}
           &nbsp;
         {/if}
@@ -40,8 +40,8 @@
       <div class="lr_inner cf">
         <div class="lr_image">
         {if $module_data.PRODUCTS_IMAGE != ''}
-          <a href="{$module_data.PRODUCTS_LINK}"><img class="unveil" src="{$tpl_path}css/images/loading.gif" data-src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" title="{$module_data.PRODUCTS_NAME|onlytext}" /></a>
-          <noscript><a href="{$module_data.PRODUCTS_LINK}"><img src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" title="{$module_data.PRODUCTS_NAME|onlytext}" /></a></noscript>
+          <a href="{$module_data.PRODUCTS_LINK}"><img class="unveil" src="{$tpl_path}css/images/loading.gif" data-src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" /></a>
+          <noscript><a href="{$module_data.PRODUCTS_LINK}"><img src="{$module_data.PRODUCTS_IMAGE}" alt="{$module_data.PRODUCTS_NAME|onlytext}" /></a></noscript>
         {else}
           &nbsp;
         {/if}      
@@ -49,7 +49,7 @@
         <div class="lr_content cf">
           <div class="lr_title"><h2><a href="{$module_data.PRODUCTS_LINK}">{$module_data.PRODUCTS_NAME}</a></h2></div>
           <div class="lr_desc_box">
-            {if is_array($module_data.ATTRIBUTES) && count($module_data.ATTRIBUTES) > 0}
+            {if $module_data.ATTRIBUTES != ''}
             <div class="lr_desc">
               <ul class="attributes_list">
                 {foreach key=key_data item=item_data from=$module_data.ATTRIBUTES} 

@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: SimplePrice.php 6525 2016-03-01 11:56:23Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -114,15 +114,6 @@ class SimplePrice {
 		     LIMIT 1
 		');
 	}
-
-	public function tryGetSpecialOffer($iProductId) {
-        return MagnaDB::gi()->fetchOne('
-            SELECT specials_new_products_price 
-              FROM '.TABLE_SPECIALS.'
-             WHERE     products_id = "'.$iProductId.'"
-                   AND status = 1
-        ');
-    }
 
 	public function getSpecialOffer($pID) {
 		return (float)MagnaDB::gi()->fetchOne('
@@ -314,21 +305,11 @@ class SimplePrice {
 	
 	public static function getTaxByClassID($taxClassID, $countryID = -1) {
 		if ($countryID == -1) {
-            if (defined('STORE_COUNTRY') && (int)(STORE_COUNTRY) > 0) {
-                $countryID = (int)STORE_COUNTRY;
-            } elseif (defined('ML_GAMBIO_41_NEW_CONFIG_TABLE')) {
-                $countryID = (int)self::queryCache("
-                    SELECT `value`
-                      FROM ".TABLE_CONFIGURATION."
-                     WHERE `key` = 'configuration/STORE_COUNTRY'
-                ");
-            } else {
-                $countryID = (int)self::queryCache('
-                    SELECT `configuration_value` 
-                      FROM '.TABLE_CONFIGURATION.'
-                     WHERE `configuration_key` = "STORE_COUNTRY"
-                ');
-            }
+			# Fallback to shop default
+			$countryID = (int)self::queryCache('
+				SELECT configuration_value FROM '.TABLE_CONFIGURATION.'
+				 WHERE configuration_key="STORE_COUNTRY"
+			');
 		}
 		$taxRate = self::queryCache(eecho('
 			SELECT MAX(tax_rate)
@@ -427,11 +408,6 @@ class SimplePrice {
 					'Type' => 'fix',
 					'Price' => $attr['price'],
 				);
-			} else if ($attr['prefix'] == '%') {
-				$attr = array (
-					'Type' => 'calc',
-					'Price' => $this->price * $attr['price'] / 100,
-				);
 			} else {
 				$attr = array (
 					'Type' => 'calc',
@@ -529,15 +505,10 @@ class SimplePrice {
 	}
 
 	public function makeSignalPrice($decimalDigits) {
-		if (isset($decimalDigits) && $decimalDigits !== '') {
-			//If price signal is single digit then just add price signal as last digit
-			if (strlen((string)$decimalDigits) == 1) {
-				$this->price = (0.1 * (int)($this->price * 10)) + ($decimalDigits / 100);
-			} else {
-				$this->price = ((int)$this->price) + ($decimalDigits / 100);
-			}
+		if (empty($decimalDigits) || !ctype_digit($decimalDigits)) {
+			return $this;
 		}
-
+		$this->price = floor($this->price) + (int)$decimalDigits/100;
 		return $this;
 	}
 

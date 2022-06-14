@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: inventoryUpdate.php 5959 2015-09-01 10:02:05Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *	 Released under the GNU General Public License v2 or later
@@ -253,9 +253,6 @@ function magnaGetCartContents() {
 					}
 					case '=': {
 						$price['price'] = $aPrice['price'];
-					}
-					case '%': {
-						$price['price'] = $price['price'] * (100 + $aPrice['price']) / 100.0;
 					}
 				}
 			}

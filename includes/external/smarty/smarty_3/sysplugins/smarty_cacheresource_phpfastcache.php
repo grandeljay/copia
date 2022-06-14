@@ -8,26 +8,12 @@
  * *
  * @package CacheResource-examples
  */
-require_once(DIR_FS_CATALOG.'includes/classes/modified_cache.php');
-
 class Smarty_CacheResource_Phpfastcache extends Smarty_CacheResource_KeyValueStore {
-    
-    private $cache = null;
-    
+
     public function __construct()
     {
-        global $modified_cache;
-
-        if (!is_object($modified_cache)) {
-          $_mod_cache_class = strtolower(DB_CACHE_TYPE).'_cache';
-          if (!class_exists($_mod_cache_class)) {
-            $_mod_cache_class = 'modified_cache';
-          }
-          $modified_cache = $_mod_cache_class::getInstance();
-        }
-
-        $this->cache = $modified_cache;
-        $this->prefix = 'tpl_';
+        require_once (DIR_FS_EXTERNAL . 'phpfastcache/phpfastcache.php');
+        $this->cache = phpFastCache();        
     }
 
     /**
@@ -41,10 +27,10 @@ class Smarty_CacheResource_Phpfastcache extends Smarty_CacheResource_KeyValueSto
     {
         $_keys = $_res = array();
         foreach ($keys as $k) {
-            $_k = $this->prefix.sha1($k);
-            $this->cache->setID($_k);
-            $_res[$k] = $this->cache->get();
+            $_k = sha1($k);
+            $_res[$_k] = $this->cache->get($_k);
         }
+
         return $_res;
     }
     
@@ -55,12 +41,11 @@ class Smarty_CacheResource_Phpfastcache extends Smarty_CacheResource_KeyValueSto
      * @param int $expire expiration time
      * @return boolean true on success, false on failure
      */
-    protected function write(array $keys, $expire = DB_CACHE_EXPIRE)
+    protected function write(array $keys, $expire=null)
     {
        foreach ($keys as $k => $v) {
-            $_k = $this->prefix.sha1($k);
-            $this->cache->setID($_k);
-            $this->cache->set($v, $expire);
+            $k = sha1($k);
+            $this->cache->set($k, $v, $expire);
         }
         return true;
     }
@@ -74,7 +59,7 @@ class Smarty_CacheResource_Phpfastcache extends Smarty_CacheResource_KeyValueSto
     protected function delete(array $keys)
     {
         foreach ($keys as $k) {
-            $this->cache->delete($this->prefix.$k);
+            $this->cache->delete($k);
         }
         return true;
     }
@@ -85,7 +70,7 @@ class Smarty_CacheResource_Phpfastcache extends Smarty_CacheResource_KeyValueSto
      * @return boolean true on success, false on failure
      */
     protected function purge()
-    {        
-        return $this->cache->clear();
+    {
+        return $this->cache->clean();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: print_order.php 13375 2021-02-03 11:35:02Z GTB $
+   $Id: print_order.php 10061 2016-07-12 10:21:49Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -41,25 +41,6 @@
 
   $smarty->assign('order_data', $order_data);
   $smarty->assign('order_total', $order_total['data']);
-  
-  $smarty->assign('vat_info', 0);
-  if ($order->customer['vat_id'] != '' 
-      && count($order_data) > 0
-      && $order_data[0]['ALLOW_TAX'] == 0
-      )
-  {
-    $store_country = xtc_get_countriesList(STORE_COUNTRY);
-    $countries_array = xtc_get_isocodes_from_geozone(5);
-    if (in_array($order->delivery['country_iso_2'], $countries_array)
-        && in_array($store_country['countries_iso_code_2'], $countries_array)
-        && $order->delivery['country_iso_2'] != $store_country['countries_iso_code_2']
-        )
-    {
-      $smarty->assign('vat_info', 1);
-    } elseif ($order->delivery['country_iso_2'] != $store_country['countries_iso_code_2']) {
-      $smarty->assign('vat_info', 2);
-    }
-  }
 
   // assign language to template for caching
   $languages_query = xtc_db_query("select code, language_charset from " . TABLE_LANGUAGES . " WHERE directory ='". $order->info['language'] ."'");
@@ -68,14 +49,13 @@
   $smarty->assign('charset', $langcode['language_charset']);
   $smarty->assign('language', $order->info['language']);
 
-  $smarty->assign('logo_path', DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
-  $smarty->assign('tpl_path', DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/');
+  $smarty->assign('logo_path',HTTP_SERVER . DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/img/');
+  $smarty->assign('tpl_path',HTTP_SERVER . DIR_WS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/');
 
   $smarty->assign('oID',$order->info['order_id']);
   if ($order->info['payment_method'] != '' && $order->info['payment_method'] != 'no_payment') {
-    require_once (DIR_FS_CATALOG.DIR_WS_CLASSES . 'payment.php');
-    $payment_modules = new payment($order->info['payment_method']);
-    $payment_method = $payment_modules::payment_title($order->info['payment_method'],$order->info['order_id']);
+    include(DIR_FS_CATALOG.'lang/'.$_SESSION['language'].'/modules/payment/'.$order->info['payment_method'].'.php');
+    $payment_method = constant(strtoupper('MODULE_PAYMENT_'.$order->info['payment_method'].'_TEXT_TITLE'));
 
     // mod: BILLPAY payment module
     if(stripos($order->info['payment_method'], 'billpay') !== false) {
@@ -95,16 +75,13 @@
   $smarty->assign('INVOICE_NUMBER', isset($order->info['ibn_billnr']) && $order->info['ibn_billnr'] != '' ? $order->info['ibn_billnr'] :  $order->info['order_id']);
   $smarty->assign('INVOICE_DATE', isset($order->info['ibn_billdate']) && $order->info['ibn_billdate'] != '0000-00-00' ? xtc_date_short($order->info['ibn_billdate']) :  xtc_date_short($order->info['date_purchased']));
   $smarty->assign('DELIVERY_DATE', isset($order->info['ibn_billdate']) && $order->info['ibn_billdate'] != '0000-00-00' ? xtc_date_short($order->info['ibn_billdate']) :  xtc_date_short($order->info['date_purchased']));
-  $smarty->assign('SHIPPING_CLASS', $order->info['shipping_class']);
-  
+
   require_once(DIR_FS_CATALOG.'includes/classes/main.php');
   $main = new main();
 
   $invoice_data = $main->getContentData(INVOICE_INFOS);
   $smarty->assign('ADDRESS_SMALL', $invoice_data['content_heading']);
   $smarty->assign('ADDRESS_LARGE', $invoice_data['content_text']);
-
-  foreach(auto_include(DIR_FS_ADMIN.'includes/extra/modules/orders/orders_print/','php') as $file) require ($file);
 
   // dont allow cache
   $smarty->caching = false;

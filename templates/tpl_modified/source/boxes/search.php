@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: search.php 13399 2021-02-08 12:20:09Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,23 +20,26 @@
 // include smarty
 include(DIR_FS_BOXES_INC . 'smarty_default.php');
 
-// include needed functions
-require_once (DIR_FS_INC.'xtc_get_categories.inc.php');
+// set cache id
+$cache_id = md5($_SESSION['language']);
 
-if (defined('SEARCH_AC_CATEGORIES')
-    && SEARCH_AC_CATEGORIES == 'true'
-    )
-{
-  $box_smarty->assign('CATEGORIES', xtc_draw_pull_down_menu('categories_id', xtc_get_categories(array(array('id' => '', 'text' => TEXT_AC_ALL_CATEGORIES)), 0, false), isset($_GET['categories_id']) ? (int)$_GET['categories_id'] : '', 'id="cat_search"').xtc_draw_hidden_field('inc_subcat', '1'));
+if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_search.html', $cache_id) || !$cache) {
+  $filename = FILENAME_ADVANCED_SEARCH_RESULT;
+  if (defined('MODULE_FINDOLOGIC_STATUS') && MODULE_FINDOLOGIC_STATUS == 'True') {
+    $filename = FILENAME_FINDOLOGIC;
+  }
+  $box_smarty->assign('FORM_ACTION', xtc_draw_form('quick_find', xtc_href_link($filename, '', $request_type, false), 'get', 'class="box-search"') . xtc_hide_session_id());
+  $box_smarty->assign('INPUT_SEARCH', xtc_draw_input_field('keywords', IMAGE_BUTTON_SEARCH, 'id="inputString" maxlength="30" autocomplete="off" '.((SEARCH_AC_STATUS == 'true') ? 'onkeyup="ac_lookup(this.value);" ' : '').'onfocus="if(this.value==this.defaultValue) this.value=\'\';" onblur="if(this.value==\'\') this.value=this.defaultValue;"'));
+  $box_smarty->assign('BUTTON_SUBMIT', xtc_image_submit('button_quick_find.gif', IMAGE_BUTTON_SEARCH,''));
+  $box_smarty->assign('FORM_END', '</form>');
+  $box_smarty->assign('LINK_ADVANCED', xtc_href_link(FILENAME_ADVANCED_SEARCH));
 }
-$box_smarty->assign('FORM_ACTION', xtc_draw_form('quick_find', xtc_href_link(FILENAME_ADVANCED_SEARCH_RESULT, '', $request_type, false), 'get', 'class="box-search"') . xtc_hide_session_id());
-$box_smarty->assign('INPUT_SEARCH', xtc_draw_input_field('keywords', '', 'placeholder="'.IMAGE_BUTTON_SEARCH.'" id="inputString" maxlength="30" autocomplete="off" '.((SEARCH_AC_STATUS == 'true') ? 'onkeyup="ac_lookup(this.value);" ' : '')));
-$box_smarty->assign('BUTTON_SUBMIT', xtc_image_submit('button_quick_find.gif', IMAGE_BUTTON_SEARCH, 'id="inputStringSubmit"'));
-$box_smarty->assign('FORM_END', '</form>');
-$box_smarty->assign('LINK_ADVANCED', xtc_href_link(FILENAME_ADVANCED_SEARCH));
 
-$box_smarty->caching = 0;
-$box_search = $box_smarty->fetch(CURRENT_TEMPLATE.'/boxes/box_search.html');
+if (!$cache) {
+  $box_search = $box_smarty->fetch(CURRENT_TEMPLATE.'/boxes/box_search.html');
+} else {
+  $box_search = $box_smarty->fetch(CURRENT_TEMPLATE.'/boxes/box_search.html', $cache_id);
+}
 
 $smarty->assign('box_SEARCH',$box_search);
 ?>

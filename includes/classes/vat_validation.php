@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: vat_validation.php 13000 2020-12-04 08:05:08Z GTB $
+   $Id: vat_validation.php 8819 2015-09-15 15:23:46Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -10,7 +10,7 @@
    based on:
    (c) 2012 Gambio GmbH - vat_validation.php 2012-05-10 gm
    (c) 2005 xtc_validate_vatid_status.inc.php 899 2005-04-29
-   (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com ($Id: vat_validation.php 13000 2020-12-04 08:05:08Z GTB $)
+   (c) 2003 XT-Commerce - community made shopping http://www.xt-commerce.com ($Id: vat_validation.php 8819 2015-09-15 15:23:46Z GTB $)
 
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
@@ -20,7 +20,7 @@ include_once(DIR_FS_INC . 'xtc_get_countries.inc.php');
 
 require_once(DIR_FS_EXTERNAL . 'nusoap/nusoap.php');
 
-define ('VAT_LIVE_CHECK_URL', 'https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl');
+define ('VAT_LIVE_CHECK_URL', 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl');
 
 class vat_validation {
   var $vat_info, $vat_errors;
@@ -169,14 +169,7 @@ class vat_validation {
     
     // check country 
     $country_check = xtc_get_countriesList($country_id, true);
-
-    // fix for Greece
-    $search_array = array('gr');
-    $replace_array = array('el');
-    $country = str_replace($search_array, $replace_array, $country);
-    $country_check['countries_iso_code_2'] = str_replace($search_array, $replace_array, $country);
-
-    if (strtoupper($country_check['countries_iso_code_2']) != strtoupper($country)) {
+    if ($country_check['countries_iso_code_2'] != strtoupper($country)) {
       return $results[0];
     }
     
@@ -189,7 +182,12 @@ class vat_validation {
         return $results[0];
       }
     }
-        
+    
+    // fix for Greece
+    $search_array = array('gr');
+    $replace_array = array('el');
+    $country = str_replace($search_array, $replace_array, $country);
+    
     $country_iso_code = strtoupper($country);
     
     if ($this->live_check == 'true') {
@@ -745,7 +743,8 @@ class vat_validation {
     $id = substr($vat_id, 1);
     $checksum = 0;
     for ($i = 9; $i > 0; $i --) {
-      $digit = $vat_id[$i];
+      $digit = $vat_id {
+        $i};
       if ($i % 2 == 1)
         $digit *= 2;
       if ($digit >= 10) {

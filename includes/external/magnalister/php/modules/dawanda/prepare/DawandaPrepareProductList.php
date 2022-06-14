@@ -38,7 +38,7 @@ class DawandaPrepareProductList extends MLProductListDawandaAbstract {
 	}
 
 	protected function getSelectionName() {
-		return 'apply';
+		return 'prepare';
 	}
 
 	protected function getPreparedStatusIndicator($aRow){

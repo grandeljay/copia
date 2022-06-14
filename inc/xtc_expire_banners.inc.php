@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_expire_banners.inc.php 13081 2020-12-15 17:04:30Z GTB $   
+   $Id: xtc_expire_banners.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -19,7 +19,7 @@
    
   // Auto expire banners
   function xtc_expire_banners() {
-    $banners_query = xtc_db_query("SELECT b.banners_group_id, 
+    $banners_query = xtc_db_query("SELECT b.banners_id, 
                                           b.expires_date, 
                                           b.expires_impressions, 
                                           sum(bh.banners_shown) as banners_shown 
@@ -32,12 +32,11 @@
       while ($banners = xtc_db_fetch_array($banners_query)) {
         if (xtc_not_null($banners['expires_date'])) {
           if (date('Y-m-d H:i:s') >= $banners['expires_date']) {
-            xtc_set_banner_status($banners['banners_group_id'], '0');
+            xtc_set_banner_status($banners['banners_id'], '0');
           }
-        }
-        if (xtc_not_null($banners['expires_impressions'])) {
+        } elseif (xtc_not_null($banners['expires_impressions'])) {
           if ($banners['banners_shown'] >= $banners['expires_impressions']) {
-            xtc_set_banner_status($banners['banners_group_id'], '0');
+            xtc_set_banner_status($banners['banners_id'], '0');
           }
         }
       }

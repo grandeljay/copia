@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_update_whos_online.inc.php 12973 2020-11-27 11:18:35Z GTB $
+   $Id: xtc_update_whos_online.inc.php 3952 2012-11-15 00:20:51Z Tomcraft1980 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -17,32 +17,30 @@
    ---------------------------------------------------------------------------------------*/
 
   function xtc_update_whos_online() {
-    global $PHP_SELF;
-    
-    if (defined('MODULE_WHOS_ONLINE_STATUS') && MODULE_WHOS_ONLINE_STATUS == 'false') {
-      return;
-    }
 
-    if (in_array(basename($PHP_SELF), array('ajax.php', 'display_vvcodes.php'))) {
-      return;
-    }
-    
     $crawler = 0; 
     if (isset($_SESSION['customer_id'])) {
       $wo_customer_id = (int)$_SESSION['customer_id'];
-      $wo_full_name = xtc_db_prepare_input($_SESSION['customer_first_name'] . ' ' . $_SESSION['customer_last_name']);
+
+      $customer_query = xtc_db_query("SELECT customers_firstname,
+                                             customers_lastname
+                                        FROM " . TABLE_CUSTOMERS . "
+                                       WHERE customers_id = '" . (int)$wo_customer_id . "'");
+      $customer = xtc_db_fetch_array($customer_query);
+
+      $wo_full_name = xtc_db_prepare_input($customer['customers_firstname'] . ' ' . $customer['customers_lastname']);
     } else {
       $wo_customer_id = '';
-      $crawler = xtc_check_agent(true);
+      $crawler = xtc_check_agent();
       if ($crawler !== 0) {
-        $wo_full_name = '['.TEXT_SEARCH_ENGINE_AGENT.'] ('.$crawler.')';
+        $wo_full_name = '['.TEXT_SEARCH_ENGINE_AGENT.']';
       } else {
         $wo_full_name = TEXT_GUEST;
       }
     }
 
     if ($crawler !== 0) {
-      $wo_session_id = 'BOT#'.substr(md5($crawler), 4);
+      $wo_session_id = '';
     } else {
       $wo_session_id = xtc_session_id();
     }
@@ -50,8 +48,8 @@
     // include needed functions
     require_once (DIR_FS_INC.'ip_clearing.inc.php');
     $wo_ip_address = xtc_db_prepare_input(ip_clearing($_SESSION['tracking']['ip']));
-    $wo_last_page_url = xtc_db_prepare_input(end($_SESSION['tracking']['pageview_history']));
-    $wo_referer = xtc_db_prepare_input($_SESSION['tracking']['http_referer']['url']);
+    $wo_last_page_url = xtc_db_prepare_input(strip_tags($_SERVER['REQUEST_URI']));
+    $wo_referer = xtc_db_prepare_input(isset($_SERVER['HTTP_REFERER']) ? strip_tags($_SERVER['HTTP_REFERER']) : '---');
 
     $current_time = time();
     $time_last_click = 900;

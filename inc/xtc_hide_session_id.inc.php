@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_hide_session_id.inc.php 12439 2019-12-02 17:40:51Z GTB $   
+   $Id: xtc_hide_session_id.inc.php 899 2005-04-29 02:40:57Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -14,11 +14,9 @@
 
    Released under the GNU General Public License 
    ---------------------------------------------------------------------------------------*/
-  
-  // include needed functions
-  require_once(DIR_FS_INC . 'xtc_draw_hidden_field.inc.php');
-  
-  // Hide form elements
+ // include needed functions
+ require_once(DIR_FS_INC . 'xtc_draw_hidden_field.inc.php');
+// Hide form elements
   function xtc_hide_session_id() {
     global $session_started;
 
@@ -26,4 +24,4 @@
       return xtc_draw_hidden_field(xtc_session_name(), xtc_session_id());
     }
   }
-?>
+ ?>

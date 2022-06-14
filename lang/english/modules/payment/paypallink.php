@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypallink.php 11030 2017-12-08 07:50:06Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -14,11 +14,11 @@
 $lang_array = array(
   'MODULE_PAYMENT_PAYPALLINK_TEXT_TITLE' => 'PayPal Link',
   'MODULE_PAYMENT_PAYPALLINK_TEXT_INFO' => '<img src="https://www.paypal.com/de_DE/DE/i/logo/lockbox_150x47.gif" />',
-  'MODULE_PAYMENT_PAYPALLINK_TEXT_DESCRIPTION' => 'PayPal as a payment link for the customer after the order has been completed. Decide yourself where the customer receives the request for payment.',
+  'MODULE_PAYMENT_PAYPALLINK_TEXT_DESCRIPTION' => 'Sie werden nach dem "Best&auml;tigen" zu PayPal geleitet um hier Ihre Bestellung zu bezahlen.<br />Danach gelangen Sie zur&uuml;ck in den Shop und erhalten Ihre Bestell-Best&auml;tigung.<br />Jetzt schneller bezahlen mit unbegrenztem PayPal-K&auml;uferschutz - nat&uuml;rlich kostenlos.',
   'MODULE_PAYMENT_PAYPALLINK_ALLOWED_TITLE' => 'Allowed zones',
   'MODULE_PAYMENT_PAYPALLINK_ALLOWED_DESC' => 'Please enter the zones <b>separately</b> which should be allowed to use this module (e.g. AT,DE (leave empty if you want to allow all zones))',
-  'MODULE_PAYMENT_PAYPALLINK_STATUS_TITLE' => 'Enable PayPal Link',
-  'MODULE_PAYMENT_PAYPALLINK_STATUS_DESC' => 'Do you want to accept PayPal Link payments?',
+  'MODULE_PAYMENT_PAYPALLINK_STATUS_TITLE' => 'Enable PayPal module',
+  'MODULE_PAYMENT_PAYPALLINK_STATUS_DESC' => 'Do you want to accept PayPal payments?',
   'MODULE_PAYMENT_PAYPALLINK_SORT_ORDER_TITLE' => 'Sort order',
   'MODULE_PAYMENT_PAYPALLINK_SORT_ORDER_DESC' => 'Sort order of the view. Lowest numeral will be displayed first',
   'MODULE_PAYMENT_PAYPALLINK_ZONE_TITLE' => 'Payment zone',

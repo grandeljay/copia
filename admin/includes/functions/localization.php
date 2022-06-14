@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: localization.php 11711 2019-04-03 14:25:36Z GTB $
+   $Id: localization.php 950 2005-05-14 16:45:21Z mz $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -20,36 +20,25 @@
   // include needed function
   require_once(DIR_FS_INC.'get_external_content.inc.php');
 
-  function quote_primary_currency($to, $from = DEFAULT_CURRENCY) {
-    if ($from === $to) return 1;
+  function quote_yahooapis_currency($to, $from = DEFAULT_CURRENCY) {
+    $url = 'https://query.yahooapis.com/v1/public/yql?q=select%20Rate%20from%20yahoo.finance.xchange%20where%20pair%20%3D%20%22'.$from.$to.'%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys';
+    $currency = get_external_content($url, 3, false);
+    $currency = json_decode($currency, true);
 
+    if (isset($currency['query']['results']['rate']['Rate'])) {
+      return $currency['query']['results']['rate']['Rate'];
+    } else {
+      return false;
+    }
+  }
+
+  function quote_cryptonator_currency($to, $from = DEFAULT_CURRENCY) {
     $url = 'https://www.cryptonator.com/api/ticker/'.$from.'-'.$to;
     $currency = get_external_content(urldecode($url), 3, false);
     $currency = json_decode($currency, true);
     
     if (isset($currency['ticker']['price'])) {
       return $currency['ticker']['price'];
-    } else {
-      return false;
-    }
-  }
-
-  function quote_secondary_currency($to, $from = DEFAULT_CURRENCY) {
-    if ($from === $to) return 1;
-
-    $url = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
-    $page = get_external_content($url, 3, false);    
-    $XML = simplexml_load_string($page);
-
-    $cur = array();        
-    foreach($XML->Cube->Cube->Cube as $rate){
-      $cur[(string)$rate['currency']] = (float)$rate['rate'];
-    }
-   
-    $cur['EUR'] = 1;
-   
-    if (!empty($cur[$to]) && !empty($cur[$from])) {    
-      return (float)$cur[$to] / $cur[$from];
     } else {
       return false;
     }

@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: html_output.php 13198 2021-01-18 15:53:35Z GTB $
+   $Id: html_output.php 9972 2016-06-13 08:02:31Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -111,17 +111,9 @@
   // Output a form input field
   function xtc_draw_input_field($name, $value = '', $parameters = '', $required = false, $type = 'text', $reinsert_value = true) {
     $field = '<input type="' . $type . '" name="' . $name . '"';
-    if (isset($GLOBALS[$name]) 
-        && !is_object($GLOBALS[$name]) 
-        && !is_array($GLOBALS[$name]) 
-        && ($reinsert_value) 
-        ) 
-    {
+    if ( isset($GLOBALS[$name]) && ($reinsert_value) ) {
       $field .= ' value="' . encode_htmlspecialchars(trim($GLOBALS[$name])) . '"';
-    } elseif ((gettype($value) == 'double' && $value > 0) 
-              || (gettype($value) != 'double' && $value != '')
-              )
-    {
+    } elseif ($value != '') {
       $field .= ' value="' . encode_htmlspecialchars(trim($value)) . '"';
     }
     if ($parameters != '') {
@@ -136,12 +128,7 @@
   // Output a form small input field
   function xtc_draw_small_input_field($name, $value = '', $parameters = '', $required = false, $type = 'text', $reinsert_value = true) {
     $field = '<input type="' . $type . '" size="3" name="' . $name . '"';
-    if (isset($GLOBALS[$name]) 
-        && !is_object($GLOBALS[$name]) 
-        && !is_array($GLOBALS[$name]) 
-        && ($reinsert_value) 
-        ) 
-    {
+    if ( isset($GLOBALS[$name]) && ($reinsert_value) ) {
       $field .= ' value="' . encode_htmlspecialchars(trim($GLOBALS[$name])) . '"';
     } elseif ($value != '') {
       $field .= ' value="' . encode_htmlspecialchars(trim($value)) . '"';
@@ -157,7 +144,7 @@
 
   // Output a form password field
   function xtc_draw_password_field($name, $value = '', $required = false, $parameters = '') {
-    $params = strpos($parameters,'maxlength') !== false ? '' : 'maxlength="60"';
+    $params = strpos($parameters,'maxlength') !== false ? '' : 'maxlength="40"';
     if ($parameters != '') {
       $params .= ' ' . $parameters;
     }
@@ -198,15 +185,15 @@
     if ($value != '') {
       $selection .= ' value="' . $value . '"';
     }
-    if ( ($checked == true) || (isset($GLOBALS[$name]) && ($GLOBALS[$name] == 'on')) || ($value && isset($GLOBALS[$name]) && !is_object($GLOBALS[$name]) && !is_array($GLOBALS[$name]) && ($GLOBALS[$name] == $value)) || ($value && ($value == $compare)) ) {
+    if ( ($checked == true) || (isset($GLOBALS[$name]) && ($GLOBALS[$name] == 'on')) || ($value && isset($GLOBALS[$name]) && ($GLOBALS[$name] == $value)) || ($value && ($value == $compare)) ) {
       $selection .= ' checked="checked"';
     }
     $addtag = '';
     if (NEW_SELECT_CHECKBOX == 'true' && strpos($parameters,'noStyling') === false) {
       $addtag = '<em>&nbsp;</em>';
+      $parameters  = preg_replace("'\s+=\s+'",'=',$parameters);
+      $parameters = (strpos($parameters,'class="') !== false ? str_replace('class="', 'class="ChkBox ',$parameters) : $parameters . ' class="ChkBox"');
     }
-    $parameters  = preg_replace("'\s+=\s+'",'=',$parameters);
-    $parameters = (strpos($parameters,'class="') !== false ? str_replace('class="', 'class="ChkBox ',$parameters) : $parameters . ' class="ChkBox"');
     if (xtc_not_null($parameters)) $selection .= ' ' . $parameters;
     
     $selection .= '>'.$addtag;
@@ -225,18 +212,10 @@
 
   // Output a form textarea field
   function xtc_draw_textarea_field($name, $wrap, $width, $height, $text = '', $params = '', $reinsert_value = true, $encode = false) {
-    $id = str_replace('[', '_', $name);
-    $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $id);
-
-    $field = '<textarea id="'.$id.'" name="' . $name . '" wrap="' . $wrap . '" cols="' . $width . '" rows="' . $height . '"';
+    $field = '<textarea id="'.$name.'" name="' . $name . '" wrap="' . $wrap . '" cols="' . $width . '" rows="' . $height . '"';
     if ($params) $field .= ' ' . $params;
     $field .= '>';
-    if (isset($GLOBALS[$name]) 
-        && !is_object($GLOBALS[$name]) 
-        && !is_array($GLOBALS[$name]) 
-        && ($reinsert_value) 
-        ) 
-    {
+    if ( isset($GLOBALS[$name]) && ($reinsert_value) ) {
       $field .= encode_htmlspecialchars(trim($GLOBALS[$name]));
     } elseif ($text != '') {
       if ($encode === true) {
@@ -283,15 +262,9 @@
       foreach ($values as $key=>$val) {
         $field .= '<option value="' .$val['id'] . '"';
         $li .= '<li data-val="' .$val['id'] . '"';
-        if ((strlen($val['id']) > 0 
-             && isset($GLOBALS[$name]) 
-             && !is_object($GLOBALS[$name]) 
-             && !is_array($GLOBALS[$name]) 
-             && (string)$GLOBALS[$name] == (string)$val['id']
-             ) || ((string)$default == (string)$val['id'])
-            )
-        {
+        if ( ((strlen($val['id']) > 0) && isset($GLOBALS[$name]) && ($GLOBALS[$name] == $val['id'])) || ($default == $val['id']) ) {
           $field .= ' selected="selected"';
+          //$li .= ' class="selected"';
           $selText = $val['text'];
         }
         $field .= '>' . $val['text'] . '</option>' . PHP_EOL;
@@ -321,9 +294,9 @@
    */
   function xtc_sorting($page,$sort) {
     $nav= '<br /><a href="'.xtc_href_link($page, xtc_get_all_get_params(array('action','sorting')).'sorting='.$sort).'" title="'.TEXT_SORT_ASC.'">';
-    $nav.= xtc_image(DIR_WS_ICONS . 'sort_up.gif', TEXT_SORT_ASC, '20' ,'20').'</a>';
+    $nav.= xtc_image(DIR_WS_ICONS . 'sort_down.gif', TEXT_SORT_ASC, '20' ,'20').'</a>';
     $nav.= '<a href="'.xtc_href_link($page, xtc_get_all_get_params(array('action','sorting')).'sorting='.$sort.'-desc').'" title="'.TEXT_SORT_DESC.'">';
-    $nav.= xtc_image(DIR_WS_ICONS . 'sort_down.gif', TEXT_SORT_DESC, '20' ,'20').'</a>';    
+    $nav.= xtc_image(DIR_WS_ICONS . 'sort_up.gif', TEXT_SORT_DESC, '20' ,'20').'</a>';    
     return $nav;
   }
   

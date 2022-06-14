@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: table.php 12901 2020-09-24 13:02:08Z Tomcraft $   
+   $Id: table.php 5118 2013-07-18 10:58:36Z Tomcraft $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -18,8 +18,7 @@
 
 define('MODULE_SHIPPING_TABLE_TEXT_TITLE', 'Tabellarische Versandkosten');
 define('MODULE_SHIPPING_TABLE_TEXT_DESCRIPTION', 'Tabellarische Versandkosten');
-define('MODULE_SHIPPING_TABLE_TEXT_WAY', 'Bester Weg');
-define('MODULE_SHIPPING_TABLE_TEXT_UNITS', 'kg');
+define('MODULE_SHIPPING_TABLE_TEXT_WAY', 'Bester Weg (%01.2f kg)');
 define('MODULE_SHIPPING_TABLE_TEXT_WEIGHT', 'Gewicht');
 define('MODULE_SHIPPING_TABLE_TEXT_AMOUNT', 'Menge');
 define('MODULE_SHIPPING_TABLE_UNDEFINED_RATE', 'Die Versandkosten k&ouml;nnen im Moment nicht berechnet werden.');
@@ -42,14 +41,12 @@ define('MODULE_SHIPPING_TABLE_NUMBER_ZONES_DESC' , 'Anzahl der bereitgestellten 
 define('MODULE_SHIPPING_TABLE_DISPLAY_TITLE' , 'Anzeige aktivieren');
 define('MODULE_SHIPPING_TABLE_DISPLAY_DESC' , 'M&ouml;chten Sie anzeigen, wenn kein Versand in das Land m&ouml;glich ist bzw. keine Versandkosten berechnet werden konnten?');
 
-if (defined('MODULE_SHIPPING_TABLE_NUMBER_ZONES')) {
-  for ($module_shipping_table_i = 1; $module_shipping_table_i <= MODULE_SHIPPING_TABLE_NUMBER_ZONES; $module_shipping_table_i ++) {
-    define('MODULE_SHIPPING_TABLE_COUNTRIES_'.$module_shipping_table_i.'_TITLE' , '<hr/>Zone '.$module_shipping_table_i.' L&auml;nder');
-    define('MODULE_SHIPPING_TABLE_COUNTRIES_'.$module_shipping_table_i.'_DESC' , 'Durch Komma getrennte Liste von ISO L&auml;ndercodes (2 Zeichen), welche Teil von Zone '.$module_shipping_table_i.' sind (WORLD eintragen f&uuml;r den Rest der Welt.).');
-    define('MODULE_SHIPPING_TABLE_COST_'.$module_shipping_table_i.'_TITLE' , 'Zone '.$module_shipping_table_i.' Versandkosten');
-    define('MODULE_SHIPPING_TABLE_COST_'.$module_shipping_table_i.'_DESC' , 'Versandkosten nach Zone '.$module_shipping_table_i.' Bestimmungsorte, basierend auf einer Gruppe von max. Bestellgewichten oder Warenkorbwert, je nach Moduleinstellung. Beispiel: 3:8.50,7:10.50,... Gewicht/Preis von kleiner oder gleich 3 w&uuml;rde 8.50 f&uuml;r die Zone '.$module_shipping_table_i.' Bestimmungsl&auml;nder kosten.');
-    define('MODULE_SHIPPING_TABLE_HANDLING_'.$module_shipping_table_i.'_TITLE' , 'Zone '.$module_shipping_table_i.' Handling Geb&uuml;hr');
-    define('MODULE_SHIPPING_TABLE_HANDLING_'.$module_shipping_table_i.'_DESC' , 'Handling Geb&uuml;hr f&uuml;r diese Versandzone');
-  }
+for ($module_shipping_table_i = 1; $module_shipping_table_i <= MODULE_SHIPPING_TABLE_NUMBER_ZONES; $module_shipping_table_i ++) {
+  define('MODULE_SHIPPING_TABLE_COUNTRIES_'.$module_shipping_table_i.'_TITLE' , '<hr/>Zone '.$module_shipping_table_i.' L&auml;nder');
+  define('MODULE_SHIPPING_TABLE_COUNTRIES_'.$module_shipping_table_i.'_DESC' , 'Durch Komma getrennte Liste von ISO L&auml;ndercodes (2 Zeichen), welche Teil von Zone '.$module_shipping_table_i.' sind (WORLD eintragen f&uuml;r den Rest der Welt.).');
+  define('MODULE_SHIPPING_TABLE_COST_'.$module_shipping_table_i.'_TITLE' , 'Zone '.$module_shipping_table_i.' Versandkosten');
+  define('MODULE_SHIPPING_TABLE_COST_'.$module_shipping_table_i.'_DESC' , 'Versandkosten nach Zone '.$module_shipping_table_i.' Bestimmungsorte, basierend auf einer Gruppe von max. Bestellgewichten oder Warenkorbwert, je nach Moduleinstellung. Beispiel: 3:8.50,7:10.50,... Gewicht/Preis von kleiner oder gleich 3 w&uuml;rde 8.50 f&uuml;r die Zone '.$module_shipping_table_i.' Bestimmungsl&auml;nder kosten.');
+  define('MODULE_SHIPPING_TABLE_HANDLING_'.$module_shipping_table_i.'_TITLE' , 'Zone '.$module_shipping_table_i.' Handling Geb&uuml;hr');
+  define('MODULE_SHIPPING_TABLE_HANDLING_'.$module_shipping_table_i.'_DESC' , 'Handling Geb&uuml;hr f&uuml;r diese Versandzone');
 }
 ?>

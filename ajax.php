@@ -1,19 +1,14 @@
 <?php
-
-/* -----------------------------------------------------------------------------------------
-   $Id: ajax.php 12837 2020-07-29 11:08:34Z GTB $
-
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
-
-   Copyright (c) 2013-2016 [www.hackersolutions.com]
-   -----------------------------------------------------------------------------------------
-   Released under the GNU General Public License
-   ---------------------------------------------------------------------------------------*/
-
-// set the level of error reporting
-@ini_set('display_errors', false);
-error_reporting(0);
+/*
+ * $Id:$
+ *
+ * modified eCommerce Shopsoftware
+ * http://www.modified-shop.org
+ *
+ * Copyright (c) 2013-2016 [www.hackersolutions.com]
+ *
+ * Released under the GNU General Public License
+ */
 
 include 'includes/' . (isset($_REQUEST['speed']) ? (file_exists('includes/local/configure.php') ? 'local/configure.php' : 'configure.php') : 'application_top.php');
 
@@ -32,7 +27,7 @@ $ajax_rt = (isset($_REQUEST['type']) ?  preg_replace("/[^h-x]/i", "", $_REQUEST[
 if (function_exists($ajax_ext)) {
     $response = $ajax_ext();
 } elseif (class_exists($ajax_ext)) {
-    $object =  new $ajax_ext();
+    $object =  new $ajax_ext;
     $method = isset($_REQUEST['method']) ? $_REQUEST['method'] : null;
     if ($method && method_exists($object, $method)) {
         $response = $object->$method();
@@ -45,25 +40,11 @@ if (function_exists($ajax_ext)) {
     die("function or class does not exist");
 }
 
-// gzip compression
-if (
-    !isset($_REQUEST['speed'])
-    && defined('GZIP_COMPRESSION')
-    && GZIP_COMPRESSION == 'true'
-    && isset($ext_zlib_loaded)
-    && $ext_zlib_loaded == true
-    && isset($ini_zlib_output_compression)
-    && $ini_zlib_output_compression < 1
-    && $encoding = xtc_check_gzip()
-) {
-    header('Content-Encoding: ' . $encoding);
-}
-
 if ($ajax_rt == 'json') {
     $response = json_encode($response);
     header('Content-Type: application/json');
 } else {
-    header('Content-Type: text/' . $ajax_rt);
+    header('Content-Type: text/'.$ajax_rt);
 }
 
 // response headers
@@ -76,23 +57,18 @@ header("Pragma: no-cache");
 // output
 echo $response;
 
-// gzip compression
-if (
-    !isset($_REQUEST['speed'])
-    && defined('GZIP_COMPRESSION')
-    && GZIP_COMPRESSION == 'true'
-    && isset($ext_zlib_loaded)
-    && $ext_zlib_loaded == true
-    && isset($ini_zlib_output_compression)
-    && $ini_zlib_output_compression < 1
-) {
-    xtc_gzip_output(GZIP_LEVEL);
-}
-
 // log parse time
 if (defined('STORE_PAGE_PARSE_TIME') && STORE_PAGE_PARSE_TIME == 'true') {
     $parse_time = number_format((microtime(true) - PAGE_PARSE_START_TIME), 3);
     if ($parse_time >= STORE_PAGE_PARSE_TIME_THRESHOLD) {
-        error_log(strftime(STORE_PARSE_DATE_TIME_FORMAT) . ' [' . $parse_time . 's] ' . getenv('REQUEST_URI') . "\n", 3, DIR_FS_LOG . 'mod_parsetime_' . date('Y-m-d') . '.log');
+        error_log(strftime(STORE_PARSE_DATE_TIME_FORMAT) . ' [' . $parse_time . 's] ' . getenv('REQUEST_URI') . "\n", 3, DIR_FS_LOG.'mod_parsetime_'. date('Y-m-d') .'.log');
     }
 }
+
+if (defined('GZIP_COMPRESSION') && GZIP_COMPRESSION == 'true' && $ext_zlib_loaded == true && $ini_zlib_output_compression < 1) {
+    xtc_gzip_output(GZIP_LEVEL);
+}
+
+function_exists('xtc_db_close') ? xtc_db_close() : null;
+
+?>

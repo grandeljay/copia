@@ -1,6 +1,6 @@
 <?php
   /* -----------------------------------------------------------------------------------------
-   $Id: module_export.php 13432 2021-03-01 17:25:02Z GTB $
+   $Id: module_export.php 10392 2016-11-07 11:28:13Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,9 +23,8 @@
 
   require('includes/application_top.php');
 
-  // include needed functions
-  require_once(DIR_WS_FUNCTIONS.'export_functions.php');
-  require_once(DIR_FS_INC.'update_module_configuration.inc.php');
+  // include needed functions (for modules)
+  require_once(DIR_WS_FUNCTIONS . 'export_functions.php');
 
   if (!is_writeable(DIR_FS_CATALOG . 'export/')) {
     $messageStack->add(ERROR_EXPORT_FOLDER_NOT_WRITEABLE, 'error');
@@ -88,27 +87,10 @@
       case 'save':
         if (is_array($_POST['configuration'])) {
           if (count($_POST['configuration'])) {
-            foreach ($_POST['configuration'] as $key => $value) {
-              if (is_array($_POST['configuration'][$key])) {
-                // multi language config
-                $keys = array_keys($_POST['configuration'][$key]);
-                if (gettype(array_shift($keys)) == 'string') {
-                  $config_value = array();
-                  foreach ($_POST['configuration'][$key] as $k => $v) {
-                    if (xtc_not_null($v)) {
-                      $config_value[] =  $k . '::' . $v;
-                    }
-                  }
-                  $value = implode('||', $config_value);
-                } else {
-                  $value = implode(',', $_POST['configuration'][$key]);
-                }
-              }
-              xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " 
-                               SET configuration_value = '" . xtc_db_input($value) . "',
-                                   last_modified = NOW()
-                             WHERE configuration_key = '" . $key . "'");
-              if (@strpos($key,'FILE') !== false) $file = $value;
+            while (list($key, $value) = each($_POST['configuration'])) {
+              $value = is_array($_POST['configuration'][$key]) ? implode(',', $_POST['configuration'][$key]) : $value;
+              xtc_db_query("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '" . $value . "' WHERE configuration_key = '" . $key . "'");
+              if (@strpos($key,'FILE') !== false) $file=$value; //GTB - 2010-08-06 - start Download Problem PHP > 5.3
             }
           }
         }
@@ -121,7 +103,7 @@
           //add post params to get params
           $post_params = isset($module->post_params) ? $module->post_params : array();
           reset($post_params);
-          foreach ($post_params as $key => $pparam) {
+          while(list($key, $pparam) = each($post_params)) {
             $get_params[$pparam] = $_POST[$pparam];
           }
           //convert params array to params string
@@ -179,91 +161,86 @@
 
   //########## FUNCTIONS ##########//
 
-  function get_module_info($module) {
-    $module_info = array('code' => $module->code,
-                         'title' => $module->title,
-                         'description' => $module->description,
-                         'extended_description' => isset($module->extended_description) ? $module->extended_description : '',
-                         'status' => $module->check());
-    $module_info['properties'] = isset($module->properties) ? $module->properties : array();
-    $module_info['keys_dispnone'] = isset($module->keys_dispnone) ? $module->keys_dispnone : array();
-    $module_keys = method_exists($module,'keys') ? $module->keys() : array();
+  function get_module_info($module)
+  {
+      $module_info = array('code' => $module->code,
+                           'title' => $module->title,
+                           'description' => $module->description,
+                           'extended_description' => isset($module->extended_description) ? $module->extended_description : '',
+                           'status' => $module->check());
+      $module_info['properties'] = isset($module->properties) ? $module->properties : array();
+      $module_info['keys_dispnone'] = isset($module->keys_dispnone) ? $module->keys_dispnone : array();
+      $module_keys = method_exists($module,'keys') ? $module->keys() : array();
 
-    $keys_extra = array();
-    $key_value_query = xtc_db_query("SELECT configuration_key,
-                                            configuration_value,
-                                            use_function,
-                                            set_function
-                                       FROM " . TABLE_CONFIGURATION . "
-                                      WHERE configuration_key IN ('" . implode("', '", $module_keys) . "')
-                                   ORDER BY FIELD(configuration_key, '".implode("', '", $module_keys)."')");
-    while ($key_value = xtc_db_fetch_array($key_value_query)) {
-      $keys_extra[$key_value['configuration_key']] = array(
-        'title' => constant(strtoupper($key_value['configuration_key'] .'_TITLE')),
-        'description' => constant(strtoupper($key_value['configuration_key'] .'_DESC')),
-        'value' => $key_value['configuration_value'],
-        'use_function' => $key_value['use_function'],
-        'set_function' => $key_value['set_function'],
-      );
-    }
-    $module_info['keys'] = $keys_extra;
-    
-    return $module_info;
-  }
-
-  function create_directory_array($module_directory,$file_extension) {
-    global $module, $module_type;
-    
-    $directory_array = array(array());
-    $alphabet = range('A', 'Z');
-    
-    foreach(auto_include($module_directory, substr($file_extension, 1)) as $file) {
-      $filename = basename($file);
-      
-      if (is_file(DIR_FS_LANGUAGES . $_SESSION['language'] . '/modules/' . $module_type . '/' . $filename)) {
-        include_once(DIR_FS_LANGUAGES . $_SESSION['language'] . '/modules/' . $module_type . '/' . $filename);
-      }
-      
-      include_once($module_directory . $filename);
-
-      $class = substr($filename, 0, strpos($filename, '.'));
-      if (class_exists($class)) {
-        $module = new $class();
-      }
-
-      if (method_exists($module,'check')) {
-        $title = strtoupper(preg_replace('/[^A-Za-z]/', '', $module->title));
-        $module->sort_order = array_search($title[0], $alphabet);
-        if ($module instanceof $class && $module->check() > 0) {
-          $directory_array[0][get_module_configuration_sorting($directory_array[0], $module->sort_order)] = $filename;
-        } else {
-          $directory_array[1][get_module_configuration_sorting($directory_array[1], $module->sort_order)] = $filename;
+      $keys_extra = array();
+      for ($j = 0, $k = sizeof($module_keys); $j < $k; $j++) {
+        $key_value_query = xtc_db_query("SELECT configuration_key,
+                                                configuration_value,
+                                                use_function,
+                                                set_function
+                                           FROM " . TABLE_CONFIGURATION . "
+                                          WHERE configuration_key = '" . $module_keys[$j] . "'");
+        $key_value = xtc_db_fetch_array($key_value_query);
+        if ($key_value['configuration_key'] !='') {
+          $keys_extra[$module_keys[$j]]['title'] = constant(strtoupper($key_value['configuration_key'] .'_TITLE'));
         }
+        $keys_extra[$module_keys[$j]]['value'] = $key_value['configuration_value'];
+        if ($key_value['configuration_key'] !='') {
+          $keys_extra[$module_keys[$j]]['description'] = constant(strtoupper($key_value['configuration_key'] .'_DESC'));
+        }
+        $keys_extra[$module_keys[$j]]['use_function'] = $key_value['use_function'];
+        $keys_extra[$module_keys[$j]]['set_function'] = $key_value['set_function'];
       }
-      unset($module);
-    }
-    
-    if (isset($directory_array[0])) {
-      ksort($directory_array[0]);
-      $directory_array[0] = array_values($directory_array[0]);
-    }
-    
-    if (isset($directory_array[1])) {
-      ksort($directory_array[1]);
-      $directory_array[1] = array_values($directory_array[1]);
-    }
-    
-    return $directory_array;
+      $module_info['keys'] = $keys_extra;
+      return $module_info;
   }
 
+  function create_directory_array($module_directory,$file_extension)
+  {
+      global $module;
+      $directory_array = array(array());
+      if ($dir = @dir($module_directory)) {
+        while ($file = $dir->read()) {
+          if (!is_dir($module_directory . $file)) {
+            if (substr($file, strrpos($file, '.')) == $file_extension) {
+              include_once($module_directory . $file);
+              $class = substr($file, 0, strrpos($file, '.'));
+              if (xtc_class_exists($class)) {
+                $module = new $class();
+              }
+              if (method_exists($module,'check') && $module->check() > 0) {
+                $directory_array[0][] = $file;
+              } else {
+                $directory_array[1][] = $file;
+              }
+              unset($module);
+            }
+          }
+        }
+        if (is_array($directory_array[0])) {
+          ksort($directory_array[0]);
+          foreach ($directory_array[0] as $key => $val){
+            $directory_array[0][$key] = $val;
+          }
+          $directory_array[0] = array_values($directory_array[0]);
+        }
+        if (is_array($directory_array[1])) {
+          sort($directory_array[1]);
+        }
+        ksort($directory_array);
+        $dir->close();
+      }
+      return $directory_array;
+  }
+  
   function convert_params_array_to_string($params_array)
   {
     reset($params_array);
     $params = array();
-    foreach ($params_array as $key => $value) {
+    while(list($key, $value) = each($params_array)) {
       if (is_array($value)) {
         reset($value);
-        foreach ($value as $key2 => $value2) {
+        while(list($key2, $value2) = each($value)) {
           $params[] = $key.'_'.strtolower($key2) .'='. $value2;
         }
       } else {
@@ -274,36 +251,6 @@
     return $params_string;
   }
 
-  function check_update_needed($module_type) {
-    global $module_directory, $messageStack;
-    
-    $installed_array = explode(';', constant('MODULE_'.strtoupper($module_type).'_INSTALLED'));
-    $info = array();
-    if (count($installed_array) > 0) {
-      foreach ($installed_array as $file) {
-        if (is_file($module_directory . $file)) {
-          if (is_file(DIR_FS_LANGUAGES . $_SESSION['language'] . '/modules/' . $module_type . '/' . $file)) {
-            include_once(DIR_FS_LANGUAGES . $_SESSION['language'] . '/modules/' . $module_type . '/' . $file);
-          }
-          include_once($module_directory . $file);
-          $class = substr($file, 0, strpos($file, '.'));
-          if (class_exists($class)) {
-            $module = new $class();
-            if ($module instanceof $class && $module->check() > 0) {     
-              $key_array = $module->keys();     
-              foreach ($key_array as $key) {
-                if (!defined($key)) {
-                  $info[] = '<li>'.$class.'</li>';
-                  break;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return $info;
-  }
 
 //########## OUTPUT ##########//
 require (DIR_WS_INCLUDES.'head.php');
@@ -343,15 +290,12 @@ if (xtc_not_null($action) && !$box) {
           <div class="pageHeadingImage"><?php echo xtc_image(DIR_WS_ICONS.'heading/icon_modules.png'); ?></div>
           <div class="pageHeading pdg2"><?php echo HEADING_TITLE; ?><br /></div>
           <div class="main">Modules</div>
+          <?php if ($set == 'export' && !xtc_not_null($action)) { ?>
+          <div style="clear:both;margin:10px 0;"><span class="main important_info"><?php echo TEXT_MODULE_INFO; ?></span></div>
+          <?php } ?>
           <table class="tableCenter">
             <tr>
-              <?php 
-                if(!xtc_not_null($action) || $box) {
-                  $info = check_update_needed($module_type);
-                  if (count($info) > 0) {
-                    echo '<div class="error_message">'.TEXT_MODULE_UPDATE_NEEDED.'<ul>'.implode('', $info).'</ul></div>';
-                  }
-                  ?>
+                <?php if(!xtc_not_null($action) || $box) { ?>
                     <td class="boxCenterLeft">
                       <table class="tableBoxCenter collapse">
                         <?php
@@ -365,7 +309,7 @@ if (xtc_not_null($action) && !$box) {
                             }
                             include_once($module_directory . $file);
                             $class = substr($file, 0, strrpos($file, '.'));
-                            if (class_exists($class)) {
+                            if (xtc_class_exists($class)) {
                               $module = new $class();
                               if ($module->check() > 0) {
                                 if (($module->sort_order > 0) && !isset($installed_modules[$module->sort_order])) {
@@ -374,11 +318,11 @@ if (xtc_not_null($action) && !$box) {
                                   $installed_modules[] = $file;
                                 }
                               }
-                              if (($module_class == '' || (isset($module_class) && ($module_class == $class))) && !isset($mInfo)) {
+                              if ((!$module_class || (isset($module_class) && ($module_class == $class))) && !isset($mInfo)) {
                                 $module_info = get_module_info($module);
                                 $mInfo = new objectInfo($module_info);
                               }
-                              if ($module->check() > 0 && !isset($installed)) {
+                              if ($module->check() > 0 && !$installed) {
                                 $installed = true;
                                 ?>
                                 <tr class="dataTableHeadingRow sub">
@@ -390,7 +334,7 @@ if (xtc_not_null($action) && !$box) {
                                   <td class="dataTableHeadingContent txta-r"><?php echo TABLE_HEADING_ACTION; ?> </td>
                                 </tr>
                                 <?php
-                              } elseif ($module->check() < 1 && !isset($deinstalled) && isset($installed)) {
+                              } elseif ($module->check() < 1 && !$deinstalled && $installed) {
                                 $deinstalled = true;
                                 ?>
                                 <tr><td colspan="3" style="height:35px;">&nbsp;</td></tr>
@@ -466,7 +410,7 @@ if (xtc_not_null($action) && !$box) {
                         include_once(DIR_FS_LANGUAGES . $_SESSION['language'] . '/modules/' . $module_type . '/' . $class . '.php');
                       }
                       include($module_directory . $class . '.php');
-                      if (class_exists($class)) {
+                      if (xtc_class_exists($class)) {
                         $module = new $class();
                         $module_info = get_module_info($module);
                         $mInfo = new objectInfo($module_info);
@@ -475,26 +419,26 @@ if (xtc_not_null($action) && !$box) {
                     $keys = '';
                     
                     reset($mInfo->keys_dispnone);
-                    foreach ($mInfo->keys_dispnone as $key => $value) {
+                    while (list($key, $value) = each($mInfo->keys_dispnone)) {
                       unset($mInfo->keys[$value]);
                     }
                     
                     reset($mInfo->keys);
-                    foreach ($mInfo->keys as $key => $value) {
+                    while (list($key, $value) = each($mInfo->keys)) {
                       $keys .= '<b>' . $value['title'] . '</b><br />' .  $value['description'].'<br />';
                       if ($value['set_function']) {
                         if (strpos($value['set_function'], '->') !== false) {
                           $class_method = explode('->', $value['set_function']);
-                          if (!isset(${$class_method[0]}) || !is_object(${$class_method[0]})) {
+                          if (!isset(${$class_method[0]}) || !is_object(${$class_method[0]})) { // DokuMan - 2011-05-10 - check if object is first set
                             include(DIR_WS_CLASSES . $class_method[0] . '.php');
                             ${$class_method[0]} = new $class_method[0]();
                           }
                           $keys .= call_user_func_array(array(${$class_method[0]}, $class_method[1]), array($value['value'], $key));
                         } else {
-                          eval('$keys .= ' . $value['set_function'] . "'" . encode_htmlspecialchars($value['value'], ENT_QUOTES) . "', '" . $key . "');");
+                          eval('$keys .= ' . $value['set_function'] . "'" . $value['value'] . "', '" . $key . "');");
                         }
                       } else {
-                        $keys .= xtc_draw_input_field('configuration[' . $key . ']', $value['value'], 'class="inputModule"');
+                        $keys .= xtc_draw_input_field('configuration[' . $key . ']', $value['value']);
                       }
                       $keys .= '<br /><br />';
                     }
@@ -506,7 +450,7 @@ if (xtc_not_null($action) && !$box) {
                     $contents[] = $module->display();                          
                     break;
 
-                  case 'restore':
+                case 'restore':
                     $heading[] = array('text' => '<b>' . $mInfo->title . '</b>');
                     $contents = array ('form' => (isset($mInfo->properties['form_restore']) ? $mInfo->properties['form_restore'] : xtc_draw_form('modules', FILENAME_MODULE_EXPORT, 'set=' . $set . '&module=' . $module_class . '&action=restoreconfirm')));
                     $contents[] = array ('text' => '<br />'.TEXT_INFO_MODULE_RESTORE);
@@ -517,7 +461,7 @@ if (xtc_not_null($action) && !$box) {
                     }
                     $contents[] = array ('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="'. BUTTON_RESTORE .'"><a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_MODULE_EXPORT, 'set=' . $set . '&module=' . $module_class).'">' . BUTTON_CANCEL . '</a>');
                     break;
-                  case 'backup':
+                case 'backup':
                     $heading[] = array('text' => '<b>' . $mInfo->title . '</b>');
                     $contents = array ('form' => (isset($mInfo->properties['form_backup']) ? $mInfo->properties['form_backup'] : xtc_draw_form('modules', FILENAME_MODULE_EXPORT, 'set=' . $set . '&module=' . $module_class . '&action=backupconfirm')));
                     $contents[] = array ('text' => '<br />'.TEXT_INFO_MODULE_BACKUP);
@@ -528,7 +472,7 @@ if (xtc_not_null($action) && !$box) {
                     }
                     $contents[] = array ('align' => 'center', 'text' => '<br /><input type="submit" class="button" onclick="this.blur();" value="'. BUTTON_BACKUP .'"><a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_MODULE_EXPORT, 'set=' . $set . '&module=' . $module_class).'">' . BUTTON_CANCEL . '</a><br/><br/>');
                     break;
-                  case 'remove':
+                case 'remove':
                     $heading[] = array('text' => '<b>' . $mInfo->title . '</b>');
                     $contents = array ('form' => (isset($mInfo->properties['form_remove']) ? $mInfo->properties['form_remove'] : xtc_draw_form('modules', FILENAME_MODULE_EXPORT, 'set=' . $set . '&module=' . $module_class . '&action=removeconfirm')));
                     $contents[] = array ('text' => '<br />'.TEXT_INFO_MODULE_REMOVE);
@@ -546,7 +490,7 @@ if (xtc_not_null($action) && !$box) {
                       if ($mInfo->status != '0') {
                         $keys = '';
                         reset($mInfo->keys);
-                        foreach ($mInfo->keys as $value) {
+                        while (list(, $value) = each($mInfo->keys)) {
                           $keys .= '<b>' . $value['title'] . '</b><br />';
                           if ($value['use_function']) {
                             $use_function = $value['use_function'];
@@ -561,7 +505,7 @@ if (xtc_not_null($action) && !$box) {
                               $keys .= xtc_call_function($use_function, $value['value']);
                             }
                           } else {
-                            $keys .=  (strlen($value['value']) > 30) ? substr(strip_tags($value['value']),0,30) . ' ...' : $value['value'];
+                            $keys .=  (strlen($value['value']) > 30) ? substr($value['value'],0,30) . ' ...' : $value['value'];
                           }
                           $keys .= '<br /><br />';
                         }
@@ -602,9 +546,6 @@ if (xtc_not_null($action) && !$box) {
                     echo sprintf(MODULE_STEP_READY_STYLE_BACK,xtc_button_link(BUTTON_BACK, xtc_href_link(FILENAME_MODULE_EXPORT, 'set=' . $set . '&module='.$mInfo->code))) ;
                   }
                   //EOF NEW MODULE PROCESSING
-                  if (isset($mInfo->properties['add_content'])) {
-                    echo $mInfo->properties['add_content'];
-                  }               
                   echo '</div>' . PHP_EOL;      
                   echo '            </td>'  . PHP_EOL;
                 }

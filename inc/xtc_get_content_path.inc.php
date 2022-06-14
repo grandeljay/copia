@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_content_path.inc.php 12466 2019-12-05 11:04:41Z GTB $   
+   $Id:$   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -37,9 +37,7 @@ function xtc_get_content_id($content_group) {
                                       FROM ".TABLE_CONTENT_MANAGER."
                                      WHERE content_group='".(int) $content_group."'
                                        AND languages_id='".(int) $_SESSION['languages_id']."'");
-  if (xtc_db_num_rows($content_group_query, true) > 0) {
-    $content_group = xtc_db_fetch_array($content_group_query, true);
-    return $content_group['content_id'];
-  }
+  $content_group = xtc_db_fetch_array($content_group_query, true);
+  return $content_group['content_id'];
 }
 ?>

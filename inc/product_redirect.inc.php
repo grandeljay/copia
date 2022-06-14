@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: product_redirect.inc.php 12801 2020-06-24 14:51:06Z GTB $
+   $Id: product_redirect.inc.php 10236 2016-08-11 12:11:51Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -14,20 +14,16 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-function product_redirect_link($products_id = false, $current_link, $categories_id = 0) {
+function product_redirect_link($products_id = false, $current_link) {
   global $products_link_cat_id;  
 
   $return_arr = array('redirect' => true,
                       'RedirectionLink' => '');
 
   if ($products_id !== false) {
-    $where_cat = '';
-    if ((int)$categories_id > 0) {
-      $where_cat = " AND c.categories_id = '".(int)$categories_id."' ";
-    }
-    $order_by = ((defined('PRODUCTS_CANONICAL_CAT_ID') && PRODUCTS_CANONICAL_CAT_ID) ? "ORDER BY FIELD(p2c.categories_id, p.products_canonical_cat_id) DESC" : 'ORDER BY p2c.categories_id < 1, p2c.categories_id ASC');
-
-    $check_link_query = xtDBquery("SELECT p.products_id, 
+    $add_select = ((defined('PRODUCTS_CANONICAL_CAT_ID') && PRODUCTS_CANONICAL_CAT_ID) ? "p.products_canonical_cat_id," : '');
+    $check_link_query = xtDBquery("SELECT ".$add_select."
+                                          p.products_id, 
                                           pd.products_name,
                                           p2c.categories_id
                                      FROM " . TABLE_PRODUCTS . " p
@@ -37,14 +33,9 @@ function product_redirect_link($products_id = false, $current_link, $categories_
                                           ON pd.products_id = p.products_id 
                                              AND pd.language_id = '".(int)$_SESSION['languages_id']."' 
                                              AND trim(pd.products_name) != ''
-                                     JOIN " . TABLE_CATEGORIES . " c
-                                          ON c.categories_id = p2c.categories_id 
-                                             AND c.categories_status = '1'
-                                                 " . $where_cat . "
                                     WHERE p.products_id = '" . (int)$products_id . "'
-                                      AND p.products_status = '1'
                                           " . PRODUCTS_CONDITIONS_P . "
-                                          " . $order_by);
+                                      AND p.products_status = '1'");
                     
     if (xtc_db_num_rows($check_link_query, true) > 0) {
       $link_array = array();
@@ -87,12 +78,6 @@ function product_redirect($actual_products_id) {
       return xtc_get_product_path($actual_products_id);
     }
     
-    require_once(DIR_FS_CATALOG.'includes/classes/modified_seo_url.php');
-    foreach(auto_include(DIR_FS_CATALOG.'includes/extra/seo_url_mod/','php') as $file) require_once ($file);
-
-    $seo_url_mod = SEO_URL_MOD_CLASS;
-    $modified_seo = $seo_url_mod::getInstance();
-
     // check Session-ID and $_GET-Parameter
     $current_link = preg_replace("/([^\?]*)(\?.*)/", "$1", $_SERVER['REQUEST_URI']);
     
@@ -100,12 +85,7 @@ function product_redirect($actual_products_id) {
     if (defined('ADD_CAT_NAMES_TO_PRODUCT_LINK') && ADD_CAT_NAMES_TO_PRODUCT_LINK === false) {
       $shortURL = ((strlen(DIR_WS_CATALOG) > 1) ? str_replace(DIR_WS_CATALOG, '', $current_link) : ltrim($current_link, '/'));
       if (isset($_SESSION['CatPath']) && trim($_SESSION['CatPath']) != '' && strpos($shortURL, '/') === false) {
-        $cPath_array = explode('_', $_SESSION['CatPath']);
-        $redirect_arr = product_redirect_link($actual_products_id, $current_link, array_pop($cPath_array));
-                
-        if ($redirect_arr['redirect'] === false) {
-          return $_SESSION['CatPath'];
-        }
+        return $_SESSION['CatPath'];
       }
     }
    
@@ -114,10 +94,7 @@ function product_redirect($actual_products_id) {
     }
 
     // redirect
-    if (!isset($redirect_arr)) {
-      $redirect_arr = product_redirect_link($actual_products_id, $current_link);
-    }
-    
+    $redirect_arr = product_redirect_link($actual_products_id, $current_link);
     if ($redirect_arr['redirect']) {
       if ($redirect_arr['RedirectionLink'] != '') {
         header('HTTP/1.1 301 Moved Permanently' );

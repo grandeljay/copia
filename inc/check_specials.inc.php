@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: check_specials.inc.php 10422 2016-11-23 12:06:38Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,7 +20,7 @@ function check_specials() {
                                                        AND pd.language_id = ".(int)$_SESSION['languages_id']."
                                                JOIN ".TABLE_SPECIALS." s
                                                     ON p.products_id = s.products_id
-                                                       ".SPECIALS_CONDITIONS_S."
+                                                       AND s.status = '1'
                                               WHERE p.products_status = '1'
                                                     ".PRODUCTS_CONDITIONS_P);
     if (xtc_db_num_rows($products_specials_query) > 0) {

@@ -1,5 +1,5 @@
 #  -----------------------------------------------------------------------------------------
-#  $Id: .htaccess 12137 2019-09-20 21:31:16Z Tomcraft $
+#  $Id: .htaccess 9957 2016-06-09 12:01:38Z GTB $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -18,7 +18,7 @@
 # This is used with Apache WebServers
 # The following blocks direct HTTP requests in this directory recursively
 
-<FilesMatch "(?<!\.css|\.js|\.jpg|\.jpeg|\.png|\.gif|\.webp|\.ico|\.svg|\.CSS|\.JS|\.JPG|\.JPEG|\.PNG|\.GIF|\.WEBP|\.ICO|\.SVG)$">
+<FilesMatch ".*\.(php|php3|php4|php5|phtml|htm|html|xhtml|js|pl)$">
   <IfModule mod_authz_core.c>
     # Apache 2.4
     <RequireAll>

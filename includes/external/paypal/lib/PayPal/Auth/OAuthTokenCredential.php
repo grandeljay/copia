@@ -48,11 +48,6 @@ class OAuthTokenCredential extends PayPalResourceModel
     private $clientSecret;
 
     /**
-     * Target subject
-     */
-    private $targetSubject;
-
-    /**
      * Generated Access Token
      *
      * @var string $accessToken
@@ -86,12 +81,11 @@ class OAuthTokenCredential extends PayPalResourceModel
      * @param string $clientId     client id obtained from the developer portal
      * @param string $clientSecret client secret obtained from the developer portal
      */
-    public function __construct($clientId = null, $clientSecret = null, $targetSubject = null)
+    public function __construct($clientId, $clientSecret)
     {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
         $this->cipher = new Cipher($this->clientSecret);
-        $this->targetSubject = $targetSubject;
     }
 
     /**
@@ -204,7 +198,6 @@ class OAuthTokenCredential extends PayPalResourceModel
         return null;
     }
 
-
     /**
      * Updates Access Token based on given input
      *
@@ -217,113 +210,7 @@ class OAuthTokenCredential extends PayPalResourceModel
         $this->generateAccessToken($config, $refreshToken);
         return $this->accessToken;
     }
-    
 
-    /**
-     * Get a Seller Authorization Code from shared ID
-     *
-     * @param $config
-     * @param $sharedId
-     * @param array $params optional arrays to override defaults
-     * @return null
-     * @throws PayPalConfigurationException
-     * @throws \PayPal\Exception\PayPalConnectionException
-     */
-    public function getSellerAccessToken($config, $sharedId, $params = array())
-    {
-        static $allowedParams = array(
-            'grant_type' => 'authorization_code',
-            'code' => 1,
-            'code_verifier' => 1,
-        );
-
-        $params = is_array($params) ? $params : array();
-        $payload = http_build_query(array_merge($allowedParams, array_intersect_key($params, $allowedParams)));
-
-        $httpConfig = new PayPalHttpConfig(null, 'POST', $config);
-
-        // if proxy set via config, add it
-        if (!empty($config['http.Proxy'])) {
-            $httpConfig->setHttpProxy($config['http.Proxy']);
-        }
-
-        $handlers = array(self::$AUTH_HANDLER);
-
-        /** @var IPayPalHandler $handler */
-        foreach ($handlers as $handler) {
-            if (!is_object($handler)) {
-                $fullHandler = "\\" . (string)$handler;
-                $handler = new $fullHandler(new ApiContext($this));
-            }
-            $handler->handle($httpConfig, $payload, array('sharedId' => $sharedId, 'path' => "/v1/oauth2/token"));
-        }
-
-        $connection = new PayPalHttpConnection($httpConfig, $config);
-        $res = $connection->execute($payload);
-        $response = json_decode($res, true);
-
-        if ($response == null || !isset($response["access_token"]) || !isset($response["expires_in"])) {
-            $this->accessToken = null;
-            $this->tokenExpiresIn = null;
-            PayPalLoggingManager::getInstance(__CLASS__)->warning("Could not generate new Access token. Invalid response from server: ");
-            throw new PayPalConnectionException(null, "Could not generate new Access token. Invalid response from server: ");
-        } else {
-            $this->accessToken = $response["access_token"];
-            $this->tokenExpiresIn = $response["expires_in"];
-        }
-        $this->tokenCreateTime = time();
-
-        return null;
-    }
-
-
-    /**
-     * Get a Seller Credentials from Authorization Code
-     *
-     * @param $config
-     * @param $partnerID
-     * @return null
-     * @throws PayPalConfigurationException
-     * @throws \PayPal\Exception\PayPalConnectionException
-     */
-    public function getSellerCredentials($config, $partnerID)
-    {
-        $httpConfig = new PayPalHttpConfig(null, 'GET', $config);
-
-        // if proxy set via config, add it
-        if (!empty($config['http.Proxy'])) {
-            $httpConfig->setHttpProxy($config['http.Proxy']);
-        }
-
-        $handlers = array(self::$AUTH_HANDLER);
-
-        /** @var IPayPalHandler $handler */
-        foreach ($handlers as $handler) {
-            if (!is_object($handler)) {
-                $fullHandler = "\\" . (string)$handler;
-                $handler = new $fullHandler(new ApiContext($this));
-            }
-            $handler->handle($httpConfig, '', array('access_token' => $this->accessToken, 'path' => sprintf("/v1/customer/partners/%s/merchant-integrations/credentials/", $partnerID)));
-        }
-
-        $connection = new PayPalHttpConnection($httpConfig, $config);
-        $res = $connection->execute($payload);
-        $response = json_decode($res, true);
-        
-       if ($response == null || !isset($response["client_id"]) || !isset($response["client_secret"])) {
-            $this->accessToken = null;
-            $this->tokenExpiresIn = null;
-            PayPalLoggingManager::getInstance(__CLASS__)->warning("Could not generate new Access token. Invalid response from server: ");
-            throw new PayPalConnectionException(null, "Could not generate new Access token. Invalid response from server: ");
-        } else {
-            $this->clientId = $response["client_id"];
-            $this->clientSecret = $response["client_secret"];
-        }
-
-        return null;
-    }
-    
-    
     /**
      * Retrieves the token based on the input configuration
      *
@@ -338,11 +225,6 @@ class OAuthTokenCredential extends PayPalResourceModel
     protected function getToken($config, $clientId, $clientSecret, $payload)
     {
         $httpConfig = new PayPalHttpConfig(null, 'POST', $config);
-
-        // if proxy set via config, add it
-        if (!empty($config['http.Proxy'])) {
-            $httpConfig->setHttpProxy($config['http.Proxy']);
-        }
 
         $handlers = array(self::$AUTH_HANDLER);
 
@@ -379,9 +261,6 @@ class OAuthTokenCredential extends PayPalResourceModel
             // Used for Future Payments
             $params['grant_type'] = 'refresh_token';
             $params['refresh_token'] = $refreshToken;
-        }
-        if ($this->targetSubject != null) {
-            $params['target_subject'] = $this->targetSubject;
         }
         $payload = http_build_query($params);
         $response = $this->getToken($config, $this->clientId, $this->clientSecret, $payload);

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: orders_edit.php 13395 2021-02-06 15:59:49Z GTB $
+   $Id: orders_edit.php 10221 2016-08-10 12:09:43Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -14,17 +14,23 @@
    (c) 2006 xt:Commerce; www.xt-commerce.com
 
    Released under the GNU General Public License
+   v.1.32 - 2012-05-23 (c) by web28 - www.rpa-com.de: Korrektur f�r Nettosumme bei Modulen ohne Steuersatz
+   v.1.31 - 2012-05-23 (c) by web28 - www.rpa-com.de: FIX Preisberechnung Kundengruppenwechsel, Optionspreise bei Sonderpreisen
+   v.1.30 - 2012-04-05 (c) by web28 - www.rpa-com.de: FIX order tax by $order->delivery['country_iso_2']
+   v.1.28 - 2012-03-22 (c) by web28 - www.rpa-com.de: FIX tax guest account, tax ot_payment, tax cod_fee
+   v.1.26 - 2011-11-01 (c) by web28 - www.rpa-com.de: L�nderwechsel -> delivery_country_iso_code_2, billing_country_iso_code_2
+   TODO Attributpreise und Sonderangebote
+        Bei Sonderangeboten wird der Attributpreis nicht zum Artikelpreis addiert
+        Anpassung in checkout_process.php
    --------------------------------------------------------------*/
 
+
   require ('includes/application_top.php');
-  
-  $styles = ' style="width:200px;"';
-  require(DIR_WS_INCLUDES . 'get_states.php');
 
   // include needed functions
   require_once (DIR_WS_FUNCTIONS.'orders_functions.php');
 
-  if (!isset($_GET['oID']) && isset($_POST['oID'])) {
+  if (!$_GET['oID']) {
     $_GET['oID'] = $_POST['oID'];
   }
   $order = new order((int)$_GET['oID']);
@@ -80,7 +86,7 @@
       $products_id = orders_product_option_insert($_POST['oID'], $_POST);
       xtc_redirect(xtc_href_link(FILENAME_ORDERS_EDIT, 'edit_action=options&oID='.(int)$_POST['oID'].'&pID='.(int)$products_id.'&opID='.(int)$_POST['opID']));
       break;
-    case 'product_option_delete':
+    case 'product_option_edit':
       $products_id = orders_product_option_delete($_POST['oID'], $_POST);
       xtc_redirect(xtc_href_link(FILENAME_ORDERS_EDIT, 'edit_action=options&oID='.(int)$_POST['oID'].'&pID='.(int)$products_id.'&opID='.(int)$_POST['opID']));
       break;
@@ -146,8 +152,10 @@
           <tr>
             <td class="boxCenterLeft">                
               <?php
-              if (isset($_GET['text']) && $_GET['text'] == 'address') {
-                echo TEXT_EDIT_ADDRESS_SUCCESS;
+              if ($_GET['text'] == 'address') {
+                if ($_GET['text'] == 'address') {
+                  echo TEXT_EDIT_ADDRESS_SUCCESS;
+                }
               }
               if (!isset($_GET['edit_action'])) {
                 ?>                
@@ -155,23 +163,24 @@
                   <?php echo TEXT_ORDERS_EDIT_INFO;?>
                 </div>
                 <?php
-              } else {
-                if ($_GET['edit_action'] == 'address') {                  
-                  include ('orders_edit_address.php');                  
-                } elseif ($_GET['edit_action'] == 'products') {
-                  include ('orders_edit_products.php');
-                } elseif ($_GET['edit_action'] == 'other') {
-                  include ('orders_edit_other.php');
-                } elseif ($_GET['edit_action'] == 'options') {
-                  include ('orders_edit_options.php');
-                }
+              }
+              if ($_GET['edit_action'] == 'address') {                  
+                include ('orders_edit_address.php');                  
+              } elseif ($_GET['edit_action'] == 'products') {
+                include ('orders_edit_products.php');
+              } elseif ($_GET['edit_action'] == 'other') {
+                include ('orders_edit_other.php');
+              } elseif ($_GET['edit_action'] == 'options') {
+                include ('orders_edit_options.php');
               }
               ?>
               <div class="clear smallText pdg2 flt-r mrg5">
               <?php
                 echo TEXT_SAVE_ORDER;
                 echo xtc_draw_form('save_order', FILENAME_ORDERS_EDIT, 'action=save_order', 'post');
+                  echo xtc_draw_hidden_field('customers_status_id', $address[customers_status]);
                   echo xtc_draw_hidden_field('oID', (int)$_GET['oID']);
+                  echo xtc_draw_hidden_field('cID', (int)$_GET['cID']);
                   echo '<input type="submit" class="button" onclick="this.blur();" value="'.BUTTON_SAVE.'"/>';
                   if (isset($_GET['edit_action'])) {
                     echo '&nbsp;&nbsp;&nbsp;';
@@ -187,6 +196,22 @@
             <?php
             $heading = array ();
             $contents = array ();
+            // KLARNA ORDERSTATUS UPDATE START
+            if (is_file(DIR_FS_DOCUMENT_ROOT . 'includes/external/klarna/class.KlarnaCore.php')) {
+              require_once (DIR_FS_DOCUMENT_ROOT . 'includes/external/klarna/class.KlarnaCore.php');
+              if ($_GET['edit_action'] == "klarna_check_orderstatus") {
+                include_once (DIR_FS_ADMIN. 'klarna_check_orderstatus.php');
+                $orderStatus = new KlarnaCheckOrder;
+                $orderStatus->checkOrder($_GET['oID'], $order->info['payment_method']);
+              }
+              if ($order->info['payment_method'] == 'klarna_partPayment' || $order->info['payment_method'] == 'klarna_invoice' || $order->info['payment_method'] == 'klarna_SpecCamp') {
+                echo "<link href='" . KlarnaUtils::getStaticPath() . "images.css' type='text/css' rel='stylesheet'/>";
+                $contents[] = array ('align' => 'center',
+                                     'text' => '<br /><span class="klarna_logo_small"></span><br /><br />'.'<a class="button" onclick="this.blur();" href="'.xtc_href_link(FILENAME_ORDERS_EDIT, 'edit_action=klarna_check_orderstatus&oID='.$_GET['oID']).'">Check Order Status</a><br /><br />'
+                                     );
+              }
+            }
+            // KLARNA ORDERSTATUS UPDATE END
             switch ($action) {
               default :
                 if (is_object($order)) {

@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: config.php 6760 2016-06-16 00:29:38Z MaW $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -26,7 +26,7 @@ $magnaConfig = array();
 /* DB Config */
 function loadDBConfig($mpID = '0') {
 	global $magnaConfig;
-	if (!isset($magnaConfig) || !is_array($magnaConfig) || !array_key_exists('db', $magnaConfig)) {
+	if (!array_key_exists('db', $magnaConfig)) {
 		$magnaConfig['db'] = array();
 	}
 	if (!array_key_exists($mpID, $magnaConfig['db'])) {
@@ -222,8 +222,6 @@ function getDBConfigValue($key, $mpID, $default = null) {
 	}
 	if (   !array_key_exists($mpID, $magnaConfig['db'])
 		|| !array_key_exists($key,  $magnaConfig['db'][$mpID])
-		|| (     !is_array($magnaConfig['db'][$mpID][$key])          && !is_array($default)
-	             && (strlen(trim($magnaConfig['db'][$mpID][$key])) == 0) && strlen($default) > 0)
 	) {
 		return $default;
 	}
@@ -237,28 +235,6 @@ function getDBConfigValue($key, $mpID, $default = null) {
 	}
 	
 	return $magnaConfig['db'][$mpID][$key];
-}
-
-function getOneFromMultiOptionConfig($sName, $mpID, $iSelected = null) {
-	$aData = array();
-	$aDefault = getDBConfigValue($sName, $mpID);
-	if ($iSelected === null) {
-		$iDetault = 0;
-		foreach ($aDefault['defaults'] as $iKey => $sValue) {
-			if ($sValue == '1') {
-				$iDetault = $iKey;
-				break;
-			}
-		}
-	} else {
-		$iDetault = $iSelected;
-	}
-	foreach (loadDBConfig($mpID) as $sKey => $aConfig) {
-		if (strpos($sKey, $sName . '.') !== false && isset($aConfig[$iDetault])) {
-			$aData[str_replace($sName . '.', '', $sKey)] = $aConfig[$iDetault];
-		}
-	}
-	return $aData;
 }
 
 function removeDBConfigValue($key, $mpID) {

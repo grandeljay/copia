@@ -11,7 +11,7 @@
  *                                      boost your Online-Shop
  *
  * -----------------------------------------------------------------------------
- * $Id$
+ * $Id: MagnaUpdater.php 6198 2015-11-04 10:39:36Z tim.neumann $
  *
  * (c) 2010 RedGecko GmbH -- http://www.redgecko.de
  *     Released under the MIT License (Expat)
@@ -295,11 +295,6 @@ class MagnaUpdater {
 		}
 
 		$tdata = fileGetContents($origin.$name, $foobar, -1);
-		if ($tdata === false) {
-		// happened that it didn't succeed at first, wait a bit
-			usleep(rand(300000, 987654));
-			$tdata = fileGetContents($origin.$name, $foobar, -1);
-		}
 		if ($tdata === false) {
 			$this->updaterAllErrors[] = array('file' => $name, 'error' => MagnaUpdaterFailedOnLoadingFile);
 			return MagnaUpdaterFailedOnLoadingFile;

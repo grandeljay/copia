@@ -36,7 +36,6 @@ class MagnaCompatibleDeletedView {
 	
 	private $deletedLog = array();
 
-
 	public function __construct($settings = array()) {
 		global $_MagnaShopSession, $_MagnaSession, $_url, $_modules;
 		

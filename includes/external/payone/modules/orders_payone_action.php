@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: orders_payone_action.php 10806 2017-06-20 07:07:20Z GTB $
+   $Id: orders_payone_action.php 10200 2016-08-04 11:29:50Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -22,7 +22,6 @@ if (isset($oID) && $oID != '') {
                                   'payone_elv', 
                                   'payone_prepay', 
                                   'payone_cod', 
-                                  'payone_paydirekt', 
                                   'payone_invoice');
                                 
   if (in_array($order->info['payment_method'], $payone_payment_methods)) {

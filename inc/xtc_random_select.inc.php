@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_random_select.inc.php 12433 2019-12-02 07:23:33Z GTB $   
+   $Id: xtc_random_select.inc.php 1108 2005-07-24 20:24:08Z hhgag $   
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -27,4 +27,4 @@
 
     return $random_product;
   }
-?>
+ ?>

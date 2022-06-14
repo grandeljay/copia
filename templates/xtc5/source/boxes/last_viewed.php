@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: last_viewed.php 12294 2019-10-23 09:15:59Z GTB $
+   $Id:$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,11 +23,18 @@ if (isset($_SESSION['tracking']['products_history']) && count($_SESSION['trackin
   $random_last_viewed = xtc_rand(0, (count($_SESSION['tracking']['products_history']) - 1));
 
   // set cache id
-  $cache_id = md5($_SESSION['currency'].$_SESSION['language'].$_SESSION['customers_status']['customers_status'].$_SESSION['tracking']['products_history'][$random_last_viewed]);
+  $cache_id = md5($_SESSION['language'].$_SESSION['customers_status']['customers_status'].$_SESSION['tracking']['products_history'][$random_last_viewed]);
 
   if (!$box_smarty->is_cached(CURRENT_TEMPLATE.'/boxes/box_last_viewed.html', $cache_id) || !$cache) {
 
-    $random_query = "SELECT ".$product->default_select.",
+    $random_query = "SELECT p.products_id,
+                            p.products_price,
+                            p.products_tax_class_id,
+                            p.products_image,
+                            p.products_vpe,
+                            p.products_vpe_status,
+                            p.products_vpe_value,
+                            pd.products_name,
                             p2c.categories_id,
                             cd.categories_name
                        FROM " . TABLE_PRODUCTS . " p

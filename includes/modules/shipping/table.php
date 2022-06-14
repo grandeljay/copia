@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: table.php 12901 2020-09-24 13:02:08Z Tomcraft $   
+   $Id: table.php 5118 2013-07-18 10:58:36Z Tomcraft $   
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -26,10 +26,10 @@
       $this->code = 'table';
       $this->title = MODULE_SHIPPING_TABLE_TEXT_TITLE;
       $this->description = MODULE_SHIPPING_TABLE_TEXT_DESCRIPTION;
-      $this->sort_order = ((defined('MODULE_SHIPPING_TABLE_SORT_ORDER')) ? MODULE_SHIPPING_TABLE_SORT_ORDER : '');
+      $this->sort_order = MODULE_SHIPPING_TABLE_SORT_ORDER;
       $this->icon = '';
-      $this->tax_class = ((defined('MODULE_SHIPPING_TABLE_TAX_CLASS')) ? MODULE_SHIPPING_TABLE_TAX_CLASS : '');
-      $this->enabled = ((defined('MODULE_SHIPPING_TABLE_STATUS') && MODULE_SHIPPING_TABLE_STATUS == 'True') ? true : false);
+      $this->tax_class = MODULE_SHIPPING_TABLE_TAX_CLASS;
+      $this->enabled = ((MODULE_SHIPPING_TABLE_STATUS == 'True') ? true : false);
       $this->num_zones = defined('MODULE_SHIPPING_TABLE_NUMBER_ZONES') ? MODULE_SHIPPING_TABLE_NUMBER_ZONES : '1';
 
       if ( ($this->enabled == true) && ((int)MODULE_SHIPPING_TABLE_ZONE > 0) && is_object($order) ) {
@@ -56,13 +56,13 @@
           xtc_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_TABLE_NUMBER_ZONES', '1', '6', '0', now())");
           if (defined('MODULE_SHIPPING_TABLE_COST')) {
             if (!defined('MODULE_SHIPPING_TABLE_COUNTRIES_1')) {
-              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) values ('MODULE_SHIPPING_TABLE_COUNTRIES_1', '". MODULE_SHIPPING_TABLE_ALLOWED ."', '6', '0', 'xtc_cfg_textarea(', now())");
+              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) values ('MODULE_SHIPPING_TABLE_COUNTRIES_1', ". MODULE_SHIPPING_TABLE_ALLOWED .", '6', '0', 'xtc_cfg_textarea(', now())");
             }
             if (!defined('MODULE_SHIPPING_TABLE_COST_1')) {
-              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_TABLE_COST_1', '". MODULE_SHIPPING_TABLE_COST ."', '6', '0', now())");
+              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_TABLE_COST_1', ". MODULE_SHIPPING_TABLE_COST .", '6', '0', now())");
             }
             if (!defined('MODULE_SHIPPING_TABLE_HANDLING_1')) {
-              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_TABLE_HANDLING_1', '". MODULE_SHIPPING_TABLE_HANDLING ."', '6', '0', now())");
+              xtc_db_query("insert into " . TABLE_CONFIGURATION . " ( configuration_key, configuration_value, configuration_group_id, sort_order, date_added) values ('MODULE_SHIPPING_TABLE_HANDLING_1', ". MODULE_SHIPPING_TABLE_HANDLING .", '6', '0', now())");
             }
           }
         }
@@ -126,7 +126,7 @@
         for ($i=0; $i<sizeof($table_table); $i+=2) {
           if ($order_total <= $table_table[$i]) {
             $shipping = $table_table[$i+1];
-            $shipping_method = MODULE_SHIPPING_TABLE_TEXT_WAY . ' ' . $dest_country . ': ';
+            $shipping_method = sprintf(MODULE_SHIPPING_TABLE_TEXT_WAY, $shipping_weight) . ' ' . $dest_country . ': ';
             break;
           }
         }
@@ -145,7 +145,7 @@
           $shipping_cost = ($shipping + constant('MODULE_SHIPPING_TABLE_HANDLING_' . $dest_zone));
 
           $this->quotes['methods'] = array(array('id' => $this->code,
-                                                 'title' => $shipping_method . ' (' . ($shipping_num_boxes > 1 ? $shipping_num_boxes . ' x ' : '') . round($shipping_weight, 2) . ' ' . MODULE_SHIPPING_TABLE_TEXT_UNITS .')',
+                                                 'title' => $shipping_method,
                                                  'cost'  => $shipping_cost));
         }
         

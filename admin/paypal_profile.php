@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypal_profile.php 11026 2017-12-06 16:24:36Z GTB $
+   $Id: paypal_profile.php 10051 2016-07-08 13:36:47Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -93,7 +93,6 @@ require (DIR_WS_INCLUDES.'head.php');
           <div class="pageHeadingImage"><?php echo xtc_image(DIR_WS_ICONS.'heading/icon_configuration.png'); ?></div>
           <div class="flt-l">
             <div class="pageHeading pdg2"><?php echo TEXT_PAYPAL_PROFILE_HEADING_TITLE; ?></div>
-            <div class="main">v<?php echo $paypal->paypal_version; ?></div>
           </div>
           <?php
             if (!isset($_GET['action'])) {
@@ -106,7 +105,7 @@ require (DIR_WS_INCLUDES.'head.php');
             <?php
               if (isset($_GET['action']) && $_GET['action'] == 'edit') {
                 $list = $paypal->get_profile($_GET['id']);
-            
+              
                 echo xtc_draw_form('config', basename($PHP_SELF), xtc_get_all_get_params(array('action')).'action=update');
 
                 for ($i=0, $n=count($list); $i<$n; $i++) {
@@ -142,13 +141,11 @@ require (DIR_WS_INCLUDES.'head.php');
                       <td class="dataTableConfig col-middle"><?php echo xtc_draw_pull_down_menu('config[flow_config][landing_page_type]', $landingpage_array, $list[$i]['flow_config']['landing_page_type']); ?></td>
                       <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_PROFILE_PAGE_INFO; ?></td>
                     </tr>
-                    <?php /*
                     <tr>
                       <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_PROFILE_ADDRESS; ?></td>
                       <td class="dataTableConfig col-middle"><?php echo draw_on_off_selection('config[input_fields][address_override]', $status_array, ($list[$i]['input_fields']['address_override'] == '1' ? false : true)); ?></td>
                       <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_PROFILE_ADDRESS_INFO; ?></td>
                     </tr>
-                    */ ?>
                     <tr>
                       <td class="txta-r" colspan="3" style="border:none;">
                         <a class="button" href="<?php echo xtc_href_link(basename($PHP_SELF)); ?>"><?php echo BUTTON_CANCEL; ?></a>
@@ -157,7 +154,7 @@ require (DIR_WS_INCLUDES.'head.php');
                     </tr>
                  <?php
                 }
-            
+              
               } elseif (isset($_GET['action']) && $_GET['action'] == 'new') {
 
                 echo xtc_draw_form('config', basename($PHP_SELF), xtc_get_all_get_params(array('action')).'action=insert');
@@ -187,13 +184,11 @@ require (DIR_WS_INCLUDES.'head.php');
                     <td class="dataTableConfig col-middle"><?php echo xtc_draw_pull_down_menu('config[flow_config][landing_page_type]', $landingpage_array, ''); ?></td>
                     <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_PROFILE_PAGE_INFO; ?></td>
                   </tr>
-                  <?php /*
                   <tr>
                     <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_PROFILE_ADDRESS; ?></td>
                     <td class="dataTableConfig col-middle"><?php echo draw_on_off_selection('config[input_fields][address_override]', $status_array, false); ?></td>
                     <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_PROFILE_ADDRESS_INFO; ?></td>
                   </tr>
-                  */ ?>
                   <tr>
                     <td class="txta-r" colspan="3" style="border:none;">
                       <a class="button" href="<?php echo xtc_href_link(basename($PHP_SELF)); ?>"><?php echo BUTTON_CANCEL; ?></a>
@@ -201,10 +196,10 @@ require (DIR_WS_INCLUDES.'head.php');
                     </td>
                   </tr>
                 <?php
-          
+            
               } else {
                 $list = $paypal->list_profile();
-            
+              
                 for ($i=0, $n=count($list); $i<$n; $i++) {
                   ?>
                     <tr>
@@ -237,13 +232,11 @@ require (DIR_WS_INCLUDES.'head.php');
                       <td class="dataTableConfig col-middle"><?php echo $list[$i]['flow_config']['landing_page_type']; ?></td>
                       <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_PROFILE_PAGE_INFO; ?></td>
                     </tr>
-                    <?php /*
                     <tr>
                       <td class="dataTableConfig col-left"><?php echo TEXT_PAYPAL_PROFILE_ADDRESS; ?></td>
                       <td class="dataTableConfig col-middle"><?php echo (($list[$i]['input_fields']['address_override'] == '0') ? YES : NO); ?></td>
                       <td class="dataTableConfig col-right"><?php echo TEXT_PAYPAL_PROFILE_ADDRESS_INFO; ?></td>
                     </tr>
-                    */ ?>
                     <tr>
                       <td class="txta-r" colspan="3" style="border:none;">
                         <a class="button" href="<?php echo xtc_href_link(basename($PHP_SELF), 'action=edit&id='.$list[$i]['id']); ?>"><?php echo BUTTON_EDIT; ?></a>

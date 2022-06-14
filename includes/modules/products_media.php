@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: products_media.php 10774 2017-06-10 07:27:25Z GTB $
+   $Id:$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org

@@ -4,8 +4,7 @@
 {config_load file="lang_`$language`.section" section="login"}
 <h1>{#heading_login#}</h1>
 
-{if $info_message != ''}<div class="errormessage">{$info_message}</div>{/if}
-{if $success_message != ''}<div class="infomessage">{$success_message}</div>{/if}
+{if $info_message != ''}<div class="{if isset($smarty.get.info) && $smarty.get.info == '1'}info{else}error{/if}message">{$info_message}</div>{/if}
 
 <div class="twoColums">
   <div class="highlightbox cf">
@@ -22,17 +21,15 @@
     <br />  
     <table>
       <tr>
-        <td><span class="fieldtext">{#text_email#}</span>{$INPUT_MAIL|replace:"type=\"text\"":"type=\"email\""}</td>
+        <td><span class="fieldtext">{#text_email#}</span>{$INPUT_MAIL}</td>
       </tr>
       <tr>
         <td><span class="fieldtext">{#text_password#}</span>{$INPUT_PASSWORD}</td>
       </tr>
-      {if $VVIMG}
+      {if $INPUT_CODE}
         <tr>
           <td><span class="fieldtext">{#text_sec_code#}</span>{$VVIMG}</td>
         </tr>
-      {/if}
-      {if $INPUT_CODE}
         <tr>
           <td><span class="fieldtext">{#text_sec_code#}</span>{$INPUT_CODE}</td>
         </tr>

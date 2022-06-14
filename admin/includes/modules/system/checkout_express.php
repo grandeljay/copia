@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: checkout_express.php 11599 2019-03-21 16:05:39Z GTB $
+   $Id: checkout_express.php 9910 2016-06-01 08:57:22Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,11 +21,11 @@ class checkout_express
         $this->code = 'checkout_express';
         $this->title = MODULE_CHECKOUT_EXPRESS_TEXT_TITLE;
         $this->description = MODULE_CHECKOUT_EXPRESS_TEXT_DESCRIPTION;
-        $this->sort_order = ((defined('MODULE_CHECKOUT_EXPRESS_SORT_ORDER')) ? MODULE_CHECKOUT_EXPRESS_SORT_ORDER : '');
-        $this->enabled = ((defined('MODULE_CHECKOUT_EXPRESS_STATUS') && MODULE_CHECKOUT_EXPRESS_STATUS == 'true') ? true : false);
+        $this->sort_order = MODULE_CHECKOUT_EXPRESS_SORT_ORDER;
+        $this->enabled = ((MODULE_CHECKOUT_EXPRESS_STATUS == 'true') ? true : false);
 
-        if (defined('RUN_MODE_ADMIN') && $this->enabled === true && (!defined('MODULE_CHECKOUT_EXPRESS_CONTENT_INSTALLED') || MODULE_CHECKOUT_EXPRESS_CONTENT_INSTALLED != '1')) {
-          $this->description .= ((defined('MODULE_'.strtoupper($this->code).'_DESCRIPTION_INSTALL')) ? constant('MODULE_'.strtoupper($this->code).'_DESCRIPTION_INSTALL').'<a class="button btnbox" style="text-align:center;" onclick="this.blur();" href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=system&module=' . $this->code . '&moduleaction=content') . '">' . MODULE_CHECKOUT_EXPRESS_BUTTON_INSTALL . '</a>' : '');
+        if (defined('RUN_MODE_ADMIN') && $this->enabled === true) {
+          $this->description .= ((defined('MODULE_'.strtoupper($this->code).'_DESCRIPTION_INSTALL')) ? constant('MODULE_'.strtoupper($this->code).'_DESCRIPTION_INSTALL').'<a class="button btnbox" style="text-align:center;" onclick="this.blur();" href="' . xtc_href_link(FILENAME_MODULE_EXPORT, 'set=system&module=' . $this->code . '&moduleaction=content') . '">' . 'Content '.BUTTON_MODULE_INSTALL . '</a>' : '');
           if (isset($_GET['moduleaction']) && $_GET['moduleaction'] == 'content') {
             $this->content_install();
             unset($_GET['moduleaction']);
@@ -56,10 +56,8 @@ class checkout_express
 
     function install() 
     {
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CHECKOUT_EXPRESS_STATUS', 'true',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('MODULE_CHECKOUT_EXPRESS_CONTENT', '',  '6', '1', 'xtc_cfg_select_content_module(', 'xtc_cfg_display_content', now())");
-        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value, configuration_group_id, sort_order, date_added) VALUES ('MODULE_CHECKOUT_EXPRESS_CONTENT_INSTALLED', '0',  '6', '1', now())");
-        
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, date_added) VALUES ('MODULE_CHECKOUT_EXPRESS_STATUS', 'true',  '6', '1', 'xtc_cfg_select_option(array(\'true\', \'false\'), ', now())");
+        xtc_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, use_function, date_added) VALUES ('MODULE_CHECKOUT_EXPRESS_CONTENT', '',  '6', '1', 'xtc_cfg_select_content_module(', 'xtc_cfg_display_content', now())");
         xtc_db_query("CREATE TABLE ".TABLE_CUSTOMERS_CHECKOUT." (
                                      customers_id int(11) NOT NULL,
                                      checkout_shipping VARCHAR(128) NOT NULL,
@@ -67,11 +65,10 @@ class checkout_express
                                      checkout_payment VARCHAR(128) NOT NULL,
                                      checkout_payment_address INT(11) NOT NULL,
                                      PRIMARY KEY (customers_id)
-                                   )");
+                                   ) ENGINE=MYISAM");
     }
     
     function content_install() {
-      if (!defined('MODULE_CHECKOUT_EXPRESS_CONTENT_INSTALLED') || MODULE_CHECKOUT_EXPRESS_CONTENT_INSTALLED != '1') {
         $content_query = xtc_db_query("SELECT MAX(content_id)+1 as content_id,
                                               MAX(content_group)+1 as content_group
                                          FROM ".TABLE_CONTENT_MANAGER);
@@ -91,7 +88,7 @@ class checkout_express
           'content_meta_title' => '',
           'content_meta_description' => '',
           'content_meta_keywords' => '',
-          'content_delete' => '1',
+          'content_delete' => '0',
           'content_active' => '1',
           'date_added' => 'now()'
           
@@ -110,11 +107,6 @@ class checkout_express
         xtc_db_query("UPDATE ".TABLE_CONFIGURATION."
                          SET configuration_value = '".$content['content_group']."'
                        WHERE configuration_key = 'MODULE_CHECKOUT_EXPRESS_CONTENT'");
-
-        xtc_db_query("UPDATE ".TABLE_CONFIGURATION."
-                         SET configuration_value = '1'
-                       WHERE configuration_key = 'MODULE_CHECKOUT_EXPRESS_CONTENT_INSTALLED'");
-      }
     }
     
     function remove()

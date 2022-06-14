@@ -33,8 +33,8 @@ loadDBConfig($_MagnaSession['mpID']);
 
 $requiredConfigKeys = $_modules[$_MagnaSession['currentPlatform']]['requiredConfigKeys'];
 $authConfigKeys = array(
-	/*'amazon.username',
-	'amazon.password',*/
+	'amazon.username',
+	'amazon.password',
 	'amazon.marketplaceid',
 	'amazon.merchantid',
 	'amazon.site',
@@ -112,8 +112,6 @@ if ($_magnaQuery['mode'] == 'prepare') {
 } else if ($_magnaQuery['mode'] == 'checkin') {
 	$includes[] = DIR_MAGNALISTER_MODULES.'amazon/checkin.php';
 
-} else if ($_magnaQuery['mode'] == 'shippinglabel') {
-	$includes[] = DIR_MAGNALISTER_MODULES.'amazon/shippinglabel.php';
 } else if ($_magnaQuery['mode'] == 'listings') {
 	$includes[] = DIR_MAGNALISTER_MODULES.'amazon/listings.php';
 	

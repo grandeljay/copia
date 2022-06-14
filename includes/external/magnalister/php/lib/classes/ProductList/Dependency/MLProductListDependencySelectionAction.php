@@ -37,11 +37,9 @@ class MLProductListDependencySelectionAction extends MLProductListDependency {
 						TABLE_MAGNA_SELECTION, 
 						array(
 							'pID' => $aRequest[0],
-							'data' => '',
 							'session_id' => $this->getConfig('session_id'),
 							'mpID' => $this->getConfig('mpID'),
-							'selectionname' => $this->getConfig('selectionname'),
-                            'expires' => gmdate('Y-m-d H:i:s'),
+							'selectionname' => $this->getConfig('selectionname')
 						),
 						true
 					);
@@ -67,7 +65,6 @@ class MLProductListDependencySelectionAction extends MLProductListDependency {
 							TABLE_MAGNA_SELECTION, 
 							array(
 								'pID' => $aRow['products_id'],
-                                'data' => '',
 								'session_id' => $this->getConfig('session_id'),
 								'mpID' => $this->getConfig('mpID'),
 								'selectionname' => $this->getConfig('selectionname')
@@ -83,7 +80,6 @@ class MLProductListDependencySelectionAction extends MLProductListDependency {
 							TABLE_MAGNA_SELECTION, 
 							array(
 								'pID' => $aRow['products_id'],
-                                'data' => '',
 								'session_id' => $this->getConfig('session_id'),
 								'mpID' => $this->getConfig('mpID'),
 								'selectionname' => $this->getConfig('selectionname')
@@ -99,7 +95,6 @@ class MLProductListDependencySelectionAction extends MLProductListDependency {
 							TABLE_MAGNA_SELECTION, 
 							array(
 								'pID' => $aRow['products_id'],
-                                'data' => '',
 								'session_id' => $this->getConfig('session_id'),
 								'mpID' => $this->getConfig('mpID'),
 								'selectionname' => $this->getConfig('selectionname')

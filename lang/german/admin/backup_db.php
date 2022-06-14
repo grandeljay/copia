@@ -1,17 +1,14 @@
 <?php
-  /* --------------------------------------------------------------
-   $Id: backup_db.php 13059 2020-12-12 08:00:14Z GTB $
+/*
+  $Id: backup.php,v 1.16 2002/03/16 21:30:02 hpdl Exp $
 
-   modified eCommerce Shopsoftware
-   http://www.modified-shop.org
+  osCommerce, Open Source E-Commerce Solutions
+  http://www.oscommerce.com
 
-   Copyright (c) 2009 - 2013 [www.modified-shop.org]
-   --------------------------------------------------------------
-   based on:
-   (c) 2011 (c) by  web28 - www.rpa-com.de
+  Copyright (c) 2002 osCommerce
 
-   Released under the GNU General Public License
-   --------------------------------------------------------------*/
+  Released under the GNU General Public License
+*/
 
 define('HEADING_TITLE', 'Datenbank Backup Manager');
 

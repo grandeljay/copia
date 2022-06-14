@@ -19,7 +19,7 @@
 // Allgemeine Texte
 define('TABLE_HEADING', 'Bestelldaten bearbeiten');
 define('TABLE_HEADING_ORDER', 'Bestellung Nr:&nbsp;');
-define('TEXT_SAVE_ORDER', 'Bestellung abschlie&szlig;en und neu berechnen.&nbsp;');
+define('TEXT_SAVE_ORDER', 'Bestellungsbearbeitung beenden und Bestellung neu berechnen.&nbsp;');
 
 define('TEXT_EDIT_ADDRESS', 'Adress- und Kundendaten');
 define('TEXT_EDIT_PRODUCTS', 'Artikel, Artikeloptionen und Preise');
@@ -64,7 +64,9 @@ define('TEXT_PRODUCT_SEARCH', 'Artikelsuche:');
 define('TEXT_PRODUCT_OPTION', 'Artikelmerkmale:');
 define('TEXT_PRODUCT_OPTION_VALUE', 'Optionswert:');
 define('TEXT_PRICE_PREFIX', 'Price Prefix:');
+define('TEXT_SAVE_ORDER', 'Bestellung abschlie&szlig;en und neu berechnen');
 define('TEXT_INS', 'Hinzuf&uuml;gen:');
+define('TEXT_SHIPPING', 'Versandkosten Modul');
 define('TEXT_COD_COSTS', 'Nachnahmekosten');
 define('TEXT_VALUE', 'Preis');
 define('TEXT_DESC', 'Einf&uuml;gen');
@@ -79,6 +81,10 @@ define('TEXT_ORDER_TOTAL', 'Zusammenfassung:');
 define('TEXT_SAVE', 'Speichern');
 define('TEXT_ACTUAL', 'Aktuell: ');
 define('TEXT_NEW', 'Neu: ');
+define('TEXT_PRICE', 'Kosten: ');
+
+define('TEXT_ADD_TAX','inkl. ');
+define('TEXT_NO_TAX','zzgl. ');
 
 define('TEXT_ORDERS_EDIT_INFO', '<b>Wichtige Hinweise:</b><br />
 Bitte bei den Adress-/Kundendaten die richtige Kundengruppe w&auml;hlen.<br />

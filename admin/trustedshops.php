@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: trustedshops.php 13051 2020-12-10 08:47:50Z GTB $
+   $Id$
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,33 +23,35 @@
   $languages = xtc_get_languages(); 
 
   // installed
-  if (defined('MODULE_TRUSTEDSHOPS_STATUS') && MODULE_TRUSTEDSHOPS_STATUS == 'true') {
-    $installed_array = array();
-    $installed_query = xtc_db_query("SELECT languages_id
-                                       FROM ".TABLE_TRUSTEDSHOPS."
-                                      WHERE status = '1'");
-    while ($installed = xtc_db_fetch_array($installed_query)) {
-      $installed_array[] = $installed['languages_id'];
-    }
+  $installed_array = array();
+  $installed_query = xtc_db_query("SELECT languages_id
+                                     FROM ".TABLE_TRUSTEDSHOPS."
+                                    WHERE status = '1'");
+  while ($installed = xtc_db_fetch_array($installed_query)) {
+    $installed_array[] = $installed['languages_id'];
   }
-
+  
   $languages_id_array = array();
   for ($i=0, $n=count($languages); $i<$n; $i++) {
     $languages_id_array[] = array('id' => $languages[$i]['id'], 'text' => $languages[$i]['name']);
   }
 
-  $trustedshops_status_array = array(
-    array('id' => '1', 'text' => TEXT_ENABLED),
-    array('id' => '0', 'text' => TEXT_DISABLED),
-  );
+  $trustedshops_status_array = array(array('id' => '1', 'text' => TEXT_ENABLED),
+                                     array('id' => '0', 'text' => TEXT_DISABLED),
+                                     );
 
-  $trustbadge_array = array(
-    array('id' => 'default', 'text' => TEXT_BADGE_DEFAULT),
-    //array('id' => 'small', 'text' => TEXT_BADGE_SMALL),
-    array('id' => 'reviews', 'text' => TEXT_BADGE_REVIEWS),
-    array('id' => 'custom', 'text' => TEXT_BADGE_CUSTOM),
-    //array('id' => 'custom_reviews', 'text' => TEXT_BADGE_CUSTOM_REVIEWS),
-  );
+  $trustbadge_array = array(array('id' => 'default', 'text' => TEXT_BADGE_DEFAULT),
+                            //array('id' => 'small', 'text' => TEXT_BADGE_SMALL),
+                            array('id' => 'reviews', 'text' => TEXT_BADGE_REVIEWS),
+                            array('id' => 'custom', 'text' => TEXT_BADGE_CUSTOM),
+                            //array('id' => 'custom_reviews', 'text' => TEXT_BADGE_CUSTOM_REVIEWS),
+                            );
+
+  $trustbadge_position_array = array(array('id' => 'bottomRight', 'text' => TEXT_BADGE_BOTTOM_RIGHT),
+                                     array('id' => 'bottomLeft', 'text' => TEXT_BADGE_BOTTOM_LEFT),
+                                     array('id' => 'topRight', 'text' => TEXT_BADGE_TOP_RIGHT),
+                                     array('id' => 'topLeft', 'text' => TEXT_BADGE_TOP_LEFT),
+                                     );
 
   switch ($_GET['action']) {
     case 'setflag':
@@ -121,12 +123,12 @@
       
       if ($_GET['action'] == 'insert') {
         $insert_sql_data = array('date_added' => 'now()');
-        $sql_data_array = array_merge($sql_data_array, $insert_sql_data);
+        $sql_data_array = xtc_array_merge($sql_data_array, $insert_sql_data);
         xtc_db_perform(TABLE_TRUSTEDSHOPS, $sql_data_array);
         $tID = xtc_db_insert_id();
       } elseif ($_GET['action'] == 'save') {
         $update_sql_data = array('last_modified' => 'now()');
-        $sql_data_array = array_merge($sql_data_array, $update_sql_data);
+        $sql_data_array = xtc_array_merge($sql_data_array, $update_sql_data);
         xtc_db_perform(TABLE_TRUSTEDSHOPS, $sql_data_array, 'update', "id = '" . (int)$tID . "'");
       }
       

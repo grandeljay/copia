@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_get_tax_rate_from_desc.inc.php 12508 2020-01-10 16:08:12Z GTB $
+   $Id: xtc_get_tax_rate_from_desc.inc.php 2843 2012-05-06 14:30:10Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -31,13 +31,15 @@
 // Get tax rate from tax description
   function xtc_get_tax_rate_from_desc($tax_desc) {
     //search digits in tax_description
-    if (preg_match('/\d+(\.\d{1,2})?/', str_replace(',', '.', $tax_desc), $matches)) {
+    if (preg_match('/\d+\.?\d*/', str_replace(',', '.', $tax_desc), $matches)) {
       return floatval($matches[0]);
     }
-
+    //check for TAX_SHORT_DISPLAY and remove it
+    if(defined('TAX_SHORT_DISPLAY') && TAX_SHORT_DISPLAY != '') {
+      $tax_desc = trim(str_replace(TAX_SHORT_DISPLAY, '', $tax_desc));
+    }
     //remove tax info text
-    $tax_desc = trim(str_replace(array(TAX_ADD_TAX, TAX_NO_TAX), '', $tax_desc));
-
+    $tax_desc = trim(str_replace(array(TAX_ADD_TAX,TAX_NO_TAX), '', $tax_desc));
     //get tax_rate from table tax_rates by tax_description
     $tax_query = xtc_db_query("SELECT tax_rate 
                                  FROM " . TABLE_TAX_RATES . " 
@@ -46,7 +48,7 @@
       $tax = xtc_db_fetch_array($tax_query);
       return $tax['tax_rate'];
     }
-
+    //no tax_rate find, return 0
     return 0;
   }
 ?>

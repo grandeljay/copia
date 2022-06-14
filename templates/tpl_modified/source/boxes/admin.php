@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: admin.php 13363 2021-02-03 08:40:04Z GTB $
+   $Id: admin.php 96 2012-12-02 12:02:56Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -34,7 +34,7 @@ require_once(DIR_FS_INC . 'xtc_get_shop_conf.inc.php');
 if (xtc_get_shop_conf('SHOP_OFFLINE') == 'checked') {
   $box_smarty->assign('SHOP_OFFLINE', true);
   if ($admin_access['shop_offline'] == '1') {
-    $box_smarty->assign('SHOP_OFFLINE_LINK', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'shop_offline.php', '', 'NONSSL'));
+    $box_smarty->assign('SHOP_OFFLINE_LINK', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'shop_offline.php','', 'NONSSL'));
   }
 }
 
@@ -43,15 +43,15 @@ if ($admin_access['newsfeed'] == '1') {
   $num_news_query = xtc_db_query("SELECT count(*) as total FROM newsfeed WHERE news_date > '".NEWSFEED_LAST_READ."'");
   $num_news = xtc_db_fetch_array($num_news_query);
   $box_smarty->assign('NEWSFEED_COUNT', $num_news['total']);
-  $box_smarty->assign('NEWSFEED', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'newsfeed.php', '', 'NONSSL'));
+  $box_smarty->assign('NEWSFEED', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'newsfeed.php','', 'NONSSL'));
 }
 
 // update check
-if ($admin_access['check_update'] == '1' && file_exists(DIR_FS_INC.'check_version_update.inc.php')) {
+if ($admin_access['check_update'] == '1') {
   require_once(DIR_FS_INC.'check_version_update.inc.php');
   $update_array = check_version_update();
   $box_smarty->assign('UPDATE_COUNT', $update_array['update']);
-  $box_smarty->assign('UPDATE', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'check_update.php', '', 'NONSSL'));
+  $box_smarty->assign('UPDATE', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'check_update.php','', 'NONSSL'));
 }
 
 // language
@@ -63,7 +63,7 @@ if ($admin_access['languages'] == '1' || $admin_access['categories'] == '1') {
   }
   if (count($lng->catalog_languages) > 1) {
     reset($lng->catalog_languages);
-    foreach ($lng->catalog_languages as $key => $value) {
+    while (list($key, $value) = each($lng->catalog_languages)) {
       $lng_link_txt = file_exists('lang/' .  $value['directory'] .'/' . $value['image']) ? xtc_image('lang/' .  $value['directory'] .'/' . $value['image'], $value['name']) : $value['name'];
       $languages_string .= '&nbsp;<a href="' . xtc_href_link(basename($PHP_SELF), xtc_get_all_get_params(array('language', 'currency')) . 'language=' . $key, $request_type) . '">' . $lng_link_txt . '</a> ';
     }
@@ -75,21 +75,15 @@ if ($admin_access['languages'] == '1' || $admin_access['categories'] == '1') {
 if ($admin_access['orders'] == '1') {
   $orders_contents = '';
   $orders_status_validating = xtc_db_num_rows(xtc_db_query("SELECT orders_status FROM ".TABLE_ORDERS ." WHERE orders_status ='0'"));
-  $orders_contents .='<li><a href="'.xtc_href_link_admin(FILENAME_ORDERS, 'status=0', 'NONSSL').'"><em>'.$orders_status_validating.'</em>'.TEXT_VALIDATING.'</a></li>';
+  $orders_contents .='<li><a href="'.xtc_href_link_admin(FILENAME_ORDERS, 'selected_box=customers&status=0', 'NONSSL').'"><em>'.$orders_status_validating.'</em>'.TEXT_VALIDATING.'</a></li>';
 
-  $orders_status_query = xtc_db_query("SELECT os.orders_status_name, 
-                                              os.orders_status_id, 
-                                              count(*) AS count 
-                                         FROM ".TABLE_ORDERS_STATUS." os 
-                                         JOIN ".TABLE_ORDERS." o
-                                              ON o.orders_status = os.orders_status_id  
-                                        WHERE os.language_id = '".(int)$_SESSION['languages_id']."'
-                                     GROUP BY os.orders_status_id
-                                     ORDER BY os.sort_order, os.orders_status_name");
+  $orders_status_query = xtc_db_query("SELECT orders_status_name, orders_status_id FROM ".TABLE_ORDERS_STATUS." WHERE language_id = '".(int)$_SESSION['languages_id']."' ORDER BY sort_order");
   while ($orders_status = xtc_db_fetch_array($orders_status_query)) {
-    $orders_contents .= '<li><a href="'.xtc_href_link_admin(FILENAME_ORDERS, 'status='.$orders_status['orders_status_id'], 'NONSSL').'"><em>'.$orders_status['count'].'</em>'.$orders_status['orders_status_name'].'</a></li>';
+    $orders_pending_query = xtc_db_query("SELECT count(*) AS count FROM ".TABLE_ORDERS." WHERE orders_status = '".$orders_status['orders_status_id']."'");
+    $orders_pending = xtc_db_fetch_array($orders_pending_query);
+    $orders_contents .= '<li><a href="'.xtc_href_link_admin(FILENAME_ORDERS, 'selected_box=customers&status='.$orders_status['orders_status_id'], 'NONSSL').'"><em>'.$orders_pending['count'].'</em>'.$orders_status['orders_status_name'].'</a></li>';
   }
-  $box_smarty->assign('ORDERS', xtc_href_link_admin(FILENAME_ORDERS, '', 'NONSSL'));
+  $box_smarty->assign('ORDERS', xtc_href_link_admin(FILENAME_ORDERS,'', 'NONSSL'));
   $box_smarty->assign('ORDERS_CONTENT', $orders_contents);
 }
 
@@ -98,7 +92,7 @@ if ($admin_access['customers'] == '1') {
   $customers_query = xtc_db_query("select count(*) as count from ".TABLE_CUSTOMERS);
   $customers = xtc_db_fetch_array($customers_query);
   $box_smarty->assign('CUSTOMERS_INFO', BOX_ENTRY_CUSTOMERS . ' ' . $customers['count']);
-  $box_smarty->assign('CUSTOMERS', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'customers.php', '', 'NONSSL'));
+  $box_smarty->assign('CUSTOMERS', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'customers.php','', 'NONSSL'));
 }
 
 // categories/product/attributes
@@ -116,15 +110,9 @@ if ($admin_access['categories'] == '1') {
     $box_smarty->assign('EDIT_XSELL', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'categories.php', 'cpath='.$cPath.'&current_product_id='.$product->data['products_id'].'&action=edit_crossselling'));
   }
   // attributes
-  if ($admin_access['products_attributes'] == '1') {
+  if ($admin_access['new_attributes'] == '1') {
     if ($product->isProduct() === true) {
-      $box_smarty->assign('EDIT_PRODUCT_ATTRIBUTES', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'products_attributes.php', 'cpath='.$cPath.'&current_product_id='.$product->data['products_id'].'&action=edit'));
-    }
-  }
-  // tags
-  if ($admin_access['products_tags'] == '1') {
-    if ($product->isProduct() === true) {
-      $box_smarty->assign('EDIT_PRODUCT_TAGS', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'products_tags.php', 'cpath='.$cPath.'&current_product_id='.$product->data['products_id'].'&action=edit'));
+      $box_smarty->assign('EDIT_PRODUCT_ATTRIBUTES', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'new_attributes.php', 'cpath='.$cPath.'&current_product_id='.$product->data['products_id'].'&action=edit'));
     }
   }
   // product info
@@ -136,7 +124,7 @@ if ($admin_access['categories'] == '1') {
   $reviews = xtc_db_fetch_array($reviews_query);
   $box_smarty->assign('REVIEWS_INFO', BOX_ENTRY_REVIEWS . ' ' . $reviews['count']);
   
-  $box_smarty->assign('CATEGORIES', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'categories.php', '', 'NONSSL'));
+  $box_smarty->assign('CATEGORIES', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'categories.php','', 'NONSSL'));
 }
 
 // content manager
@@ -144,22 +132,13 @@ if ($admin_access['content_manager'] == '1') {
   if (isset($_GET['coID'])) {
     $box_smarty->assign('EDIT_CONTENT', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'content_manager.php', 'action=edit&coID='.(int)$_GET['coID']));
   }
-  $box_smarty->assign('CONTENT_MANAGER', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'content_manager.php', '', 'NONSSL'));
-}
-
-// caching
-if (DB_CACHE == 'true' || USE_CACHE == 'true') {
-  $box_smarty->assign('CACHING', true);
-  if ($admin_access['configuration'] == '1') {
-    $box_smarty->assign('CACHING_LINK', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'configuration.php', 'gID=11', 'NONSSL'));
-  }
+  $box_smarty->assign('CONTENT_MANAGER', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'content_manager.php','', 'NONSSL'));
 }
 
 // start
-$box_smarty->assign('START', xtc_href_link_admin(FILENAME_START, '', 'NONSSL'));
-
-// support
-$box_smarty->assign('SUPPORT', xtc_href_link_admin((defined('DIR_ADMIN') ? DIR_ADMIN : 'admin/').'support.php', '', 'NONSSL'));
+if ($admin_access['start'] == '1') {
+  $box_smarty->assign('START', xtc_href_link_admin(FILENAME_START,'', 'NONSSL'));
+}
 
 $box_smarty->caching = 0;
 $box_admin = $box_smarty->fetch(CURRENT_TEMPLATE.'/boxes/box_admin.html');

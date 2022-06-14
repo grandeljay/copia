@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: newsfeed.php 13259 2021-01-31 10:44:32Z GTB $
+   $Id: start.php 4738 2013-05-07 15:57:00Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -21,8 +21,6 @@ require ('includes/application_top.php');
 //display per page
 $cfg_max_display_results_key = 'MAX_DISPLAY_NEWS_RESULTS';
 $page_max_display_results = xtc_cfg_save_max_display_results($cfg_max_display_results_key);
-
-$page = (isset($_GET['page']) ? (int)$_GET['page'] : 1);
 
 // update last read
 xtc_db_query("UPDATE ".TABLE_CONFIGURATION." SET configuration_value = '".time()."' WHERE configuration_key = 'NEWSFEED_LAST_READ'");
@@ -71,23 +69,21 @@ require (DIR_WS_INCLUDES.'head.php');
       ?>
       <!-- body_text //-->
       <td width="100%" valign="top">
-        <div class="dataTableHeadingContent"><a target="_blank" href="<?php echo RSS_FEED_LINK; ?>"><strong><?php echo RSS_FEED_TITLE; ?></strong></a></div>
         <div class="admin_container cf">
-          <div class="admin_contentbox blog_container">
+          <div class="admin_headline"><a target="_blank" href="<?php echo RSS_FEED_LINK; ?>"><?php echo RSS_FEED_TITLE; ?></a></div>
+          <div class="admin_contentbox">
             <?php
             $news_query_raw = "SELECT * FROM newsfeed ORDER BY news_date DESC";
-            $news_split = new splitPageResults($page, $page_max_display_results, $news_query_raw, $news_query_numrows);
+            $news_split = new splitPageResults($_GET['page'], $page_max_display_results, $news_query_raw, $news_query_numrows);
             $news_query = xtc_db_query($news_query_raw);
             if (xtc_db_num_rows($news_query) > 0) {
               $i = 0;
               while ($news = xtc_db_fetch_array($news_query)) {
                 $news['news_text'] = str_replace('src="http://', 'src="https://', $news['news_text']);
                 ?>
-                <div class="blog_title<?php echo (($i == 0) ? ' active' : ''); ?>">
-                  <div class="blog_header"><?php echo $news['news_title']; ?></div>
+                <div class="blog_title<?php echo (($i == 0) ? ' active' : ''); ?>"><?php echo $news['news_title']; ?></div>                          
+                <div class="blogentry" <?php echo (($i != 0) ? ' style="display:none; margin-top:2px;"' : ''); ?>>
                   <div class="blog_date"><?php echo date('d.m.Y', $news['news_date']); ?></div>                                      
-                </div>                          
-                <div class="blogentry" <?php echo (($i != 0) ? ' style="display:none;"' : ''); ?>>
                   <div class="blog_desc"><?php echo $news['news_text']; ?></div>
                   <div class="blog_read_more"><a target="_blank" href="<?php echo $news['news_link']; ?>">weiterlesen &raquo;</a></div>
                 </div>
@@ -105,9 +101,8 @@ require (DIR_WS_INCLUDES.'head.php');
           ?>           
           </div>
         </div>
-        <br />
-        <div class="smallText pdg2 flt-l"><?php echo $news_split->display_count($news_query_numrows, $page_max_display_results, $page, TEXT_DISPLAY_NUMBER_OF_NEWSFEED); ?></div>
-        <div class="smallText pdg2 flt-r"><?php echo $news_split->display_links($news_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $page); ?></div>
+        <div class="smallText pdg2 flt-l"><?php echo $news_split->display_count($news_query_numrows, $page_max_display_results, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_NEWSFEED); ?></div>
+        <div class="smallText pdg2 flt-r"><?php echo $news_split->display_links($news_query_numrows, $page_max_display_results, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></div>
         <?php echo draw_input_per_page($PHP_SELF,$cfg_max_display_results_key,$page_max_display_results); ?>
       </td>
       <!-- body_text_eof //-->

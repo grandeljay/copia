@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: coupon_admin.php 13346 2021-02-02 13:12:50Z GTB $
+   $Id: coupon_admin.php 2094 2011-08-15 14:56:49Z web28 $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -76,7 +76,6 @@ define('COUPON_USES_COUPON', 'Anzahl/Verwendungen pro Coupon');
 define('COUPON_USES_USER', 'Anzahl/Verwendungen pro Kunde');
 define('COUPON_PRODUCTS', 'Liste der g&uuml;ltigen Artikel');
 define('COUPON_CATEGORIES', 'Liste der g&uuml;ltigen Kategorien');
-define('COUPON_CUSTOMERS', 'Liste der g&uuml;ltigen Kundengruppen');
 define('VOUCHER_NUMBER_USED', 'Anzahl Verwendet');
 define('DATE_CREATED', 'erstellt am');
 define('DATE_MODIFIED', 'ge&auml;ndert am');
@@ -88,18 +87,16 @@ define('COUPON_AMOUNT_HELP', 'Tragen Sie hier den Rabatt f&uuml;r diesen Coupon 
 define('COUPON_CODE_HELP', 'Hier k&ouml;nnen Sie einen eigenen Code eintragen (max. 16 Zeichen). Lassen Sie das Feld frei, dann wird dieser Code automatisch generiert.');
 define('COUPON_STARTDATE_HELP', 'Das Datum ab dem der Coupon g&uuml;ltig ist.<br>');
 define('COUPON_FINISHDATE_HELP', 'Das Datum an dem der Coupon abl&auml;uft.<br>');
-define('COUPON_FREE_SHIP_HELP', 'Coupon f&uuml;r eine versandkostenfreie Lieferung.');
+define('COUPON_FREE_SHIP_HELP', 'Coupon f&uuml;r eine versandkostenfreie Lieferung. <strong>Achtung:</strong> Der Coupon Wert wird <b>nicht</b> ber&uuml;cksichtigt! Der Mindestbestellwert bleibt g&uuml;ltig.');
 define('COUPON_DESC_HELP', 'Beschreibung des Coupons f&uuml;r den Kunden');
 define('COUPON_MIN_ORDER_HELP', 'Mindestbestellwert ab dem dieser Coupon g&uuml;ltig ist');
 define('COUPON_USES_COUPON_HELP', 'Tragen Sie hier ein wie oft dieser Coupon eingel&ouml;st werden darf. Lassen Sie das Feld frei, dann ist die Benutzung unlimitiert.');
 define('COUPON_USES_USER_HELP', 'Tragen Sie hier ein wie oft ein Kunde diesen Coupon einl&ouml;sen darf. Lassen Sie das Feld frei, dann ist die Benutzung unlimitiert.');
 define('COUPON_PRODUCTS_HELP', 'Eine durch Komma getrennte Liste von Artikel-IDs f&uuml;r die dieser Coupon g&uuml;ltig ist. Ein leeres Feld bedeutet keine Einschr&auml;nkung.');
 define('COUPON_CATEGORIES_HELP', 'Eine durch Komma getrennte Liste von Kategorie-IDs f&uuml;r die dieser Coupon g&uuml;ltig ist. Ein leeres Feld bedeutet keine Einschr&auml;nkung.');
-define('COUPON_CUSTOMERS_HELP', 'W&auml;hlen Sie die g&uuml;ltigen Kundengruppen f&uuml;r diesen Coupon.');
-
 define('COUPON_ID', 'cID');
 define('BUTTON_DELETE_NO_CONFIRM', 'ohne Abfrage l&ouml;schen');
-define('TEXT_NO_RESTRICTION', 'keine Einschr&auml;nkung');
+define('TEXT_NONE', 'keine Einschr&auml;nkung');
 define('TEXT_COUPON_DELETE', 'L&ouml;schen');
 define('TEXT_COUPON_STATUS', 'Status');
 define('TEXT_COUPON_DETAILS', 'Coupon Daten');
@@ -111,7 +108,7 @@ define('TEXT_VIEW', 'Listenansicht');
 define('TEXT_VIEW_SHORT', 'Anzeige');
 //BOF - web28 - 2011-04-13 - ADD Coupon message infos
 define('COUPON_MINORDER_INFO', "\nMindestbestellwert: ");
-define('COUPON_RESTRICT_INFO', "\nDieser Coupon ist nur f&uuml;r bestimmte Artikel g&uuml;ltig!");
+define('COUPON_RESTRICT_INFO', "\nDieser Coupon ist nur für bestimmte Artikel g&uuml;ltig!");
 define('COUPON_INFO', "\nCouponwert: ");
 define('COUPON_FREE_SHIPPING', 'Versandkostenfrei');
 define('COUPON_LINK_TEXT', '\n\nDetails');
@@ -128,6 +125,4 @@ define('ERROR_NO_COUPON_AMOUNT', 'FEHLER: Kein Couponwert');
 define('COUPON_DATE_START_TT', 'Beginnt um 00:00:00 Uhr');
 define('COUPON_DATE_END_TT', 'Endet um Mitternacht (23:59:59 Uhr)');
 define('ERROR_COUPON_DATE', 'FEHLER: Das Enddatum ist &auml;lter als das Startdatum');
-
-define('TEXT_OT_COUPON_STATUS_INFO', 'Das Coupon Modul (ot_coupon) muss noch installiert werden (Module -> <a href="'.xtc_href_link('modules.php','set=ordertotal').'">Zusammenfassung</a>)');
 ?>

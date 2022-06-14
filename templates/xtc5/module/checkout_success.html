@@ -15,7 +15,7 @@
 {if $GV_SEND_LINK}
 <p>{#gv_has_vouchera#} {$GV_SEND_LINK} {#gv_has_voucherb#}</p>
 {/if}
-{if is_array($PAYMENT_INFO) && count($PAYMENT_INFO) > 0}
+{if count($PAYMENT_INFO) > 0}
 <div class="highlightbox">
   {foreach name=aussen item=data from=$PAYMENT_INFO}
     <h4>{$data.title|stripslashes}</h4>
@@ -31,13 +31,9 @@
 </div>
 <br class="clearfix" />
 {/if}
-
-{if isset($BUTTON_PRINT_LAYER)}
-  <div style="float:left;">{$BUTTON_PRINT_LAYER}</div>
-{else}
-  {if isset($FORM_ACTION_PRINT_LAYER)}{$FORM_ACTION_PRINT_LAYER}{else}{$FORM_ACTION_PRINT}{/if}<div style="float:left;">{$BUTTON_PRINT}</div>{$FORM_END}
-{/if}
-
+{$FORM_ACTION_PRINT}
+<div style="float:left;">{$BUTTON_PRINT}</div>
+{$FORM_END}
 {$FORM_ACTION}
 <div style="float:left; padding-left:5px;">{$BUTTON_CONTINUE}</div>
 <div style="clear:left;"></div>

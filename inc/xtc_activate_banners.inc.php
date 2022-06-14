@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: xtc_activate_banners.inc.php 13478 2021-03-31 07:15:08Z GTB $
+   $Id: xtc_activate_banners.inc.php 899 2005-04-29 02:40:57Z hhgag $
 
    XT-Commerce - community made shopping
    http://www.xt-commerce.com
@@ -15,12 +15,12 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-  // Auto activate banners
+// Auto activate banners
   function xtc_activate_banners() {
     $banners_query = xtc_db_query("SELECT banners_id, 
                                           date_scheduled 
                                      FROM " . TABLE_BANNERS . " 
-                                    WHERE date_scheduled IS NOT NULL");
+                                    WHERE date_scheduled != ''");
     if (xtc_db_num_rows($banners_query)) {
       while ($banners = xtc_db_fetch_array($banners_query)) {
         if (date('Y-m-d H:i:s') >= $banners['date_scheduled']) {
@@ -29,4 +29,4 @@
       }
     }
   }
-?>
+ ?>

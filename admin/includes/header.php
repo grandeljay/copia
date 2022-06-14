@@ -1,6 +1,6 @@
 <?php
   /* --------------------------------------------------------------
-   $Id: header.php 12446 2019-12-03 08:43:21Z GTB $
+   $Id: header.php 10381 2016-11-07 08:16:07Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -19,6 +19,10 @@
 
   require_once(DIR_FS_INC . 'xtc_get_shop_conf.inc.php'); 
   
+  //define with and height for xtc_draw_separator('pixel_trans.gif', HEADING_IMAGE_WIDTH, HEADING_IMAGE_HEIGHT)
+  define('HEADING_IMAGE_WIDTH',57);
+  define('HEADING_IMAGE_HEIGHT',40);
+  
   ((isset($_GET['search']) && strip_tags($_GET['search']) != $_GET['search']) ? $_GET['search'] = NULL : false);
   ((isset($_GET['search_email']) && strip_tags($_GET['search_email']) != $_GET['search_email']) ? $_GET['search_email'] = NULL : false);
   
@@ -26,7 +30,7 @@
   $ls_languages = xtc_get_languages();  
   $languages_array = array();
   if (count($ls_languages) > 1) {
-    foreach ($ls_languages as $key => $value) {
+    while (list($key, $value) = each($ls_languages)) {
       if (!isset($_GET['action']) || $_GET['action'] == 'edit') {
         $languages_array[] = '<a href="' . xtc_href_link($current_page, xtc_get_all_get_params(array('language', 'currency')).'language=' . $value['code'], 'NONSSL') . '">' . xtc_image('../lang/' .  $value['directory'] .'/admin/images/' . $value['image'], $value['name']) . '</a>';
       } else {
@@ -47,14 +51,8 @@
   // check update
   require_once(DIR_FS_INC.'check_version_update.inc.php');
   $update_array = check_version_update();
-  
-  // caching
-  $configuration_query = xtc_db_query("SELECT count(*) as total 
-                                         FROM ".TABLE_CONFIGURATION."
-                                        WHERE configuration_value = 'true' 
-                                          AND (configuration_key = 'DB_CACHE' OR configuration_key = 'USE_CACHE')");
-  $configuration = xtc_db_fetch_array($configuration_query);
-?> 
+  ?>
+ 
 <div id="fixed-header"<?php echo ((USE_ADMIN_FIXED_SEARCH == 'true') ? ' class="active"' : ''); ?>>
   <div class="admin_spacer"></div>
   <div class="adminbar">
@@ -65,7 +63,7 @@
         <?php
           $favorites = array();
 
-          $favorites[] = array(
+          $favorites[0] = array(
               'file'  => 'index.php',
               'par'  => '', 
               'mode'  => 1,
@@ -73,7 +71,8 @@
               'name'  => BOX_SHOP,
               'class' => ''
             );
-          $favorites[] = array(
+
+          $favorites[1] = array(
               'file'  => 'orders.php',
               'par'  => '', 
               'mode'  => 0,
@@ -81,7 +80,7 @@
               'name'  => BOX_ORDERS,
               'class' => ''
             );
-          $favorites[] = array(
+          $favorites[2] = array(
               'file'  => 'customers.php',
               'par'  => '', 
               'mode'  => 0,
@@ -89,7 +88,7 @@
               'name'  => BOX_CUSTOMERS,
               'class' => ''
             );
-          $favorites[] = array(
+          $favorites[3] = array(
               'file'  => 'categories.php',
               'par'  => '', 
               'mode'  => 0,
@@ -97,7 +96,7 @@
               'name'  => BOX_CATEGORIES,
               'class' => ''
             );
-          $favorites[] = array(
+          $favorites[4] = array(
               'file'  => 'content_manager.php',
               'par'  => '', 
               'mode'  => 0,
@@ -105,7 +104,7 @@
               'name'  => BOX_CONTENT,
               'class' => ''
             );
-          $favorites[] = array(
+          $favorites[5] = array(
               'file'  => 'backup.php',
               'par'  => '', 
               'mode'  => 0,
@@ -114,19 +113,8 @@
               'class' => ''
             );
 
-          if ($configuration['total'] > 0) {
-            $favorites[] = array(
-                'file' => 'configuration.php',
-                'par' => 'gID=11',
-                'mode' => 0,
-                'icon' => 'icon_attention.png',
-                'name' => BOX_CACHING,
-                'class' => ''
-              );
-          }
-
           if (xtc_get_shop_conf('SHOP_OFFLINE') == 'checked') {
-            $favorites[] = array(
+            $favorites[6] = array(
                 'file' => 'shop_offline.php',
                 'par' => '',
                 'mode' => 0,
@@ -137,7 +125,7 @@
           }
           
           if (USE_ADMIN_FIXED_SEARCH == 'false') {
-            $favorites[] = array(
+            $favorites[7] = array(
                 'file' => "javascript:void(0)\" onclick=\"$('#searchbar_new').toggle('fast').parent('#fixed-header').toggleClass('active').siblings('.fixed-header-height').toggleClass('active');",
                 'par' => '',
                 'mode' => 2,
@@ -147,7 +135,7 @@
               );
           }
           
-          $favorites[] = array(
+          $favorites[8] = array(
               'file' => 'logoff.php',
               'par' => '', 
               'mode' => 1,
@@ -155,7 +143,7 @@
               'name' => BOX_LOGOUT,
               'class' => 'right'
             );    
-          $favorites[] = array(
+          $favorites[9] = array(
               'file'  => 'newsfeed.php',
               'par'   => '', 
               'mode'  => 0,
@@ -164,7 +152,7 @@
               'class' => 'right',
               'count' => $num_news['total']
             );
-          $favorites[] = array(
+          $favorites[10] = array(
               'file'  => 'credits.php',
               'par'   => '', 
               'mode'  => 0,
@@ -172,7 +160,7 @@
               'name'  => BOX_CREDITS,
               'class' => 'right'
             );
-          $favorites[] = array(
+          $favorites[11] = array(
               'file'  => 'check_update.php',
               'par'   => '', 
               'mode'  => 0,
@@ -180,23 +168,6 @@
               'name'  => BOX_UPDATE,
               'class' => 'right',
               'count' => $update_array['update']
-            );
-          $favorites[] = array(
-              'file'  => xtc_href_link('support.php'),
-              'par'   => '', 
-              'mode'  => 2,
-              'icon'  => 'icon_support.png',
-              'name'  => BOX_SUPPORT,
-              'class' => 'right',
-            );
-          $favorites[] = array(
-              'file'  => 'https://www.modified-shop.org/shop/',
-              'target' => '_blank',
-              'par'   => '', 
-              'mode'  => 2,
-              'icon'  => 'icon_modified_shop.png',
-              'name'  => BOX_SHOP,
-              'class' => 'right',
             );
 
           // overwrite with hooks
@@ -219,7 +190,7 @@
                 if ($page_permission[strtok($f['file'], '.')] != '1') continue;
                 $link = xtc_href_link($f['file'], $f['par'], 'NONSSL', true);
               }
-              echo '<li'.($f['class'] ? ' class="'.$f['class'].'"' : '').'><a'.((isset($f['target'])) ? ' target="'.$f['target'].'"' : '').' href="' . $link . '">'.
+              echo '<li'.($f['class'] ? ' class="'.$f['class'].'"' : '').'><a href="' . $link . '">'.
                    xtc_image(DIR_WS_ICONS.'fastnav/'.$f['icon'], $f['name'], 32, 32).
                    (isset($f['count']) && $f['count'] ? '<div class="icon_count">'.$f['count'].'</div>' : '').
                    '</a></li>' . PHP_EOL;

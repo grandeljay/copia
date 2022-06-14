@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: categoriesModules.class.php 13242 2021-01-27 10:26:16Z GTB $
+   $Id: categoriesModules.class.php 10333 2016-10-20 11:26:26Z web28 $
 
    modified eCommerce Shopsoftware  
    http://www.modified-shop.org     
@@ -32,9 +32,6 @@ class categoriesModules {
             $class = substr($file, 0, strpos($file, '.'));
             $module_status = (defined('MODULE_'. strtoupper($module_type) .'_'. strtoupper($class) .'_STATUS') && strtolower(constant('MODULE_'. strtoupper($module_type) .'_'. strtoupper($class) .'_STATUS')) == 'true') ? true : false;
             if (is_file($module_directory . $file) && $module_status) {
-              if (file_exists(DIR_FS_CATALOG . 'lang/' . $_SESSION['language'] . '/modules/' . $module_type . '/' . $file)) {
-                include_once(DIR_FS_CATALOG . 'lang/' . $_SESSION['language'] . '/modules/' . $module_type . '/' . $file);
-              }
               include_once($module_directory . $file);
               $GLOBALS[$class] = new $class();
               $this->modules[] = $class;
@@ -104,12 +101,6 @@ class categoriesModules {
         return $this->call_module_method($sql_data_array,$src_category_id,$dest_category_id,$ctype,$new_cat_id); //Return parameter must be in first place
     }
 
-    function move_category($src_category_id, $dest_category_id)
-    {
-        $this->function_call = 'move_category';
-        $this->secure_call_module_method($src_category_id, $dest_category_id);
-    }
-
     function remove_category($category_id)
     {
         $this->function_call = 'remove_category';
@@ -128,10 +119,10 @@ class categoriesModules {
         $this->secure_call_module_method($src_pic, $dest_pic);
     }
     
-    function categories_image_process($categories_image_name, $categories_image_name_process, $image_type)
+    function categories_image_process($categories_image_name, $categories_image_name_process)
     {
         $this->function_call = 'categories_image_process';
-        $this->secure_call_module_method($categories_image_name, $categories_image_name_process, $image_type);
+        $this->secure_call_module_method($categories_image_name, $categories_image_name_process);
     }
 
     //----- PRODUCTS FUNCTIONS -----//
@@ -153,12 +144,6 @@ class categoriesModules {
         return $this->call_module_method($sql_data_array,$products_data,$products_id,$language_id); //Return parameter must be in first place
     }
 
-    function insert_product_end($product_id)
-    {
-        $this->function_call = 'insert_product_end';
-        $this->secure_call_module_method($product_id);
-    }
-
     function remove_product($products_id)
     {
         $this->function_call = 'remove_product';
@@ -174,7 +159,7 @@ class categoriesModules {
     function duplicate_product_before($sql_data_array,$src_products_id,$dest_categories_id)
     {
         $this->function_call = 'duplicate_product_before';
-        return $this->call_module_method($sql_data_array,$src_products_id,$dest_categories_id); //Return parameter must be in first place
+        return $this->call_module_method($sql_data_array,$products_data,$products_id,$language_id); //Return parameter must be in first place
     }
 
     function duplicate_product_after($sql_data_array,$src_products_id,$dest_categories_id,$dup_products_id)
@@ -189,12 +174,6 @@ class categoriesModules {
         return $this->call_module_method($sql_data_array,$src_products_id,$dest_categories_id,$dup_products_id); //Return parameter must be in first place
     }
     
-    function duplicate_product_end($product_id) 
-    { 
-        $this->function_call = 'duplicate_product_end'; 
-        $this->secure_call_module_method($product_id); 
-    } 
-
     function image_name($image_name, $id, $counter, $suffix, $name_arr, $srcID, $data_arr)
     {
         $this->function_call = 'image_name';

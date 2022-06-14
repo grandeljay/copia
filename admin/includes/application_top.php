@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id: application_top.php 13484 2021-04-01 08:50:12Z GTB $
+   $Id: application_top.php 9985 2016-06-15 12:24:25Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -29,15 +29,14 @@
    Released under the GNU General Public License
    --------------------------------------------------------------*/
 
+// DB version, used for updates (_installer)
+define('DB_VERSION', 'MOD_2.0.1.0');
+
 //Run Mode
 define('RUN_MODE_ADMIN',true);
 
 // Start the clock for the page parse time log
 define('PAGE_PARSE_START_TIME', microtime(true));
-
-// set the level of error reporting
-@ini_set('display_errors', false);
-error_reporting(0);
 
 // security
 define('_VALID_XTC',true);
@@ -54,18 +53,36 @@ if (file_exists('../includes/local/configure.php')) {
   include_once('../includes/configure.php');
 }
 
-// minimum requirement
-if (version_compare(PHP_VERSION, '5.6', '<')) {
-  die('<h1>Minimum requirement PHP Version 5.6</h1>');
+// default time zone
+if (version_compare(PHP_VERSION, '5.1.0', '>=')) {
+  date_default_timezone_set('Europe/Berlin');
 }
 
-// default time zone
-date_default_timezone_set('Europe/Berlin');
+// set the level of error reporting
+@ini_set('display_errors', true);
+if (is_file(DIR_FS_CATALOG.'export/_error_reporting.admin')) {
+  error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED); //exlude E_STRICT on PHP 5.4
+  define('LOGGING_LEVEL', 'INFO');
+} elseif (is_file(DIR_FS_CATALOG.'export/_error_reporting.all')) {
+  error_reporting(E_ALL); //exlude E_STRICT on PHP 5.4
+  define('LOGGING_LEVEL', 'FINE');
+} elseif (is_file(DIR_FS_CATALOG.'export/_error_reporting.dev')) {
+  error_reporting(-1); // Development value
+  define('LOGGING_LEVEL', 'DEBUG');
+} else {
+  @ini_set('display_errors', false);
+  error_reporting(0);
+  define('LOGGING_LEVEL', 'WARN');
+}
 
 // new error handling
 if (is_file(DIR_FS_CATALOG.DIR_WS_INCLUDES.'error_reporting.php')) {
   require_once (DIR_FS_CATALOG.DIR_WS_INCLUDES.'error_reporting.php');
 }
+
+// turn off magic-quotes support, for both runtime and sybase, as both will cause problems if enabled
+if (version_compare(PHP_VERSION, 5.3, '<') && function_exists('set_magic_quotes_runtime')) set_magic_quotes_runtime(0);
+if (version_compare(PHP_VERSION, 5.4, '<') && @ini_get('magic_quotes_sybase') != 0) @ini_set('magic_quotes_sybase', 0);
 
 // security inputfilter for GET/POST/COOKIE
 require (DIR_FS_CATALOG.DIR_WS_CLASSES.'inputfilter.php');
@@ -77,6 +94,9 @@ $_REQUEST = $inputfilter->validate($_REQUEST);
 // auto include
 require_once (DIR_FS_INC . 'auto_include.inc.php');
 
+// solve compatibility issues
+require_once (DIR_WS_FUNCTIONS.'compatibility.php');
+
 // project versison
 require_once (DIR_WS_INCLUDES.'version.php');
 
@@ -85,6 +105,12 @@ require_once(DIR_FS_INC . 'set_php_self.inc.php');
 $PHP_SELF = set_php_self();
 
 define('TAX_DECIMAL_PLACES', 0);
+
+// Used in the "Backup Manager" to compress backups
+define('LOCAL_EXE_GZIP', '/usr/bin/gzip');
+define('LOCAL_EXE_GUNZIP', '/usr/bin/gunzip');
+define('LOCAL_EXE_ZIP', '/usr/local/bin/zip');
+define('LOCAL_EXE_UNZIP', '/usr/local/bin/unzip');
 
 // include the list of project filenames
 require (DIR_FS_ADMIN.DIR_WS_INCLUDES.'filenames.php');
@@ -118,6 +144,11 @@ foreach(auto_include(DIR_FS_ADMIN.'includes/extra/functions/','php') as $file) r
 
 // design layout (wide of boxes in pixels) (default: 125)
 define('BOX_WIDTH', 125);
+
+// Define how do we update currency exchange rates
+// Possible values are 'yahooapis' 'cryptonator' or ''
+define('CURRENCY_SERVER_PRIMARY', 'yahooapis');
+define('CURRENCY_SERVER_BACKUP', 'cryptonator');
 
 // make a connection to the database... now
 xtc_db_connect() or die('Unable to connect to database server!');
@@ -165,12 +196,14 @@ if (file_exists(DIR_WS_INCLUDES . 'request_type.php')) {
 // set the top level domains
 $http_domain_arr = xtc_get_top_level_domain(HTTP_SERVER);
 $https_domain_arr = xtc_get_top_level_domain(HTTPS_SERVER);
-$http_domain = $http_domain_arr['domain'];
-$https_domain = $https_domain_arr['domain'];
+$http_domain = $http_domain_arr['new'];
+$https_domain = $https_domain_arr['new'];
 $current_domain = (($request_type == 'NONSSL') ? $http_domain : $https_domain);
 
-// set the top level domains to delete
-$current_domain_delete = (($request_type == 'NONSSL') ? $http_domain_arr['delete'] : $https_domain_arr['delete']);
+// set the top level domains - old
+$http_domain_old = $http_domain_arr['old'];
+$https_domain_old = $https_domain_arr['old'];
+$current_domain_old = (($request_type == 'NONSSL') ? $http_domain_old : $https_domain_old);
 
 // set the session name and save path
 // set the session cookie parameters
@@ -190,11 +223,11 @@ include (DIR_FS_CATALOG.DIR_WS_MODULES.'verify_session.php');
 include (DIR_FS_CATALOG.DIR_WS_MODULES.'set_language_sessions.php');
 
 // include the language translations
-require_once(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/'.$_SESSION['language'] . '.php');
-require_once(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/buttons.php');
+require(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/'.$_SESSION['language'] . '.php');
+require(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/buttons.php');
 $current_page = basename($PHP_SELF);
 if (is_file(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/' . $current_page)) {
-  require_once(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/' . $current_page);
+  require(DIR_FS_LANGUAGES . $_SESSION['language'] . '/admin/' . $current_page);
 }
 
 // write customers status in session
@@ -267,11 +300,6 @@ if (!isset($_SESSION['customer_id'])) {
 }
 
 xtc_check_permission($pagename);
-
-// set which precautions should be checked
-defined('WARN_CONFIG_WRITEABLE') OR define('WARN_CONFIG_WRITEABLE', 'true');
-defined('WARN_FILES_WRITEABLE') OR define('WARN_FILES_WRITEABLE', 'true');
-defined('WARN_DIRS_WRITEABLE') OR define('WARN_DIRS_WRITEABLE', 'true');
 
 foreach(auto_include(DIR_FS_ADMIN.'includes/extra/application_top/application_top_end/','php') as $file) require ($file);
 

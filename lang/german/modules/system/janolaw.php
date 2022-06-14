@@ -18,7 +18,7 @@
    ---------------------------------------------------------------------------------------*/
 
 define('MODULE_JANOLAW_TEXT_TITLE', 'janolaw AGB Hosting-Service');
-define('MODULE_JANOLAW_TEXT_DESCRIPTION', '<a href="https://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><img src="images/janolaw/janolaw_185x35.png" border=0></a><br /><br />Deutschlands gro&szlig;es Rechtsportal janolaw bietet ma&szlig;geschneiderte L&ouml;sungen f&uuml;r Ihre Rechtsfragen - von der Anwaltshotline bis zu individuellen Vertr&auml;gen mit Anwaltsgarantie. Mit dem AGB Hosting-Service f&uuml;r Internetshops k&ouml;nnen Sie die rechtlichen Kerndokumente AGB, Widerrufsbelehrung, Impressum und Datenschutzerkl&auml;rung individuell auf Ihren Shop anpassen und laufend durch das janolaw Team aktualisieren lassen. Mehr Schutz geht nicht.<br /><br /><a href="https://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><strong><u>Hier geht&#x27;s zum Angebot<u></strong></a>');
+define('MODULE_JANOLAW_TEXT_DESCRIPTION', '<a href="http://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><img src="images/janolaw/janolaw_185x35.png" border=0></a><br /><br />Deutschlands gro&szlig;es Rechtsportal janolaw bietet ma&szlig;geschneiderte L&ouml;sungen f&uuml;r Ihre Rechtsfragen - von der Anwaltshotline bis zu individuellen Vertr&auml;gen mit Anwaltsgarantie. Mit dem AGB Hosting-Service f&uuml;r Internetshops k&ouml;nnen Sie die rechtlichen Kerndokumente AGB, Widerrufsbelehrung, Impressum und Datenschutzerkl&auml;rung individuell auf Ihren Shop anpassen und laufend durch das janolaw Team aktualisieren lassen. Mehr Schutz geht nicht.<br /><br /><a href="http://www.janolaw.de/internetrecht/agb/agb-hosting-service/modified/index.html?partnerid=8764#menu" target="_blank"><strong><u>Hier geht&#x27;s zum Angebot<u></strong></a>');
 define('MODULE_JANOLAW_USER_ID_TITLE', '<hr noshade>User-ID');
 define('MODULE_JANOLAW_USER_ID_DESC', 'Ihre User-ID');
 define('MODULE_JANOLAW_SHOP_ID_TITLE', 'Shop-ID');
@@ -31,7 +31,7 @@ define('MODULE_JANOLAW_FORMAT_TITLE', 'Format Typ');
 define('MODULE_JANOLAW_FORMAT_DESC', 'Sollen die Daten als Text oder HTML gespeichert werden?');
 define('MODULE_JANOLAW_UPDATE_INTERVAL_TITLE', '<hr noshade>Update Intervall');
 define('MODULE_JANOLAW_UPDATE_INTERVAL_DESC', 'In welchen Abst&auml;nden sollen die Daten aktualisiert werden?');
-define('MODULE_JANOLAW_ERROR', 'Bitte pr&uuml;fen Sie die Zuordnung der Dokumente.');
+define('MODULE_JANOLAW_ERROR', 'Bitte pr&uuml;fen sie die Zuordnung der Dokumente.');
 
 define('MODULE_JANOLAW_TYPE_DATASECURITY_TITLE', '<hr noshade>Rechtstext Datenschutz');
 define('MODULE_JANOLAW_TYPE_DATASECURITY_DESC', 'Bitte geben Sie an, in welcher Seite dieser Rechtstext automatisch eingef&uuml;gt werden soll.');

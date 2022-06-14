@@ -12,7 +12,7 @@
     <td class="quantity">{$module_data.PRODUCTS_QTY}</td>
     <td class="productname">
     <strong><a href="{$module_data.PRODUCTS_LINK}">{$module_data.PRODUCTS_NAME}</a></strong>
-    {if is_array($module_data.ATTRIBUTES) && count($module_data.ATTRIBUTES) > 0}
+    {if $module_data.ATTRIBUTES != ''}
       <table class="productattributes" width="100%" border="0" cellspacing="0" cellpadding="0">
       {foreach key=key_data item=item_data from=$module_data.ATTRIBUTES}
         <tr>
@@ -22,7 +22,7 @@
       {/foreach}
       </table>
     {/if}
-    {if !is_array($module_data.ATTRIBUTES) || count($module_data.ATTRIBUTES) == 0}<br />{/if}
+    {if $module_data.ATTRIBUTES == ''}<br />{/if}
     {if $module_data.BUTTON_WISHLIST != ''}&laquo; {$module_data.BUTTON_WISHLIST}{/if}
     </td>
     <td class="singleprice">{$module_data.PRODUCTS_SINGLE_PRICE}</td>
@@ -39,6 +39,7 @@
       <strong>{$TOTAL_CONTENT}</strong>
       {if $SHIPPING_INFO}{$SHIPPING_INFO}{/if}
       {if $TOTAL_WEIGHT}<br />{#text_total_weight#} {$TOTAL_WEIGHT} kg{/if}
+      {if $KLARNA_PPBOX}<br />{$KLARNA_PPBOX}{/if}
     </td>
     *}
     <td colspan="4" class="subtotal">
@@ -46,7 +47,7 @@
         {if $UST_CONTENT}{$UST_CONTENT}{else}{$smarty.const.TAX_INFO_EXCL|sprintf:''}<br />{/if}
       {/if}
       <strong>{$TOTAL_CONTENT}</strong><br />
-      {if isset($shipping_content) && count($shipping_content) > 0}
+      {if sizeof($shipping_content) > 0}
         {if $SELECT_COUNTRY}{$SELECT_COUNTRY}<br />{/if}
         {foreach name=aussen item=shipping_data from=$shipping_content}
           {$shipping_data.NAME} ({$COUNTRY}): {$shipping_data.VALUE}<br />
@@ -55,7 +56,7 @@
       {if $total}<strong>{#text_total#}: {$total}</strong>{/if}
       {if isset($FREE_SHIPPING_INFO)}{$FREE_SHIPPING_INFO}{/if}
       {*if $TOTAL_WEIGHT}<br />{#text_total_weight#} {$TOTAL_WEIGHT} kg{/if*}
-      {if $PAYPAL_INSTALLMENT && !$PAYPALPLAN}<br/>{$PAYPAL_INSTALLMENT}{/if}
+      {if $KLARNA_PPBOX}<br />{$KLARNA_PPBOX}{/if}
     </td>
     <td class="subtotal">&nbsp;</td>
   </tr>

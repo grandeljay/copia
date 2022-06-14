@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: paypal_profile.php 12464 2019-12-05 10:48:17Z GTB $
+   $Id: paypal_profile.php 10062 2016-07-12 10:46:14Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -35,7 +35,7 @@ $lang_array = array(
   'TEXT_PAYPAL_PROFILE_ADDRESS' => 'Adresse &uuml;berschreiben:',
   'TEXT_PAYPAL_PROFILE_ADDRESS_INFO' => 'Soll die Versandadresse von PayPal &uuml;bernommen werden?',
   
-  'TEXT_PAYPAL_PROFILE_INFO' => 'Es ist kein PayPal Profil vorhanden.<br/><br/>Mit einem PayPal Profil k&ouml;nnen sie:<ul><li>den angezeigten Namen bei PayPal &auml;ndern</li><li>die PayPal Seite mit einem Logo versehen</li><li>die Zielseite bei PayPal festlegen</li></ul>',
+  'TEXT_PAYPAL_PROFILE_INFO' => 'Es ist kein PayPal Profil vorhanden.<br/><br/>Mit einem PayPal Profil k&ouml;nnen sie:<ul><li>die PayPal Seite mit einem Logo versehen</li><li>Adresse von PayPal f&uuml;r den K&auml;uferschutz &uuml;bernehmen</li></ul>',
 );
 
 

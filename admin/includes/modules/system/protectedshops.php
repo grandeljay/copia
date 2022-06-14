@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: protectedshops.php 11599 2019-03-21 16:05:39Z GTB $
+   $Id: protectedshops.php 9924 2016-06-04 08:08:18Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -28,8 +28,7 @@ class protectedshops {
     $this->code = 'protectedshops';
     $this->title = MODULE_PROTECTEDSHOPS_TEXT_TITLE;
     $this->description = MODULE_PROTECTEDSHOPS_TEXT_DESCRIPTION;
-    $this->enabled = ((defined('MODULE_PROTECTEDSHOPS_STATUS') && MODULE_PROTECTEDSHOPS_STATUS == 'true') ? true : false);
-    $this->sort_order = '';
+    $this->enabled = ((MODULE_PROTECTEDSHOPS_STATUS == 'true') ? true : false);
   }
  
   function init_ps() {
