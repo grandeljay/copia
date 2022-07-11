@@ -34,23 +34,23 @@
 // use always session_id from URL for payment providers
 define('SESSION_FORCE_COOKIE_USE', 'False');
 
-include('includes/application_top.php');
+include 'includes/application_top.php';
 
 // create smarty elements
 $smarty = new Smarty();
 
 // include needed functions
-require_once(DIR_FS_INC . 'xtc_collect_posts.inc.php');
-require_once(DIR_FS_INC . 'xtc_calculate_tax.inc.php');
-require_once(DIR_FS_INC . 'xtc_display_tax_value.inc.php');
+require_once DIR_FS_INC . 'xtc_collect_posts.inc.php';
+require_once DIR_FS_INC . 'xtc_calculate_tax.inc.php';
+require_once DIR_FS_INC . 'xtc_display_tax_value.inc.php';
 
-require(DIR_WS_INCLUDES . 'checkout_requirements.php');
+require DIR_WS_INCLUDES . 'checkout_requirements.php';
 
 if (isset($_POST['payment'])) {
     $_SESSION['payment'] = xtc_db_prepare_input($_POST['payment']);
 }
 
-if (isset($_POST['comments_added']) && $_POST['comments_added'] != '') {
+if (isset($_POST['comments_added']) && '' != $_POST['comments_added']) {
     $_SESSION['comments'] = xtc_db_prepare_input($_POST['comments']);
 }
 
@@ -60,14 +60,14 @@ if (isset($_POST['cot_gv'])) {
 
 // if conditions are not accepted, redirect the customer to the payment method selection page
 if (SIGN_CONDITIONS_ON_CHECKOUT == 'true') {
-    if ((!isset($_POST['conditions']) || $_POST['conditions'] == false) && !isset($_GET['conditions'])) {
+    if ((!isset($_POST['conditions']) || false == $_POST['conditions']) && !isset($_GET['conditions'])) {
         $error = str_replace('\n', '<br />', ERROR_CONDITIONS_NOT_ACCEPTED);
         xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'error_message=' . urlencode($error), 'SSL', true, false));
     }
 }
 
 if (DISPLAY_PRIVACY_ON_CHECKOUT == 'true' && DISPLAY_PRIVACY_CHECK == 'true') {
-    if ((!isset($_POST['privacy']) || $_POST['privacy'] == false) && !isset($_GET['conditions'])) {
+    if ((!isset($_POST['privacy']) || false == $_POST['privacy']) && !isset($_GET['conditions'])) {
         $error = str_replace('\n', '<br />', ERROR_PRIVACY_NOTICE_NOT_ACCEPTED);
         xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'error_message=' . urlencode($error), 'SSL', true, false));
     }
@@ -75,11 +75,13 @@ if (DISPLAY_PRIVACY_ON_CHECKOUT == 'true' && DISPLAY_PRIVACY_CHECK == 'true') {
 
 $content_type = $_SESSION['cart']->get_content_type();
 if (
-    DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT == 'true'
-    && ($_SESSION['cart']->content_type == 'virtual'
-        || $_SESSION['cart']->content_type == 'mixed')
+       DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT == 'true'
+    && (
+           'virtual' == $_SESSION['cart']->content_type
+        || 'mixed'   == $_SESSION['cart']->content_type
+    )
 ) {
-    if ((!isset($_POST['revocation']) || $_POST['revocation'] == false) && !isset($_GET['conditions'])) {
+    if ((!isset($_POST['revocation']) || false == $_POST['revocation']) && !isset($_GET['conditions'])) {
         $error = str_replace('\n', '<br />', ERROR_REVOCATION_NOT_ACCEPTED);
         xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'error_message=' . urlencode($error), 'SSL', true, false));
     }
@@ -88,7 +90,7 @@ if (
 if (
     ACTIVATE_GIFT_SYSTEM == 'true'
     && isset($_GET['action'])
-    && $_GET['action'] == 'check_gift_checkout'
+    && 'check_gift_checkout' == $_GET['action']
 ) {
     xtc_collect_posts();
 }
@@ -124,19 +126,26 @@ $order_total_modules->pre_confirmation_check();
 
 // GV Code line changed
 if (
-    (is_array($payment_modules->modules)
-     && sizeof($payment_modules->modules) > 0
-     && !isset($_SESSION['credit_covers'])
-     && (!isset(${$_SESSION['payment']}) || !is_object(${$_SESSION['payment']})))
-    ||
-    (isset(${$_SESSION['payment']})
-     && is_object(${$_SESSION['payment']})
-     && ${$_SESSION['payment']}->enabled == false)
-    ||
-    (isset($_SESSION['cot_gv'])
-     && $_SESSION['cot_gv'] > 0
-     && $xtPrice->xtcFormat($order->info['total'], false) > $_SESSION['cot_gv']
-     && $_SESSION['payment'] == 'no_payment')
+        (
+               is_array($payment_modules->modules)
+           && sizeof($payment_modules->modules) > 0
+           && !isset($_SESSION['credit_covers'])
+           && (
+                   !isset(${$_SESSION['payment']})
+               || !is_object(${$_SESSION['payment']})
+           )
+    )
+    || (
+           isset(${$_SESSION['payment']})
+        && is_object(${$_SESSION['payment']})
+        && false == ${$_SESSION['payment']}->enabled
+    )
+    || (
+           isset($_SESSION['cot_gv'])
+        && $_SESSION['cot_gv'] > 0
+        && $xtPrice->xtcFormat($order->info['total'], false) > $_SESSION['cot_gv']
+        && 'no_payment' == $_SESSION['payment']
+    )
 ) {
     xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'error_message=' . urlencode(ERROR_NO_PAYMENT_MODULE_SELECTED), 'SSL'));
 }
@@ -173,21 +182,22 @@ if (SHOW_IP_LOG == 'true') {
 //allow duty-note in checkout_confirmation
 $smarty->assign('DELIVERY_DUTY_INFO', $main->getDeliveryDutyInfo($order->delivery['country']['iso_code_2']));
 
-if ($_SESSION['shipping'] !== false) {
+if (false !== $_SESSION['shipping']) {
     $smarty->assign('DELIVERY_LABEL', xtc_address_format($order->delivery['format_id'], $order->delivery, 1, ' ', '<br />'));
     $smarty->assign('SHIPPING_ADDRESS_EDIT', xtc_href_link(FILENAME_CHECKOUT_SHIPPING_ADDRESS, '', 'SSL'));
 }
-if (!isset($_SESSION['credit_covers']) || $_SESSION['credit_covers'] != '1') {
+if (!isset($_SESSION['credit_covers']) || '1' != $_SESSION['credit_covers']) {
     $smarty->assign('BILLING_LABEL', xtc_address_format($order->billing['format_id'], $order->billing, 1, ' ', '<br />'));
     $smarty->assign('BILLING_ADDRESS_EDIT', xtc_href_link(FILENAME_CHECKOUT_PAYMENT_ADDRESS, '', 'SSL'));
 }
 $smarty->assign('PRODUCTS_EDIT', xtc_href_link(FILENAME_SHOPPING_CART, '', 'NONSSL'));
 
-if ($_SESSION['sendto'] != false) {
+if (false != $_SESSION['sendto']) {
     if ($order->info['shipping_method']) {
       //shipping method
         $shipping_class = explode('_', $order->info['shipping_class']);
-        if ($order->info['shipping_class'] != '' && $shipping_class[0] != 'free') {
+
+        if ('' != $order->info['shipping_class'] && 'free' != $shipping_class[0]) {
             include_once(DIR_FS_CATALOG . 'lang/' . $_SESSION['language'] . '/modules/shipping/' . $shipping_class[0] . '.php');
             $shipping_method = constant(strtoupper('MODULE_SHIPPING_' . $shipping_class[0] . '_TEXT_TITLE'));
         } else {
@@ -206,7 +216,7 @@ $smarty->assign('PRODUCTS_ARRAY', $order->products);
 
 $smarty->assign('ORDER_TAX_GROUPS', sizeof($order->info['tax_groups']));
 
-if ($order->info['payment_method'] != 'no_payment' && $order->info['payment_method'] != '') {
+if ('no_payment' != $order->info['payment_method'] && '' != $order->info['payment_method']) {
     $smarty->assign('PAYMENT_METHOD', $payment_modules::payment_title($order->info['payment_method']));
     $smarty->assign('PAYMENT_EDIT', xtc_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL'));
 }
@@ -217,7 +227,7 @@ if ($_SESSION['cart']->show_total() <= 0 && count($order->totals) == 0) {
     $smarty->clear_assign('PAYMENT_EDIT');
 };
 
-if ($no_payment === false && isset($_SESSION['credit_covers']) && $order->info['payment_method'] == 'no_payment') {
+if (false === $no_payment && isset($_SESSION['credit_covers']) && 'no_payment' == $order->info['payment_method']) {
     include_once(DIR_WS_LANGUAGES . '/' . $_SESSION['language'] . '/modules/order_total/ot_gv.php');
     $smarty->assign('PAYMENT_METHOD', constant('MODULE_ORDER_TOTAL_GV_TITLE'));
 }
@@ -237,19 +247,21 @@ if (isset(${$_SESSION['payment']}->form_action_url) && (!isset(${$_SESSION['paym
 }
 $smarty->assign('CHECKOUT_FORM', xtc_draw_form('checkout_confirmation', $form_action_url, 'post', 'name="checkout_confirmation"'));
 $smarty->assign('MODULE_BUTTONS', (is_array($payment_modules->modules) ? $payment_modules->process_button() : ''));
-$smarty->assign('CHECKOUT_BUTTON', xtc_image_submit('button_confirm_order.gif', IMAGE_BUTTON_CONFIRM_ORDER, (($_SESSION['payment'] == 'payone_cc') ? 'onclick="return payoneCheck();"' : '') . ' id="button_checkout_confirmation"') . '</form>' . "\n");
+$smarty->assign('CHECKOUT_BUTTON', xtc_image_submit('button_confirm_order.gif', IMAGE_BUTTON_CONFIRM_ORDER, (('payone_cc' == $_SESSION['payment']) ? 'onclick="return payoneCheck();"' : '') . ' id="button_checkout_confirmation"') . '</form>' . "\n");
 
 //express checkout
 if (defined('MODULE_CHECKOUT_EXPRESS_STATUS') && MODULE_CHECKOUT_EXPRESS_STATUS == 'true') {
     if (isset($_POST['express'])) {
-        $check_query = xtc_db_query("SELECT *
+        $check_query = xtc_db_query(
+            "SELECT *
                                    FROM " . TABLE_CUSTOMERS_CHECKOUT . "
-                                  WHERE customers_id = '" . (int) $_SESSION['customer_id'] . "'");
+                                  WHERE customers_id = '" . (int) $_SESSION['customer_id'] . "'"
+        );
 
-        $sql_data_array = array('customers_id' => (int)$_SESSION['customer_id'],
+        $sql_data_array = array('customers_id'          => (int)$_SESSION['customer_id'],
                             'checkout_shipping_address' => $_SESSION['sendto'],
-                            'checkout_payment' => $_SESSION['payment'],
-                            'checkout_payment_address' => $_SESSION['billto'],
+                            'checkout_payment'          => $_SESSION['payment'],
+                            'checkout_payment_address'  => $_SESSION['billto'],
                             );
         if (
             isset($_SESSION['shipping'])
@@ -266,14 +278,14 @@ if (defined('MODULE_CHECKOUT_EXPRESS_STATUS') && MODULE_CHECKOUT_EXPRESS_STATUS 
         }
         $smarty->assign('success_message', SUCCESS_CHECKOUT_EXPRESS_UPDATED);
     }
-  // disable some modules, because needed action on checkout_payment
+    // disable some modules, because needed action on checkout_payment
     $disallowed_payment = array(
-    'banktransfer',
-    'paypalplus',
-    'payone_installment',
-    'payone_otrans',
+        'banktransfer',
+        'paypalplus',
+        'payone_installment',
+        'payone_otrans',
     );
-    if ($no_payment === false && !in_array($_SESSION['payment'], $disallowed_payment)) {
+    if (false === $no_payment && !in_array($_SESSION['payment'], $disallowed_payment)) {
         $smarty->assign('FORM_ACTION', xtc_draw_form('customers_express', xtc_href_link(FILENAME_CHECKOUT_CONFIRMATION, 'conditions=on', 'SSL'), 'post', 'name="customers_express"') . xtc_draw_hidden_field('express', 'on'));
         $smarty->assign('BUTTON_SUBMIT', xtc_image_submit('button_save.gif', IMAGE_BUTTON_UPDATE));
         if (MODULE_CHECKOUT_EXPRESS_CONTENT != '') {
@@ -321,9 +333,9 @@ $smarty->assign('HEADQUARTER', $store_owner);
 $breadcrumb->add(NAVBAR_TITLE_1_CHECKOUT_CONFIRMATION, xtc_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL'));
 $breadcrumb->add(NAVBAR_TITLE_2_CHECKOUT_CONFIRMATION);
 
-require(DIR_WS_INCLUDES . 'header.php');
+require DIR_WS_INCLUDES . 'header.php';
 
-if ($order->content_type == 'virtual' || ($order->content_type == 'virtual_weight') || ($_SESSION['cart']->count_contents_virtual() == 0)) {
+if ('virtual' == $order->content_type || ('virtual_weight' == $order->content_type) || ($_SESSION['cart']->count_contents_virtual() == 0)) {
     $_SESSION['NO_SHIPPING'] = true;
     $smarty->assign('NO_SHIPPING', $_SESSION['NO_SHIPPING']);
 }
