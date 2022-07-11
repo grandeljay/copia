@@ -17,25 +17,25 @@
    Released under the GNU General Public License
    ---------------------------------------------------------------------------------------*/
 
-include('includes/application_top.php');
+include 'includes/application_top.php';
 
 // create smarty elements
 $smarty = new Smarty();
 
 // include needed functions
-require_once(DIR_FS_INC . 'xtc_date_short.inc.php');
-require_once(DIR_FS_INC . 'xtc_image_button.inc.php');
-require_once(DIR_FS_INC . 'xtc_validate_email.inc.php');
-require_once(DIR_FS_INC . 'xtc_get_geo_zone_code.inc.php');
-require_once(DIR_FS_INC . 'xtc_get_customers_country.inc.php');
-require_once(DIR_FS_INC . 'get_customers_gender.inc.php');
-require_once(DIR_FS_INC . 'secure_form.inc.php');
+require_once DIR_FS_INC . 'xtc_date_short.inc.php';
+require_once DIR_FS_INC . 'xtc_image_button.inc.php';
+require_once DIR_FS_INC . 'xtc_validate_email.inc.php';
+require_once DIR_FS_INC . 'xtc_get_geo_zone_code.inc.php';
+require_once DIR_FS_INC . 'xtc_get_customers_country.inc.php';
+require_once DIR_FS_INC . 'get_customers_gender.inc.php';
+require_once DIR_FS_INC . 'secure_form.inc.php';
 
 if (!isset($_SESSION['customer_id'])) {
     xtc_redirect(xtc_href_link(FILENAME_LOGIN, '', 'SSL'));
 } elseif (
     isset($_SESSION['customer_id'])
-          && $_SESSION['customers_status']['customers_status_id'] == DEFAULT_CUSTOMERS_STATUS_ID_GUEST
+          && DEFAULT_CUSTOMERS_STATUS_ID_GUEST == $_SESSION['customers_status']['customers_status_id']
           && GUEST_ACCOUNT_EDIT != 'true'
 ) {
     xtc_redirect(xtc_href_link(FILENAME_DEFAULT, '', 'SSL'));
@@ -49,20 +49,20 @@ unset($_SESSION['payment']);
 unset($_SESSION['delivery_zone']);
 unset($_SESSION['billing_zone']);
 
-if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
+if (isset($_POST['action']) && ('process' == $_POST['action'])) {
     $valid_params = array(
-    'gender',
-    'firstname',
-    'lastname',
-    'dob',
-    'vat',
-    'email_address',
-    'confirm_email_address',
-    'telephone',
-    'fax',
+        'gender',
+        'firstname',
+        'lastname',
+        'dob',
+        'vat',
+        'email_address',
+        'confirm_email_address',
+        'telephone',
+        'fax',
     );
 
-  // prepare variables
+    // prepare variables
     foreach ($_POST as $key => $value) {
         if ((!isset(${$key}) || !is_object(${$key})) && in_array($key, $valid_params)) {
             ${$key} = xtc_db_prepare_input($value);
@@ -71,7 +71,7 @@ if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
 
     $error = false;
 
-    if (ACCOUNT_GENDER == 'true' && $gender == '') {
+    if ('true' == ACCOUNT_GENDER && '' == $gender) {
         $error = true;
         $messageStack->add('account_edit', ENTRY_GENDER_ERROR);
     }
@@ -86,27 +86,32 @@ if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
         $messageStack->add('account_edit', ENTRY_LAST_NAME_ERROR);
     }
 
-    if (ACCOUNT_DOB == 'true') {
-        if (checkdate(substr(xtc_date_raw($dob), 4, 2), substr(xtc_date_raw($dob), 6, 2), substr(xtc_date_raw($dob), 0, 4)) == false) {
+    if ('true' == ACCOUNT_DOB) {
+        if (checkdate(substr(xtc_date_raw($dob), 4, 2), substr(xtc_date_raw($dob), 6, 2), false == substr(xtc_date_raw($dob), 0, 4))) {
             $error = true;
             $messageStack->add('account_edit', ENTRY_DATE_OF_BIRTH_ERROR);
         }
     }
 
-  // New VAT Check
-    if (ACCOUNT_COMPANY_VAT_CHECK == 'true') {
+    // New VAT Check
+    if ('true' == ACCOUNT_COMPANY_VAT_CHECK) {
         $country = xtc_get_customers_country($_SESSION['customer_id']);
-        require_once(DIR_WS_CLASSES . 'vat_validation.php');
-        $vatID = new vat_validation($vat, $_SESSION['customer_id'], '', $country, ($_SESSION['account_type'] != '0'));
+
+        require_once DIR_WS_CLASSES . 'vat_validation.php';
+
+        $vatID = new vat_validation($vat, $_SESSION['customer_id'], '', $country, ('0' != $_SESSION['account_type']));
+
         if (
-            ACCOUNT_COMPANY_VAT_GROUP == 'true'
-            && $_SESSION['customers_status']['customers_status'] != '0'
-            && $vat != ''
+            'true' == ACCOUNT_COMPANY_VAT_GROUP
+            && '0' != $_SESSION['customers_status']['customers_status']
+            && '' != $vat
         ) {
             $customers_status = $vatID->vat_info['status'];
         }
+
         $customers_vat_id_status = isset($vatID->vat_info['vat_id_status']) ? $vatID->vat_info['vat_id_status'] : '';
-        if (isset($vatID->vat_info['error']) && $vatID->vat_info['error'] == 1) {
+
+        if (isset($vatID->vat_info['error']) && 1 == $vatID->vat_info['error']) {
             $messageStack->add('account_edit', ENTRY_VAT_ERROR);
             $error = true;
         }
@@ -117,16 +122,19 @@ if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
         $messageStack->add('account_edit', ENTRY_EMAIL_ADDRESS_ERROR);
     }
 
-    if (xtc_validate_email($email_address) == false) {
+    if (false == xtc_validate_email($email_address)) {
         $error = true;
         $messageStack->add('account_edit', ENTRY_EMAIL_ADDRESS_CHECK_ERROR);
     } else {
-        $check_email_query = xtc_db_query("SELECT count(*) as total
-                                         FROM " . TABLE_CUSTOMERS . "
-                                        WHERE customers_email_address = '" . xtc_db_input($email_address) . "'
-                                          AND account_type = '0'
-                                          AND customers_id != '" . (int)$_SESSION['customer_id'] . "'");
-        $check_email = xtc_db_fetch_array($check_email_query);
+        $check_email_query = xtc_db_query(
+            "SELECT count(*) as total
+               FROM " . TABLE_CUSTOMERS . "
+              WHERE customers_email_address  = '" . xtc_db_input($email_address) . "'
+                AND account_type             = '0'
+                AND customers_id            != '" . (int)$_SESSION['customer_id'] . "'"
+        );
+        $check_email       = xtc_db_fetch_array($check_email_query);
+
         if ($check_email['total'] > 0) {
             $error = true;
             $messageStack->add('account_edit', ENTRY_EMAIL_ADDRESS_ERROR_EXISTS);
@@ -148,18 +156,20 @@ if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
         $error = true;
     }
 
-    if ($error == false) {
-        $sql_data_array = array('customers_vat_id' => $vat,
-                            'customers_vat_id_status' => $customers_vat_id_status,
-                            'customers_firstname' => $firstname,
-                            'customers_lastname' => $lastname,
-                            'customers_email_address' => $email_address,
-                            'customers_telephone' => $telephone,
-                            'customers_fax' => $fax,
-                            'customers_last_modified' => 'now()');
+    if (false == $error) {
+        $sql_data_array = array(
+            'customers_vat_id'        => $vat,
+            'customers_vat_id_status' => $customers_vat_id_status,
+            'customers_firstname'     => $firstname,
+            'customers_lastname'      => $lastname,
+            'customers_email_address' => $email_address,
+            'customers_telephone'     => $telephone,
+            'customers_fax'           => $fax,
+            'customers_last_modified' => 'now()'
+        );
 
-        if (isset($customers_status) && $_SESSION['account_type'] == '0') {
-            if ((int)$customers_status == 0) {
+        if (isset($customers_status) && '0' == $_SESSION['account_type']) {
+            if (0 == (int)$customers_status) {
                 if (DEFAULT_CUSTOMERS_STATUS_ID != 0) {
                     $customers_status = DEFAULT_CUSTOMERS_STATUS_ID;
                 } else {
@@ -177,15 +187,17 @@ if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
         }
 
         xtc_db_perform(TABLE_CUSTOMERS, $sql_data_array, 'update', "customers_id = '" . (int) $_SESSION['customer_id'] . "'");
-        xtc_db_query("UPDATE " . TABLE_CUSTOMERS_INFO . "
-                     SET customers_info_date_account_last_modified = now()
-                   WHERE customers_info_id = '" . (int) $_SESSION['customer_id'] . "'");
+        xtc_db_query(
+            "UPDATE " . TABLE_CUSTOMERS_INFO . "
+                SET customers_info_date_account_last_modified = now()
+              WHERE customers_info_id = '" . (int) $_SESSION['customer_id'] . "'"
+        );
 
-        $_SESSION['customer_gender'] = ACCOUNT_GENDER == 'true' ? $gender : '';
-        $_SESSION['customer_first_name'] = $firstname;
-        $_SESSION['customer_last_name'] = $lastname;
+        $_SESSION['customer_gender']        = ACCOUNT_GENDER == 'true' ? $gender : '';
+        $_SESSION['customer_first_name']    = $firstname;
+        $_SESSION['customer_last_name']     = $lastname;
         $_SESSION['customer_email_address'] = $email_address;
-        $_SESSION['customer_vat_id'] = $vat;
+        $_SESSION['customer_vat_id']        = $vat;
 
       // reset the session variables
         $customer_first_name = $firstname;
@@ -193,10 +205,12 @@ if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
         xtc_redirect(xtc_href_link(FILENAME_ACCOUNT, '', 'SSL'));
     }
 } else {
-    $account_query = xtc_db_query("SELECT *
-                                   FROM " . TABLE_CUSTOMERS . "
-                                  WHERE customers_id = '" . (int) $_SESSION['customer_id'] . "'");
-    $account = xtc_db_fetch_array($account_query);
+    $account_query = xtc_db_query(
+        "SELECT *
+           FROM " . TABLE_CUSTOMERS . "
+         WHERE customers_id = '" . (int) $_SESSION['customer_id'] . "'"
+    );
+    $account       = xtc_db_fetch_array($account_query);
 }
 
 // include boxes
@@ -214,9 +228,9 @@ if ($messageStack->size('account_edit') > 0) {
 }
 
 if (ACCOUNT_GENDER == 'true') {
-    $male = (isset($account['customers_gender']) && $account['customers_gender'] == 'm') ? true : false;
-    $female = (isset($account['customers_gender']) && $account['customers_gender'] == 'f') ? true : false;
-    $diverse = (isset($account['customers_gender']) && $account['customers_gender'] == 'd') ? true : false;
+    $male    = (isset($account['customers_gender']) && 'm' == $account['customers_gender']) ? true : false;
+    $female  = (isset($account['customers_gender']) && 'f' == $account['customers_gender']) ? true : false;
+    $diverse = (isset($account['customers_gender']) && 'd' == $account['customers_gender']) ? true : false;
     $smarty->assign('gender', '1');
     $smarty->assign('INPUT_MALE', xtc_draw_radio_field(array('name' => 'gender','suffix' => MALE), 'm', $male));
     $smarty->assign('INPUT_FEMALE', xtc_draw_radio_field(array('name' => 'gender','suffix' => FEMALE), 'f', $female));
@@ -252,7 +266,7 @@ $smarty->assign('FORM_END', '</form>');
 $smarty->assign('language', $_SESSION['language']);
 
 $smarty->caching = 0;
-$main_content = $smarty->fetch(CURRENT_TEMPLATE . '/module/account_edit.html');
+$main_content    = $smarty->fetch(CURRENT_TEMPLATE . '/module/account_edit.html');
 
 $smarty->assign('language', $_SESSION['language']);
 $smarty->assign('main_content', $main_content);
@@ -261,4 +275,4 @@ if (!defined('RM')) {
     $smarty->load_filter('output', 'note');
 }
 $smarty->display(CURRENT_TEMPLATE . '/index.html');
-include('includes/application_bottom.php');
+include 'includes/application_bottom.php';
