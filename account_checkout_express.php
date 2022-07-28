@@ -323,7 +323,7 @@ clear_checkout_session();
 if (isset($_POST['action']) && 'process' == $_POST['action'] && false === $error) {
     if (isset($_GET['products_id']) && (int)$_GET['products_id'] > '0') {
         xtc_redirect(xtc_href_link(FILENAME_PRODUCT_INFO, xtc_get_all_get_params(), 'SSL'));
-    } elseif (isset($_GET['cart']) && $_GET['cart'] == 'true') {
+    } elseif (isset($_GET['cart']) && 'true' == $_GET['cart']) {
         xtc_redirect(xtc_href_link(FILENAME_SHOPPING_CART, '', 'SSL'));
     }
 
