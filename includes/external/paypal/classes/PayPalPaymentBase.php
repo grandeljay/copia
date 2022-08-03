@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalPaymentBase.php 13469 2021-03-15 11:18:57Z Tomcraft $
+   $Id: PayPalPaymentBase.php 14471 2022-05-17 10:51:15Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -13,6 +13,9 @@
 
 // include needed classes
 require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalCommon.php');
+
+// include needed functions
+require_once (DIR_FS_INC.'xtc_count_shipping_modules.inc.php');
 
 
 class PayPalPaymentBase extends PayPalCommon {
@@ -27,7 +30,7 @@ class PayPalPaymentBase extends PayPalCommon {
     global $order;
 
     $this->code = $class;
-    $this->paypal_version = '1.60';
+    $this->paypal_version = '1.82';
 
     $this->admin_access_array = array(
       'paypal_info',
@@ -38,7 +41,7 @@ class PayPalPaymentBase extends PayPalCommon {
     );
 
     $this->title = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_TITLE')) ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_TITLE') : '');
-    if (defined('DIR_WS_INSTALLER') && defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_ADMIN_TITLE')) {
+    if ((defined('DIR_WS_INSTALLER') || defined('RUN_MODE_ADMIN')) && defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_ADMIN_TITLE')) {
       $this->title = constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_ADMIN_TITLE');
     }
     $this->info = ((defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_INFO')) ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_INFO') : '');
@@ -66,6 +69,11 @@ class PayPalPaymentBase extends PayPalCommon {
       if (in_array($this->code, $payment_sale)) {
         $this->transaction_type = 'sale';
       }
+
+      $this->intent = 'CAPTURE';
+      if ($this->get_config('PAYPAL_TRANSACTION_TYPE') == 'authorize') {
+        $this->intent = 'AUTHORIZE';
+      }
     }
   
     if (is_object($order) && !defined('RUN_MODE_ADMIN')) {
@@ -81,6 +89,14 @@ class PayPalPaymentBase extends PayPalCommon {
   function update_status() {
     global $order;
 
+    if (!isset($_SESSION['paypal_payment_forbidden'])) {
+      $_SESSION['paypal_payment_forbidden'] = array();
+    }
+    
+    if (in_array($this->code, $_SESSION['paypal_payment_forbidden'])) {
+      $this->enabled = false;
+    }
+    
     if ($this->enabled == true
         && defined('MODULE_PAYMENT_'.strtoupper($this->code).'_ZONE')
         && (int) constant('MODULE_PAYMENT_'.strtoupper($this->code).'_ZONE') > 0
@@ -107,7 +123,22 @@ class PayPalPaymentBase extends PayPalCommon {
     }
   }
 
-
+  
+  function is_enabled() {
+    if ($this->enabled === true) {
+      $unallowed_modules_string = $_SESSION['customers_status']['customers_status_payment_unallowed'];
+      $unallowed_modules_string = preg_replace("'[\r\n\s]+'", '', $unallowed_modules_string);
+      $unallowed_modules = explode(',', strtoupper($unallowed_modules_string));
+      
+      if (!in_array(strtoupper($this->code), $unallowed_modules)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  
   function javascript_validation() {
     return false;
   }
@@ -128,22 +159,375 @@ class PayPalPaymentBase extends PayPalCommon {
 
 
   function pre_confirmation_check() {
-    return false;
+    global $order, $smarty, $total_weight, $total_count, $free_shipping;
+    
+    if (!in_array($this->code, array('paypalcart', 'paypalexpress'))) {
+      return false;
+    }
+
+    if (isset($_SESSION['shipping'])) {
+      $shipping = $_SESSION['shipping'];
+      unset($_SESSION['shipping']);
+    }
+    
+    $this->free_shipping = $this->calculate_total(3);
+    
+    if (isset($shipping)) {
+      $_SESSION['shipping'] = $shipping;
+    }
+    
+    // process the selected shipping method
+    if (isset($_POST['action']) && ($_POST['action'] == 'process')) {
+      if ((isset($_POST['shipping'])) && (strpos($_POST['shipping'], '_'))) {
+        list ($module, $method) = explode('_', $_POST['shipping']);
+        global ${$module};
+      }
+
+      $total_weight = $_SESSION['cart']->show_weight();
+      $total_count = $_SESSION['cart']->count_contents();
+
+      if ($order->delivery['country']['iso_code_2'] != '') {
+        $_SESSION['delivery_zone'] = $order->delivery['country']['iso_code_2'];
+      }
+
+      if (isset($order->delivery['delivery_zone']) && $order->delivery['delivery_zone'] != '') {
+        $_SESSION['delivery_zone'] = $order->delivery['delivery_zone'];
+      }
+
+      if ($order->billing['country']['iso_code_2'] != '') {
+        $_SESSION['billing_zone'] = $order->billing['country']['iso_code_2'];
+      }
+
+      // load all enabled shipping modules
+      require_once (DIR_WS_CLASSES.'shipping.php');
+      $shipping_modules = new shipping;
+            
+      $redirect_link = xtc_href_link(FILENAME_CHECKOUT_CONFIRMATION, xtc_get_all_get_params(array('conditions_message')), 'SSL');
+      require(DIR_WS_INCLUDES.'shipping_action.php');
+    }
+    
+    $this->confirmation();
   }
 
 
   function confirmation() {
-    return false;
+    global $order, $smarty, $xtPrice, $main, $messageStack, $total_weight, $total_count, $free_shipping;
+    
+    if (!in_array($this->code, array('paypalcart', 'paypalexpress'))) {
+      return false;
+    }
+
+    if ($order->delivery['country']['iso_code_2'] != '') {
+      $_SESSION['delivery_zone'] = $order->delivery['country']['iso_code_2'];
+    }
+
+    if (isset($order->delivery['delivery_zone']) && $order->delivery['delivery_zone'] != '') {
+      $_SESSION['delivery_zone'] = $order->delivery['delivery_zone'];
+    }
+
+    if ($order->billing['country']['iso_code_2'] != '') {
+      $_SESSION['billing_zone'] = $order->billing['country']['iso_code_2'];
+    }
+
+    $no_shipping = false;
+    if ($order->content_type == 'virtual' || ($order->content_type == 'virtual_weight') || ($_SESSION['cart']->count_contents_virtual() == 0)) {
+      $no_shipping = true;
+    }
+
+    $total_weight = $_SESSION['cart']->show_weight();
+    $total_count = $_SESSION['cart']->count_contents();
+
+    // load all enabled shipping modules
+    require_once (DIR_WS_CLASSES . 'shipping.php');
+    $shipping_modules = new shipping;
+
+    // add unallowed payment / shipping
+    if (defined('MODULE_EXCLUDE_PAYMENT_STATUS') && MODULE_EXCLUDE_PAYMENT_STATUS == 'True') {
+      for ($i=1; $i<=MODULE_EXCLUDE_PAYMENT_NUMBER; $i++) {
+        $payment_exclude = explode(',', constant('MODULE_EXCLUDE_PAYMENT_PAYMENT_'.$i));
+        
+        if (in_array($this->code, $payment_exclude)) {
+          $shipping_exclude = explode(',', constant('MODULE_EXCLUDE_PAYMENT_SHIPPING_'.$i));
+        
+          for ($i=0, $n=count($shipping_modules->modules); $i<$n; $i++) {
+            if (in_array(substr($shipping_modules->modules[$i], 0, -4), $shipping_exclude)) {
+              unset($shipping_modules->modules[$i]);
+            }
+          }
+        
+        }
+      }
+    }
+    
+    $free_shipping = $this->free_shipping;
+    $free_shipping_value_over = $this->free_shipping_value_over;
+    
+    // get all available shipping quotes
+    $quotes = $shipping_modules->quote();
+
+    // if no shipping method has been selected, automatically select the cheapest method.
+    // if the modules status was changed when none were available, to save on implementing
+    // a javascript force-selection method, also automatically select the cheapest shipping
+    // method if more than one module is now enabled
+    if ((!isset($_SESSION['shipping']) && CHECK_CHEAPEST_SHIPPING_MODUL == 'true') || (isset($_SESSION['shipping']) && ($_SESSION['shipping'] == false) && (xtc_count_shipping_modules() == 1))) {
+      if ($free_shipping == true) {
+        $_SESSION['shipping'] = array(
+          'id' => 'free_free',
+          'title' => FREE_SHIPPING_TITLE,
+          'cost' => 0
+        );
+      } else {
+        $_SESSION['shipping'] = $shipping_modules->cheapest();
+      }
+      $order = new order();
+    }
+
+    if ($no_shipping === true) $_SESSION['shipping'] = false;
+
+    if (defined('SHOW_SELFPICKUP_FREE') && SHOW_SELFPICKUP_FREE == 'true') {
+      if ($free_shipping == true) {
+        $free_shipping = false;
+        
+        $ot_shipping = new ot_shipping();
+        $quotes_array = $ot_shipping->quote();
+        for ($i = 0, $n = sizeof($quotes); $i < $n; $i ++) {
+          if (isset($GLOBALS[$quotes[$i]['id']])
+              && is_object($GLOBALS[$quotes[$i]['id']])
+              && method_exists($GLOBALS[$quotes[$i]['id']], 'display_free')
+              )
+          {
+            if ($GLOBALS[$quotes[$i]['id']]->display_free() === true) {
+              $quotes_array = array_merge($quotes_array, $shipping_modules->quote($quotes[$i]['id'], $quotes[$i]['methods'][0]['id']));
+            }
+          } elseif ($quotes[$i]['id'] == 'selfpickup') {
+            $quotes_array = array_merge($quotes_array, $shipping_modules->quote($quotes[$i]['id'], $quotes[$i]['methods'][0]['id']));
+          }
+        }
+        $quotes = $quotes_array;
+      }
+    }
+
+    // build shipping block
+    require(DIR_WS_INCLUDES.'shipping_block.php');
+    
+    if ($no_shipping === false) {
+      $module_smarty->assign('FORM_SHIPPING_ACTION', xtc_draw_form('checkout_shipping', xtc_href_link(FILENAME_CHECKOUT_CONFIRMATION, xtc_get_all_get_params(), 'SSL')).xtc_draw_hidden_field('action', 'process'));
+    
+      $shipping_found = false;
+      for ($i = 0, $n = sizeof($quotes); $i < $n; $i ++) {
+        if (isset($quotes[$i]['methods'])
+            && is_array($quotes[$i]['methods'])
+            )
+        {
+          for ($j = 0, $n2 = sizeof($quotes[$i]['methods']); $j < $n2; $j ++) {
+            if (isset($_SESSION['shipping']) 
+                && is_array($_SESSION['shipping']) 
+                && array_key_exists('id', $_SESSION['shipping'])
+                && $quotes[$i]['id'].'_'.$quotes[$i]['methods'][$j]['id'] == $_SESSION['shipping']['id']
+                )
+            {
+              $shipping_found = true;
+              break;
+            }
+          }
+        }
+      }
+      if ($shipping_found === false) {
+        $module_smarty->assign('shipping_message', ERROR_CHECKOUT_SHIPPING_NO_METHOD);
+        /*
+        if (xtc_count_shipping_modules() == 1) {
+          $module_smarty->assign('BUTTON_CONTINUE', xtc_image_submit('button_confirm.gif', IMAGE_BUTTON_CONFIRM));
+        }
+        */
+      }
+      if (xtc_count_shipping_modules() > 1) {
+        $module_smarty->assign('BUTTON_CONTINUE', xtc_image_submit('button_confirm.gif', IMAGE_BUTTON_CONFIRM));
+      }
+      $module_smarty->assign('FORM_END', '</form>');
+    
+      if ($no_shipping === false) {
+        $module_smarty->assign('SHIPPING_BLOCK', $shipping_block);
+      }
+      
+      if (xtc_count_shipping_modules() == 0) {
+        $_SESSION['shipping'] = '';
+      }
+      
+      $module_smarty->assign('language', $_SESSION['language']);
+      $module_smarty->caching = 0;
+
+      $tpl_file = DIR_FS_EXTERNAL.'paypal/templates/shipping_block.html';
+      if (is_file(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/module/paypal/shipping_block.html')) {
+        $tpl_file = DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/module/paypal/shipping_block.html';
+      }
+      $shipping_method = $module_smarty->fetch($tpl_file);
+    
+      $smarty->assign('SHIPPING_METHOD', $shipping_method);
+    }
+    $smarty->assign('SHIPPING_ADDRESS_EDIT', xtc_href_link(FILENAME_CHECKOUT_SHIPPING_ADDRESS, xtc_get_all_get_params(), 'SSL'));
+    $smarty->assign('BILLING_ADDRESS_EDIT', xtc_href_link(FILENAME_CHECKOUT_PAYMENT_ADDRESS, xtc_get_all_get_params(), 'SSL'));
+
+    $smarty->clear_assign('SHIPPING_EDIT');
+    $smarty->clear_assign('PAYMENT_EDIT');
+    //$smarty->clear_assign('PRODUCTS_EDIT');
   }
 
 
   function process_button() {
-    return false;
+    global $smarty, $main, $messageStack;
+    
+    if (!in_array($this->code, array('paypalcart', 'paypalexpress'))) {
+      return false;
+    }
+
+    $module_smarty = new Smarty;
+    
+    //check if display conditions on checkout page is true
+    if (DISPLAY_REVOCATION_ON_CHECKOUT == 'true') {
+      //revocation  
+      $shop_content_data = $main->getContentData(REVOCATION_ID);
+      $module_smarty->assign('REVOCATION', $shop_content_data['content_text']);
+      $module_smarty->assign('REVOCATION_TITLE', $shop_content_data['content_heading']);
+      $module_smarty->assign('REVOCATION_LINK', $main->getContentLink(REVOCATION_ID, MORE_INFO, 'SSL'));
+      //agb
+      $shop_content_data = $main->getContentData(3);
+      $module_smarty->assign('AGB_TITLE', $shop_content_data['content_heading']);
+      $module_smarty->assign('AGB_LINK', $main->getContentLink(3, MORE_INFO,'SSL'));
+      $module_smarty->assign('TEXT_AGB_CHECKOUT', sprintf(TEXT_AGB_CHECKOUT, $main->getContentLink(3, MORE_INFO,'SSL'), $main->getContentLink(REVOCATION_ID, MORE_INFO,'SSL'), $main->getContentLink(2, MORE_INFO,'SSL')));
+      //privacy
+      $shop_content_data = $main->getContentData(2);
+      $module_smarty->assign('PRIVACY', $shop_content_data['content_heading']);
+      $module_smarty->assign('PRIVACY_TITLE', $shop_content_data['content_heading']);
+      $module_smarty->assign('PRIVACY_LINK', $main->getContentLink(2, MORE_INFO,'SSL'));
+    }
+
+    //check if display conditions on checkout page is true
+    if (DISPLAY_CONDITIONS_ON_CHECKOUT == 'true') {
+      $shop_content_data = $main->getContentData(3);
+      $module_smarty->assign('AGB', '<div class="agbframe">' . $shop_content_data['content_text'] . '</div>');
+      $module_smarty->assign('AGB_LINK', $main->getContentLink(3, MORE_INFO,'SSL'));
+      if ((defined('SIGN_CONDITIONS_ON_CHECKOUT') && SIGN_CONDITIONS_ON_CHECKOUT == 'true') || (!defined('SIGN_CONDITIONS_ON_CHECKOUT') && DISPLAY_CONDITIONS_ON_CHECKOUT == 'true')) {
+        $module_smarty->assign('AGB_checkbox', '<input type="checkbox" value="conditions" name="conditions" id="conditions"'.(isset($_GET['step']) && $_GET['step'] == 'step2' ? ' checked="checked"' : '').' />');
+      }
+    }
+
+    if (defined('DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT')
+        && DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT == 'true'
+        && ($_SESSION['cart']->content_type == 'virtual'
+            || $_SESSION['cart']->content_type == 'mixed')
+        )
+    {
+      $shop_content_data = $main->getContentData(REVOCATION_ID);
+      $module_smarty->assign('REVOCATION', '<div class="agbframe">' . $shop_content_data['content_text'] . '</div>');
+      $module_smarty->assign('REVOCATION_LINK', $main->getContentLink(REVOCATION_ID, MORE_INFO,'SSL'));
+      $module_smarty->assign('REVOCATION_checkbox', '<input type="checkbox" value="revocation" name="revocation" id="revocation"'.(isset($_GET['step']) && $_GET['step'] == 'step2' ? ' checked="checked"' : '').' />');
+    }
+
+    if (defined('DISPLAY_PRIVACY_ON_CHECKOUT') && DISPLAY_PRIVACY_ON_CHECKOUT == 'true') {
+      $shop_content_data = $main->getContentData(2);
+      $module_smarty->assign('PRIVACY', '<div class="agbframe">' . $shop_content_data['content_text'] . '</div>');
+      $module_smarty->assign('PRIVACY_LINK', $main->getContentLink(2, MORE_INFO,'SSL'));
+      $module_smarty->assign('PRIVACY_checkbox', '<input type="checkbox" value="privacy" name="privacy" id="privacy"'.(isset($_GET['step']) && $_GET['step'] == 'step2' ? ' checked="checked"' : '').' />');
+    }
+
+    $module_smarty->assign('COMMENTS', xtc_draw_textarea_field('comments', 'soft', '60', '5', isset($_SESSION['comments'])?$_SESSION['comments']:'') . xtc_draw_hidden_field('comments_added', 'YES')); //Dokuman - 2012-05-31 - fix paypal_checkout notices
+    $module_smarty->assign('ADR_checkbox', '<input type="checkbox" value="address" name="check_address" id="address" />');
+
+    if ($messageStack->size('checkout_confirmation') > 0) {
+      $smarty->assign('error_message', $messageStack->output('checkout_confirmation'));
+    } elseif (isset($_SESSION['paypal_express_new_customer'])
+              && !isset($_SESSION['paypal_express_new_customer_note'])
+              )
+    {
+      $smarty->assign('error_message', TEXT_PAYPAL_CART_ACCOUNT_CREATED);
+      $_SESSION['paypal_express_new_customer_note'] = 'true';
+    }
+
+    $module_smarty->assign('language', $_SESSION['language']);
+    $module_smarty->caching = 0;
+    
+    $tpl_file = DIR_FS_EXTERNAL.'paypal/templates/comments_block.html';
+    if (is_file(DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/module/paypal/comments_block.html')) {
+      $tpl_file = DIR_FS_CATALOG.'templates/'.CURRENT_TEMPLATE.'/module/paypal/comments_block.html';
+    }
+    $process_button = $module_smarty->fetch($tpl_file);
+
+    return $process_button;
   }
 
 
   function before_process() {
-    return false;
+    global $messageStack;
+
+    if (!in_array($this->code, array('paypalcart', 'paypalexpress'))) {
+      return false;
+    }
+        
+    if (isset($_SESSION['payment']) 
+        && $_SESSION['payment'] == $this->code
+        && !isset($_SESSION['paypal']['process'])
+        )
+    {
+      if (isset($_SESSION['paypal']['paymentId'])
+          || isset($_SESSION['paypal']['OrderID'])
+          )
+      {
+        $error = false;
+        if ($_POST['comments_added'] != '') {
+          $_SESSION['comments'] = xtc_db_prepare_input($_POST['comments']);
+        }
+        if (((defined('SIGN_CONDITIONS_ON_CHECKOUT') && SIGN_CONDITIONS_ON_CHECKOUT == 'true')
+             || (!defined('SIGN_CONDITIONS_ON_CHECKOUT') && DISPLAY_CONDITIONS_ON_CHECKOUT == 'true')
+             ) && (!isset($_POST['conditions']) || $_POST['conditions'] != 'conditions')
+            )
+        {
+          $error = true;
+          $messageStack->add_session('checkout_confirmation', str_replace('\n', '', ERROR_CONDITIONS_NOT_ACCEPTED));
+        }
+        if (!isset($_POST['check_address']) || $_POST['check_address'] != 'address') {
+          $error = true;
+          $messageStack->add_session('checkout_confirmation', str_replace('\n', '', ERROR_ADDRESS_NOT_ACCEPTED));
+        }
+        if (!isset($_SESSION['shipping']) 
+            || ($_SESSION['shipping'] !== false && !is_array($_SESSION['shipping']))
+            ) 
+        {
+          $error = true;
+          $messageStack->add_session('checkout_confirmation', ERROR_CHECKOUT_SHIPPING_NO_METHOD);
+        }
+        if (defined('DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT')
+            && DISPLAY_REVOCATION_VIRTUAL_ON_CHECKOUT == 'true'
+            && ($_SESSION['cart']->content_type == 'virtual'
+                || $_SESSION['cart']->content_type == 'mixed'
+                )
+            && (!isset($_POST['revocation']) || $_POST['revocation'] != 'revocation')
+            )
+        {
+          $error = true;
+          $messageStack->add_session('checkout_confirmation', str_replace('\n', '', ERROR_REVOCATION_NOT_ACCEPTED));
+        }
+        if (defined('DISPLAY_PRIVACY_ON_CHECKOUT') && DISPLAY_PRIVACY_ON_CHECKOUT == 'true' && (!isset($_POST['privacy']) || $_POST['privacy'] != 'privacy')) {
+          $error = true;
+          $messageStack->add_session('checkout_confirmation', str_replace('\n', '', ERROR_PRIVACY_NOTICE_NOT_ACCEPTED));
+        }
+        
+        if ($error === true) {
+          xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_CONFIRMATION, xtc_get_all_get_params(array('conditions_message')).'conditions=true', 'SSL', true, false));
+        }
+      }
+
+      if ($this->code == 'paypalexpress') {
+        $PayPalOrder = $this->GetOrder($_SESSION['paypal']['OrderID']);
+        
+        if (isset($PayPalOrder->status) && !in_array($PayPalOrder->status, array('COMPLETED', 'APPROVED'))) {
+          xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error='.$this->code, 'SSL'));
+        }
+      }
+    } elseif (isset($_SESSION['paypal']['process'])) {
+      xtc_redirect(xtc_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));
+    }
+    
+    $_SESSION['paypal']['process'] = true;
   }
 
 
@@ -179,57 +563,69 @@ class PayPalPaymentBase extends PayPalCommon {
 
 
   function get_payment_instructions($orders_id) {
-    $payment = $this->get_order_details($orders_id);
-  
-    if (isset($payment['instruction'])) {
-       
+    // include needed functions
+    if (!function_exists('xtc_date_short')) {
+      require_once(DIR_FS_INC.'xtc_date_short.inc.php');
+    }
+
+    $payment_query = xtc_db_query("SELECT *
+                                     FROM ".TABLE_PAYPAL_INSTRUCTIONS."
+                                    WHERE orders_id = '".(int)$orders_id."'");
+    if (xtc_db_num_rows($payment_query) > 0) {
+      $payment = xtc_db_fetch_array($payment_query);
+      $payment['amount'] = sprintf("%01.2f", round($payment['amount'], 2));
+      $payment['date'] = xtc_date_short($payment['date']);
+
       $fields = array(
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_AMOUNT,
-          'field' => $payment['instruction']['amount']['total'].' '.$payment['instruction']['amount']['currency'],
+          'field' => $payment['amount'].' '.$payment['currency'],
         ),
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_REFERENCE,
-          'field' => $payment['instruction']['reference'],
+          'field' => $payment['reference'],
         ),
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_PAYDATE,
-          'field' => $payment['instruction']['date'],
+          'field' => $payment['date'],
         ),
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_ACCOUNT,
-          'field' => $payment['instruction']['bank']['name'],
+          'field' => $payment['name'],
         ),
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_HOLDER,
-          'field' => $payment['instruction']['bank']['holder'],
+          'field' => $payment['holder'],
         ),
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_IBAN,
-          'field' => $payment['instruction']['bank']['iban'],
+          'field' => $payment['iban'],
         ),
         array(
           'title' => TEXT_PAYPAL_INSTRUCTIONS_BIC,
-          'field' => $payment['instruction']['bank']['bic'],
+          'field' => $payment['bic'],
         ),
       );
-      
-      $title = sprintf(TEXT_PAYPAL_INSTRUCTIONS_CHECKOUT, $payment['instruction']['amount']['total'].' '.$payment['instruction']['amount']['currency'], $payment['instruction']['date']);
-      if ($fields[2]['field'] == '') {
+
+      $title = sprintf(TEXT_PAYPAL_INSTRUCTIONS_CHECKOUT, $payment['amount'].' '.$payment['currency'], $payment['date']);
+      if ($payment['date'] == '') {
         unset($fields[2]);
         $fields = array_values($fields);
-        $title = sprintf(TEXT_PAYPAL_INSTRUCTIONS_CHECKOUT_SHORT, $payment['instruction']['amount']['total'].' '.$payment['instruction']['amount']['currency']);
+        $title = sprintf(TEXT_PAYPAL_INSTRUCTIONS_CHECKOUT_SHORT, $payment['amount'].' '.$payment['currency']);
       }
-      
+
       $success = array(
-        array ('title' => $title,
-               'class' => $this->code,
-               'fields' => $fields
-               ),
-        );
-  
+        array (
+          'title' => $title,
+          'class' => $this->code,
+          'fields' => $fields
+        ),
+      );
+
       return $success;
     }
+
+    return false;
   }
 
 
@@ -263,12 +659,20 @@ class PayPalPaymentBase extends PayPalCommon {
 
   function get_error() {
     $error = false;
-    if (isset($_GET['payment_error']) && $_GET['payment_error'] != '') {
+    if (isset($_GET['payment_error']) && $_GET['payment_error'] == $this->code) {
+      $message = decode_htmlentities(constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_ERROR_MESSAGE'));
+      if (isset($_SESSION['paypal_payment_error'])) {
+        if (defined('TEXT_PAYPAL_'.$_SESSION['paypal_payment_error'].'_ERROR')) {
+          $message = decode_htmlentities(constant('TEXT_PAYPAL_'.$_SESSION['paypal_payment_error'].'_ERROR'));
+        }
+        unset($_SESSION['paypal_payment_error']);
+      }
       $error = array(
         'title' => constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_ERROR_HEADING'),
-        'error' => decode_htmlentities(constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_ERROR_MESSAGE'))
+        'error' => $message
       );
     }
+    
     return $error;
   }
 
@@ -280,10 +684,14 @@ class PayPalPaymentBase extends PayPalCommon {
 
   function check() {
     if (!isset($this->_check)) {
-      $check_query = xtc_db_query("SELECT configuration_value 
-                                     FROM ".TABLE_CONFIGURATION." 
-                                    WHERE configuration_key = 'MODULE_PAYMENT_".strtoupper($this->code)."_STATUS'");
-      $this->_check = xtc_db_num_rows($check_query);
+      if (defined('MODULE_PAYMENT_'.strtoupper($this->code).'_STATUS')) {
+        $this->_check = true;
+      } else {
+        $check_query = xtc_db_query("SELECT configuration_value 
+                                       FROM ".TABLE_CONFIGURATION." 
+                                      WHERE configuration_key = 'MODULE_PAYMENT_".strtoupper($this->code)."_STATUS'");
+        $this->_check = xtc_db_num_rows($check_query);
+      }
     }
     return $this->_check;
   }
@@ -291,11 +699,14 @@ class PayPalPaymentBase extends PayPalCommon {
 
   function check_install() {
     if (!isset($this->_check_install)) {
-      $check_query = xtc_db_query("SHOW TABLES LIKE '".TABLE_PAYPAL_CONFIG."'");
-      if (xtc_db_num_rows($check_query) > 0) {
+      if (defined('MODULE_PAYMENT_PAYPAL_SECRET')) {
         $this->_check_install = true;
       } else {
         $this->_check_install = false;
+        $check_query = xtc_db_query("SHOW TABLES LIKE '".TABLE_PAYPAL_CONFIG."'");
+        if (xtc_db_num_rows($check_query) > 0) {
+          $this->_check_install = true;
+        }
       }
     }
     return $this->_check_install;
@@ -372,7 +783,12 @@ class PayPalPaymentBase extends PayPalCommon {
     }
   }
 
-
+  
+  function get_js_sdk($commit = 'true', $client_token = false, $custom = false) {
+    return get_paypal_js_sdk($this->get_config('PAYPAL_CLIENT_ID_'.strtoupper($this->get_config('PAYPAL_MODE'))), $_SESSION['currency'], $this->intent, $commit, $client_token, $custom);
+  }
+  
+  
   function update_order($comment, $orders_status, $orders_id) {
   
     $order_history_data = array(
@@ -401,20 +817,95 @@ class PayPalPaymentBase extends PayPalCommon {
       if ($_SESSION['customer_id'] == $check['customers_id']) {
         require_once(DIR_FS_INC.'xtc_remove_order.inc.php');
         xtc_remove_order((int)$orders_id, ((STOCK_LIMITED == 'true') ? 'on' : false));
+        $this->LoggingManager->log('INFO', 'Remove Order ID: '.$orders_id);
       }
     }
   }
 
 
-  function install() {
+  function get_shipping_data() {
+    global $order, $xtPrice, $free_shipping, $total_weight, $total_count;
+    
+    if ($_SESSION['cart']->count_contents() > 0
+        && $_SESSION['cart']->get_content_type() != 'virtual'
+        )
+    {
+      require_once(DIR_WS_CLASSES.'shipping.php');
+      require_once(DIR_WS_CLASSES.'product.php');
+      require_once(DIR_WS_CLASSES.'order.php');
+      require_once(DIR_FS_INC.'xtc_get_countries.inc.php');
+    
+      $order = new order();
+    
+      $countries_id = isset($_SESSION['customer_country_id']) ? $_SESSION['customer_country_id'] : STORE_COUNTRY;
+      if (isset($_SESSION['country'])) {
+        $countries_id = $_SESSION['country'];
+      }
+    
+      $country = xtc_get_countriesList($countries_id, true);
+    
+      $_SESSION['delivery_zone'] = $country['countries_iso_code_2'];        
+      $order->delivery['country']['iso_code_2'] = $country['countries_iso_code_2'];
+      $order->delivery['country']['title'] = $country['countries_name'];
+      $order->delivery['country']['id'] = $country['countries_id'];
+      $order->delivery['country_id'] = $country['countries_id'];
+      $order->delivery['zone_id'] = 0;
+    
+      $total_weight = $_SESSION['cart']->show_weight();
+      $total_count = $_SESSION['cart']->count_contents();
 
+      // load all enabled shipping modules
+      $shipping_modules = new shipping();
+
+      $free_shipping = false;
+      if (MODULE_ORDER_TOTAL_INSTALLED) {
+        require_once (DIR_WS_CLASSES . 'order_total.php');
+        $order_total_modules = new order_total();
+        $order_total_modules->process();
+      }
+
+      $shipping_modules->quote();
+      $shipping_data = $shipping_modules->cheapest();
+      unset($_SESSION['delivery_zone']);
+    
+      if ($free_shipping === true) {
+        $shipping_data = array(
+          'cost' => 0,
+          'total' => 0,
+          'tax' => 0,
+        );
+      } elseif (is_array($shipping_data)) {
+        $shipping_data['tax'] = 0;
+        if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 
+            && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1
+            ) 
+        {
+          $module = substr($shipping_data['id'], 0, strpos($shipping_data['id'], '_'));
+          if (is_object($GLOBALS[$module]) && property_exists($GLOBALS[$module], 'tax_class')) {
+            $shipping_tax = xtc_get_tax_rate($GLOBALS[$module]->tax_class, $order->delivery['country']['id'], $order->delivery['zone_id']);
+            $shipping_data['tax'] = $xtPrice->xtcAddTax($shipping_data['cost'], $shipping_tax) - $shipping_data['cost'];
+          }
+        }      
+      }
+    
+      return $shipping_data;
+    }
+  }
+
+
+  function install() {
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_".strtoupper($this->code)."_STATUS', 'True', '6', '1', NULL, now(), '', 'xtc_cfg_select_option(array(\'True\', \'False\'),' )");
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_".strtoupper($this->code)."_SORT_ORDER', '0', '6', '2', NULL, now(), '', '')");
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_".strtoupper($this->code)."_ALLOWED', '', '6', '3', NULL, now(), '', '')");
     xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_".strtoupper($this->code)."_ZONE', '0', '6', '4', NULL, now(), 'xtc_get_zone_class_title', 'xtc_cfg_pull_down_zone_classes(')");
     
     if (!defined('MODULE_PAYMENT_PAYPAL_SECRET')) {
-      xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_PAYPAL_SECRET', '".md5(uniqid())."', '6', '3', NULL, now(), '', '')");
+      $check_query = xtc_db_query("SELECT * 
+                                     FROM ".TABLE_CONFIGURATION." 
+                                    WHERE configuration_key = 'MODULE_PAYMENT_PAYPAL_SECRET'");
+      if (xtc_db_num_rows($check_query) < 1) {
+        xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_PAYPAL_SECRET', '".md5(uniqid())."', '6', '3', NULL, now(), '', '')");
+      }
     }
     
     xtc_db_query("CREATE TABLE IF NOT EXISTS ".TABLE_PAYPAL_PAYMENT." ( 
@@ -460,6 +951,17 @@ class PayPalPaymentBase extends PayPalCommon {
                     PRIMARY KEY (paypal_instructions_id),
                     KEY idx_orders_id (orders_id)
                   );");
+
+    xtc_db_query("CREATE TABLE IF NOT EXISTS ".TABLE_PAYPAL_TRACKING." (
+                   tracking_id int(11) NOT NULL AUTO_INCREMENT,
+                   orders_id int(11) NOT NULL,
+                   transaction_id varchar(64) NOT NULL,
+                   tracking_number varchar(64) NOT NULL,
+                   carrier varchar(16) NOT NULL,
+                   date_added datetime NOT NULL,
+                   PRIMARY KEY (tracking_id),
+                   KEY idx_orders_id (orders_id)
+                 );");
   
     $admin_query = xtc_db_query("SELECT * 
                                    FROM ".TABLE_ADMIN_ACCESS."
@@ -513,14 +1015,13 @@ class PayPalPaymentBase extends PayPalCommon {
     $check_query = xtc_db_query("SELECT configuration_key 
                                    FROM ".TABLE_CONFIGURATION." 
                                   WHERE configuration_key LIKE 'MODULE_PAYMENT_PAYPAL%_STATUS'");
-    if (xtc_db_num_rows($check_query) == 1) {			
-      xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_PAYMENT);
-      xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_CONFIG);
-      xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_IPN);
-      xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_INSTRUCTIONS);
+    if (xtc_db_num_rows($check_query) == 1) {
+      //xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_PAYMENT);
+      //xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_CONFIG);
+      //xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_IPN);
+      //xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_INSTRUCTIONS);
+      //xtc_db_query("DROP TABLE IF EXISTS ".TABLE_PAYPAL_TRACKING);
 
-
-  
       $admin_query = xtc_db_query("SELECT * 
                                      FROM ".TABLE_ADMIN_ACCESS."
                                     LIMIT 1");
@@ -534,9 +1035,11 @@ class PayPalPaymentBase extends PayPalCommon {
           xtc_db_query("ALTER TABLE ".TABLE_ADMIN_ACCESS." DROP COLUMN `".$admin_access."`");
         }
       }
+      
+      xtc_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE configuration_key LIKE 'MODULE_PAYMENT_PAYPAL_SECRET'");
     }
 
-    xtc_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE configuration_key LIKE 'MODULE_PAYMENT_".strtoupper($this->code)."\_%'");
+    xtc_db_query("DELETE FROM ".TABLE_CONFIGURATION." WHERE configuration_key LIKE 'MODULE_PAYMENT_".strtoupper($this->code)."\_%' AND configuration_key != 'MODULE_PAYMENT_PAYPAL_SECRET'");
   }
 
 
@@ -565,15 +1068,15 @@ class PayPalPaymentBase extends PayPalCommon {
         if (file_exists(DIR_FS_LANGUAGES.$languages['directory'].'/admin/paypal_config.php')) {
           include(DIR_FS_LANGUAGES.$languages['directory'].'/admin/paypal_config.php');
         }
-        if (${$statusname} != '') {
+        if (isset(${$statusname}) && ${$statusname} != '') {
           $check_query = xtc_db_query("SELECT orders_status_id 
                                          FROM " . TABLE_ORDERS_STATUS . " 
                                         WHERE orders_status_name = '" .xtc_db_input(${$statusname}). "' 
                                           AND language_id = '".(int)$languages['languages_id']."' 
                                         LIMIT 1");
           $status = xtc_db_fetch_array($check_query);
-          if (xtc_db_num_rows($check_query) < 1 || (${$statusid} && $status['orders_status_id'] != ${$statusid}) ) {
-            if (!${$statusid}) {
+          if (xtc_db_num_rows($check_query) < 1 || (isset(${$statusid}) && $status['orders_status_id'] != ${$statusid}) ) {
+            if (!isset(${$statusid})) {
               $status_query = xtc_db_query("SELECT max(orders_status_id) as status_id FROM " . TABLE_ORDERS_STATUS);
               $status = xtc_db_fetch_array($status_query);
               ${$statusid} = $status['status_id'] + 1;
@@ -633,6 +1136,17 @@ class PayPalPaymentBase extends PayPalCommon {
                     KEY idx_orders_id (orders_id)
                   );");
     
+    xtc_db_query("CREATE TABLE IF NOT EXISTS ".TABLE_PAYPAL_TRACKING." (
+                   tracking_id int(11) NOT NULL AUTO_INCREMENT,
+                   orders_id int(11) NOT NULL,
+                   transaction_id varchar(64) NOT NULL,
+                   tracking_number varchar(64) NOT NULL,
+                   carrier varchar(16) NOT NULL,
+                   date_added datetime NOT NULL,
+                   PRIMARY KEY (tracking_id),
+                   KEY idx_orders_id (orders_id)
+                 );");
+
     $table_array = array(
       array('column' => 'method', 'default' => "varchar(64) NOT NULL AFTER orders_id"),
     );
@@ -694,7 +1208,12 @@ class PayPalPaymentBase extends PayPalCommon {
     }
     
     if (!defined('MODULE_PAYMENT_PAYPAL_SECRET')) {
-      xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_PAYPAL_SECRET', '".md5(uniqid())."', '6', '3', NULL, now(), '', '')");
+      $check_query = xtc_db_query("SELECT * 
+                                     FROM ".TABLE_CONFIGURATION." 
+                                    WHERE configuration_key = 'MODULE_PAYMENT_PAYPAL_SECRET'");
+      if (xtc_db_num_rows($check_query) < 1) {
+        xtc_db_query("INSERT INTO ".TABLE_CONFIGURATION." (configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES ('MODULE_PAYMENT_PAYPAL_SECRET', '".md5(uniqid())."', '6', '3', NULL, now(), '', '')");
+      }
     }
     
     //check tables
@@ -718,6 +1237,7 @@ class PayPalPaymentBase extends PayPalCommon {
     // set all files to be deleted                     
     $unlink_file = array(
       'callback/paypal/paypalinstallment.php',
+      'includes/external/paypal/modules/installment.php',
       'includes/external/paypal/templates/presentment.html',
       'includes/external/paypal/templates/presentment_info.html',
       'includes/modules/order_total/ot_paypalinstallment_fee.php',

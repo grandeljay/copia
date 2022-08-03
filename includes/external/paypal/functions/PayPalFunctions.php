@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalFunctions.php 12392 2019-11-08 11:31:12Z GTB $
+   $Id: PayPalFunctions.php 14450 2022-05-10 07:37:39Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -47,6 +47,56 @@ function get_third_party_payments() {
     }
   }
   return $selection;
+}
+
+
+function get_paypal_js_sdk($lient_id, $currency, $intent, $commit, $client_token, $custom) {
+  static $output;
+  
+  if (!isset($output)) {
+    $output = true;
+    
+    $js = xtc_href_link(DIR_WS_EXTERNAL.'paypal/js/paypal-js.min.js', '', 'SSL', false);
+    $script = '<script type="module">
+      import { loadScript } from "'.$js.'";
+    ';
+    
+    if ($custom === true) {
+      $script = '<script type="module">
+        import { loadCustomScript } from "'.$js.'";
+        %s
+      </script>';
+      
+      return $script;
+    }
+    
+    $script .= '
+      let paypal;
+
+      try {
+        paypal = await loadScript({
+          "client-id": "'.$lient_id.'",
+          "currency": "'.$currency.'",
+          "intent": "'.strtolower($intent).'",
+          "commit": "'.$commit.'",
+          "locale": "'.$_SESSION['language_code'].'_'.strtoupper(($_SESSION['language_code'] == 'en') ? 'GB' : $_SESSION['language_code']).'",
+          "enable-funding": "paylater",
+          '.(($client_token !== false) ? '"data-client-token": "'.$client_token.'",' : '').'
+          "components": "buttons,funding-eligibility,messages,hosted-fields"
+        });
+      } catch (error) {
+        $(".apms_form").hide();
+        $(".apms_form_button").hide();
+        console.error("failed to load the PayPal SDK", error);
+      }
+
+      if (paypal) {
+        %s
+      }
+    </script>';
+    
+    return $script;
+  }
 }
 
 

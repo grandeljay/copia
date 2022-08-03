@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   $Id$
+   $Id: password_policy.php 13929 2022-01-11 12:01:09Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -63,6 +63,11 @@ class password_policy
             'value' => ((POLICY_MIN_SPECIAL_CHARS > 0) ? POLICY_MIN_SPECIAL_CHARS : false),
             'test'  => 'return preg_match_all("/[\W_]/", $p, $x) >= $v;',
             'error' => ENTRY_PASSWORD_ERROR_MIN_CHAR);
+
+        $this->rules['invalid_chars'] = array(
+            'value' => false,
+            'test'  => '',
+            'error' => ENTRY_PASSWORD_ERROR_INVALID_CHAR);
     }
     
     /*
@@ -86,6 +91,11 @@ class password_policy
                 $this->errors[$k] = $this->get_rule_error($k);
             }
         }
+        
+        if (preg_match("/[\\\\]/", $password) > 0) {
+            $this->errors['invalid_chars'] = $this->get_rule_error('invalid_chars');
+        }
+        
         return sizeof($this->errors) == 0;
     }
     

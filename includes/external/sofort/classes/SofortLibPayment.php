@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: SofortLibPayment.php 11815 2019-04-30 11:08:30Z GTB $
+   $Id: SofortLibPayment.php 14380 2022-04-27 09:57:16Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -101,10 +101,10 @@ class SofortLibPayment {
 		}
 		unset($_SESSION['sofort'][$this->code]);
 
-  	$description = $this->_setImageText((($this->ideal === true) ? 'logo_90x30.png' : 'pink.svg'), constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT'));
+  	$description = $this->_setImageText(((isset($this->ideal) && $this->ideal === true) ? 'logo_90x30.png' : 'pink.svg'), constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_DESCRIPTION_CHECKOUT_PAYMENT_TEXT'));
 	
     $fields = array();
-    if ($this->ideal === true) {
+    if (isset($this->ideal) && $this->ideal === true) {
       //get all available banks from SOFORT-server
       $this->sofortLibIdealBanks = new Sofort\SofortLib\IdealBanks(constant('MODULE_PAYMENT_'.strtoupper($this->code).'_KEY'));
       $this->sofortLibIdealBanks->sendRequest();
@@ -201,10 +201,14 @@ class SofortLibPayment {
 
 	function check() {
 		if (!isset($this->_check)) {
-			$check_query = xtc_db_query("SELECT configuration_value
-			                               FROM " . TABLE_CONFIGURATION . "
-			                              WHERE configuration_key = 'MODULE_PAYMENT_".strtoupper($this->code)."_STATUS'");
-			$this->_check = xtc_db_num_rows($check_query);
+			if (defined('MODULE_PAYMENT_'.strtoupper($this->code).'_STATUS')) {
+				$this->_check = true;
+			} else {
+				$check_query = xtc_db_query("SELECT configuration_value
+				                               FROM " . TABLE_CONFIGURATION . "
+				                              WHERE configuration_key = 'MODULE_PAYMENT_".strtoupper($this->code)."_STATUS'");
+				$this->_check = xtc_db_num_rows($check_query);
+			}
 		}
 		return $this->_check;
 	}
@@ -279,14 +283,14 @@ class SofortLibPayment {
         if (count($order_total_array)) {
           foreach($order_total_array as $key => $entry) {
             if ($entry['code'] == 'ot_total') {
-              $amount = round($entry['value'], $xtPrice->get_decimal_places(''));
+              $amount = round($entry['value'], $xtPrice->get_decimal_places($_SESSION['currency']));
             }
           }
         }
       }
     } else {
       $order = new order((int)$insert_id);
-      $amount = round($order->info['pp_total'], $xtPrice->get_decimal_places(''));
+      $amount = round($order->info['pp_total'], $xtPrice->get_decimal_places($_SESSION['currency']));
     }
     $this->data['amount'] = number_format($amount, 2, '.', '');
 
@@ -309,7 +313,7 @@ class SofortLibPayment {
                                                 ),
                                           array($insert_id,
                                                 $_SESSION['customer_id'],
-                                                strftime(DATE_FORMAT_SHORT),
+                                                date(DATE_FORMAT),
                                                 $order->customer['firstname'] . ' ' . $order->customer['lastname'],
                                                 $order->customer['company'],
                                                 $order->customer['email_address']

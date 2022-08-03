@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: Semknox.php 13466 2021-03-11 12:30:15Z GTB $
+   $Id: Semknox.php 13895 2021-12-22 16:27:59Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -81,7 +81,7 @@
       // client
       $this->client = new Client(
         array(
-          'base_uri' => 'https://api-v3.semknox.com/',
+          'base_uri' => 'https://api-modified.sitesearch360.com/',
           'timeout' => $timeout,
           'headers' => array(
             'SHOPSYS' => 'MODIFIED',
@@ -114,14 +114,14 @@
       foreach ($products_id_array as $products_id) {
         $products_array['products'][] = $this->getProduct($products_id);
       }
-      
+
       try {
         $response = $this->client->post(
           sprintf('products/batch/upload?apiKey=%s&projectId=%s', $this->api_key, $this->project_id),
           array(GuzzleHttp\RequestOptions::JSON => $this->convertToString($products_array))
         );
         $json = $response->getBody();
-        $response = json_decode($json, true);
+        $response = json_decode($json);
         $this->logger->log('semknox', __FUNCTION__.': '.date('Y-m-d H:i:s'));
       } catch (Exception $e) {
         $this->logger->log('semknox', __FUNCTION__.': '.$e->getMessage());
@@ -234,7 +234,7 @@
         'identifier' => $products['products_id'],
         'groupIdentifier' => $products['products_id'],
         'name' => $products['products_name'],
-        'productUrl' => $xtc_href_link(FILENAME_PRODUCT_INFO, 'products_id='.$products['products_id'], 'NONSSL', false),
+        'productUrl' => $xtc_href_link(FILENAME_PRODUCT_INFO, xtc_product_link($products['products_id'], $products['products_name']), 'NONSSL', false),
         'categories' => $this->getCategories($products['products_id']),
         'images' => array(),
         'attributes' => $this->getTags($products['products_id']),
@@ -276,12 +276,6 @@
       $products_array['attributes'][] = array(
         'key' => 'date_added',
         'value' => $this->getText($products['products_date_added']),
-        'userGroups' => $this->customers_status_all_array,
-      );
-
-      $products_array['attributes'][] = array(
-        'key' => 'purchased',
-        'value' => $this->getText($products['products_ordered']),
         'userGroups' => $this->customers_status_all_array,
       );
 
@@ -524,7 +518,7 @@
   
     private function getText($string) {
       $string = strip_tags($string);
-      $string = preg_replace ("/\s++/u", ' ', $string);
+      $string = preg_replace("/\s++/", ' ', $string);
       $string = trim($string);
 
       return $string;

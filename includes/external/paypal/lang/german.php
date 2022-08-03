@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: german.php 12938 2020-11-23 10:22:10Z GTB $
+   $Id: german.php 14465 2022-05-16 13:18:06Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -24,6 +24,7 @@ $lang_array = array(
   'TEXT_PAYPAL_TRANSACTION_ACCOUNT_STATE' => 'Account Status:',
   'TEXT_PAYPAL_TRANSACTION_INTENT' => 'Intent:',
   'TEXT_PAYPAL_TRANSACTION_STATE' => 'Status:',
+  'TEXT_PAYPAL_TRANSACTION_ID' => 'ID:',
   
   
   // transactions
@@ -34,6 +35,7 @@ $lang_array = array(
   'TEXT_PAYPAL_TRANSACTIONS_TOTAL' => 'Betrag:',
   'TEXT_PAYPAL_TRANSACTIONS_VALID' => 'G&uuml;ltig bis:',
   'TEXT_PAYPAL_TRANSACTIONS_ID' => 'ID:',
+  'TEXT_PAYPAL_TRANSACTIONS_FEE' => 'Geb&uuml;hr:',
   
   
   // instruction
@@ -55,17 +57,25 @@ $lang_array = array(
   'TEXT_PAYPAL_REFUND_COMMENT' => 'Kommentar:<br />(maximal 127 Zeichen)',
   'TEXT_PAYPAL_REFUND_AMOUNT' => 'Betrag:',
   'TEXT_PAYPAL_REFUND_SUBMIT' => 'R&uuml;ckzahlung',
+  'TEXT_PAYPAL_REFUND_CAPTURE' => 'Einziehung:',
   
   
   // capture
-  'TEXT_PAYPAL_CAPTURE' => 'Zahlung erfassen',
-  'TEXT_PAYPAL_CAPTURE_LEFT' => 'Anzahl m&ouml;glicher Erfassungen: ',
-  'TEXT_PAYPAL_CAPTURE_IS_FINAL' => 'Letzte Erfassung:',
+  'TEXT_PAYPAL_CAPTURE' => 'Zahlung einziehen',
+  'TEXT_PAYPAL_CAPTURE_LEFT' => 'Anzahl m&ouml;glicher Einziehungen: ',
+  'TEXT_PAYPAL_CAPTURE_IS_FINAL' => 'Letzte Einziehung:',
   'TEXT_PAYPAL_CAPTURE_AMOUNT' => 'Betrag:',
-  'TEXT_PAYPAL_CAPTURE_SUBMIT' => 'Zahlung erfassen',
-  'TEXT_PAYPAL_CAPTURED' => 'Zahlung erfasst',
-
+  'TEXT_PAYPAL_CAPTURE_SUBMIT' => 'Zahlung einziehen',
+  'TEXT_PAYPAL_CAPTURED' => 'Zahlung eingezogen',
+  'TEXT_PAYPAL_CAPTURE_AUTHORIZE' => 'Authorisierung:',
   
+  
+  // tracking
+  'TEXT_PAYPAL_TRACKING' => 'Tracking:',
+  'TEXT_PAYPAL_ADDTRACKING' => 'Tracking',
+  'TEXT_PAYPAL_TRACKING_SUBMIT' => 'Sendungsnummer hinzuf&uuml;gen',
+
+
   // products
   'TEXT_PAYPAL_PRODUCTS_TYPE' => 'Produktart',
   'TEXT_PAYPAL_CREATE_PRODUCT' => 'Artikel erstellen',
@@ -106,12 +116,12 @@ $lang_array = array(
   'TEXT_PAYPAL_BILLING_CYCLES_COMPLETED' => 'Zahlungen erfolgt:',
   'TEXT_PAYPAL_BILLING_CYCLES_REMAINING' => 'Zahlungen offen:',
   'TEXT_PAYPAL_BILLING_CYCLES_TOTAL' => 'Zahlungen gesamt:',
-  'TEXT_PAYPAL_BILLING_TIME_NEXT' => 'Nächste Zahlung:',
+  'TEXT_PAYPAL_BILLING_TIME_NEXT' => 'N&auml;chste Zahlung:',
   'TEXT_PAYPAL_BILLING_TIME_FINAL' => 'Letzte Zahlung:',
   'TEXT_PAYPAL_BILLING_FAILED' => 'Fehlgeschlagen:',
   'TEXT_PAYPAL_CANCEL' => 'Zahlungen abbrechen',
   'TEXT_PAYPAL_CANCEL_SUBMIT' => 'Best&auml;tigen',
-  
+
   // error
   'TEXT_PAYPAL_ERROR_AMOUNT' => 'Bitte geben Sie einen Betrag ein.',
   'TEXT_PAYPAL_ERROR_ALREADY_PAID' => 'Wir haben Ihre Zahlung bereits erhalten. Vielen Dank!',
@@ -121,7 +131,7 @@ $lang_array = array(
   'TEXT_PAYPAL_ERROR_SUBSCRIPTION_PRODUCTS' => 'Sie haben einen Abo Artikel im Warenkorb welcher nur alleine gekauft werden kann.',
   
   // diverse
-  'MODULE_PAYMENT_PAYPAL_TEXT_ORDER' => 'Ihre Bestellung bei '.STORE_NAME,
+  'MODULE_PAYMENT_PAYPAL_TEXT_ORDER' => 'Ihre Bestellung bei '.(defined('STORE_NAME') ? STORE_NAME : ''),
 
   // status
   'TEXT_PAYPAL_NO_STATUS_CHANGE' => 'keine Status&auml;nderung',
@@ -149,6 +159,8 @@ $lang_array = array(
   'TEXT_PAYPALINSTALLMENT_CREDITOR' => 'Darlehensgeber',
   'TEXT_PAYPALINSTALLMENT_INFO_LINK' => 'Informationen zu m&ouml;glichen Raten',
 
+  'TEXT_PAYPAL_INSTRUMENT_DECLINED_ERROR' => 'Das gew&auml;hlte Zahlungsmittel wurde entweder von PayPal oder von der Bank abgelehnt, oder es kann f&uuml;r diese Zahlung nicht verwendet werden.',
+  'IMAGE_ICON_STATUS_YELLOW' => 'vor&uuml;bergehend nicht verf&uuml;gbar',
 );
 
 

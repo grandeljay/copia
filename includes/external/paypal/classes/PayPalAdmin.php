@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalAdmin.php 12890 2020-09-21 14:08:35Z GTB $
+   $Id: PayPalAdmin.php 14301 2022-04-13 07:48:14Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -25,6 +25,7 @@ use PayPal\Api\Webhook;
 use PayPal\Api\WebhookEventType;
 use PayPal\Api\Patch;
 use PayPal\Api\PatchRequest;
+use PayPal\Api\Partner;
 
 
 class PayPalAdmin extends PayPalPayment {
@@ -34,7 +35,31 @@ class PayPalAdmin extends PayPalPayment {
     PayPalPayment::__construct('paypal');    
 	}
 
+  
+  function getSellerStatus($mode) {
+  
+    // auth
+    $apiContext = $this->apiContext($mode);
 
+    // set WebProfile
+    $partner = new Partner();
+    
+    $partner_details = $this->get_partner_details($mode);
+    
+    if ($this->get_config('PAYPAL_MERCHANT_ID_'.strtoupper($mode)) != '') {
+      $partner->setPartnerId($partner_details['partnerID'])
+              ->setMerchantId($this->get_config('PAYPAL_MERCHANT_ID_'.strtoupper($mode)));
+    
+      try {
+        return $partner->get($apiContext);
+      
+      } catch (Exception $ex) {
+        $this->LoggingManager->log('DEBUG', 'getSellerStatus', array('exception' => $ex));
+      }
+    }
+  }
+  
+  
   function list_profile() {
     
     // auth
@@ -251,6 +276,10 @@ class PayPalAdmin extends PayPalPayment {
             'orders_status' => $this->get_config($eventtypes[$i]->getName()),
           );
         }
+             
+        if (isset($list_array[$w]['data'])) {
+          array_multisort (array_column($list_array[$w]['data'], 'name'), SORT_ASC, $list_array[$w]['data']);
+        }
       }
     }
         
@@ -398,6 +427,10 @@ class PayPalAdmin extends PayPalPayment {
         $available_array[$i]['status'] = ((in_array($available_array[$i]['name'], $list_array)) ? true : false);
         $available_array[$i]['orders_status'] = $this->get_config($available_array[$i]['name']);
       }    
+
+      if (count($available_array) > 0) {
+        array_multisort (array_column($available_array, 'name'), SORT_ASC, $available_array);
+      }
     }
     
     return $available_array;
@@ -465,6 +498,10 @@ class PayPalAdmin extends PayPalPayment {
           'description' => $eventtype->getDescription(),
         );
       }
+
+      if (count($list_array) > 0) {
+        array_multisort (array_column($list_array, 'name'), SORT_ASC, $list_array);
+      }
     }
         
     return $list_array;    
@@ -488,8 +525,8 @@ class PayPalAdmin extends PayPalPayment {
   
   function getOnboardingLink($mode = 'live') {
     $partner = $this->get_partner_details($mode);
-    if (is_array($partner)) {
-      return sprintf($partner['requestURL'], $partner['partnerID'], $partner['clientID'], $this->get_seller_nonce());    
+    if (is_array($partner)) {      
+      return sprintf($partner['requestURLv2'], $partner['partnerID'], $partner['clientID'], $this->get_seller_nonce(), urlencode(xtc_href_link('paypal_config.php', 'action=callback&mode='.$mode)));    
     }
   }
   

@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalCommon.php 13445 2021-03-04 14:11:31Z GTB $
+   $Id: PayPalCommon.php 14191 2022-03-24 07:03:40Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -43,12 +43,14 @@ class PayPalCommon extends PayPalAuth {
         $string[$key] = $this->encode_utf8($value);
       }
     } else {
-      $string = decode_htmlentities($string);
-      $cur_encoding = mb_detect_encoding($string);
-      if ($cur_encoding == "UTF-8" && mb_check_encoding($string, "UTF-8")) {
-        return $string;
-      } else {
-        return mb_convert_encoding($string, "UTF-8", $_SESSION['language_charset']);
+      if (!is_bool($string)) {
+        $string = decode_htmlentities($string);
+        $cur_encoding = mb_detect_encoding($string);
+        if ($cur_encoding == "UTF-8" && mb_check_encoding($string, "UTF-8")) {
+          return $string;
+        } else {
+          return mb_convert_encoding($string, "UTF-8", $_SESSION['language_charset']);
+        }
       }
     }
     
@@ -62,7 +64,9 @@ class PayPalCommon extends PayPalAuth {
         $string[$key] = $this->decode_utf8($value);
       }
     } else {
-      $string = decode_utf8($string);
+      if (!is_bool($string)) {
+        $string = decode_utf8($string);
+      }
     }
     
     return $string;
@@ -167,7 +171,7 @@ class PayPalCommon extends PayPalAuth {
         default:
           if ($totals[$i]['sort_order'] > $sortorder_subtotal) {
             if($totals[$i]['value'] < 0) {
-              $this->details->setShippingDiscount($this->details->getShippingDiscount() + $totals[$i]['value']);
+              $this->details->setDiscount($this->details->getDiscount() + ($totals[$i]['value'] * (-1)));
             } else {
               $this->details->setHandlingFee($this->details->getHandlingFee() + $totals[$i]['value']);
             }
@@ -187,7 +191,7 @@ class PayPalCommon extends PayPalAuth {
                       && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 0
                       && $order->delivery['country_id'] == STORE_COUNTRY
                       )
-              ) && $this->details->getShippingDiscount() == 0
+              ) && $this->details->getDiscount() == 0
              ) 
     {      
       if ((string)$amount_total != (string)$total) {
@@ -195,8 +199,8 @@ class PayPalCommon extends PayPalAuth {
       } 
     } else {
       if ((string)$amount_total != (string)$total) {
-        if ($this->details->getShippingDiscount() < 0) {
-          $this->details->setShippingDiscount($this->details->getShippingDiscount() + ($amount_total - $total));
+        if ($this->details->getDiscount() > 0) {
+          $this->details->setDiscount($this->details->getDiscount() + (($amount_total - $total) * (-1)));
         } elseif ($this->details->getHandlingFee() > 0) {
           $this->details->setHandlingFee($this->details->getHandlingFee() + ($amount_total - $total));
         }
@@ -215,6 +219,7 @@ class PayPalCommon extends PayPalAuth {
     $total += $this->details->getInsurance();
     $total += $this->details->getGiftWrap();
     $total += $this->details->getFee();
+    $total -= $this->details->getDiscount();
     
     return $total;
   }
@@ -239,6 +244,7 @@ class PayPalCommon extends PayPalAuth {
         || $this->details->getInsurance() > 0
         || $this->details->getGiftWrap() > 0
         || $this->details->getFee() > 0
+        || $this->details->getDiscount() > 0
         )
     {
       return true;
@@ -264,8 +270,8 @@ class PayPalCommon extends PayPalAuth {
   }
 
 
-  function calculate_total($plain = true) {
-    global $order;
+  function calculate_total($mode = 1) {
+    global $order, $free_shipping, $free_shipping_value_over;
     
     $order_backup = $order;
     
@@ -284,18 +290,20 @@ class PayPalCommon extends PayPalAuth {
     if (!class_exists('order_total')) {
       require_once (DIR_WS_CLASSES . 'order_total.php');
     }
+    $free_shipping = false;
     $order_total_modules = new order_total();
     $order_total = $order_total_modules->process();
+    
+    $this->free_shipping = $free_shipping;
+    $this->free_shipping_value_over = $free_shipping_value_over;
     
     $total = $order->info['total'];
 
     $order = $order_backup;
     
-    if ($plain === false) {
-      return $order_total;
-    }
-    
-    return $total;
+    if ($mode == 1) return $total;
+    if ($mode == 2) return $order_total;
+    if ($mode == 3) return $free_shipping;
   }
 
   
@@ -417,6 +425,7 @@ class PayPalCommon extends PayPalAuth {
     
     // include needed function
     require_once (DIR_FS_INC.'xtc_write_user_info.inc.php');
+    require_once (DIR_FS_INC.'write_customers_session.inc.php');
     
     $where = " WHERE customers_email_address = '".xtc_db_input($customer['info']['email_address'])."' AND account_type = '0' ";
     if ($customer_id != '') {
@@ -435,23 +444,7 @@ class PayPalCommon extends PayPalAuth {
       }
       $check_customer = xtc_db_fetch_array($check_customer_query);
  
- 			$check_country_query = xtc_db_query("SELECT entry_country_id, 
-			                                            entry_zone_id 
-			                                       FROM ".TABLE_ADDRESS_BOOK." 
-			                                      WHERE customers_id = '".(int) $check_customer['customers_id']."' 
-			                                        AND address_book_id = '".$check_customer['customers_default_address_id']."'");
-			$check_country = xtc_db_fetch_array($check_country_query);
-
-			$_SESSION['customer_gender'] = $check_customer['customers_gender'];
-			$_SESSION['customer_first_name'] = $check_customer['customers_firstname'];
-			$_SESSION['customer_last_name'] = $check_customer['customers_lastname'];
-			$_SESSION['customer_email_address'] = $check_customer['customers_email_address'];
 			$_SESSION['customer_id'] = $check_customer['customers_id'];
-			$_SESSION['customer_vat_id'] = $check_customer['customers_vat_id'];
-			$_SESSION['customer_default_address_id'] = $check_customer['customers_default_address_id'];
-			$_SESSION['customer_country_id'] = $check_country['entry_country_id'];
-			$_SESSION['customer_zone_id'] = $check_country['entry_zone_id'];
-			$_SESSION['account_type'] = $check_customer['account_type'];
       
       if (isset($check_customer['customers_password_time'])) {
         $_SESSION['customer_time'] = $check_customer['customers_password_time'];
@@ -466,12 +459,23 @@ class PayPalCommon extends PayPalAuth {
 			xtc_db_query("UPDATE ".TABLE_CUSTOMERS_INFO." 
 			                 SET customers_info_date_of_last_logon = now(), 
 			                     customers_info_number_of_logons = customers_info_number_of_logons+1 
-			               WHERE customers_info_id = '".(int) $_SESSION['customer_id']."'");
-			xtc_write_user_info((int) $_SESSION['customer_id']);
+			               WHERE customers_info_id = '".(int)$_SESSION['customer_id']."'");
+			               
+      // write customers status session
+      require(DIR_WS_INCLUDES.'write_customers_status.php');
+
+      // write customers session
+      write_customers_session((int)$_SESSION['customer_id']);
+
+      // user info
+			xtc_write_user_info((int)$_SESSION['customer_id']);
 
 			// restore cart contents
 			$_SESSION['cart']->restore_contents();
-
+      
+      // set cartID
+      $_SESSION['paypal']['cartID'] = $_SESSION['cart']->cartID;
+      
 			// restore wishlist contents
 			if (isset($_SESSION['wishlist'])
 			    && is_object($_SESSION['wishlist'])
@@ -550,11 +554,12 @@ class PayPalCommon extends PayPalAuth {
                      SET customers_default_address_id = '" . (int)$address_id . "' 
                    WHERE customers_id = '" . (int)$customer_id . "'");
     
-    $sql_data_array = array('customers_info_id' => (int)$customer_id,
-                            'customers_info_number_of_logons' => '1',
-                            'customers_info_date_account_created' => 'now()',
-                            'customers_info_date_of_last_logon' => 'now()'
-                            );
+    $sql_data_array = array(
+      'customers_info_id' => (int)$customer_id,
+      'customers_info_number_of_logons' => '1',
+      'customers_info_date_account_created' => 'now()',
+      'customers_info_date_of_last_logon' => 'now()'
+    );
     xtc_db_perform(TABLE_CUSTOMERS_INFO, $sql_data_array);
         
     // login
@@ -571,7 +576,7 @@ class PayPalCommon extends PayPalAuth {
     
     $sql_data_array = array(
       'customers_id' => $customer_id,
-      'entry_gender' => $data['gender'],
+      'entry_gender' => ((isset($data['gender'])) ? $data['gender'] : ''),
       'entry_firstname' => $data[$type.'_firstname'],
       'entry_lastname' => $data[$type.'_lastname'],
       'entry_company' => $data[$type.'_company'],
@@ -597,13 +602,13 @@ class PayPalCommon extends PayPalAuth {
   function get_shipping_address($customer_id, $data) {
     
     $where = '';
-    if (ACCOUNT_COMPANY == 'true') {
+    if (ACCOUNT_COMPANY == 'true' && isset($data['delivery_company'])) {
       $where .= " AND entry_company = '".xtc_db_input($data['delivery_company'])."'";
     }
-    if (ACCOUNT_SUBURB == 'true') {
+    if (ACCOUNT_SUBURB == 'true' && isset($data['delivery_suburb'])) {
       $where .= " AND entry_suburb = '".xtc_db_input($data['delivery_suburb'])."'";
     }
-    if (ACCOUNT_STATE == 'true') {
+    if (ACCOUNT_STATE == 'true' && isset($data['delivery_zone_id'])) {
       $where .= " AND entry_zone_id = '".xtc_db_input($data['delivery_zone_id'])."'";
       $where .= " AND entry_state = '".xtc_db_input($data['delivery_state'])."'";
     }

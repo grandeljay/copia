@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: janolaw.php 11561 2019-03-20 16:36:11Z GTB $
+   $Id: janolaw.php 13930 2022-01-11 13:42:38Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -36,7 +36,7 @@ class janolaw_content {
                     'datasecurity' => 'Datenschutzerklaerung',
                     'withdrawal' => 'Muster-Widerrufsformular',
                     ),
-      'GB' => array('legaldetails' => 'Imprint',
+      'GB' => array('legaldetails' => 'Legal-Notice',
                     'terms' => 'General-Terms-and-Conditions',
                     'revocation' => 'Instructions-on-withdrawal',
                     'datasecurity' => 'Data-privacy-policy',
