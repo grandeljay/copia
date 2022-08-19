@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: orders_paypal.php 12950 2020-11-24 16:00:14Z GTB $
+   $Id: orders_paypal.php 14191 2022-03-24 07:03:40Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -11,14 +11,31 @@
    ---------------------------------------------------------------------------------------*/
 
 if (isset($order) && is_object($order)) {
-  if ($order->info['payment_method'] == 'paypalclassic' 
-      || $order->info['payment_method'] == 'paypalcart'
-      || $order->info['payment_method'] == 'paypalplus'
-      || $order->info['payment_method'] == 'paypallink'
-      || $order->info['payment_method'] == 'paypalpluslink'
-      || $order->info['payment_method'] == 'paypalsubscription'
-      ) 
-  {
+  $orders_array = array(
+    'paypalclassic',
+    'paypalcart',
+    'paypalplus',
+    'paypallink',
+    'paypalpluslink',
+    'paypalsubscription',
+    'paypal',
+    'paypalacdc',
+    'paypalpui',
+    'paypalexpress',
+    'paypalcard',
+    'paypalsepa',
+    'paypalsofort',
+    'paypaltrustly',
+    'paypalprzelewy',
+    'paypalmybank',
+    'paypalideal',
+    'paypalgiropay',
+    'paypaleps',
+    'paypalblik',
+    'paypalbancontact',
+  );
+  
+  if (in_array($order->info['payment_method'], $orders_array)) {
     require_once(DIR_FS_EXTERNAL.'paypal/classes/PayPalInfo.php');
     $paypal = new PayPalInfo($order->info['payment_method']);        
     ?>
@@ -50,6 +67,8 @@ if (isset($order) && is_object($order)) {
           #refund_comment { width: 340px; resize: none; }
           div#pp { display:none; min-height: 44px; background: url(../includes/external/paypal/css/processing.gif) no-repeat; background-position: center center; background-color: #E2E2E2; border-left: 2px solid #bbb; border-right: 2px solid #bbb; border-bottom: 2px solid #bbb;}
           div#pp_error { background: #bbb;padding: 3px; }
+          div.pp_tracking .tracking_row { display:flex; align-items:center; border-bottom:1px dotted #999; padding: 3px 0px; }
+          div.pp_tracking .tracking_row input { margin-right:5px; margin-top:1px; }
         </style>
         <table border="0" width="100%" cellspacing="0" cellpadding="0">
           <tr>

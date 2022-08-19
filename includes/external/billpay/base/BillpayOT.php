@@ -153,6 +153,9 @@ class BillpayOT
         $tax_value = 0;
         if ($this->isTaxPayer())
         {
+            if (!isset($order->info['tax_groups'][TAX_ADD_TAX . "$tax_description"])) {
+                $order->info['tax_groups'][TAX_ADD_TAX . "$tax_description"] = 0;
+            }
             $tax_value = $this->calculateTax();
             $tax_description = xtc_get_tax_description(constant($this->_configPrefix.'TAX_CLASS'), $order->delivery['country']['id'], $order->delivery['zone_id']);
             $order->info['tax_groups'][TAX_ADD_TAX . "$tax_description"] += $this->calculateTax();
@@ -197,14 +200,10 @@ class BillpayOT
     }
 
     protected function calculateTax($total = NULL) {
-        global $order;
+        global $order, $xtPrice;
 
-        /** @noinspection PhpIncludeInspection */
-        if (!function_exists('xtc_calculate_tax')) { //fix #1309
-          require_once(DIR_FS_INC . 'xtc_calculate_tax.inc.php');
-        }
         $billpay_tax = xtc_get_tax_rate(constant($this->_configPrefix.'TAX_CLASS'), $order->delivery['country']['id'], $order->delivery['zone_id']);
-        $value = xtc_calculate_tax($this->calculateFee($total), $billpay_tax);
+        $value = $xtPrice->calcTax($this->calculateFee($total), $billpay_tax);
         $value = round($value, 2);
         return $value;
     }
@@ -271,10 +270,14 @@ class BillpayOT
     public function check()
     {
         if (!isset($this->_check)) {
+          if (defined($this->status_field)) {
+            $this->_check = true;
+          } else {
             $table = TABLE_CONFIGURATION;
             $config_key = $this->status_field;
             $query = "SELECT configuration_value from $table where configuration_key = '$config_key'";
             $this->_check = BillpayDB::DBCount($query);
+          }
         }
         return $this->_check;
     }

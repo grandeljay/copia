@@ -1,21 +1,24 @@
--- 
--- Daten für Tabelle `tax_class`
--- 
+--
+-- Daten fÃ¼r Tabelle `tax_class`
+--
 
-INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `last_modified`, `date_added`) VALUES (1, 'DE::Standardsatz||EN::Standard rate', '', NULL, NOW());
-INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `last_modified`, `date_added`) VALUES (2, 'DE::ermäßigter Steuersatz||EN::reduced tax rate', '', NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `sort_order`, `last_modified`, `date_added`) VALUES (1, 'DE::Standardsatz||EN::Standard rate', '', 10, NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `sort_order`, `last_modified`, `date_added`) VALUES (2, 'DE::ermÃ¤ÃŸigter Satz 1||EN::reduced rate 1', '', 20, NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `sort_order`, `last_modified`, `date_added`) VALUES (3, 'DE::ermÃ¤ÃŸigter Satz 2||EN::reduced rate 2', '', 30, NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `sort_order`, `last_modified`, `date_added`) VALUES (4, 'DE::stark ermÃ¤ÃŸigter Satz||EN::highly reduced rate', '', 40, NULL, NOW());
+INSERT INTO `tax_class` (`tax_class_id`, `tax_class_title`, `tax_class_description`, `sort_order`, `last_modified`, `date_added`) VALUES (5, 'DE::Zwischensatz||EN::Intermediate rate', '', 50, NULL, NOW());
 
--- 
--- Daten für Tabelle `geo_zones`
--- 
+--
+-- Daten fÃ¼r Tabelle `geo_zones`
+--
 
-INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(5, 'DE::Steuerzone EU||EN::Tax zone EU', 'DE::Steuerzone für EU||EN::Tax zone for EU', '0', NULL, NOW());
-INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(6, 'DE::Steuerzone Nicht-EU-Ausland||EN::Tax zone for non-EU countries', 'DE::Steuerzone für Nicht-EU-Ausland||EN::Tax zone for non-EU countries', '1', NULL, NOW());
-INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(7, 'DE::Steuerzone B2B||EN::Tax zone B2B', 'DE::Steuerzone für B2B||EN::Tax zone for B2B', '0', NULL, NOW());
+INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(5, 'DE::Steuerzone EU||EN::Tax zone EU', 'DE::Steuerzone fÃ¼r EU||EN::Tax zone for EU', '0', NULL, NOW());
+INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(6, 'DE::Steuerzone Nicht-EU-Ausland||EN::Tax zone for non-EU countries', 'DE::Steuerzone fÃ¼r Nicht-EU-Ausland||EN::Tax zone for non-EU countries', '1', NULL, NOW());
+INSERT INTO `geo_zones` (`geo_zone_id`, `geo_zone_name`, `geo_zone_description`, `geo_zone_info`, `last_modified`, `date_added`) VALUES(7, 'DE::Steuerzone B2B||EN::Tax zone B2B', 'DE::Steuerzone fÃ¼r B2B||EN::Tax zone for B2B', '0', NULL, NOW());
 
--- 
--- Daten für Tabelle `zones_to_geo_zones`
--- 
+--
+-- Daten fÃ¼r Tabelle `zones_to_geo_zones`
+--
 
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (14, 14, 0, 5, NULL, NOW());
 INSERT INTO `zones_to_geo_zones` (`association_id`, `zone_country_id`, `zone_id`, `geo_zone_id`, `last_modified`, `date_added`) VALUES (21, 21, 0, 5, NULL, NOW());

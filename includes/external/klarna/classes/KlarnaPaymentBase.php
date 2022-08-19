@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: KlarnaPaymentBase.php 13244 2021-01-27 12:28:43Z GTB $
+   $Id: KlarnaPaymentBase.php 14393 2022-04-29 21:12:01Z Tomcraft $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -23,7 +23,7 @@ class KlarnaPaymentBase extends KlarnaAutoload {
 
 
   function init() {    
-    $this->klarna_version = '1.01';
+    $this->klarna_version = '1.12';
     
     $this->title = defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_TITLE') ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_TITLE') : '';
     $this->description = defined('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_DESCRIPTION') ? constant('MODULE_PAYMENT_'.strtoupper($this->code).'_TEXT_DESCRIPTION') : '';
@@ -369,10 +369,14 @@ class KlarnaPaymentBase extends KlarnaAutoload {
 
   function check() {
     if (!isset ($this->_check)) {
-      $check_query = xtc_db_query("SELECT configuration_value 
-                                     FROM ".TABLE_CONFIGURATION." 
-                                    WHERE configuration_key = 'MODULE_PAYMENT_".strtoupper($this->code)."_STATUS'");
-      $this->_check = xtc_db_num_rows($check_query);
+      if (defined('MODULE_PAYMENT_'.strtoupper($this->code).'_STATUS')) {
+        $this->_check = true;
+      } else {
+        $check_query = xtc_db_query("SELECT configuration_value 
+                                       FROM ".TABLE_CONFIGURATION." 
+                                      WHERE configuration_key = 'MODULE_PAYMENT_".strtoupper($this->code)."_STATUS'");
+        $this->_check = xtc_db_num_rows($check_query);
+      }
     }
     return $this->_check;
   }

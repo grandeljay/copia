@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayPalPayment.php 13171 2021-01-15 14:40:47Z GTB $
+   $Id: PayPalPayment.php 14332 2022-04-19 13:59:19Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -20,6 +20,7 @@ defined('TABLE_PAYPAL_PAYMENT') OR define('TABLE_PAYPAL_PAYMENT', 'paypal_paymen
 defined('TABLE_PAYPAL_CONFIG') OR define('TABLE_PAYPAL_CONFIG', 'paypal_config');
 defined('TABLE_PAYPAL_IPN') OR define('TABLE_PAYPAL_IPN', 'paypal_ipn');
 defined('TABLE_PAYPAL_INSTRUCTIONS') OR define('TABLE_PAYPAL_INSTRUCTIONS', 'paypal_instructions');
+defined('TABLE_PAYPAL_TRACKING') OR define('TABLE_PAYPAL_TRACKING', 'paypal_tracking');
 
 
 // include needed functions
@@ -35,7 +36,7 @@ require_once(DIR_FS_CATALOG.'includes/classes/class.logger.php');
 
 
 // language
-if (is_file(DIR_FS_EXTERNAL.'paypal/lang/'.$_SESSION['language'].'.php')) {
+if (isset($_SESSION) && is_file(DIR_FS_EXTERNAL.'paypal/lang/'.$_SESSION['language'].'.php')) {
   require_once(DIR_FS_EXTERNAL.'paypal/lang/'.$_SESSION['language'].'.php');
 } else {
   require_once(DIR_FS_EXTERNAL.'paypal/lang/english.php');
@@ -87,16 +88,17 @@ use PayPal\Api\PaymentMethod;
 class PayPalPayment extends PayPalPaymentBase {
 
 
-  function __construct($class) {    
+  function __construct($class) {  
     $this->loglevel = ((PayPalPaymentBase::check_install() === true) ? $this->get_config('PAYPAL_LOG_LEVEL') : 'INFO'); 
-    $this->LoggingManager = new LoggingManager(DIR_FS_LOG.'mod_paypal_%s_'.((defined('RUN_MODE_ADMIN')) ? 'admin_' : '').'%s.log', 'paypal', strtolower($this->loglevel));
+    $this->logmode = ((PayPalPaymentBase::check_install() === true) ? $this->get_config('PAYPAL_MODE') : 'paypal'); 
+    $this->LoggingManager = new LoggingManager(DIR_FS_LOG.'mod_paypal_%s_'.((defined('RUN_MODE_ADMIN')) ? 'admin_' : '').'%s.log', $this->logmode, strtolower($this->loglevel));
 
     PayPalPaymentBase::init($class);
   }
    
   
   function payment_redirect($cart = false, $approval = false, $order_exists = false) {
-    global $order, $xtPrice, $free_shipping, $total_weight, $total_count;
+    global $order, $xtPrice;
     
     // auth
     $apiContext = $this->apiContext();
@@ -151,10 +153,10 @@ class PayPalPayment extends PayPalPaymentBase {
         {
           $price = $total - $_SESSION['cart']->show_tax(false);
         }
-        $this->details->setShippingDiscount($this->details->getShippingDiscount() + ($xtPrice->xtcGetDC($price, $_SESSION['customers_status']['customers_status_ot_discount']) * (-1)));
+        $this->details->setDiscount($this->details->getDiscount() + ($xtPrice->xtcGetDC($price, $_SESSION['customers_status']['customers_status_ot_discount'])));
       }
 
-      $this->amount->setTotal($total + $this->details->getShippingDiscount());
+      $this->amount->setTotal($total - $this->details->getDiscount());
 
       if ($_SESSION['customers_status']['customers_status_show_price_tax'] == 0 
           && $_SESSION['customers_status']['customers_status_add_tax_ot'] == 1
@@ -172,65 +174,21 @@ class PayPalPayment extends PayPalPaymentBase {
         } 
       }
       
-      // shipping cost
-      if ($_SESSION['cart']->get_content_type() != 'virtual') {
-        require_once(DIR_WS_CLASSES.'shipping.php');
-        require_once(DIR_WS_CLASSES.'product.php');
-        require_once(DIR_WS_CLASSES.'order.php');
-        require_once(DIR_FS_INC.'xtc_get_countries.inc.php');
-        
-        $order = new order();
-        
-        $countries_id = isset($_SESSION['customer_country_id']) ? $_SESSION['customer_country_id'] : STORE_COUNTRY;
-        if (isset($_SESSION['country'])) {
-          $countries_id = $_SESSION['country'];
-        }
-        
-        $country = xtc_get_countriesList($countries_id, true);
-        
-        $_SESSION['delivery_zone'] = $country['countries_iso_code_2'];        
-        $order->delivery['country']['iso_code_2'] = $country['countries_iso_code_2'];
-        $order->delivery['country']['title'] = $country['countries_name'];
-        $order->delivery['country']['id'] = $country['countries_id'];
-        $order->delivery['country_id'] = $country['countries_id'];
-        $order->delivery['zone_id'] = 0;
-        
-        $total_weight = $_SESSION['cart']->show_weight();
-        $total_count = $_SESSION['cart']->count_contents();
+      // shipping cost        
+      $shipping_data = $this->get_shipping_data();
+      if (is_array($shipping_data)) {
+        $shipping_cost = new Item(); 
+        $shipping_cost->setName($this->encode_utf8(PAYPAL_EXP_VORL))
+                      ->setCurrency($_SESSION['currency']) 
+                      ->setQuantity(1) 
+                      ->setPrice($shipping_data['total']); 
 
-        // load all enabled shipping modules
-        $shipping_modules = new shipping();
+        $i = count($item);
+        $item[$i] = $shipping_cost;
 
-        $free_shipping = false;
-        require_once (DIR_WS_MODULES.'order_total/ot_shipping.php');
-        include_once (DIR_WS_LANGUAGES.$_SESSION['language'].'/modules/order_total/ot_shipping.php');
-        $ot_shipping = new ot_shipping;
-        $ot_shipping->process();
-
-        $shipping_modules->quote();
-        $shipping_data = $shipping_modules->cheapest();
-        unset($_SESSION['delivery_zone']);
-        
-        if ($free_shipping === true) {
-          $shipping_data = array(
-            'cost' => 0,
-            'total' => 0
-          );
-        }
-        
-        if (is_array($shipping_data)) {
-          $shipping_cost = new Item(); 
-          $shipping_cost->setName($this->encode_utf8(PAYPAL_EXP_VORL))
-                        ->setCurrency($_SESSION['currency']) 
-                        ->setQuantity(1) 
-                        ->setPrice($shipping_data['total']); 
-
-          $i = count($item);
-          $item[$i] = $shipping_cost;
-
-          $this->amount->setTotal($this->amount->getTotal() + (double)$shipping_data['total']);
-          $this->details->setSubtotal($this->amount->getTotal() - $this->details->getTax() - $this->details->getShippingDiscount());
-        }
+        $this->amount->setTotal($this->amount->getTotal() + (double)$shipping_data['total'] + (double)$shipping_data['tax']);
+        $this->details->setTax($this->details->getTax() + (double)$shipping_data['tax']);
+        $this->details->setSubtotal($this->amount->getTotal() - $this->details->getTax() + $this->details->getDiscount());
       }
       
       // set amount 
@@ -250,7 +208,7 @@ class PayPalPayment extends PayPalPaymentBase {
                        ->setPostalCode($this->encode_utf8($order->delivery['postcode']))
                        ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
 
-      if ($order->delivery['company'] != '') {
+      if (isset($order->delivery['company']) && $order->delivery['company'] != '') {
         $shipping_address->setLine2($this->encode_utf8($order->delivery['company']));
       }
 
@@ -281,7 +239,7 @@ class PayPalPayment extends PayPalPaymentBase {
       
       // set totals
       if ($order_exists === false) {
-        $order_totals = $this->calculate_total(false);
+        $order_totals = $this->calculate_total(2);
         $this->get_totals($order_totals, true, $subtotal);
       } else {
         $this->get_totals($order->totals);
@@ -472,7 +430,7 @@ class PayPalPayment extends PayPalPaymentBase {
                     ->setPostalCode($this->encode_utf8($order->billing['postcode']))
                     ->setCountryCode($this->encode_utf8($order->billing['country']['iso_code_2']));
 
-    if ($order->billing['company'] != '') {
+    if (isset($order->billing['company']) && $order->billing['company'] != '') {
       $payment_address->setLine2($this->encode_utf8($order->billing['company']));
     }
 
@@ -505,7 +463,7 @@ class PayPalPayment extends PayPalPaymentBase {
                      ->setPostalCode($this->encode_utf8($order->delivery['postcode']))
                      ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
 
-    if ($order->delivery['company'] != '') {
+    if (isset($order->delivery['company']) && $order->delivery['company'] != '') {
       $shipping_address->setLine2($this->encode_utf8($order->delivery['company']));
     }
 
@@ -801,11 +759,11 @@ class PayPalPayment extends PayPalPaymentBase {
     $payment_address = new Address();
     $payment_address->setLine1($this->encode_utf8($order->billing['street_address']))
                     ->setCity($this->encode_utf8($order->billing['city']))
-                    ->setState($this->encode_utf8(((isset($order->billing['state']) && $order->billing['state'] != '') ? xtc_get_zone_code($order->billing['country_id'], $order->billing['zone_id'], $order->billing['state']) : '')))
+                    ->setCountryCode($this->encode_utf8(((isset($order->billing['country_iso_2'])) ? $order->billing['country_iso_2'] : $order->billing['country']['iso_code_2'])))
                     ->setPostalCode($this->encode_utf8($order->billing['postcode']))
-                    ->setCountryCode($this->encode_utf8(((isset($order->billing['country_iso_2'])) ? $order->billing['country_iso_2'] : $order->billing['country']['iso_code_2'])));
+                    ->setState($this->encode_utf8(((isset($order->billing['state']) && $order->billing['state'] != '') ? xtc_get_zone_code(((isset($order->billing['country_id'])) ? $order->billing['country_id'] : 0), ((isset($order->billing['zone_id'])) ? $order->billing['zone_id'] : 0), $order->billing['state']) : '')));
 
-    if ($order->billing['company'] != '') {
+    if (isset($order->billing['company']) && $order->billing['company'] != '') {
       $payment_address->setLine2($this->encode_utf8($order->billing['company']));
     }
 
@@ -835,9 +793,9 @@ class PayPalPayment extends PayPalPaymentBase {
                      ->setCity($this->encode_utf8($order->delivery['city']))
                      ->setCountryCode($this->encode_utf8(((isset($order->delivery['country_iso_2'])) ? $order->delivery['country_iso_2'] : $order->delivery['country']['iso_code_2'])))
                      ->setPostalCode($this->encode_utf8($order->delivery['postcode']))
-                     ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code($order->delivery['country_id'], $order->delivery['zone_id'], $order->delivery['state']) : '')));
+                     ->setState($this->encode_utf8(((isset($order->delivery['state']) && $order->delivery['state'] != '') ? xtc_get_zone_code(((isset($order->delivery['country_id'])) ? $order->delivery['country_id'] : 0), ((isset($order->delivery['zone_id'])) ? $order->delivery['zone_id'] : 0), $order->delivery['state']) : '')));
 
-    if ($order->delivery['company'] != '') {
+    if (isset($order->delivery['company']) && $order->delivery['company'] != '') {
       $shipping_address->setLine2($this->encode_utf8($order->delivery['company']));
     }
 
@@ -1531,7 +1489,7 @@ class PayPalPayment extends PayPalPaymentBase {
                ->setShippingAddress($shipping_address);
     
     $shipping_cost = 0;
-    $order_totals = $this->calculate_total(false);
+    $order_totals = $this->calculate_total(2);
     foreach ($order_totals as $totals) {
       if ($totals['code'] == 'ot_shipping') {
         $shipping_cost = round($totals['value'], 2);

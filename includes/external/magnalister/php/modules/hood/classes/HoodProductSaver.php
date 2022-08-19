@@ -87,6 +87,24 @@ class HoodProductSaver {
 		}
 		
 		MagnaDB::gi()->insert(TABLE_MAGNA_HOOD_PROPERTIES, $data, true);
+
+		// ensure that we don't store multiple prepare rows for the same item
+		switch($this->config['keytype']) {
+			case('artNr'): {
+				MagnaDB::gi()->query('DELETE FROM '.TABLE_MAGNA_HOOD_PROPERTIES.'
+					WHERE mpID = '.$data['mpID'].'
+					  AND products_model = \''.$data['products_model'].'\'
+					  AND products_id <> \''.$data['products_id'].'\'');
+				break;
+			}
+			default: {
+				MagnaDB::gi()->query('DELETE FROM '.TABLE_MAGNA_HOOD_PROPERTIES.'
+					WHERE mpID = '.$data['mpID'].'
+					  AND products_id = \''.$data['products_id'].'\'
+					  AND products_model <> \''.$data['products_model'].'\'');
+				break;
+			}
+		}
 	}
 	
 	protected function getManufacturerPartNumber(&$row) {
@@ -268,7 +286,7 @@ class HoodProductSaver {
 		     : 'ep.products_id = p.products_id'
 		 ).'
 		     WHERE pd.language_id = "' . $this->config['lang'] . '"
-		           AND p.products_id IN (' . implode($pIDs, ', ') . ')
+		           AND p.products_id IN (' . implode(', ', $pIDs) . ')
 		', false));
 		#echo print_m($data);
 		

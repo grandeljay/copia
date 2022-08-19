@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: KlarnaPayment.php 13251 2021-01-28 14:32:56Z GTB $
+   $Id: KlarnaPayment.php 14387 2022-04-28 21:27:12Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -19,6 +19,8 @@ define('TABLE_KLARNA_PAYMENTS', 'klarna_payments');
 require_once(DIR_FS_EXTERNAL.'GuzzleHttp/functions_include.php');
 require_once(DIR_FS_EXTERNAL.'GuzzleHttp/Promise/functions_include.php');
 require_once(DIR_FS_EXTERNAL.'GuzzleHttp/Psr7/functions_include.php');
+
+require_once(DIR_FS_INC.'xtc_get_countries.inc.php');
 require_once(DIR_FS_INC.'xtc_get_products_image.inc.php');
 
 // include needed classes
@@ -374,8 +376,12 @@ class KlarnaPayment extends KlarnaPaymentBase {
     
     if (isset($_SESSION['shipping']) && $_SESSION['shipping'] !== false) {
       $shipping_method = substr($_SESSION['shipping']['id'], 0, strpos($_SESSION['shipping']['id'], '_'));
-      $tax_class_id = constant('MODULE_SHIPPING_'.strtoupper($shipping_method).'_TAX_CLASS');
-      $tax = $xtPrice->TAX[$tax_class_id];
+      if ($shipping_method == 'free') {
+        $tax_class_id = MODULE_ORDER_TOTAL_SHIPPING_TAX_CLASS;
+      } else {
+        $tax_class_id = constant('MODULE_SHIPPING_'.strtoupper($shipping_method).'_TAX_CLASS');
+      }
+      $tax = isset($xtPrice->TAX[$tax_class_id]) ? $xtPrice->TAX[$tax_class_id] : 0;
       $shipping_cost = ((isset($order->info['pp_shipping'])) ? $order->info['pp_shipping'] : $order->info['shipping_cost']);
       if ($add_tax === true) {
         $shipping_cost = $this->xtcAddTax($shipping_cost, $tax);
@@ -420,8 +426,8 @@ class KlarnaPayment extends KlarnaPaymentBase {
           break;
 
         default:              
-          $tax_class_id = constant('MODULE_ORDER_TOTAL_'.strtoupper(substr($total['code'], 3)).'_TAX_CLASS');
-          $tax = $xtPrice->TAX[$tax_class_id];
+          $tax_class_id = defined('MODULE_ORDER_TOTAL_'.strtoupper(substr($total['code'], 3)).'_TAX_CLASS') ? constant('MODULE_ORDER_TOTAL_'.strtoupper(substr($total['code'], 3)).'_TAX_CLASS') : 0;
+          $tax = isset($xtPrice->TAX[$tax_class_id]) ? $xtPrice->TAX[$tax_class_id] : 0;
           $amount = $total['value'];
           if ($add_tax === true) {
             $amount = $this->xtcAddTax($amount, $tax);
@@ -470,6 +476,14 @@ class KlarnaPayment extends KlarnaPaymentBase {
           }
           $order_array['order_lines'][$k]['tax_rate'] = $this->format_amount((($order_array['order_lines'][$k]['total_amount'] / ($order_array['order_lines'][$k]['total_amount'] - $order_array['order_lines'][$k]['total_tax_amount']) - 1)) * 100);
         }
+        if ($order_lines['reference'] == 'ot_discount') {
+          $order_array['order_lines'][$k]['total_tax_amount'] += ($order_array['order_tax_amount'] - $tax_total);
+          if ($add_tax === true) {
+             $order_array['order_lines'][$k]['unit_price'] += $order_array['order_lines'][$k]['total_tax_amount'];
+             $order_array['order_lines'][$k]['total_amount'] += $order_array['order_lines'][$k]['total_tax_amount'];
+          }
+          $order_array['order_lines'][$k]['tax_rate'] = $this->format_amount((($order_array['order_lines'][$k]['total_amount'] / ($order_array['order_lines'][$k]['total_amount'] - $order_array['order_lines'][$k]['total_tax_amount']) - 1)) * 100);
+        }
       }
     }
 
@@ -514,14 +528,14 @@ class KlarnaPayment extends KlarnaPaymentBase {
     $shipping_address = new stdclass();    
     if ($minimal === false) {
       $shipping_address->title = $this->parse_gender($_SESSION['language_code'], $order->delivery['gender']);
-      $shipping_address->given_name = $order->delivery['firstname'];
-      $shipping_address->family_name = $order->delivery['lastname'];
-      $shipping_address->organization_name = $order->delivery['company'];
-      $shipping_address->street_address = $order->delivery['street_address'];
-      $shipping_address->street_address2 = (($order->delivery['suburb'] != '') ? $order->delivery['suburb'] : NULL);
+      $shipping_address->given_name = encode_utf8($order->delivery['firstname'], $_SESSION['language_charset'], true);
+      $shipping_address->family_name = encode_utf8($order->delivery['lastname'], $_SESSION['language_charset'], true);
+      $shipping_address->organization_name = encode_utf8($order->delivery['company'], $_SESSION['language_charset'], true);
+      $shipping_address->street_address = encode_utf8($order->delivery['street_address'], $_SESSION['language_charset'], true);
+      $shipping_address->street_address2 = (($order->delivery['suburb'] != '') ? encode_utf8($order->delivery['suburb'], $_SESSION['language_charset'], true) : NULL);
       $shipping_address->postal_code = $order->delivery['postcode'];
-      $shipping_address->city = $order->delivery['city'];
-      $shipping_address->region = ((isset($order->delivery['state']) && $order->delivery['state'] != '') ? $order->delivery['state'] : NULL);
+      $shipping_address->city = encode_utf8($order->delivery['city'], $_SESSION['language_charset'], true);
+      $shipping_address->region = ((isset($order->delivery['state']) && $order->delivery['state'] != '') ? encode_utf8($order->delivery['state'], $_SESSION['language_charset'], true) : NULL);
       $shipping_address->email = $order->customer['email_address'];
       $shipping_address->phone = $order->customer['telephone'];
     }
@@ -531,14 +545,14 @@ class KlarnaPayment extends KlarnaPaymentBase {
     $billing_address = new stdclass();
     if ($minimal === false) {
       $billing_address->title = $this->parse_gender($_SESSION['language_code'], $order->billing['gender']);
-      $billing_address->given_name = $order->billing['firstname'];
-      $billing_address->family_name = $order->billing['lastname'];
-      $billing_address->organization_name = $order->billing['company'];
-      $billing_address->street_address = $order->billing['street_address'];
-      $billing_address->street_address2 = (($order->billing['suburb'] != '') ? $order->billing['suburb'] : NULL);
+      $billing_address->given_name = encode_utf8($order->billing['firstname'], $_SESSION['language_charset'], true);
+      $billing_address->family_name = encode_utf8($order->billing['lastname'], $_SESSION['language_charset'], true);
+      $billing_address->organization_name = encode_utf8($order->billing['company'], $_SESSION['language_charset'], true);
+      $billing_address->street_address = encode_utf8($order->billing['street_address'], $_SESSION['language_charset'], true);
+      $billing_address->street_address2 = (($order->billing['suburb'] != '') ? encode_utf8($order->billing['suburb'], $_SESSION['language_charset'], true) : NULL);
       $billing_address->postal_code = $order->billing['postcode'];
-      $billing_address->city = $order->billing['city'];
-      $billing_address->region = ((isset($order->billing['state']) && $order->billing['state'] != '') ? $order->billing['state'] : NULL);
+      $billing_address->city = encode_utf8($order->billing['city'], $_SESSION['language_charset'], true);
+      $billing_address->region = ((isset($order->billing['state']) && $order->billing['state'] != '') ? encode_utf8($order->billing['state'], $_SESSION['language_charset'], true) : NULL);
       $billing_address->email = $order->customer['email_address'];
       $billing_address->phone = $order->customer['telephone'];
     }

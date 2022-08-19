@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------------------
-#  $Id: update_2.0.5.1_to_2.0.6.0.sql 13493 2021-04-01 11:33:13Z GTB $
+#  $Id: update_2.0.5.1_to_2.0.6.0.sql 13545 2021-05-06 15:58:41Z Tomcraft $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -45,25 +45,25 @@ UPDATE `geo_zones` SET `geo_zone_name` = 'DE::Steuerzone Nicht-EU-Ausland||EN::T
 UPDATE `geo_zones` SET `geo_zone_name` = 'DE::Steuerzone B2B||EN::Tax zone B2B' WHERE `geo_zone_name` = 'Steuerzone B2B';
 UPDATE `geo_zones` SET `geo_zone_name` = 'DE::Steuerzone CH/LI||EN::Tax zone CH/LI' WHERE `geo_zone_name` = 'Steuerzone CH/LI';
 UPDATE `geo_zones` SET `geo_zone_name` = 'DE::Steuerzone DE||EN::Tax zone DE' WHERE `geo_zone_name` = 'Steuerzone DE';
-UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone für EU||EN::Tax zone for EU' WHERE `geo_zone_description` = 'Steuerzone für EU';
-UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone für Nicht-EU-Ausland||EN::Tax zone for non-EU countries' WHERE `geo_zone_description` = 'Steuerzone für Nicht-EU-Ausland';
-UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone für B2B||EN::Tax zone for B2B' WHERE `geo_zone_description` = 'Steuerzone für B2B';
-UPDATE `geo_zones` SET `geo_zone_description` = 'Steuerzone für CH/LI' WHERE `geo_zone_description` = 'DE::Steuerzone für CH/LI||EN::Tax zone for CH/LI';
-UPDATE `geo_zones` SET `geo_zone_description` = 'Steuerzone für DE' WHERE `geo_zone_description` = 'DE::Steuerzone für DE||EN::Tax zone for DE';
+UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone fÃ¼r die EU||EN::Tax zone for the EU' WHERE `geo_zone_description` = 'Steuerzone fÃ¼r die EU';
+UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone fÃ¼r Nicht-EU-Ausland||EN::Tax zone for non-EU countries' WHERE `geo_zone_description` = 'Steuerzone fÃ¼r Nicht-EU-Ausland';
+UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone fÃ¼r B2B||EN::Tax zone for B2B' WHERE `geo_zone_description` = 'Steuerzone fÃ¼r B2B';
+UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone fÃ¼r CH/LI||EN::Tax zone for CH/LI' WHERE `geo_zone_description` = 'Steuerzone fÃ¼r CH/LI';
+UPDATE `geo_zones` SET `geo_zone_description` = 'DE::Steuerzone fÃ¼r DE||EN::Tax zone for DE' WHERE `geo_zone_description` = 'Steuerzone fÃ¼r DE';
 ALTER TABLE `tax_class` MODIFY `tax_class_title` VARCHAR(255) NOT NULL;
 UPDATE `tax_class` SET `tax_class_title` = 'DE::Standardsatz||EN::Standard rate' WHERE `tax_class_title` = 'Standardsatz';
-UPDATE `tax_class` SET `tax_class_title` = 'DE::ermäßigter Steuersatz||EN::reduced tax rate' WHERE `tax_class_title` = 'ermäßigter Steuersatz';
+UPDATE `tax_class` SET `tax_class_title` = 'DE::ermÃ¤ÃŸigter Steuersatz||EN::reduced tax rate' WHERE `tax_class_title` = 'ermÃ¤ÃŸigter Steuersatz';
 
 #GTB - 2021-01-20 - banners_redirect
-ALTER TABLE `banners` ADD `banners_redirect` INT(11) NOT NULL DEFAULT '1' AFTER `banners_url`; 
+ALTER TABLE `banners` ADD `banners_redirect` INT(11) NOT NULL DEFAULT '1' AFTER `banners_url`;
 
 #GTB - 2021-01-21 - add primary key
-ALTER TABLE `newsletter_recipients_history` ADD `history_id` INT(11) NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`history_id`); 
+ALTER TABLE `newsletter_recipients_history` ADD `history_id` INT(11) NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`history_id`);
 
 #GTB - 2021-01-26 - add additional images
-ALTER TABLE `categories` ADD `categories_image_mobile` VARCHAR(255) NOT NULL AFTER `categories_image`; 
+ALTER TABLE `categories` ADD `categories_image_mobile` VARCHAR(255) NOT NULL AFTER `categories_image`;
 ALTER TABLE `categories` ADD `categories_image_list` VARCHAR(255) NOT NULL AFTER `categories_image_mobile`;
-ALTER TABLE `banners` ADD `banners_image_mobile` VARCHAR(255) NOT NULL AFTER `banners_image`; 
+ALTER TABLE `banners` ADD `banners_image_mobile` VARCHAR(255) NOT NULL AFTER `banners_image`;
 
 #GTB - 2021-01-29 - update banner for new image handling
 UPDATE `banners` SET `banners_image` = 'modified_banner.jpg', `banners_image_mobile` = 'modified_banner_mobile.jpg' WHERE banners_image = 'banner_modified-ecommerce-shopsoftware_de.jpg';

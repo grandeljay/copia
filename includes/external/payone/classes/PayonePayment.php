@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: PayonePayment.php 13368 2021-02-03 09:22:39Z GTB $
+   $Id: PayonePayment.php 14281 2022-04-06 08:59:31Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -395,8 +395,12 @@ class PayonePayment {
 
 	function check() {
 		if (!isset ($this->_check)) {
-			$check_query = xtc_db_query("select configuration_value from ".TABLE_CONFIGURATION." where configuration_key = 'MODULE_PAYMENT_".  strtoupper($this->code) ."_STATUS'");
-			$this->_check = xtc_db_num_rows($check_query);
+			if (defined('MODULE_PAYMENT_'.strtoupper($this->code).'_STATUS')) {
+				$this->_check = true;
+			} else {
+				$check_query = xtc_db_query("select configuration_value from ".TABLE_CONFIGURATION." where configuration_key = 'MODULE_PAYMENT_".	 strtoupper($this->code) ."_STATUS'");
+				$this->_check = xtc_db_num_rows($check_query);
+			}
 		}
 		return $this->_check;
 	}
@@ -404,10 +408,12 @@ class PayonePayment {
 	function install() {
 		$config = $this->_configuration();
 		$sort_order = 0;
-		foreach($config as $key => $data) {
-			$install_query = "insert into ".TABLE_CONFIGURATION." ( configuration_key, configuration_value,  configuration_group_id, sort_order, set_function, use_function, date_added) ".
-					"values ('MODULE_PAYMENT_".strtoupper($this->code)."_".$key."', '".$data['configuration_value']."', '6', '".$sort_order."', '".xtc_db_input($data['set_function'])."', '".xtc_db_input($data['use_function'])."', now())";
-			xtc_db_query($install_query);
+		foreach($config as $key => $sql_data_array) {
+		  $sql_data_array['configuration_key'] = 'MODULE_PAYMENT_'.strtoupper($this->code).'_'.$key;
+		  $sql_data_array['sort_order'] = $sort_order;
+		  $sql_data_array['date_added'] = 'now()';
+		  
+		  xtc_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 			$sort_order++;
 		}
 	}
@@ -524,7 +530,7 @@ class PayonePayment {
 		$this->delivery_data->setShippingLastname($order->delivery['lastname']);
 		$this->delivery_data->setShippingCompany($order->delivery['company']);
 		$this->delivery_data->setShippingStreet($order->delivery['street_address']);
-    $this->delivery_data->setShippingAddressaddition($order->billing['suburb']);
+    $this->delivery_data->setShippingAddressaddition($order->delivery['suburb']);
 		$this->delivery_data->setShippingZip($order->delivery['postcode']);
 		$this->delivery_data->setShippingCity($order->delivery['city']);
     if (isset($order->delivery['country_iso_2'])) {

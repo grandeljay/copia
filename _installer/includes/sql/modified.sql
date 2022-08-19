@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------------------
-#  $Id: modified.sql 13499 2021-04-01 16:14:59Z Tomcraft $
+#  $Id: modified.sql 14472 2022-05-17 10:57:10Z Tomcraft $
 #
 #  modified eCommerce Shopsoftware
 #  http://www.modified-shop.org
@@ -35,14 +35,14 @@ CREATE TABLE address_book (
   address_book_id INT(11) NOT NULL AUTO_INCREMENT,
   customers_id INT(11) NOT NULL,
   entry_gender CHAR(1) NOT NULL,
-  entry_company VARCHAR(64),
+  entry_company VARCHAR(64) NOT NULL,
   entry_firstname VARCHAR(64) NOT NULL,
   entry_lastname VARCHAR(64) NOT NULL,
   entry_street_address VARCHAR(64) NOT NULL,
-  entry_suburb VARCHAR(32),
+  entry_suburb VARCHAR(32) NOT NULL,
   entry_postcode VARCHAR(10) NOT NULL,
   entry_city VARCHAR(64) NOT NULL,
-  entry_state VARCHAR(64),
+  entry_state VARCHAR(64) NOT NULL,
   entry_country_id INT DEFAULT 0 NOT NULL,
   entry_zone_id INT DEFAULT 0 NOT NULL,
   address_date_added DATETIME DEFAULT '0000-00-00 00:00:00',
@@ -135,7 +135,6 @@ CREATE TABLE admin_access (
   protectedshops INT(1) NOT NULL DEFAULT 0,
   parcel_carriers INT(1) NOT NULL DEFAULT 0,
   supermailer INT(1) NOT NULL DEFAULT 0,
-  shopgate INT(1) NOT NULL DEFAULT 0,
   newsfeed INT(1) NOT NULL DEFAULT 0,
   logs INT(1) NOT NULL DEFAULT 0,
   shipcloud INT(1) NOT NULL DEFAULT 0,
@@ -145,6 +144,7 @@ CREATE TABLE admin_access (
   paypal_module INT(1) NOT NULL DEFAULT 0,
   newsletter_recipients INT(1) NOT NULL DEFAULT 0,
   semknox INT(1) NOT NULL DEFAULT 0,
+  dhl INT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (customers_id)
 );
 
@@ -166,7 +166,7 @@ CREATE TABLE banktransfer (
 
 DROP TABLE IF EXISTS banktransfer_blz;
 CREATE TABLE banktransfer_blz (
-  blz int(10) NOT NULL DEFAULT 0,
+  blz INT(10) NOT NULL DEFAULT 0,
   bankname varchar(255) NOT NULL DEFAULT '',
   prz char(2) NOT NULL DEFAULT '',
   PRIMARY KEY (blz)
@@ -191,7 +191,9 @@ CREATE TABLE banners (
   date_added DATETIME NOT NULL,
   date_status_change DATETIME DEFAULT NULL,
   status INT(1) DEFAULT 1 NOT NULL,
-  PRIMARY KEY (banners_id)
+  PRIMARY KEY (banners_id),
+  KEY idx_banners_group_id (banners_group_id),
+  KEY idx_banners_sort (banners_sort)
 );
 
 DROP TABLE IF EXISTS banners_history;
@@ -237,6 +239,7 @@ CREATE TABLE carriers (
   carrier_date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   carrier_last_modified DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (carrier_id),
+  KEY idx_carrier_sort_order (carrier_sort_order),
   UNIQUE idx_carrier_name (carrier_name)
 );
 
@@ -262,7 +265,8 @@ CREATE TABLE categories (
   last_modified DATETIME,
   PRIMARY KEY (categories_id),
   KEY idx_categories_parent_id (parent_id),
-  KEY idx_categories_status (categories_status)
+  KEY idx_categories_status (categories_status),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS categories_description;
@@ -299,6 +303,7 @@ CREATE TABLE configuration (
   set_function VARCHAR(255) NULL,
   PRIMARY KEY (configuration_id),
   KEY idx_configuration_group_id (configuration_group_id),
+  KEY idx_sort_order (sort_order),
   UNIQUE idx_configuration_key (configuration_key)
 );
 
@@ -309,7 +314,8 @@ CREATE TABLE configuration_group (
   configuration_group_description VARCHAR(255) NOT NULL,
   sort_order INT(5) NULL,
   visible INT(1) DEFAULT 1 NULL,
-  PRIMARY KEY (configuration_group_id)
+  PRIMARY KEY (configuration_group_id),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS content_manager;
@@ -333,11 +339,14 @@ CREATE TABLE content_manager (
   content_meta_keywords text NOT NULL,
   content_meta_robots VARCHAR(32) NOT NULL,
   content_active INT(1) NOT NULL DEFAULT '1',
-  content_group_index int(4) NOT NULL DEFAULT '0',
+  content_group_index INT(4) NOT NULL DEFAULT '0',
   date_added DATETIME NOT NULL,
   last_modified DATETIME NULL,
   PRIMARY KEY (content_id),
-  KEY idx_content_group (content_group, languages_id)
+  KEY idx_content_group (content_group, languages_id),
+  KEY idx_content_status (content_status),
+  KEY idx_content_active (content_active),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS content_manager_content;
@@ -364,9 +373,11 @@ CREATE TABLE countries (
   address_format_id INT(11) NOT NULL,
   status INT(1) DEFAULT 1 NULL,
   required_zones INT(1) DEFAULT '0',
+  sort_order INT(4) NOT NULL DEFAULT 0,
   PRIMARY KEY (countries_id),
   KEY idx_countries_name (countries_name),
   KEY idx_status (status),
+  KEY idx_sort_order (sort_order),
   UNIQUE idx_countries_iso_code_2 (countries_iso_code_2),
   UNIQUE idx_countries_iso_code_3 (countries_iso_code_3)
 );
@@ -458,16 +469,17 @@ CREATE TABLE currencies (
   last_updated DATETIME NULL,
   status INT(1) DEFAULT 1 NOT NULL,
   PRIMARY KEY (currencies_id),
-  UNIQUE KEY idx_code (code)
+  UNIQUE KEY idx_code (code),
+  KEY idx_status (status)
 );
 
 DROP TABLE IF EXISTS customers;
 CREATE TABLE customers (
   customers_id INT(11) NOT NULL AUTO_INCREMENT,
-  customers_cid VARCHAR(32),
-  customers_vat_id VARCHAR(20),
+  customers_cid VARCHAR(32) NOT NULL,
+  customers_vat_id VARCHAR(20) NOT NULL,
   customers_vat_id_status INT(2) DEFAULT 0 NOT NULL,
-  customers_warning VARCHAR(32),
+  customers_warning VARCHAR(32) NOT NULL,
   customers_status INT(5) DEFAULT 1 NOT NULL,
   customers_gender CHAR(1) NOT NULL,
   customers_firstname VARCHAR(64) NOT NULL,
@@ -476,7 +488,7 @@ CREATE TABLE customers (
   customers_email_address VARCHAR(255) NOT NULL,
   customers_default_address_id INT(11) NOT NULL,
   customers_telephone VARCHAR(32) NOT NULL,
-  customers_fax VARCHAR(32),
+  customers_fax VARCHAR(32) NOT NULL,
   customers_password VARCHAR(60) NOT NULL,
   customers_password_time INT(11) DEFAULT 0 NOT NULL,
   customers_newsletter CHAR(1),
@@ -492,6 +504,8 @@ CREATE TABLE customers (
   customers_last_modified DATETIME DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (customers_id),
   KEY idx_customers_email_address (customers_email_address),
+  KEY idx_customers_status (customers_status),
+  KEY idx_account_type (account_type),
   KEY idx_customers_default_address_id (customers_default_address_id)
 );
 
@@ -547,7 +561,7 @@ CREATE TABLE customers_login (
   customers_login_id INT(11) NOT NULL AUTO_INCREMENT,
   customers_ip varchar(50) DEFAULT NULL,
   customers_email_address varchar(255) DEFAULT NULL,
-  customers_login_tries int(11) NOT NULL,
+  customers_login_tries INT(11) NOT NULL,
   PRIMARY KEY (customers_login_id),
   KEY idx_customers_ip (customers_ip),
   KEY idx_customers_email_address (customers_email_address)
@@ -579,7 +593,7 @@ CREATE TABLE customers_status (
   customers_status_graduated_prices VARCHAR(1) NOT NULL DEFAULT '0',
   customers_status_show_price INT(1) NOT NULL DEFAULT 1,
   customers_status_show_price_tax INT(1) NOT NULL DEFAULT 1,
-  customers_status_show_tax_total int(7) DEFAULT '150',
+  customers_status_show_tax_total INT(7) DEFAULT '150',
   customers_status_add_tax_ot INT(1) NOT NULL DEFAULT 0,
   customers_status_payment_unallowed VARCHAR(255) NOT NULL,
   customers_status_shipping_unallowed VARCHAR(255) NOT NULL,
@@ -602,7 +616,8 @@ CREATE TABLE customers_status_history (
   old_value INT(5) DEFAULT NULL,
   date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   customer_notified INT(1) DEFAULT 0,
-  PRIMARY KEY (customers_status_history_id)
+  PRIMARY KEY (customers_status_history_id),
+  KEY idx_customers_id (customers_id)
 );
 
 DROP TABLE IF EXISTS database_version;
@@ -633,6 +648,7 @@ CREATE TABLE geo_zones (
   geo_zone_name VARCHAR(255) NOT NULL,
   geo_zone_description VARCHAR(255) NOT NULL,
   geo_zone_info INT(1) DEFAULT 0,
+  geo_zone_tax INT(1) DEFAULT 0,
   last_modified DATETIME NULL,
   date_added DATETIME NOT NULL,
   PRIMARY KEY (geo_zone_id),
@@ -652,7 +668,9 @@ CREATE TABLE languages (
   status_admin INT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (languages_id),
   UNIQUE idx_code (code),
-  KEY idx_status (status)
+  KEY idx_status (status),
+  KEY idx_status_admin (status_admin),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS manufacturers;
@@ -670,6 +688,7 @@ DROP TABLE IF EXISTS manufacturers_info;
 CREATE TABLE manufacturers_info (
   manufacturers_id INT(11) NOT NULL,
   languages_id INT(11) NOT NULL,
+  manufacturers_title VARCHAR(255) NOT NULL DEFAULT '',
   manufacturers_description text,
   manufacturers_meta_title text NOT NULL,
   manufacturers_meta_description text NOT NULL,
@@ -682,7 +701,7 @@ CREATE TABLE manufacturers_info (
 
 DROP TABLE IF EXISTS module_backup;
 CREATE TABLE module_backup (
-  configuration_id int(11) NOT NULL AUTO_INCREMENT,
+  configuration_id INT(11) NOT NULL AUTO_INCREMENT,
   configuration_key varchar(128) NOT NULL,
   configuration_value text NOT NULL,
   last_modified datetime DEFAULT NULL,
@@ -698,6 +717,7 @@ CREATE TABLE newsfeed (
   news_link VARCHAR( 128 ) NULL,
   news_date INT( 11 ) NULL,
   PRIMARY KEY (news_id),
+  KEY idx_news_date (news_date),
   UNIQUE idx_news_link (news_link)
 );
 
@@ -710,7 +730,8 @@ CREATE TABLE module_newsletter (
   date DATETIME DEFAULT NULL,
   status INT(1) NOT NULL DEFAULT 0,
   body TEXT NOT NULL,
-  PRIMARY KEY (newsletter_id)
+  PRIMARY KEY (newsletter_id),
+  KEY idx_status (status)
 );
 
 DROP TABLE IF EXISTS newsletter_recipients;
@@ -729,6 +750,7 @@ CREATE TABLE newsletter_recipients (
   ip_date_confirmed varchar(50) DEFAULT NULL,
   PRIMARY KEY (mail_id),
   KEY idx_mail_key (mail_key),
+  KEY idx_mail_status (mail_status),
   UNIQUE idx_customers_email_address (customers_email_address)
 );
 
@@ -753,7 +775,8 @@ CREATE TABLE newsletters (
   date_sent DATETIME,
   status INT(1),
   locked INT(1) DEFAULT 0,
-  PRIMARY KEY (newsletters_id)
+  PRIMARY KEY (newsletters_id),
+  KEY idx_status (status)
 );
 
 DROP TABLE IF EXISTS newsletters_history;
@@ -829,7 +852,7 @@ CREATE TABLE orders (
   shipping_class VARCHAR(64) NOT NULL,
   customers_ip VARCHAR(50) NOT NULL,
   language VARCHAR(32) NOT NULL,
-  languages_id int(11) NOT NULL,
+  languages_id INT(11) NOT NULL,
   afterbuy_success INT(1) DEFAULT 0 NOT NULL,
   afterbuy_id INT(32) DEFAULT 0 NOT NULL,
   campaign VARCHAR(32) NOT NULL,
@@ -838,7 +861,9 @@ CREATE TABLE orders (
   PRIMARY KEY (orders_id),
   KEY idx_customers_id (customers_id),
   KEY idx_orders_status (orders_status),
+  KEY idx_orders_ident_key (orders_ident_key),
   KEY idx_date_purchased (date_purchased),
+  KEY idx_customers_status (customers_status),
   KEY idx_payment_class (payment_class)
 );
 
@@ -877,7 +902,7 @@ CREATE TABLE orders_products_attributes (
   options_values_price DECIMAL(15,4) NOT NULL,
   price_prefix CHAR(1) NOT NULL,
   orders_products_options_id INT(11) NOT NULL,
-  orders_products_options_values_id INT(11) NOT NULL,  
+  orders_products_options_values_id INT(11) NOT NULL,
   options_values_weight DECIMAL(15,4) NOT NULL,
   weight_prefix CHAR(1) NOT NULL,
   PRIMARY KEY (orders_products_attributes_id),
@@ -918,7 +943,8 @@ CREATE TABLE orders_status (
   orders_status_name VARCHAR(64) NOT NULL,
   sort_order INT(11) DEFAULT 0 NOT NULL,
   PRIMARY KEY (orders_status_id, language_id),
-  KEY idx_orders_status_name (orders_status_name)
+  KEY idx_orders_status_name (orders_status_name),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS orders_status_history;
@@ -931,7 +957,8 @@ CREATE TABLE orders_status_history (
   comments text,
   comments_sent INT(1) DEFAULT 0,
   PRIMARY KEY (orders_status_history_id),
-  KEY idx_orders_id (orders_id)
+  KEY idx_orders_id (orders_id),
+  KEY idx_orders_status_id (orders_status_id)
 );
 
 DROP TABLE IF EXISTS orders_total;
@@ -944,7 +971,8 @@ CREATE TABLE orders_total (
   class VARCHAR(32) NOT NULL,
   sort_order INT(11) NOT NULL,
   PRIMARY KEY (orders_total_id),
-  KEY idx_orders_id (orders_id)
+  KEY idx_orders_id (orders_id),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS orders_tracking;
@@ -955,7 +983,8 @@ CREATE TABLE orders_tracking (
   parcel_id VARCHAR(80) NOT NULL,
   date_added DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (tracking_id),
-  KEY idx_orders_id (orders_id)
+  KEY idx_orders_id (orders_id),
+  KEY idx_carrier_id (carrier_id)
 );
 
 DROP TABLE IF EXISTS payment_moneybookers;
@@ -1007,7 +1036,11 @@ CREATE TABLE products (
   KEY idx_products_date_added (products_date_added),
   KEY idx_products_model (products_model),
   KEY idx_products_status (products_status),
-  KEY idx_manufacturers_id (manufacturers_id)
+  KEY idx_products_startpage (products_startpage),
+  KEY idx_manufacturers_id (manufacturers_id),
+  KEY idx_products_sort (products_sort),
+  KEY idx_products_startpage_sort (products_startpage_sort),
+  KEY idx_products_image (products_image)
 );
 
 DROP TABLE IF EXISTS products_attributes;
@@ -1024,11 +1057,12 @@ CREATE TABLE products_attributes (
   weight_prefix CHAR(1) NOT NULL,
   sortorder INT(11) NULL,
   attributes_ean VARCHAR(64) NULL DEFAULT NULL,
-  attributes_vpe_id int(11) NOT NULL,
+  attributes_vpe_id INT(11) NOT NULL,
   attributes_vpe_value decimal(15,4) NOT NULL,
   PRIMARY KEY (products_attributes_id),
   KEY idx_products_id (products_id),
-  KEY idx_options (options_id, options_values_id)
+  KEY idx_options (options_id, options_values_id),
+  KEY idx_sortorder (sortorder)
 );
 
 DROP TABLE IF EXISTS products_attributes_download;
@@ -1074,6 +1108,14 @@ CREATE TABLE products_description (
   KEY idx_products_name (products_name)
 );
 
+DROP TABLE IF EXISTS products_geo_zones_to_tax_class;
+CREATE TABLE products_geo_zones_to_tax_class (
+  products_id INT(11) NOT NULL,
+  geo_zone_id INT(11) NOT NULL,
+  tax_class_id INT(11) NOT NULL,
+  PRIMARY KEY (products_id, geo_zone_id)
+);
+
 DROP TABLE IF EXISTS products_graduated_prices;
 CREATE TABLE products_graduated_prices (
   price_id INT(11) NOT NULL AUTO_INCREMENT,
@@ -1091,7 +1133,9 @@ CREATE TABLE products_images (
   image_nr SMALLINT(11) NOT NULL,
   image_name VARCHAR(255) NOT NULL,
   PRIMARY KEY (image_id),
-  KEY idx_products_id (products_id)
+  KEY idx_products_id (products_id),
+  KEY idx_image_nr (image_nr),
+  KEY idx_image_name (image_name)
 );
 
 DROP TABLE IF EXISTS products_notifications;
@@ -1108,7 +1152,8 @@ CREATE TABLE products_options (
   language_id INT(11) NOT NULL,
   products_options_name VARCHAR(255) NOT NULL DEFAULT '',
   products_options_sortorder INT(11) NOT NULL,
-  PRIMARY KEY (products_options_id, language_id)
+  PRIMARY KEY (products_options_id, language_id),
+  KEY idx_products_options_sortorder (products_options_sortorder)
 );
 
 DROP TABLE IF EXISTS products_options_values;
@@ -1117,7 +1162,8 @@ CREATE TABLE products_options_values (
   language_id INT(11) NOT NULL,
   products_options_values_name VARCHAR(255) NOT NULL DEFAULT '',
   products_options_values_sortorder INT(11) NOT NULL,
-  PRIMARY KEY (products_options_values_id, language_id)
+  PRIMARY KEY (products_options_values_id, language_id),
+  KEY idx_products_options_values_sortorder (products_options_values_sortorder)
 );
 
 DROP TABLE IF EXISTS products_options_values_to_products_options;
@@ -1132,58 +1178,65 @@ CREATE TABLE products_options_values_to_products_options (
 DROP TABLE IF EXISTS products_tags;
 CREATE TABLE products_tags (
   products_tags_id INT(11) NOT NULL AUTO_INCREMENT,
-  products_id int(11) NOT NULL,
-  options_id int(11) NOT NULL,
-  values_id int(11) NOT NULL,
-  sort_order int(11) NOT NULL DEFAULT '0',
-  products_options_id int(11) NOT NULL DEFAULT '0',
-  products_options_values_id int(11) NOT NULL DEFAULT '0',
+  products_id INT(11) NOT NULL,
+  options_id INT(11) NOT NULL,
+  values_id INT(11) NOT NULL,
+  sort_order INT(11) NOT NULL DEFAULT '0',
+  products_options_id INT(11) NOT NULL DEFAULT '0',
+  products_options_values_id INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (products_tags_id),
   KEY idx_products_options_values (products_id,options_id,values_id),
   KEY idx_products_options_id (products_options_id),
   KEY idx_options_id (options_id),
-  KEY idx_values_id (values_id)
+  KEY idx_values_id (values_id),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS products_tags_options;
 CREATE TABLE products_tags_options (
-  options_id int(11) NOT NULL,
+  options_id INT(11) NOT NULL,
   options_name varchar(128) NOT NULL,
   options_description text NOT NULL,
-  options_content_group int(11) DEFAULT NULL,
-  sort_order int(11) NOT NULL DEFAULT '0',
+  options_content_group INT(11) DEFAULT NULL,
+  sort_order INT(11) NOT NULL DEFAULT '0',
   languages_id INT(11) NOT NULL,
-  status int(1) NOT NULL DEFAULT '1',
-  filter int(1) NOT NULL DEFAULT '1',
+  status INT(1) NOT NULL DEFAULT '1',
+  filter INT(1) NOT NULL DEFAULT '1',
   last_modified datetime DEFAULT NULL,
   date_added datetime NOT NULL,
-  products_options_id int(11) NOT NULL DEFAULT '0',
+  products_options_id INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (options_id,languages_id),
   KEY idx_products_options_id (products_options_id),
   KEY idx_filter_multi (languages_id, filter, options_id, sort_order),
-  KEY idx_filter (filter)
+  KEY idx_filter (filter),
+  KEY idx_options_name (options_name),
+  KEY idx_status (status),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS products_tags_values;
 CREATE TABLE products_tags_values (
-  values_id int(11) NOT NULL,
-  options_id int(11) NOT NULL,
+  values_id INT(11) NOT NULL,
+  options_id INT(11) NOT NULL,
   values_name varchar(128) NOT NULL,
   values_description text NOT NULL,
   values_image varchar(255) NOT NULL,
-  values_content_group int(11) DEFAULT NULL,
-  sort_order int(11) NOT NULL DEFAULT '0',
-  languages_id int(11) NOT NULL,
-  status int(1) NOT NULL DEFAULT '1',
-  filter int(1) NOT NULL DEFAULT '1',
+  values_content_group INT(11) DEFAULT NULL,
+  sort_order INT(11) NOT NULL DEFAULT '0',
+  languages_id INT(11) NOT NULL,
+  status INT(1) NOT NULL DEFAULT '1',
+  filter INT(1) NOT NULL DEFAULT '1',
   last_modified datetime DEFAULT NULL,
   date_added datetime NOT NULL,
-  products_options_values_id int(11) NOT NULL DEFAULT '0',
+  products_options_values_id INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (values_id,languages_id),
   KEY idx_options_id (options_id),
   KEY idx_products_options_values_id (products_options_values_id),
   KEY idx_filter_multi (languages_id, filter, options_id, sort_order),
-  KEY idx_filter (filter)
+  KEY idx_filter (filter),
+  KEY idx_values_name (values_name),
+  KEY idx_status (status),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS products_to_categories;
@@ -1204,7 +1257,7 @@ CREATE TABLE products_vpe (
 
 DROP TABLE IF EXISTS products_xsell;
 CREATE TABLE products_xsell (
-  ID int(10) NOT NULL AUTO_INCREMENT,
+  ID INT(10) NOT NULL AUTO_INCREMENT,
   products_id INT(10) UNSIGNED NOT NULL DEFAULT 1,
   products_xsell_grp_name_id INT(10) UNSIGNED NOT NULL DEFAULT 1,
   xsell_id INT(10) UNSIGNED NOT NULL DEFAULT 1,
@@ -1212,7 +1265,8 @@ CREATE TABLE products_xsell (
   PRIMARY KEY (ID),
   KEY idx_xsell_id (xsell_id),
   KEY idx_products_id (products_id),
-  KEY idx_products_xsell_grp_name_id (products_xsell_grp_name_id)
+  KEY idx_products_xsell_grp_name_id (products_xsell_grp_name_id),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS products_xsell_grp_name;
@@ -1221,14 +1275,15 @@ CREATE TABLE products_xsell_grp_name (
   xsell_sort_order INT(10) NOT NULL DEFAULT 0,
   language_id INT(11) NOT NULL,
   groupname VARCHAR(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (products_xsell_grp_name_id, language_id)
+  PRIMARY KEY (products_xsell_grp_name_id, language_id),
+  KEY idx_xsell_sort_order (xsell_sort_order)
 );
 
 DROP TABLE IF EXISTS reviews;
 CREATE TABLE reviews (
   reviews_id INT(11) NOT NULL AUTO_INCREMENT,
   products_id INT(11) NOT NULL,
-  customers_id int,
+  customers_id INT(11),
   customers_name VARCHAR(64) NOT NULL,
   reviews_rating INT(1),
   date_added DATETIME,
@@ -1236,7 +1291,8 @@ CREATE TABLE reviews (
   reviews_read INT(5) NOT NULL DEFAULT 0,
   reviews_status INT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (reviews_id),
-  KEY idx_products_id (products_id)
+  KEY idx_products_id (products_id),
+  KEY idx_reviews_status (reviews_status)
 );
 
 DROP TABLE IF EXISTS reviews_description;
@@ -1265,7 +1321,8 @@ CREATE TABLE shipping_status (
   shipping_status_image VARCHAR(64) NOT NULL,
   sort_order INT(11) DEFAULT 0 NOT NULL,
   PRIMARY KEY (shipping_status_id, language_id),
-  KEY idx_shipping_status_name (shipping_status_name)
+  KEY idx_shipping_status_name (shipping_status_name),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS shop_configuration;
@@ -1282,6 +1339,7 @@ CREATE TABLE specials (
   specials_id INT(11) NOT NULL AUTO_INCREMENT,
   products_id INT(11) NOT NULL,
   specials_quantity INT(4) NOT NULL,
+  specials_old_products_price DECIMAL(15,4) NOT NULL,
   specials_new_products_price DECIMAL(15,4) NOT NULL,
   specials_date_added DATETIME,
   specials_last_modified DATETIME,
@@ -1301,9 +1359,11 @@ CREATE TABLE tax_class (
   tax_class_id INT(11) NOT NULL AUTO_INCREMENT,
   tax_class_title VARCHAR(255) NOT NULL,
   tax_class_description VARCHAR(255) NOT NULL,
+  sort_order INT(11) DEFAULT 0 NOT NULL,
   last_modified DATETIME NULL,
   date_added DATETIME NOT NULL,
-  PRIMARY KEY (tax_class_id)
+  PRIMARY KEY (tax_class_id),
+  KEY idx_sort_order (sort_order)
 );
 
 DROP TABLE IF EXISTS tax_rates;
@@ -1318,7 +1378,8 @@ CREATE TABLE tax_rates (
   date_added DATETIME NOT NULL,
   PRIMARY KEY (tax_rates_id),
   KEY idx_tax_zone_id (tax_zone_id),
-  KEY idx_tax_class_id (tax_class_id)
+  KEY idx_tax_class_id (tax_class_id),
+  KEY idx_tax_priority (tax_priority)
 );
 
 DROP TABLE IF EXISTS whos_online;
@@ -1355,7 +1416,8 @@ CREATE TABLE zones_to_geo_zones (
  last_modified DATETIME NULL,
  date_added DATETIME NOT NULL,
  PRIMARY KEY (association_id),
- KEY idx_geo_zone_id (geo_zone_id)
+ KEY idx_geo_zone_id (geo_zone_id),
+ KEY idx_zone_country_id (zone_country_id)
 );
 
 DROP TABLE IF EXISTS personal_offers_by_customers_status_0;
@@ -1375,8 +1437,8 @@ INSERT INTO address_format VALUES (7, '$firstname $lastname$cr$streets, $city$cr
 INSERT INTO address_format VALUES (8, '$firstname $lastname$cr$streets$cr$city$cr$state$cr$postcode$cr$country','$postcode / $country');
 
 # add entry for admin_access
-INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `removeoldpics`, `janolaw`, `haendlerbund`, `check_update`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `shopgate`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`, `paypal_info`, `paypal_module`, `newsletter_recipients`, `semknox`) VALUES ('1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `removeoldpics`, `janolaw`, `haendlerbund`, `check_update`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `shopgate`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`, `paypal_info`, `paypal_module`, `newsletter_recipients`, `semknox`) VALUES ('groups', 8, 8, 7, 7, 7, 7, 7, 7, 2, 5, 5, 5, 7, 8, 8, 8, 2, 2, 2, 2, 2, 8, 2, 2, 2, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 1, 2, 5, 8, 8, 3, 9, 9, 8, 5, 9, 9, 1, 9, 9, 9, 9, 5, 9, 9, 1, 5, 9, 9, 5, 9, 9, 5, 9);
+INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `removeoldpics`, `janolaw`, `haendlerbund`, `check_update`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`, `paypal_info`, `paypal_module`, `newsletter_recipients`, `semknox`, `dhl`) VALUES ('1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+INSERT INTO `admin_access` (`customers_id`, `configuration`, `modules`, `countries`, `currencies`, `zones`, `geo_zones`, `tax_classes`, `tax_rates`, `accounting`, `backup`, `server_info`, `whos_online`, `languages`, `orders_status`, `shipping_status`, `module_export`, `customers`, `create_account`, `customers_status`, `customers_group`, `orders`, `campaigns`, `print_packingslip`, `print_order`, `popup_memo`, `coupon_admin`, `listproducts`, `listcategories`, `products_tags`, `gv_queue`, `gv_mail`, `gv_sent`, `gv_customers`, `validproducts`, `validcategories`, `mail`, `categories`, `products_attributes`, `manufacturers`, `reviews`, `specials`, `products_expected`, `stats_products_expected`, `stats_products_viewed`, `stats_products_purchased`, `stats_customers`, `stats_sales_report`, `stats_stock_warning`, `stats_campaigns`, `banner_manager`, `banner_statistics`, `module_newsletter`, `content_manager`, `content_preview`, `credits`, `orders_edit`, `csv_backend`, `products_vpe`, `cross_sell_groups`, `filemanager`, `econda`, `cleverreach`, `shop_offline`, `removeoldpics`, `janolaw`, `haendlerbund`, `check_update`, `it_recht_kanzlei`, `payone_config`, `payone_logs`, `protectedshops`, `parcel_carriers`, `supermailer`, `newsfeed`, `logs`, `shipcloud`, `trustedshops`, `blacklist_logs`, `paypal_info`, `paypal_module`, `newsletter_recipients`, `semknox`, `dhl`) VALUES ('groups', 8, 8, 7, 7, 7, 7, 7, 7, 2, 5, 5, 5, 7, 8, 8, 8, 2, 2, 2, 2, 2, 8, 2, 2, 2, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 1, 2, 5, 8, 8, 3, 9, 9, 8, 5, 9, 9, 1, 9, 9, 9, 9, 5, 9, 1, 5, 9, 9, 5, 9, 9, 5, 9, 9);
 
 # banner
 INSERT INTO `banners` VALUES (1, 1, 'modified eCommerce Shopsoftware', 'http://www.modified-shop.org', 1, 'modified_banner.jpg', 'modified_banner_mobile.jpg', 'banner', '', 1, '1', NULL, NULL, NULL, NOW(), NULL, 1);
@@ -1437,7 +1499,7 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_COMPANY_MIN_LENGTH', '2', 2, 6, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_POSTCODE_MIN_LENGTH', '4', 2, 7, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_CITY_MIN_LENGTH', '3', 2, 8, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_STATE_MIN_LENGTH', '0', 2, 9, NULL, NOW(), NULL, NULL); 
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_STATE_MIN_LENGTH', '0', 2, 9, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_TELEPHONE_MIN_LENGTH', '3', 2, 10, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ENTRY_PASSWORD_MIN_LENGTH', '8', 2, 11, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'POLICY_MIN_LOWER_CHARS', '1', 2, 12, NULL, NOW(), NULL, NULL);
@@ -1559,13 +1621,14 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_ORDER_TOTAL_DISCOUNT_SORT_ORDER', '20', 6, 2, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_ORDER_TOTAL_SUBTOTAL_NO_TAX_STATUS', 'true', 6, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_ORDER_TOTAL_SUBTOTAL_NO_TAX_SORT_ORDER','40', 6, 2, NULL, NOW(), NULL, NULL);
-#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'COMPRESS_STYLESHEET_TIME', '', 6, 100, NULL, NOW(), NULL, NULL); # Tomcraft - 2016-06-06 - Obsolete since r7607 
+#INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'COMPRESS_STYLESHEET_TIME', '', 6, 100, NULL, NOW(), NULL, NULL); # Tomcraft - 2016-06-06 - Obsolete since r7607
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEWSFEED_LAST_READ', '', 6, 100, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEWSFEED_LAST_UPDATE', '', 6, 100, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEWSFEED_LAST_UPDATE_TRY', '', 6, 100, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_CHECK_SSL_SESSION_ID', 'False', 6, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_CHECK_USER_AGENT', 'False', 6, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_CHECK_IP_ADDRESS', 'False', 6, 100, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_FORCE_COOKIE_USE', 'True', 6, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 
 # configuration_group_id 7, Shipping/Packaging
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SHIPPING_MAX_WEIGHT', '50', 7, 3, NULL, NOW(), NULL, NULL);
@@ -1592,6 +1655,10 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_FILTER_SPECIALS', '3,12,27,all', 8, 101, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_FILTER_PRODUCTS_NEW', '3,12,27,all', 8, 102, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_FILTER_ADVANCED_SEARCH_RESULT', '4,12,32,all', 8, 103, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCTS_NEW_SORT', 'desc', 8, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'asc\', \'desc\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'PRODUCTS_NEW_FIELD', 'p.products_date_added', 8, 7, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'p.products_price\', \'pd.products_name\', \'p.products_date_added\', \'p.products_model\', \'p.products_ordered\', \'p.products_sort\', \'p.products_weight\', \'p.products_quantity\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SPECIALS_SORT', 'desc', 8, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'asc\', \'desc\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SPECIALS_FIELD', 's.specials_date_added', 8, 9, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'p.products_price\', \'pd.products_name\', \'s.specials_date_added\', \'p.products_model\', \'p.products_ordered\', \'p.products_sort\', \'p.products_weight\', \'p.products_quantity\'),');
 
 # configuration_group_id 9, Stock
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STOCK_CHECK', 'true', 9, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1608,7 +1675,7 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 # configuration_group_id 10, Logging
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STORE_PAGE_PARSE_TIME', 'false', 10, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STORE_PAGE_PARSE_TIME_THRESHOLD', '1.0', 10, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STORE_PARSE_DATE_TIME_FORMAT', '%d/%m/%Y %H:%M:%S', 10, 3, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STORE_PARSE_DATE_TIME_FORMAT', 'Y-m-d H:i:s', 10, 3, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_PAGE_PARSE_TIME', 'none', 10, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'none\', \'admin\', \'all\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STORE_DB_TRANSACTIONS', 'false', 10, 5, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'STORE_DB_SLOW_QUERY', 'false', 10, 6, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1616,13 +1683,13 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DISPLAY_ERROR_REPORTING', 'none', 10, 8, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'none\', \'admin\', \'all\'),');
 
 # configuration_group_id 11, Cache
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_CACHE', 'false', 11, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DB_CACHE_TYPE', 'files', 11, 1, NULL, NOW(), NULL, 'xtc_cfg_pull_down_cache_type(\'DB_CACHE_TYPE\',');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DIR_FS_CACHE', 'cache', 11, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CACHE_LIFETIME', '3600', 11, 3, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CACHE_CHECK', 'true', 11, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DB_CACHE', 'false', 11, 5, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DB_CACHE_EXPIRE', '3600', 11, 6, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DB_CACHE_TYPE', 'files', 11, 7, NULL, NOW(), NULL, 'xtc_cfg_pull_down_cache_type(\'DB_CACHE_TYPE\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DB_CACHE', 'false', 11, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'DB_CACHE_EXPIRE', '3600', 11, 4, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_CACHE', 'false', 11, 5, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CACHE_LIFETIME', '3600', 11, 6, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CACHE_CHECK', 'true', 11, 7, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 
 # configuration_group_id 12, E-Mail Options
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'EMAIL_TRANSPORT', 'mail', 12, 1, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'sendmail\', \'smtp\', \'mail\'),');
@@ -1698,8 +1765,8 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 
 # configuration_group_id 15, Sessions
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_WRITE_DIRECTORY', '/tmp', 15, 1, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_FORCE_COOKIE_USE', 'True', 15, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_RECREATE', 'False', 15, 3, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_DELETE_OLD_COOKIES', 'False', 15, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_LIFE_CUSTOMERS', '1440', 15, 20, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'SESSION_LIFE_ADMIN', '7200', 15, 21, NULL, NOW(), NULL, NULL);
 
@@ -1724,7 +1791,7 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_PRODUCTS_KEYWORDS_LENGTH', '255', 16, 2, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_KEYWORDS_LENGTH', '255', 16, 2, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_TITLE_LENGTH', '70', 16, 2, NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_STOP_WORDS', '#german:\r\nab,aber,abgerufen,abgerufene,abgerufener,abgerufenes,acht,alle,allein,allem,allen,aller,allerdings,allerlei,alles,allgemein,allm‰hlich,allzu,als,alsbald,also,am,an,ander,andere,anderem,anderen,anderer,andererseits,anderes,anderm,andern,andernfalls,anders,anerkannt,anerkannte,anerkannter,anerkanntes,anfangen,anfing,angefangen,angesetze,angesetzt,angesetzten,angesetzter,ansetzen,anstatt,arbeiten,auch,auf,aufgehˆrt,aufgrund,aufhˆren,aufhˆrte,aufzusuchen,aus,ausdr¸cken,ausdr¸ckt,ausdr¸ckte,ausgenommen,ausser,ausserdem,author,autor,auﬂen,auﬂer,auﬂerdem,auﬂerhalb,bald,bearbeite,bearbeiten,bearbeitete,bearbeiteten,bedarf,bedurfte,bed¸rfen,befragen,befragte,befragten,befragter,begann,beginnen,begonnen,behalten,behielt,bei,beide,beiden,beiderlei,beides,beim,beinahe,beitragen,beitrugen,bekannt,bekannte,bekannter,bekennen,benutzt,bereits,berichten,berichtet,berichtete,berichteten,besonders,besser,bestehen,besteht,betr‰chtlich,bevor,bez¸glich,bietet,bin,bis,bisher,bislang,bist,bleiben,blieb,bloss,bloﬂ,brachte,brachten,brauchen,braucht,bringen,br‰uchte,bsp.,bzw,bˆden,ca.,da,dabei,dadurch,daf¸r,dagegen,daher,dahin,damals,damit,danach,daneben,dank,danke,danken,dann,dannen,daran,darauf,daraus,darf,darfst,darin,darum,darunter,dar¸ber,dar¸berhinaus,das,dass,dasselbe,davon,davor,dazu,daﬂ,dein,deine,deinem,deinen,deiner,deines,dem,demnach,demselben,den,denen,denn,dennoch,denselben,der,derart,derartig,derem,deren,derer,derjenige,derjenigen,derselbe,derselben,derzeit,des,deshalb,desselben,dessen,desto,deswegen,dich,die,diejenige,dies,diese,dieselbe,dieselben,diesem,diesen,dieser,dieses,diesseits,dinge,dir,direkt,direkte,direkten,direkter,doch,doppelt,dort,dorther,dorthin,drauf,drei,dreiﬂig,drin,dritte,drunter,dr¸ber,du,dunklen,durch,durchaus,durfte,durften,d¸rfen,d¸rfte,eben,ebenfalls,ebenso,ehe,eher,eigenen,eigenes,eigentlich,ein,einba¸n,eine,einem,einen,einer,einerseits,eines,einfach,einf¸hren,einf¸hrte,einf¸hrten,eingesetzt,einig,einige,einigem,einigen,einiger,einigermaﬂen,einiges,einmal,eins,einseitig,einseitige,einseitigen,einseitiger,einst,einstmals,einzig,ende,entsprechend,entweder,er,erg‰nze,erg‰nzen,erg‰nzte,erg‰nzten,erhalten,erhielt,erhielten,erh‰lt,erneut,erst,erste,ersten,erster,erˆffne,erˆffnen,erˆffnet,erˆffnete,erˆffnetes,es,etc,etliche,etwa,etwas,euch,euer,eure,eurem,euren,eurer,eures,fall,falls,fand,fast,ferner,finden,findest,findet,folgende,folgenden,folgender,folgendes,folglich,fordern,fordert,forderte,forderten,fortsetzen,fortsetzt,fortsetzte,fortsetzten,fragte,frau,frei,freie,freier,freies,fuer,f¸nf,f¸r,gab,ganz,ganze,ganzem,ganzen,ganzer,ganzes,gar,gbr,geb,geben,geblieben,gebracht,gedurft,geehrt,geehrte,geehrten,geehrter,gefallen,gefiel,gef‰lligst,gef‰llt,gegeben,gegen,gehabt,gehen,geht,gekommen,gekonnt,gemacht,gemocht,gem‰ss,genommen,genug,gern,gesagt,gesehen,gestern,gestrige,getan,geteilt,geteilte,getragen,gewesen,gewissermaﬂen,gewollt,geworden,ggf,gib,gibt,gleich,gleichwohl,gleichzeitig,gl¸cklicherweise,gmbh,gratulieren,gratuliert,gratulierte,gute,guten,g‰ngig,g‰ngige,g‰ngigen,g‰ngiger,g‰ngiges,g‰nzlich,hab,habe,haben,haette,halb,hallo,hast,hat,hatte,hatten,hattest,hattet,heraus,herein,heute,heutige,hier,hiermit,hiesige,hin,hinein,hinten,hinter,hinterher,hoch,hundert,h‰tt,h‰tte,h‰tten,hˆchstens,ich,igitt,ihm,ihn,ihnen,ihr,ihre,ihrem,ihren,ihrer,ihres,im,immer,immerhin,important,in,indem,indessen,info,infolge,innen,innerhalb,ins,insofern,inzwischen,irgend,irgendeine,irgendwas,irgendwen,irgendwer,irgendwie,irgendwo,ist,ja,je,jede,jedem,jeden,jedenfalls,jeder,jederlei,jedes,jedoch,jemand,jene,jenem,jenen,jener,jenes,jenseits,jetzt,j‰hrig,j‰hrige,j‰hrigen,j‰hriges,kam,kann,kannst,kaum,kein,keine,keinem,keinen,keiner,keinerlei,keines,keineswegs,klar,klare,klaren,klares,klein,kleinen,kleiner,kleines,koennen,koennt,koennte,koennten,komme,kommen,kommt,konkret,konkrete,konkreten,konkreter,konkretes,konnte,konnten,kˆnn,kˆnnen,kˆnnt,kˆnnte,kˆnnten,k¸nftig,lag,lagen,langsam,lassen,laut,lediglich,leer,legen,legte,legten,leicht,leider,lesen,letze,letzten,letztendlich,letztens,letztes,letztlich,lichten,liegt,liest,links,l‰ngst,l‰ngstens,mache,machen,machst,macht,machte,machten,mag,magst,mal,man,manche,manchem,manchen,mancher,mancherorts,manches,manchmal,mann,margin,mehr,mehrere,mein,meine,meinem,meinen,meiner,meines,meist,meiste,meisten,meta,mich,mindestens,mir,mit,mithin,mochte,morgen,morgige,muessen,muesst,muesste,muss,musst,musste,mussten,muﬂ,muﬂt,mˆchte,mˆchten,mˆchtest,mˆgen,mˆglich,mˆgliche,mˆglichen,mˆglicher,mˆglicherweise,m¸ssen,m¸sste,m¸ssten,m¸ﬂt,m¸ﬂte,nach,nachdem,nacher,nachhinein,nacht,nahm,nat¸rlich,neben,nebenan,nehmen,nein,neu,neue,neuem,neuen,neuer,neues,neun,nicht,nichts,nie,niemals,niemand,nimm,nimmer,nimmt,nirgends,nirgendwo,noch,nun,nur,nutzen,nutzt,nutzung,n‰chste,n‰mlich,nˆtigenfalls,n¸tzt,ob,oben,oberhalb,obgleich,obschon,obwohl,oder,oft,ohne,per,pfui,plˆtzlich,pro,reagiere,reagieren,reagiert,reagierte,rechts,regelm‰ﬂig,rief,rund,sage,sagen,sagt,sagte,sagten,sagtest,sang,sangen,schlechter,schlieﬂlich,schnell,schon,schreibe,schreiben,schreibens,schreiber,schwierig,sch‰tzen,sch‰tzt,sch‰tzte,sch‰tzten,sechs,sect,sehe,sehen,sehr,sehrwohl,seht,sei,seid,sein,seine,seinem,seinen,seiner,seines,seit,seitdem,seite,seiten,seither,selber,selbst,senke,senken,senkt,senkte,senkten,setzen,setzt,setzte,setzten,sich,sicher,sicherlich,sie,sieben,siebte,siehe,sieht,sind,singen,singt,so,sobald,sodaﬂ,soeben,sofern,sofort,sog,sogar,solange,solch,solche,solchem,solchen,solcher,solches,soll,sollen,sollst,sollt,sollte,sollten,solltest,somit,sondern,sonst,sonstwo,sooft,soviel,soweit,sowie,sowohl,spielen,sp‰ter,startet,startete,starteten,statt,stattdessen,steht,steige,steigen,steigt,stets,stieg,stiegen,such,suchen,s‰mtliche,tages,tat,tats‰chlich,tats‰chlichen,tats‰chlicher,tats‰chliches,tausend,teile,teilen,teilte,teilten,titel,total,trage,tragen,trotzdem,trug,tr‰gt,tun,tust,tut,txt,t‰t,ueber,um,umso,unbedingt,und,ungef‰hr,unmˆglich,unmˆgliche,unmˆglichen,unmˆglicher,unnˆtig,uns,unse,unsem,unsen,unser,unsere,unserem,unseren,unserer,unseres,unserm,unses,unten,unter,unterbrach,unterbrechen,unterhalb,unwichtig,usw,vergangen,vergangene,vergangener,vergangenes,vermag,vermutlich,vermˆgen,verrate,verraten,verriet,verrieten,version,versorge,versorgen,versorgt,versorgte,versorgten,versorgtes,verˆffentlichen,verˆffentlicher,verˆffentlicht,verˆffentlichte,verˆffentlichten,verˆffentlichtes,viel,viele,vielen,vieler,vieles,vielleicht,vielmals,vier,vollst‰ndig,vom,von,vor,voran,vorbei,vorgestern,vorher,vorne,vor¸ber,vˆllig,wachen,waere,wann,war,waren,warst,warum,was,weder,weg,wegen,weil,weiter,weitere,weiterem,weiteren,weiterer,weiteres,weiterhin,weiﬂ,welche,welchem,welchen,welcher,welches,wem,wen,wenig,wenige,weniger,wenigstens,wenn,wenngleich,wer,werde,werden,werdet,weshalb,wessen,wichtig,wie,wieder,wieso,wieviel,wiewohl,will,willst,wir,wird,wirklich,wirst,wo,wodurch,wogegen,woher,wohin,wohingegen,wohl,wohlweislich,wolle,wollen,wollt,wollte,wollten,wolltest,wolltet,womit,woraufhin,woraus,worin,wurde,wurden,w‰hrend,w‰hrenddessen,w‰r,w‰re,w‰ren,w¸rde,w¸rden,z.B.,zahlreich,zehn,zeitweise,ziehen,zieht,zog,zogen,zu,zudem,zuerst,zufolge,zugleich,zuletzt,zum,zumal,zur,zur¸ck,zusammen,zuviel,zwanzig,zwar,zwei,zwischen,zwˆlf,‰hnlich,¸bel,¸ber,¸berall,¸berallhin,¸berdies,¸bermorgen,¸brig,¸brigens\r\n\r\n#english:\r\na\'s,able,about,above,abroad,according,accordingly,across,actually,adj,after,afterwards,again,against,ago,ahead,ain\'t,all,allow,allows,almost,alone,along,alongside,already,also,although,always,am,amid,amidst,among,amongst,an,and,another,any,anybody,anyhow,anyone,anything,anyway,anyways,anywhere,apart,appear,appreciate,appropriate,are,aren\'t,around,as,aside,ask,asking,associated,at,available,away,awfully,back,backward,backwards,be,became,because,become,becomes,becoming,been,before,beforehand,begin,behind,being,believe,below,beside,besides,best,better,between,beyond,both,brief,but,by,c\'mon,c\'s,came,can,can\'t,cannot,cant,caption,cause,causes,certain,certainly,changes,clearly,co,co.,com,come,comes,concerning,consequently,consider,considering,contain,containing,contains,corresponding,could,couldn\'t,course,currently,dare,daren\'t,definitely,described,despite,did,didn\'t,different,directly,do,does,doesn\'t,doing,don\'t,done,down,downwards,during,each,edu,eg,eight,eighty,either,else,elsewhere,end,ending,enough,entirely,especially,et,etc,even,ever,evermore,every,everybody,everyone,everything,everywhere,ex,exactly,example,except,fairly,far,farther,few,fewer,fifth,first,five,followed,following,follows,for,forever,former,formerly,forth,forward,found,four,from,further,furthermore,get,gets,getting,given,gives,go,goes,going,gone,got,gotten,greetings,had,hadn\'t,half,happens,hardly,has,hasn\'t,have,haven\'t,having,he,he\'d,he\'ll,he\'s,hello,help,hence,her,here,here\'s,hereafter,hereby,herein,hereupon,hers,herself,hi,him,himself,his,hither,hopefully,how,howbeit,however,hundred,i\'d,i\'ll,i\'m,i\'ve,ie,if,ignored,immediate,in,inasmuch,inc,inc.,indeed,indicate,indicated,indicates,inner,inside,insofar,instead,into,inward,is,isn\'t,it,it\'d,it\'ll,it\'s,its,itself,just,k,keep,keeps,kept,know,known,knows,last,lately,later,latter,latterly,least,less,lest,let,let\'s,like,liked,likely,likewise,little,look,looking,looks,low,lower,ltd,made,mainly,make,makes,many,may,maybe,mayn\'t,me,mean,meantime,meanwhile,merely,might,mightn\'t,mine,minus,miss,more,moreover,most,mostly,mr,mrs,much,must,mustn\'t,my,myself,name,namely,nd,near,nearly,necessary,need,needn\'t,needs,neither,never,neverf,neverless,nevertheless,new,next,nine,ninety,no,no-one,nobody,non,none,nonetheless,noone,nor,normally,not,nothing,notwithstanding,novel,now,nowhere,obviously,of,off,often,oh,ok,okay,old,on,once,one,one\'s,ones,only,onto,opposite,or,other,others,otherwise,ought,oughtn\'t,our,ours,ourselves,out,outside,over,overall,own,particular,particularly,past,per,perhaps,placed,please,plus,possible,presumably,probably,provided,provides,que,quite,qv,rather,rd,re,really,reasonably,recent,recently,regarding,regardless,regards,relatively,respectively,right,round,said,same,saw,say,saying,says,second,secondly,see,seeing,seem,seemed,seeming,seems,seen,self,selves,sensible,sent,serious,seriously,seven,several,shall,shan\'t,she,she\'d,she\'ll,she\'s,should,shouldn\'t,since,six,so,some,somebody,someday,somehow,someone,something,sometime,sometimes,somewhat,somewhere,soon,sorry,specified,specify,specifying,still,sub,such,sup,sure,t\'s,take,taken,taking,tell,tends,th,than,thank,thanks,thanx,that,that\'ll,that\'s,that\'ve,thats,the,their,theirs,them,themselves,then,thence,there,there\'d,there\'ll,there\'re,there\'s,there\'ve,thereafter,thereby,therefore,therein,theres,thereupon,these,they,they\'d,they\'ll,they\'re,they\'ve,thing,things,think,third,thirty,this,thorough,thoroughly,those,though,three,through,throughout,thru,thus,till,to,together,too,took,toward,towards,tried,tries,truly,try,trying,twice,two,un,under,underneath,undoing,unfortunately,unless,unlike,unlikely,until,unto,up,upon,upwards,us,use,used,useful,uses,using,usually,v,value,various,versus,very,via,viz,vs,want,wants,was,wasn\'t,way,we,we\'d,we\'ll,we\'re,we\'ve,welcome,well,went,were,weren\'t,what,what\'ll,what\'s,what\'ve,whatever,when,whence,whenever,where,where\'s,whereafter,whereas,whereby,wherein,whereupon,wherever,whether,which,whichever,while,whilst,whither,who,who\'d,who\'ll,who\'s,whoever,whole,whom,whomever,whose,why,will,willing,wish,with,within,without,won\'t,wonder,would,wouldn\'t,yes,yet,you,you\'d,you\'ll,you\'re,you\'ve,your,yours,yourself,yourselves,zero', 16, 16, NULL, NOW(), NULL, 'xtc_cfg_textarea(');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_STOP_WORDS', '#german:\r\nab,aber,abgerufen,abgerufene,abgerufener,abgerufenes,acht,alle,allein,allem,allen,aller,allerdings,allerlei,alles,allgemein,allm√§hlich,allzu,als,alsbald,also,am,an,ander,andere,anderem,anderen,anderer,andererseits,anderes,anderm,andern,andernfalls,anders,anerkannt,anerkannte,anerkannter,anerkanntes,anfangen,anfing,angefangen,angesetze,angesetzt,angesetzten,angesetzter,ansetzen,anstatt,arbeiten,auch,auf,aufgeh√∂rt,aufgrund,aufh√∂ren,aufh√∂rte,aufzusuchen,aus,ausdr√ºcken,ausdr√ºckt,ausdr√ºckte,ausgenommen,ausser,ausserdem,author,autor,au√üen,au√üer,au√üerdem,au√üerhalb,bald,bearbeite,bearbeiten,bearbeitete,bearbeiteten,bedarf,bedurfte,bed√ºrfen,befragen,befragte,befragten,befragter,begann,beginnen,begonnen,behalten,behielt,bei,beide,beiden,beiderlei,beides,beim,beinahe,beitragen,beitrugen,bekannt,bekannte,bekannter,bekennen,benutzt,bereits,berichten,berichtet,berichtete,berichteten,besonders,besser,bestehen,besteht,betr√§chtlich,bevor,bez√ºglich,bietet,bin,bis,bisher,bislang,bist,bleiben,blieb,bloss,blo√ü,brachte,brachten,brauchen,braucht,bringen,br√§uchte,bsp.,bzw,b√∂den,ca.,da,dabei,dadurch,daf√ºr,dagegen,daher,dahin,damals,damit,danach,daneben,dank,danke,danken,dann,dannen,daran,darauf,daraus,darf,darfst,darin,darum,darunter,dar√ºber,dar√ºberhinaus,das,dass,dasselbe,davon,davor,dazu,da√ü,dein,deine,deinem,deinen,deiner,deines,dem,demnach,demselben,den,denen,denn,dennoch,denselben,der,derart,derartig,derem,deren,derer,derjenige,derjenigen,derselbe,derselben,derzeit,des,deshalb,desselben,dessen,desto,deswegen,dich,die,diejenige,dies,diese,dieselbe,dieselben,diesem,diesen,dieser,dieses,diesseits,dinge,dir,direkt,direkte,direkten,direkter,doch,doppelt,dort,dorther,dorthin,drauf,drei,drei√üig,drin,dritte,drunter,dr√ºber,du,dunklen,durch,durchaus,durfte,durften,d√ºrfen,d√ºrfte,eben,ebenfalls,ebenso,ehe,eher,eigenen,eigenes,eigentlich,ein,einba√ºn,eine,einem,einen,einer,einerseits,eines,einfach,einf√ºhren,einf√ºhrte,einf√ºhrten,eingesetzt,einig,einige,einigem,einigen,einiger,einigerma√üen,einiges,einmal,eins,einseitig,einseitige,einseitigen,einseitiger,einst,einstmals,einzig,ende,entsprechend,entweder,er,erg√§nze,erg√§nzen,erg√§nzte,erg√§nzten,erhalten,erhielt,erhielten,erh√§lt,erneut,erst,erste,ersten,erster,er√∂ffne,er√∂ffnen,er√∂ffnet,er√∂ffnete,er√∂ffnetes,es,etc,etliche,etwa,etwas,euch,euer,eure,eurem,euren,eurer,eures,fall,falls,fand,fast,ferner,finden,findest,findet,folgende,folgenden,folgender,folgendes,folglich,fordern,fordert,forderte,forderten,fortsetzen,fortsetzt,fortsetzte,fortsetzten,fragte,frau,frei,freie,freier,freies,fuer,f√ºnf,f√ºr,gab,ganz,ganze,ganzem,ganzen,ganzer,ganzes,gar,gbr,geb,geben,geblieben,gebracht,gedurft,geehrt,geehrte,geehrten,geehrter,gefallen,gefiel,gef√§lligst,gef√§llt,gegeben,gegen,gehabt,gehen,geht,gekommen,gekonnt,gemacht,gemocht,gem√§ss,genommen,genug,gern,gesagt,gesehen,gestern,gestrige,getan,geteilt,geteilte,getragen,gewesen,gewisserma√üen,gewollt,geworden,ggf,gib,gibt,gleich,gleichwohl,gleichzeitig,gl√ºcklicherweise,gmbh,gratulieren,gratuliert,gratulierte,gute,guten,g√§ngig,g√§ngige,g√§ngigen,g√§ngiger,g√§ngiges,g√§nzlich,hab,habe,haben,haette,halb,hallo,hast,hat,hatte,hatten,hattest,hattet,heraus,herein,heute,heutige,hier,hiermit,hiesige,hin,hinein,hinten,hinter,hinterher,hoch,hundert,h√§tt,h√§tte,h√§tten,h√∂chstens,ich,igitt,ihm,ihn,ihnen,ihr,ihre,ihrem,ihren,ihrer,ihres,im,immer,immerhin,important,in,indem,indessen,info,infolge,innen,innerhalb,ins,insofern,inzwischen,irgend,irgendeine,irgendwas,irgendwen,irgendwer,irgendwie,irgendwo,ist,ja,je,jede,jedem,jeden,jedenfalls,jeder,jederlei,jedes,jedoch,jemand,jene,jenem,jenen,jener,jenes,jenseits,jetzt,j√§hrig,j√§hrige,j√§hrigen,j√§hriges,kam,kann,kannst,kaum,kein,keine,keinem,keinen,keiner,keinerlei,keines,keineswegs,klar,klare,klaren,klares,klein,kleinen,kleiner,kleines,koennen,koennt,koennte,koennten,komme,kommen,kommt,konkret,konkrete,konkreten,konkreter,konkretes,konnte,konnten,k√∂nn,k√∂nnen,k√∂nnt,k√∂nnte,k√∂nnten,k√ºnftig,lag,lagen,langsam,lassen,laut,lediglich,leer,legen,legte,legten,leicht,leider,lesen,letze,letzten,letztendlich,letztens,letztes,letztlich,lichten,liegt,liest,links,l√§ngst,l√§ngstens,mache,machen,machst,macht,machte,machten,mag,magst,mal,man,manche,manchem,manchen,mancher,mancherorts,manches,manchmal,mann,margin,mehr,mehrere,mein,meine,meinem,meinen,meiner,meines,meist,meiste,meisten,meta,mich,mindestens,mir,mit,mithin,mochte,morgen,morgige,muessen,muesst,muesste,muss,musst,musste,mussten,mu√ü,mu√üt,m√∂chte,m√∂chten,m√∂chtest,m√∂gen,m√∂glich,m√∂gliche,m√∂glichen,m√∂glicher,m√∂glicherweise,m√ºssen,m√ºsste,m√ºssten,m√º√üt,m√º√üte,nach,nachdem,nacher,nachhinein,nacht,nahm,nat√ºrlich,neben,nebenan,nehmen,nein,neu,neue,neuem,neuen,neuer,neues,neun,nicht,nichts,nie,niemals,niemand,nimm,nimmer,nimmt,nirgends,nirgendwo,noch,nun,nur,nutzen,nutzt,nutzung,n√§chste,n√§mlich,n√∂tigenfalls,n√ºtzt,ob,oben,oberhalb,obgleich,obschon,obwohl,oder,oft,ohne,per,pfui,pl√∂tzlich,pro,reagiere,reagieren,reagiert,reagierte,rechts,regelm√§√üig,rief,rund,sage,sagen,sagt,sagte,sagten,sagtest,sang,sangen,schlechter,schlie√ülich,schnell,schon,schreibe,schreiben,schreibens,schreiber,schwierig,sch√§tzen,sch√§tzt,sch√§tzte,sch√§tzten,sechs,sect,sehe,sehen,sehr,sehrwohl,seht,sei,seid,sein,seine,seinem,seinen,seiner,seines,seit,seitdem,seite,seiten,seither,selber,selbst,senke,senken,senkt,senkte,senkten,setzen,setzt,setzte,setzten,sich,sicher,sicherlich,sie,sieben,siebte,siehe,sieht,sind,singen,singt,so,sobald,soda√ü,soeben,sofern,sofort,sog,sogar,solange,solch,solche,solchem,solchen,solcher,solches,soll,sollen,sollst,sollt,sollte,sollten,solltest,somit,sondern,sonst,sonstwo,sooft,soviel,soweit,sowie,sowohl,spielen,sp√§ter,startet,startete,starteten,statt,stattdessen,steht,steige,steigen,steigt,stets,stieg,stiegen,such,suchen,s√§mtliche,tages,tat,tats√§chlich,tats√§chlichen,tats√§chlicher,tats√§chliches,tausend,teile,teilen,teilte,teilten,titel,total,trage,tragen,trotzdem,trug,tr√§gt,tun,tust,tut,txt,t√§t,ueber,um,umso,unbedingt,und,ungef√§hr,unm√∂glich,unm√∂gliche,unm√∂glichen,unm√∂glicher,unn√∂tig,uns,unse,unsem,unsen,unser,unsere,unserem,unseren,unserer,unseres,unserm,unses,unten,unter,unterbrach,unterbrechen,unterhalb,unwichtig,usw,vergangen,vergangene,vergangener,vergangenes,vermag,vermutlich,verm√∂gen,verrate,verraten,verriet,verrieten,version,versorge,versorgen,versorgt,versorgte,versorgten,versorgtes,ver√∂ffentlichen,ver√∂ffentlicher,ver√∂ffentlicht,ver√∂ffentlichte,ver√∂ffentlichten,ver√∂ffentlichtes,viel,viele,vielen,vieler,vieles,vielleicht,vielmals,vier,vollst√§ndig,vom,von,vor,voran,vorbei,vorgestern,vorher,vorne,vor√ºber,v√∂llig,wachen,waere,wann,war,waren,warst,warum,was,weder,weg,wegen,weil,weiter,weitere,weiterem,weiteren,weiterer,weiteres,weiterhin,wei√ü,welche,welchem,welchen,welcher,welches,wem,wen,wenig,wenige,weniger,wenigstens,wenn,wenngleich,wer,werde,werden,werdet,weshalb,wessen,wichtig,wie,wieder,wieso,wieviel,wiewohl,will,willst,wir,wird,wirklich,wirst,wo,wodurch,wogegen,woher,wohin,wohingegen,wohl,wohlweislich,wolle,wollen,wollt,wollte,wollten,wolltest,wolltet,womit,woraufhin,woraus,worin,wurde,wurden,w√§hrend,w√§hrenddessen,w√§r,w√§re,w√§ren,w√ºrde,w√ºrden,z.B.,zahlreich,zehn,zeitweise,ziehen,zieht,zog,zogen,zu,zudem,zuerst,zufolge,zugleich,zuletzt,zum,zumal,zur,zur√ºck,zusammen,zuviel,zwanzig,zwar,zwei,zwischen,zw√∂lf,√§hnlich,√ºbel,√ºber,√ºberall,√ºberallhin,√ºberdies,√ºbermorgen,√ºbrig,√ºbrigens\r\n\r\n#english:\r\na\'s,able,about,above,abroad,according,accordingly,across,actually,adj,after,afterwards,again,against,ago,ahead,ain\'t,all,allow,allows,almost,alone,along,alongside,already,also,although,always,am,amid,amidst,among,amongst,an,and,another,any,anybody,anyhow,anyone,anything,anyway,anyways,anywhere,apart,appear,appreciate,appropriate,are,aren\'t,around,as,aside,ask,asking,associated,at,available,away,awfully,back,backward,backwards,be,became,because,become,becomes,becoming,been,before,beforehand,begin,behind,being,believe,below,beside,besides,best,better,between,beyond,both,brief,but,by,c\'mon,c\'s,came,can,can\'t,cannot,cant,caption,cause,causes,certain,certainly,changes,clearly,co,co.,com,come,comes,concerning,consequently,consider,considering,contain,containing,contains,corresponding,could,couldn\'t,course,currently,dare,daren\'t,definitely,described,despite,did,didn\'t,different,directly,do,does,doesn\'t,doing,don\'t,done,down,downwards,during,each,edu,eg,eight,eighty,either,else,elsewhere,end,ending,enough,entirely,especially,et,etc,even,ever,evermore,every,everybody,everyone,everything,everywhere,ex,exactly,example,except,fairly,far,farther,few,fewer,fifth,first,five,followed,following,follows,for,forever,former,formerly,forth,forward,found,four,from,further,furthermore,get,gets,getting,given,gives,go,goes,going,gone,got,gotten,greetings,had,hadn\'t,half,happens,hardly,has,hasn\'t,have,haven\'t,having,he,he\'d,he\'ll,he\'s,hello,help,hence,her,here,here\'s,hereafter,hereby,herein,hereupon,hers,herself,hi,him,himself,his,hither,hopefully,how,howbeit,however,hundred,i\'d,i\'ll,i\'m,i\'ve,ie,if,ignored,immediate,in,inasmuch,inc,inc.,indeed,indicate,indicated,indicates,inner,inside,insofar,instead,into,inward,is,isn\'t,it,it\'d,it\'ll,it\'s,its,itself,just,k,keep,keeps,kept,know,known,knows,last,lately,later,latter,latterly,least,less,lest,let,let\'s,like,liked,likely,likewise,little,look,looking,looks,low,lower,ltd,made,mainly,make,makes,many,may,maybe,mayn\'t,me,mean,meantime,meanwhile,merely,might,mightn\'t,mine,minus,miss,more,moreover,most,mostly,mr,mrs,much,must,mustn\'t,my,myself,name,namely,nd,near,nearly,necessary,need,needn\'t,needs,neither,never,neverf,neverless,nevertheless,new,next,nine,ninety,no,no-one,nobody,non,none,nonetheless,noone,nor,normally,not,nothing,notwithstanding,novel,now,nowhere,obviously,of,off,often,oh,ok,okay,old,on,once,one,one\'s,ones,only,onto,opposite,or,other,others,otherwise,ought,oughtn\'t,our,ours,ourselves,out,outside,over,overall,own,particular,particularly,past,per,perhaps,placed,please,plus,possible,presumably,probably,provided,provides,que,quite,qv,rather,rd,re,really,reasonably,recent,recently,regarding,regardless,regards,relatively,respectively,right,round,said,same,saw,say,saying,says,second,secondly,see,seeing,seem,seemed,seeming,seems,seen,self,selves,sensible,sent,serious,seriously,seven,several,shall,shan\'t,she,she\'d,she\'ll,she\'s,should,shouldn\'t,since,six,so,some,somebody,someday,somehow,someone,something,sometime,sometimes,somewhat,somewhere,soon,sorry,specified,specify,specifying,still,sub,such,sup,sure,t\'s,take,taken,taking,tell,tends,th,than,thank,thanks,thanx,that,that\'ll,that\'s,that\'ve,thats,the,their,theirs,them,themselves,then,thence,there,there\'d,there\'ll,there\'re,there\'s,there\'ve,thereafter,thereby,therefore,therein,theres,thereupon,these,they,they\'d,they\'ll,they\'re,they\'ve,thing,things,think,third,thirty,this,thorough,thoroughly,those,though,three,through,throughout,thru,thus,till,to,together,too,took,toward,towards,tried,tries,truly,try,trying,twice,two,un,under,underneath,undoing,unfortunately,unless,unlike,unlikely,until,unto,up,upon,upwards,us,use,used,useful,uses,using,usually,v,value,various,versus,very,via,viz,vs,want,wants,was,wasn\'t,way,we,we\'d,we\'ll,we\'re,we\'ve,welcome,well,went,were,weren\'t,what,what\'ll,what\'s,what\'ve,whatever,when,whence,whenever,where,where\'s,whereafter,whereas,whereby,wherein,whereupon,wherever,whether,which,whichever,while,whilst,whither,who,who\'d,who\'ll,who\'s,whoever,whole,whom,whomever,whose,why,will,willing,wish,with,within,without,won\'t,wonder,would,wouldn\'t,yes,yet,you,you\'d,you\'ll,you\'re,you\'ve,your,yours,yourself,yourselves,zero', 16, 16, NULL, NOW(), NULL, 'xtc_cfg_textarea(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_GO_WORDS', '', 16, 17, NULL, NOW(), NULL, 'xtc_cfg_textarea(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_CAT_SHOP_TITLE', 'false', 16, 18, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'META_PROD_SHOP_TITLE', 'false', 16, 19, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1767,6 +1834,9 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_STATUS', 'true', 17, 27, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_VOUCHER_AMOUNT', '0', 17, 28, NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_DISCOUNT_COUPON', '', 17, 29, NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_NEWSLETTER_INFOS', '', 17, 30, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'MODULE_NEWSLETTER_INFOS\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'REVIEWS_PURCHASED_ONLY', 'false', 17, 31, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'REVIEWS_PURCHASED_INFOS', '', 17, 32, NULL, NOW(), NULL, 'xtc_cfg_select_content(\'REVIEWS_PURCHASED_ONLY\',');
 
 #configuration_group_id 18, VAT reg no
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ACCOUNT_COMPANY_VAT_CHECK', 'true', 18, 4, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1832,7 +1902,7 @@ INSERT INTO configuration (configuration_id, configuration_key, configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'TRACKING_FACEBOOK_ID','', 24, 9, NULL, NOW(), NULL, NULL);
 
 #configuration_group_id 25, captcha
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_ACTIVE', 'newsletter,contact,password', 25, 1, NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(array(\'newsletter\' => \'Newsletter\', \'contact\' => \'Contact\', \'password\' => \'Password\', \'reviews\' => \'Reviews\', \'create_account\' => \'Registration\'), \',\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_ACTIVE', 'newsletter,contact,password', 25, 1, NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(array(\'newsletter\' => \'Newsletter\', \'contact\' => \'Contact\', \'password\' => \'Password\', \'reviews\' => \'Reviews\', \'create_account\' => \'Registration\'), \'chr(44)\',');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_LOGGED_IN', 'False', 25, 2, NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'True\', \'False\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CAPTCHA_MOD_CLASS', 'modified_captcha', 25, 3, NULL, NOW(), NULL, 'xtc_cfg_select_mod_captcha(');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MODULE_CAPTCHA_LOGIN_NUM', '2', 25, 4, NULL, NOW(), NULL, NULL);
@@ -1869,13 +1939,13 @@ INSERT INTO configuration (configuration_id ,configuration_key ,configuration_va
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_LIST_PRODUCTS', '50', '1000', '51', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_LIST_CUSTOMERS', '100', '1000', '-1', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WHOS_ONLINE_TIME_LAST_CLICK', '900', '1000', '60', NULL, NOW(), NULL, NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WHOS_ONLINE_IP_WHOIS_SERVICE', 'http://www.utrace.de/?query=', '1000', '62', NULL, NOW(), NULL, NULL);
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'WHOS_ONLINE_IP_WHOIS_SERVICE', 'https://utrace.me/?query=', '1000', '62', NULL, NOW(), NULL, NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'CONFIRM_SAVE_ENTRY', 'true', '1000', '70', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_FIXED_TOP', 'true', '1000', '23', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ADMIN_FIXED_SEARCH', 'false', '1000', '24', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MAX_DISPLAY_COUPON_RESULTS', '30', '1000', '-1', NULL , NOW(), NULL , NULL);
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_STATUSES_DISPLAY_DEFAULT', '', '1000', '90', NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(\'order_statuses\', \',\',');
-INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_STATUSES_FOR_SALES_STATISTICS', '3', '1000', '100', NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(\'order_statuses\', \',\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_STATUSES_DISPLAY_DEFAULT', '', '1000', '90', NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(\'order_statuses\', \'chr(44)\',');
+INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'ORDER_STATUSES_FOR_SALES_STATISTICS', '3', '1000', '100', NULL, NOW(), NULL, 'xtc_cfg_multi_checkbox(\'order_statuses\', \'chr(44)\',');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'MIN_GROUP_PRICE_STAFFEL', '2', '1000', '34', NULL , NOW(), NULL , NULL);
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'USE_ATTRIBUTES_IFRAME', 'true', 1000, '110', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
 INSERT INTO configuration (configuration_id, configuration_key, configuration_value, configuration_group_id, sort_order, last_modified, date_added, use_function, set_function) VALUES (NULL, 'NEW_ATTRIBUTES_STYLING', 'true', 1000, '112', NULL, NOW(), NULL, 'xtc_cfg_select_option(array(\'true\', \'false\'),');
@@ -1910,7 +1980,7 @@ INSERT INTO configuration_group VALUES (20,'Import/Export','Import/Export',20,1)
 INSERT INTO configuration_group VALUES (21,'Afterbuy','Afterbuy.de',21,1);
 INSERT INTO configuration_group VALUES (22,'Search Options','Additional Options for search function',22,1);
 INSERT INTO configuration_group VALUES (23,'Econda Tracking','Econda Tracking System',23,1);
-INSERT INTO configuration_group VALUES (24,'Motamo & Google Analytics Tracking','Settings for Motamo & Google Analytics Tracking',24,1); 
+INSERT INTO configuration_group VALUES (24,'Motamo & Google Analytics Tracking','Settings for Motamo & Google Analytics Tracking',24,1);
 INSERT INTO configuration_group VALUES (25,'Captcha','Captcha Configuration',25,1);
 INSERT INTO configuration_group VALUES (31,'Skrill','Skrill System',31,1);
 INSERT INTO configuration_group VALUES (40,'Popup Window Configuration','Popup Window Parameters',40,1);
@@ -1920,284 +1990,286 @@ INSERT INTO configuration_group VALUES (1000,'Adminarea Options','Adminarea Conf
 INSERT INTO content_manager VALUES (1, 0, 0, '', 1, 'Payment & Shipping', 'Payment & Shipping', 'Put here your Payment & Shipping information.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (2, 0, 0, '', 1, 'Privacy Notice', 'Privacy Notice', 'Put here your Privacy Notice information.', 0, 1, '', 1, 2, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (3, 0, 0, '', 1, 'Conditions of Use', 'Conditions of Use', '<strong>Conditions of Use</strong><br /><br />Put here your Conditions of Use information.<br /><br /><ol><li>Scope of Application</li><li>Contract partner</li><li>Conclusion of the Contract</li><li>Right to cancel</li><li>Price and Delivery Costs</li><li>Shipment and delivery conditions</li><li>Payment methods</li><li>Reservation of title</li><li>Warranty</li><li>Information about online dispute resolution</li></ol>...<br />...<br />...<h2>Information about online dispute resolution</h2><p>The EU Commission provides on its website the following link to the ODR platform: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a></p><p>This platform shall be a point of entry for out-of-court resolutions of disputes arising from online sales and service contracts concluded between consumers and traders.</p><h2>Further informations</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (4, 0, 0, '', 1, 'Imprint', 'Imprint', 'Put here your Company information.<br /><br />DemoShop GmbH<br />Managing director: Max Muster und Fritz Beispiel<br /><br />Max Muster Straﬂe 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />VAT ID No.: DE 000 111 222<br /><br />Platform of the EU Commission regarding online dispute resolution: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (4, 0, 0, '', 1, 'Legal Notice', 'Legal Notice', 'Put here your Company information.<br /><br />DemoShop GmbH<br />Managing director: Max Muster und Fritz Beispiel<br /><br />Max Muster Stra√üe 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />VAT ID No.: DE 000 111 222<br /><br />Platform of the EU Commission regarding online dispute resolution: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (5, 0, 0, '', 1, 'Index', 'Welcome', '{$greeting}<br /><br />This is the default installation of <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. All products shown are for demonstrational purposes. If you order products, they will be not be delivered nor billed.<br /><br />Should you be interested in the program, which forms the basis for this store, so please visit the website of <a href="https://www.modified-shop.org" rel="nofollow noopener" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />The text shown here may be edited in the admin area under <b>Content Manager</b> - entry Index.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (6, 0, 0, '', 1, 'Coupons', 'Coupons FAQ', '<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Buy Gift Vouchers/Coupons </strong></td></tr>\r\n<tr>\r\n<td class="main">If the shop provided gift vouchers or coupons, You can buy them alike all other products. As soon as You have bought and payed the coupon, the shop system will activate Your coupon. You will then see the coupon amount in Your shopping cart. Then You can send the coupon via e-mail by clicking the link "Send Coupon". </td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>How to dispatch Coupons </strong></td></tr>\r\n<tr>\r\n<td class="main">To dispatch a coupon, please click the link "Send Coupon" in Your shopping cart. To send the coupon to the correct person, we need the following details: Surname and realname of the recipient and a valid e-mail adress of the recipient, and the desired coupon amount (You can also use only parts of Your balance). Please provide also a short message for the recipient. Please check those information again before You click the "Send Coupon" button. You can change all information at any time before clicking the "Send Coupon" button. </td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>How to use Coupons to buy products. </strong></td></tr>\r\n<tr>\r\n<td class="main">As soon as You have a balance, You can use it to pay for Your orders. During the checkout process, You can redeem Your coupon. In case Your balance is less than the value of goods You ordered, You would have to choose Your preferred method of payment for the difference amount. In case Your balance is more than the value of goods You ordered, the remaining amount of Your balance will be saved for Your next order. </td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>How to redeem Coupons. </strong></td></tr>\r\n<tr>\r\n<td class="main">In case You have received a coupun via e-mail, You can: <br />1. Click on the link provided in the e-mail. If You do not have an account in this shop already, please create a personal account. <br />2. After having added a product to Your shopping cart, You can enter Your coupon code.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Problems?</strong></td></tr>\r\n<tr>\r\n<td class="main">If You have trouble or problems in using Your coupons, please check back with us via our e-mail: you@yourdomain.com. Please describe the encountered problem as detailed as possible! We need the following information to process Your request quickly: Your user id, the coupon code, error messages the shop system returned to You, and the name of the web browser You are using (e.g. "Internet Explorer 6" or "Firefox 1.5"). </td></tr></tbody></table>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (6, 0, 0, '', 1, 'Coupons', 'Coupons FAQ', '<p><strong>Buy Gift Vouchers/Coupons </strong></p>\r\n<p>If the shop provided gift vouchers or coupons, You can buy them alike all other products. As soon as You have bought and payed the coupon, the shop system will activate Your coupon. You will then see the coupon amount in Your shopping cart. Then You can send the coupon via e-mail by clicking the link "Send Coupon".</p>\r\n<p><strong>How to dispatch Coupons </strong></p>\r\n<p>To dispatch a coupon, please click the link "Send Coupon" in Your shopping cart. To send the coupon to the correct person, we need the following details: Surname and realname of the recipient and a valid e-mail adress of the recipient, and the desired coupon amount (You can also use only parts of Your balance). Please provide also a short message for the recipient. Please check those information again before You click the "Send Coupon" button. You can change all information at any time before clicking the "Send Coupon" button.</p>\r\n<p><strong>How to use Coupons to buy products. </strong></p>\r\n<p>As soon as You have a balance, You can use it to pay for Your orders. During the checkout process, You can redeem Your coupon. In case Your balance is less than the value of goods You ordered, You would have to choose Your preferred method of payment for the difference amount. In case Your balance is more than the value of goods You ordered, the remaining amount of Your balance will be saved for Your next order.</p>\r\n<p><strong>How to redeem Coupons. </strong></p>\r\n<p>In case You have received a coupun via e-mail, You can:<br />1. Click on the link provided in the e-mail. If You do not have an account in this shop already, please create a personal account.<br />2. After having added a product to Your shopping cart, You can enter Your coupon code.</p>\r\n<p><strong>Problems?</strong></p>\r\n<p>If You have trouble or problems in using Your coupons, please check back with us via our e-mail: you@yourdomain.com. Please describe the encountered problem as detailed as possible! We need the following information to process Your request quickly: Your user id, the coupon code, error messages the shop system returned to You, and the name of the web browser You are using (e.g. "Internet Explorer 6" or "Firefox 1.5").</p>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (7, 0, 0, '', 1, 'Contact', 'Contact', 'Please enter your contact information.', 0, 1, 'contact_us.php', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (8, 0, 0, '', 1, 'Sitemap', '', '', 0, 0, 'sitemap.php', 1, 8, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (9, 0, 0, '', 1, 'Right of revocation & revocation form', 'Right of revocation & revocation form', '<p><strong>Right of revocation<br /></strong><br />Add your right of revocation here.</p><p><strong>Revocation form</strong><br /><br />(Complete and return this form only if you wish to withdraw from the contract.)<br /><br />To<br />Max Mustermann / Muster GmbH<br />Musterstraﬂe 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[enter the name, address and if appropriate, fax number and e-mail-address of the entrepreneur by the entrepreneur]:<br /><br />I/We* hereby give notice that I/We (*) withdraw from my/our (*) contract of sale of the following goods (*) / provision of the following service (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Ordered on ___________________ (*)/received on _______________________(*)<br /><br />Name of the consumer(s) ______________________________________<br />Address of the consumer(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; signature of the consumer(s) (only with message on paper)<br /><br />_____________________________________________________________________________________<br />(*) delete as applicable</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (9, 0, 0, '', 1, 'Right of revocation & revocation form', 'Right of revocation & revocation form', '<p><strong>Right of revocation<br /></strong><br />Add your right of revocation here.</p><p><strong>Revocation form</strong><br /><br />(Complete and return this form only if you wish to withdraw from the contract.)<br /><br />To<br />Max Mustermann / Muster GmbH<br />Musterstra√üe 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[enter the name, address and if appropriate, fax number and e-mail-address of the entrepreneur by the entrepreneur]:<br /><br />I/We* hereby give notice that I/We (*) withdraw from my/our (*) contract of sale of the following goods (*) / provision of the following service (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Ordered on ___________________ (*)/received on _______________________(*)<br /><br />Name of the consumer(s) ______________________________________<br />Address of the consumer(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; signature of the consumer(s) (only with message on paper)<br /><br />_____________________________________________________________________________________<br />(*) delete as applicable</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (10, 0, 0, '', 1, 'Delivery time', 'Delivery time', 'The deadline for delivery begins when paying in advance on the day after the payment order to the remitting bank or for other payments on the day to run after the conclusion and ends with the expiry of the last day of the period. Falls on a Saturday, Sunday or a public holiday delivery nationally recognized, the last day of the period, as occurs, the next business day at the place of such a day.', 0, 1, '', 1, 10, 0, '', '', '', '', '1', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (11, 0, 0, '', 1, 'E-Mail Signature', '', '<b>Company</b><br />Address<br />Location<br />Homepage<br />E-mail:<br />Phone:<br />Fax:<br />CEO:<br />VAT Reg No:', 0, 1, '', 0, 11, 0, '', '', '', '', '0', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (12, 0, 0, '', 1, 'Invoice data', 'Company - Address - Code City', 'Company<br/>Address<br/>Code City<br/><br/>Phone: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>You can change this in the content manager.', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
 INSERT INTO content_manager VALUES (13, 0, 0, '', 1, 'My quick purchase', 'My quick purchase', '<p>With &bdquo;My Quick purchase&ldquo; you can more easily and above all quickly place your order now.</p><p>You will find the button &bdquo;<strong>Activate my quick purchase</strong>&ldquo; on the detail page of every product below the Cart-Button, where you have to store the desired delivery method, payment method, shipping address and billing address to activate the function for the Quick purchase.<br />Afterwards you will find the button for &bdquo;<strong>My quick purchase</strong>&ldquo; ath the following locations:</p><ul><li>Product detail page</li><li>Shopping cart</li><li>Your Account &raquo; My Orders</li><li>Your Account &raquo; My Orders &raquo; Orders detail page</li></ul><p>To change the default settings for &bdquo;My quick purchase&ldquo;, go to &bdquo;Your Account&ldquo; &raquo; &bdquo;<strong>Display/change my quick purchase settings</strong>&ldquo;.</p>', 0, 1, '', 0, 13, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (14, 0, 0, '', 1, 'Information on the authenticity of customer reviews', 'Information on the authenticity of customer reviews', 'Put here your Information on the authenticity of customer reviews.<br /><h2>Text suggestions [Select applicable]</h2><br /><h3>No verification of the authenticity of customer reviews</h3><br />The reviews are not checked for authenticity before they are published. They can therefore also come from consumers who have not actually purchased/used the rated products.<br /><br />--- or ---<br /><br /><h3>Verification of the authenticity of consumer reviews</h3><br />Each consumer review is verified for authenticity before it is published, ensuring that reviews only come from consumers who have actually purchased/used the products being reviewed.<br /><br />The verification is done [Select applicable]<br /><ul><li>by manual verification in the form of a comparison of the rating with the order history of the merchandise management system in order to make a previous product purchase a necessary condition for publication.</li><li>by sending individualised links to consumers after the completion of an online order that lead to an online rating form and ensure that access to the rating function is only granted to consumers who have actually purchased a product.</li></ul>', 0, 1, '', 0, 14, 1, '', '', '', '', '0', 0, NOW(), NULL);
 
 # content manager - german
-INSERT INTO content_manager VALUES (14, 0, 0, '', 2, 'Zahlung & Versand', 'Zahlung & Versand', 'F¸gen Sie hier Ihre Informationen ¸ber Zahlung & Versand ein.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (15, 0, 0, '', 2, 'Privatsph‰re und Datenschutz', 'Privatsph‰re und Datenschutz', 'F¸gen Sie hier Ihre Informationen ¸ber Privatsph‰re und Datenschutz ein.', 0, 1, '', 1, 2, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (16, 0, 0, '', 2, 'Unsere AGB', 'Allgemeine Gesch‰ftsbedingungen', '<strong>Allgemeine Gesch‰ftsbedingungen</strong><br /><br />F¸gen Sie hier Ihre allgemeinen Gesch‰ftsbedingungen ein.<br /><br /><ol><li>Geltungsbereich</li><li>Vertragspartner</li><li>Angebot und Vertragsschluss</li><li>Widerrufsrecht, Widerrufsbelehrung, Widerrufsfolgen</li><li>Preise und Versandkosten</li><li>Lieferung</li><li>Zahlung</li><li>Eigentumsvorbehalt</li><li>Gew‰hrleistung</li><li>Informationen zur Online-Streitbeilegung</li></ol>...<br />...<br />...<h2>Informationen zur Online-Streitbeilegung</h2><p>Die EU-Kommission stellt im Internet unter folgendem Link eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a></p><p>Diese Plattform dient als Anlaufstelle zur auﬂergerichtlichen Beilegung von Streitigkeiten aus Online-Kauf- oder Dienstleistungsvertr‰gen, an denen ein Verbraucher beteiligt ist.</p><h2>Weitere Informationen</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (17, 0, 0, '', 2, 'Impressum', 'Impressum', 'F¸gen Sie hier Ihr Impressum ein.<br /><br />DemoShop GmbH<br />Gesch‰ftsf¸hrer: Max Muster und Fritz Beispiel<br /><br />Max Muster Straﬂe 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />UStid-Nr.: DE 000 111 222<br /><br />Plattform der EU-Kommission zur Online-Streitbeilegung: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (18, 0, 0, '', 2, 'Index', 'Willkommen', '{$greeting}<br /><br />Dies ist die Standardinstallation der <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. Alle dargestellten Produkte dienen zur Demonstration der Funktionsweise. Wenn Sie Produkte bestellen, so werden diese weder ausgeliefert, noch in Rechnung gestellt.<br /><br />Sollten Sie daran interessiert sein das Programm, welches die Grundlage f¸r diesen Shop bildet, einzusetzen, so besuchen Sie bitte die Webseite der <a href="https://www.modified-shop.org" rel="nofollow noopener" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />Der hier dargestellte Text kann im Adminbereich unter <b>Content Manager</b> - Eintrag Index bearbeitet werden.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (19, 0, 0, '', 2, 'Gutscheine', 'Gutscheine - Fragen und Antworten', '<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Gutscheine kaufen </strong></td></tr>\r\n<tr>\r\n<td class="main">Gutscheine kˆnnen, falls sie im Shop angeboten werden, wie normale Artikel gekauft werden. Sobald Sie einen Gutschein gekauft haben und dieser nach erfolgreicher Zahlung freigeschaltet wurde, erscheint der Betrag unter Ihrem Warenkorb. Nun kˆnnen Sie ¸ber den Link " Gutschein versenden " den gew¸nschten Betrag per E-Mail versenden.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Wie man Gutscheine versendet</strong></td></tr>\r\n<tr>\r\n<td class="main">Um einen Gutschein zu versenden, klicken Sie bitte auf den Link "Gutschein versenden" in Ihrem Einkaufskorb. Um einen Gutschein zu versenden, benˆtigen wir folgende Angaben von Ihnen: Vor- und Nachname des Empf‰ngers. Eine g¸ltige E-Mail Adresse des Empf‰ngers. Den gew¸nschten Betrag (Sie kˆnnen auch Teilbetr‰ge Ihres Guthabens versenden). Eine kurze Nachricht an den Empf‰nger. Bitte ¸berpr¸fen Sie Ihre Angaben noch einmal vor dem Versenden. Sie haben vor dem Versenden jederzeit die Mˆglichkeit Ihre Angaben zu korrigieren.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Mit Gutscheinen einkaufen.</strong></td></tr>\r\n<tr>\r\n<td class="main">Sobald Sie ¸ber ein Guthaben verf¸gen, kˆnnen Sie dieses zum Bezahlen Ihrer Bestellung verwenden. W‰hrend des Bestellvorganges haben Sie die Mˆglichkeit Ihr Guthaben einzulˆsen. Falls das Guthaben unter dem Warenwert liegt m¸ssen Sie Ihre bevorzugte Zahlungsweise f¸r den Differenzbetrag w‰hlen. ‹bersteigt Ihr Guthaben den Warenwert, steht Ihnen das Restguthaben selbstverst‰ndlich f¸r Ihre n‰chste Bestellung zur Verf¸gung.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Gutscheine verbuchen. </strong></td></tr>\r\n<tr>\r\n<td class="main">Wenn Sie einen Gutschein per E-Mail erhalten haben, kˆnnen Sie den Betrag wie folgt verbuchen: <br />1. Klicken Sie auf den in der E-Mail angegebenen Link. Falls Sie noch nicht ¸ber ein persˆnliches Kundenkonto verf¸gen, haben Sie die Mˆglichkeit ein Konto zu erˆffnen. <br />2. Nachdem Sie ein Produkt in den Warenkorb gelegt haben, kˆnnen Sie dort Ihren Gutscheincode eingeben.</td></tr></tbody></table>\r\n<table cellSpacing="0" cellPadding="0">\r\n<tbody>\r\n<tr>\r\n<td class="main"><strong>Falls es zu Problemen kommen sollte:</strong></td></tr>\r\n<tr>\r\n<td class="main">Falls es wider Erwarten zu Problemen mit einem Gutschein kommen sollte, kontaktieren Sie uns bitte per E-Mail: you@yourdomain.com. Bitte beschreiben Sie mˆglichst genau das Problem, wichtige Angaben sind unter anderem: Ihre Kundennummer, der Gutscheincode, Fehlermeldungen des Systems sowie der von Ihnen benutzte Browser (z.B. "Internet Explorer 6" oder "Firefox 1.5"). </td></tr></tbody></table>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (20, 0, 0, '', 2, 'Kontakt', 'Kontakt', 'Ihre Kontaktinformationen', 0, 1, 'contact_us.php', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (21, 0, 0, '', 2, 'Sitemap', '', '', 0, 0, 'sitemap.php', 1, 8, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (22, 0, 0, '', 2, 'Widerrufsrecht & Widerrufsformular', 'Widerrufsrecht & Widerrufsformular', '<p><strong>Widerrufsrecht<br /></strong><br />F¸gen Sie hier das Widerrufsrecht ein.</p><p><strong>Widerrufsformular</strong><br /><br />(Wenn Sie den Vertrag widerrufen wollen, dann f¸llen Sie bitte dieses Formular aus und senden Sie es zur¸ck.)<br /><br />An<br />Max Mustermann / Muster GmbH<br />Musterstraﬂe 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[hier ist der Name, die Anschrift und gegebenenfalls die Telefaxnummer und E-Mail-Adresse des Unternehmers durch den Unternehmer einzuf¸gen]:<br /><br />Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag ¸ber den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Bestellt am ___________________ (*)/erhalten am _______________________(*)<br /><br />Name des/der Verbraucher(s) ______________________________________<br />Anschrift des/der Verbraucher(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Datum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)<br /><br />_____________________________________________________________________________________<br />(*) Unzutreffendes streichen</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (23, 0, 0, '', 2, 'Lieferzeit', 'Lieferzeit', 'Die Frist f¸r die Lieferung beginnt bei Zahlung per Vorkasse am Tag nach Erteilung des Zahlungsauftrags an das ¸berweisende Kreditinstitut bzw. bei anderen Zahlungsarten am Tag nach Vertragsschluss zu laufen und endet mit dem Ablauf des letzten Tages der Frist. F‰llt der letzte Tag der Frist auf einen Samstag, Sonntag oder einen am Lieferort staatlich anerkannten allgemeinen Feiertag, so tritt an die Stelle eines solchen Tages der n‰chste Werktag.', 0, 1, '', 1, 10, 0, '', '', '', '', '1', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (24, 0, 0, '', 2, 'E-Mail Signatur', '', 'Firma<br />Adresse<br />Ort<br />Homepage<br />E-Mail:<br />Fon:<br />Fax:<br />USt-IdNr.:<br />Handelsregister<br />Gesch‰ftsf¸hrer:', 0, 1, '', 0, 11, 0, '', '', '', '', '0', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (25, 0, 0, '', 2, 'Rechnungsdaten', 'Firma - Adresse - PLZ Stadt', 'Firma<br/>Adresse<br/>PLZ Stadt<br/><br/>Tel: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>Diese Daten kˆnnen im Content Manager ge‰ndert werden.', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
-INSERT INTO content_manager VALUES (26, 0, 0, '', 2, 'Mein Schnellkauf', 'Mein Schnellkauf', '<p>Mit &bdquo;Mein Schnellkauf&ldquo; kˆnnen Sie Ihre Bestellung jetzt noch einfacher und vor allem schneller t‰tigen.</p><p>Sie finden auf der Detailseite eines jeden Artikels unterhalb des Warenkorb-Buttons die Schaltfl‰che &bdquo;<strong>Mein Schnellkauf aktivieren</strong>&ldquo;, wo Sie die f¸r den Schnellkauf gew¸nschte Versandart, Bezahlart, Versandadresse und Rechnungsadresse hinterlegen m¸ssen um die Funktion zu aktivieren.<br />Anschlieﬂend finden Sie an den folgenden Stellen im Shop den Button zur Bestellung mit &bdquo;<strong>Mein Schnellkauf</strong>&ldquo;:</p><ul><li>Artikel-Detailseite</li><li>Warenkorb</li><li>Mein Konto &raquo; Meine Bestellungen</li><li>Mein Konto &raquo; Meine Bestellungen &raquo; Detailseite der Bestellung</li></ul><p>Um die Voreinstellungen f¸r &bdquo;Mein Schnellkauf&ldquo; zu ‰ndern, gehen Sie auf &bdquo;Mein Konto&ldquo; &raquo; &bdquo;<strong>Mein Schnellkauf bearbeiten</strong>&ldquo;.</p>', 0, 1, '', 0, 13, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (15, 0, 0, '', 2, 'Zahlung & Versand', 'Zahlung & Versand', 'F√ºgen Sie hier Ihre Informationen √ºber Zahlung & Versand ein.', 0, 1, '', 1, 1, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (16, 0, 0, '', 2, 'Privatsph√§re und Datenschutz', 'Privatsph√§re und Datenschutz', 'F√ºgen Sie hier Ihre Informationen √ºber Privatsph√§re und Datenschutz ein.', 0, 1, '', 1, 2, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (17, 0, 0, '', 2, 'Unsere AGB', 'Allgemeine Gesch√§ftsbedingungen', '<strong>Allgemeine Gesch√§ftsbedingungen</strong><br /><br />F√ºgen Sie hier Ihre allgemeinen Gesch√§ftsbedingungen ein.<br /><br /><ol><li>Geltungsbereich</li><li>Vertragspartner</li><li>Angebot und Vertragsschluss</li><li>Widerrufsrecht, Widerrufsbelehrung, Widerrufsfolgen</li><li>Preise und Versandkosten</li><li>Lieferung</li><li>Zahlung</li><li>Eigentumsvorbehalt</li><li>Gew√§hrleistung</li><li>Informationen zur Online-Streitbeilegung</li></ol>...<br />...<br />...<h2>Informationen zur Online-Streitbeilegung</h2><p>Die EU-Kommission stellt im Internet unter folgendem Link eine Plattform zur Online-Streitbeilegung bereit: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a></p><p>Diese Plattform dient als Anlaufstelle zur au√üergerichtlichen Beilegung von Streitigkeiten aus Online-Kauf- oder Dienstleistungsvertr√§gen, an denen ein Verbraucher beteiligt ist.</p><h2>Weitere Informationen</h2>...<br />...<br />...', 0, 1, '', 1, 3, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (18, 0, 0, '', 2, 'Impressum', 'Impressum', 'F√ºgen Sie hier Ihr Impressum ein.<br /><br />DemoShop GmbH<br />Gesch√§ftsf√ºhrer: Max Muster und Fritz Beispiel<br /><br />Max Muster Stra√üe 21-23<br />D-0815 Musterhausen<br />E-Mail: max.muster@muster.de<br /><br />HRB 123456<br />Amtsgericht Musterhausen<br />UStid-Nr.: DE 000 111 222<br /><br />Plattform der EU-Kommission zur Online-Streitbeilegung: <a href="https://ec.europa.eu/consumers/odr/" rel="nofollow noopener" target="_blank">https://ec.europa.eu/consumers/odr/</a>', 0, 1, '', 1, 4, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (19, 0, 0, '', 2, 'Index', 'Willkommen', '{$greeting}<br /><br />Dies ist die Standardinstallation der <strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong>. Alle dargestellten Produkte dienen zur Demonstration der Funktionsweise. Wenn Sie Produkte bestellen, so werden diese weder ausgeliefert, noch in Rechnung gestellt.<br /><br />Sollten Sie daran interessiert sein das Programm, welches die Grundlage f√ºr diesen Shop bildet, einzusetzen, so besuchen Sie bitte die Webseite der <a href="https://www.modified-shop.org" rel="nofollow noopener" target="_blank"><u><strong><span style="color:#B0347E;">mod</span><span style="color:#6D6D6D;">ified eCommerce Shopsoftware</span></strong></u></a>.<br /><br />Der hier dargestellte Text kann im Adminbereich unter <b>Content Manager</b> - Eintrag Index bearbeitet werden.', 0, 1, '', 0, 5, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (20, 0, 0, '', 2, 'Gutscheine', 'Gutscheine - Fragen und Antworten', '<p><strong>Gutscheine kaufen </strong></p>\r\n<p>Gutscheine k√∂nnen, falls sie im Shop angeboten werden, wie normale Artikel gekauft werden. Sobald Sie einen Gutschein gekauft haben und dieser nach erfolgreicher Zahlung freigeschaltet wurde, erscheint der Betrag unter Ihrem Warenkorb. Nun k√∂nnen Sie √ºber den Link " Gutschein versenden " den gew√ºnschten Betrag per E-Mail versenden.</p>\r\n<p><strong>Wie man Gutscheine versendet</strong></p>\r\n<p>Um einen Gutschein zu versenden, klicken Sie bitte auf den Link "Gutschein versenden" in Ihrem Einkaufskorb. Um einen Gutschein zu versenden, ben√∂tigen wir folgende Angaben von Ihnen: Vor- und Nachname des Empf√§ngers. Eine g√ºltige E-Mail Adresse des Empf√§ngers. Den gew√ºnschten Betrag (Sie k√∂nnen auch Teilbetr√§ge Ihres Guthabens versenden). Eine kurze Nachricht an den Empf√§nger. Bitte √ºberpr√ºfen Sie Ihre Angaben noch einmal vor dem Versenden. Sie haben vor dem Versenden jederzeit die M√∂glichkeit Ihre Angaben zu korrigieren.</p>\r\n<p><strong>Mit Gutscheinen einkaufen.</strong></p>\r\n<p>Sobald Sie √ºber ein Guthaben verf√ºgen, k√∂nnen Sie dieses zum Bezahlen Ihrer Bestellung verwenden. W√§hrend des Bestellvorganges haben Sie die M√∂glichkeit Ihr Guthaben einzul√∂sen. Falls das Guthaben unter dem Warenwert liegt m√ºssen Sie Ihre bevorzugte Zahlungsweise f√ºr den Differenzbetrag w√§hlen. √úbersteigt Ihr Guthaben den Warenwert, steht Ihnen das Restguthaben selbstverst√§ndlich f√ºr Ihre n√§chste Bestellung zur Verf√ºgung.</p>\r\n<p><strong>Gutscheine verbuchen. </strong></p>\r\n<p>Wenn Sie einen Gutschein per E-Mail erhalten haben, k√∂nnen Sie den Betrag wie folgt verbuchen:<br />1. Klicken Sie auf den in der E-Mail angegebenen Link. Falls Sie noch nicht √ºber ein pers√∂nliches Kundenkonto verf√ºgen, haben Sie die M√∂glichkeit ein Konto zu er√∂ffnen.<br />2. Nachdem Sie ein Produkt in den Warenkorb gelegt haben, k√∂nnen Sie dort Ihren Gutscheincode eingeben.</p>\r\n<p><strong>Falls es zu Problemen kommen sollte:</strong></p>\r\n<p>Falls es wider Erwarten zu Problemen mit einem Gutschein kommen sollte, kontaktieren Sie uns bitte per E-Mail: you@yourdomain.com. Bitte beschreiben Sie m√∂glichst genau das Problem, wichtige Angaben sind unter anderem: Ihre Kundennummer, der Gutscheincode, Fehlermeldungen des Systems sowie der von Ihnen benutzte Browser (z.B. "Internet Explorer 6" oder "Firefox 1.5").</p>', 0, 1, '', 0, 6, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (21, 0, 0, '', 2, 'Kontakt', 'Kontakt', 'Ihre Kontaktinformationen', 0, 1, 'contact_us.php', 1, 7, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (22, 0, 0, '', 2, 'Sitemap', '', '', 0, 0, 'sitemap.php', 1, 8, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (23, 0, 0, '', 2, 'Widerrufsrecht & Widerrufsformular', 'Widerrufsrecht & Widerrufsformular', '<p><strong>Widerrufsrecht<br /></strong><br />F√ºgen Sie hier das Widerrufsrecht ein.</p><p><strong>Widerrufsformular</strong><br /><br />(Wenn Sie den Vertrag widerrufen wollen, dann f√ºllen Sie bitte dieses Formular aus und senden Sie es zur√ºck.)<br /><br />An<br />Max Mustermann / Muster GmbH<br />Musterstra√üe 11<br />66666 Musterstadt<br />Fax: 000-777777<br />E-Mail:info@muster.de<br /><br />[hier ist der Name, die Anschrift und gegebenenfalls die Telefaxnummer und E-Mail-Adresse des Unternehmers durch den Unternehmer einzuf√ºgen]:<br /><br />Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag √ºber den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*)<br />_______________________________________________<br />_______________________________________________<br /><br />Bestellt am ___________________ (*)/erhalten am _______________________(*)<br /><br />Name des/der Verbraucher(s) ______________________________________<br />Anschrift des/der Verbraucher(s)<br />_________________________________<br />_________________________________<br />_________________________________<br /><br />_________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _____________________________________________________<br />Datum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier)<br /><br />_____________________________________________________________________________________<br />(*) Unzutreffendes streichen</p>', 0, 1, '', 1, 9, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (24, 0, 0, '', 2, 'Lieferzeit', 'Lieferzeit', 'Die Frist f√ºr die Lieferung beginnt bei Zahlung per Vorkasse am Tag nach Erteilung des Zahlungsauftrags an das √ºberweisende Kreditinstitut bzw. bei anderen Zahlungsarten am Tag nach Vertragsschluss zu laufen und endet mit dem Ablauf des letzten Tages der Frist. F√§llt der letzte Tag der Frist auf einen Samstag, Sonntag oder einen am Lieferort staatlich anerkannten allgemeinen Feiertag, so tritt an die Stelle eines solchen Tages der n√§chste Werktag.', 0, 1, '', 1, 10, 0, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (25, 0, 0, '', 2, 'E-Mail Signatur', '', 'Firma<br />Adresse<br />Ort<br />Homepage<br />E-Mail:<br />Fon:<br />Fax:<br />USt-IdNr.:<br />Handelsregister<br />Gesch√§ftsf√ºhrer:', 0, 1, '', 0, 11, 0, '', '', '', '', '0', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (26, 0, 0, '', 2, 'Rechnungsdaten', 'Firma - Adresse - PLZ Stadt', 'Firma<br/>Adresse<br/>PLZ Stadt<br/><br/>Tel: 0123456789<br/>E-Mail: info@shop.de<br/>www: www.shopurl.de<br/><br/>IBAN: DE123456789011<br/>BIC: BYLEMDNE1DE<br/><br/>Diese Daten k√∂nnen im Content Manager ge√§ndert werden.', 0, 1, '', 0, 12, 0, '', '', '', '', '0', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (27, 0, 0, '', 2, 'Mein Schnellkauf', 'Mein Schnellkauf', '<p>Mit &bdquo;Mein Schnellkauf&ldquo; k√∂nnen Sie Ihre Bestellung jetzt noch einfacher und vor allem schneller t√§tigen.</p><p>Sie finden auf der Detailseite eines jeden Artikels unterhalb des Warenkorb-Buttons die Schaltfl√§che &bdquo;<strong>Mein Schnellkauf aktivieren</strong>&ldquo;, wo Sie die f√ºr den Schnellkauf gew√ºnschte Versandart, Bezahlart, Versandadresse und Rechnungsadresse hinterlegen m√ºssen um die Funktion zu aktivieren.<br />Anschlie√üend finden Sie an den folgenden Stellen im Shop den Button zur Bestellung mit &bdquo;<strong>Mein Schnellkauf</strong>&ldquo;:</p><ul><li>Artikel-Detailseite</li><li>Warenkorb</li><li>Mein Konto &raquo; Meine Bestellungen</li><li>Mein Konto &raquo; Meine Bestellungen &raquo; Detailseite der Bestellung</li></ul><p>Um die Voreinstellungen f√ºr &bdquo;Mein Schnellkauf&ldquo; zu √§ndern, gehen Sie auf &bdquo;Mein Konto&ldquo; &raquo; &bdquo;<strong>Mein Schnellkauf bearbeiten</strong>&ldquo;.</p>', 0, 1, '', 0, 13, 1, '', '', '', '', '1', 0, NOW(), NULL);
+INSERT INTO content_manager VALUES (28, 0, 0, '', 2, 'Informationen zur Echtheit der Kundenbewertungen', 'Informationen zur Echtheit der Kundenbewertungen', 'F√ºgen Sie hier Ihre Informationen zur Echtheit der Kundenbewertungen ein.<br /><h2>Textvorschl√§ge [Zutreffendes ausw√§hlen]</h2><br /><h3>Keine √úberpr√ºfung der Echtheit von Kundenbewertungen</h3><br />Die Bewertungen werden vor ihrer Ver√∂ffentlichung nicht auf ihre Echtheit √ºberpr√ºft. Sie k√∂nnen daher auch von Verbrauchern stammen, die die bewerteten Produkte tats√§chlich gar nicht erworben/genutzt haben.<br /><br />--- oder ---<br /><br /><h3>√úberpr√ºfung der Echtheit von Kundenbewertungen</h3><br />Jede Verbraucherbewertung wird vor ihrer Ver√∂ffentlichung auf ihre Echtheit √ºberpr√ºft, sodass sichergestellt ist, dass Bewertungen nur von Verbrauchern stammen, die die bewerteten Produkte auch tats√§chlich erworben/genutzt haben.<br /><br />Die √úberpr√ºfung geschieht [Zutreffendes ausw√§hlen]<br /><ul><li>durch manuelle √úberpr√ºfung in Form eines Abgleichs der Bewertung mit der Bestellhistorie des Warenwirtschaftssystems, um einen vorangegangenen Produkterwerb zur notwendigen Bedingung f√ºr die Ver√∂ffentlichung zu machen.</li><li>durch √úbermittlung individualisierter Links an Verbraucher nach Abschluss einer Online-Bestellung, die zu einem Online-Bewertungsformular f√ºhren und die sicherstellen, dass der Zugang zur Bewertungsfunktion nur solchen Verbrauchern gew√§hrt wird, die ein Produkt auch tats√§chlich erworben haben</li></ul>', 0, 1, '', 0, 14, 1, '', '', '', '', '1', 0, NOW(), NULL);
 
 # countries
-INSERT INTO countries VALUES (1,'Afghanistan','AF','AFG',1,1,0);
-INSERT INTO countries VALUES (2,'Albania','AL','ALB',1,1,0);
-INSERT INTO countries VALUES (3,'Algeria','DZ','DZA',1,1,0);
-INSERT INTO countries VALUES (4,'American Samoa','AS','ASM',1,1,0);
-INSERT INTO countries VALUES (5,'Andorra','AD','AND',1,1,0);
-INSERT INTO countries VALUES (6,'Angola','AO','AGO',1,1,0);
-INSERT INTO countries VALUES (7,'Anguilla','AI','AIA',1,1,0);
-INSERT INTO countries VALUES (8,'Antarctica','AQ','ATA',1,1,0);
-INSERT INTO countries VALUES (9,'Antigua and Barbuda','AG','ATG',1,1,0);
-INSERT INTO countries VALUES (10,'Argentina','AR','ARG',1,1,0);
-INSERT INTO countries VALUES (11,'Armenia','AM','ARM',1,1,0);
-INSERT INTO countries VALUES (12,'Aruba','AW','ABW',1,1,0);
-INSERT INTO countries VALUES (13,'Australia','AU','AUD',1,1,0);
-INSERT INTO countries VALUES (14,'Austria','AT','AUT',5,1,0);
-INSERT INTO countries VALUES (15,'Azerbaijan','AZ','AZE',1,1,0);
-INSERT INTO countries VALUES (16,'Bahamas','BS','BHS',1,1,0);
-INSERT INTO countries VALUES (17,'Bahrain','BH','BHR',1,1,0);
-INSERT INTO countries VALUES (18,'Bangladesh','BD','BGD',1,1,0);
-INSERT INTO countries VALUES (19,'Barbados','BB','BRB',1,1,0);
-INSERT INTO countries VALUES (20,'Belarus','BY','BLR',1,1,0);
-INSERT INTO countries VALUES (21,'Belgium','BE','BEL',1,1,0);
-INSERT INTO countries VALUES (22,'Belize','BZ','BLZ',1,1,0);
-INSERT INTO countries VALUES (23,'Benin','BJ','BEN',1,1,0);
-INSERT INTO countries VALUES (24,'Bermuda','BM','BMU',1,1,0);
-INSERT INTO countries VALUES (25,'Bhutan','BT','BTN',1,1,0);
-INSERT INTO countries VALUES (26,'Bolivia','BO','BOL',1,1,0);
-INSERT INTO countries VALUES (27,'Bosnia and Herzegowina','BA','BIH',1,1,0);
-INSERT INTO countries VALUES (28,'Botswana','BW','BWA',1,1,0);
-INSERT INTO countries VALUES (29,'Bouvet Island','BV','BVT',1,1,0);
-INSERT INTO countries VALUES (30,'Brazil','BR','BRA',1,1,0);
-INSERT INTO countries VALUES (31,'British Indian Ocean Territory','IO','IOT',1,1,0);
-INSERT INTO countries VALUES (32,'Brunei Darussalam','BN','BRN',1,1,0);
-INSERT INTO countries VALUES (33,'Bulgaria','BG','BGR',1,1,0);
-INSERT INTO countries VALUES (34,'Burkina Faso','BF','BFA',1,1,0);
-INSERT INTO countries VALUES (35,'Burundi','BI','BDI',1,1,0);
-INSERT INTO countries VALUES (36,'Cambodia','KH','KHM',1,1,0);
-INSERT INTO countries VALUES (37,'Cameroon','CM','CMR',1,1,0);
-INSERT INTO countries VALUES (38,'Canada','CA','CAN',1,1,0);
-INSERT INTO countries VALUES (39,'Cape Verde','CV','CPV',1,1,0);
-INSERT INTO countries VALUES (40,'Cayman Islands','KY','CYM',1,1,0);
-INSERT INTO countries VALUES (41,'Central African Republic','CF','CAF',1,1,0);
-INSERT INTO countries VALUES (42,'Chad','TD','TCD',1,1,0);
-INSERT INTO countries VALUES (43,'Chile','CL','CHL',1,1,0);
-INSERT INTO countries VALUES (44,'China','CN','CHN',7,1,0);
-INSERT INTO countries VALUES (45,'Christmas Island','CX','CXR',1,1,0);
-INSERT INTO countries VALUES (46,'Cocos (Keeling) Islands','CC','CCK',1,1,0);
-INSERT INTO countries VALUES (47,'Colombia','CO','COL',1,1,0);
-INSERT INTO countries VALUES (48,'Comoros','KM','COM',1,1,0);
-INSERT INTO countries VALUES (49,'Congo','CG','COG',1,1,0);
-INSERT INTO countries VALUES (50,'Cook Islands','CK','COK',1,1,0);
-INSERT INTO countries VALUES (51,'Costa Rica','CR','CRI',1,1,0);
-INSERT INTO countries VALUES (52,'Cote D\'Ivoire','CI','CIV',1,1,0);
-INSERT INTO countries VALUES (53,'Croatia','HR','HRV',1,1,0);
-INSERT INTO countries VALUES (54,'Cuba','CU','CUB',1,1,0);
-INSERT INTO countries VALUES (55,'Cyprus','CY','CYP',1,1,0);
-INSERT INTO countries VALUES (56,'Czech Republic','CZ','CZE',1,1,0);
-INSERT INTO countries VALUES (57,'Denmark','DK','DNK',1,1,0);
-INSERT INTO countries VALUES (58,'Djibouti','DJ','DJI',1,1,0);
-INSERT INTO countries VALUES (59,'Dominica','DM','DMA',1,1,0);
-INSERT INTO countries VALUES (60,'Dominican Republic','DO','DOM',1,1,0);
-INSERT INTO countries VALUES (61,'East Timor','TP','TMP',1,1,0);
-INSERT INTO countries VALUES (62,'Ecuador','EC','ECU',1,1,0);
-INSERT INTO countries VALUES (63,'Egypt','EG','EGY',1,1,0);
-INSERT INTO countries VALUES (64,'El Salvador','SV','SLV',1,1,0);
-INSERT INTO countries VALUES (65,'Equatorial Guinea','GQ','GNQ',1,1,0);
-INSERT INTO countries VALUES (66,'Eritrea','ER','ERI',1,1,0);
-INSERT INTO countries VALUES (67,'Estonia','EE','EST',1,1,0);
-INSERT INTO countries VALUES (68,'Ethiopia','ET','ETH',1,1,0);
-INSERT INTO countries VALUES (69,'Falkland Islands (Malvinas)','FK','FLK',1,1,0);
-INSERT INTO countries VALUES (70,'Faroe Islands','FO','FRO',1,1,0);
-INSERT INTO countries VALUES (71,'Fiji','FJ','FJI',1,1,0);
-INSERT INTO countries VALUES (72,'Finland','FI','FIN',1,1,0);
-INSERT INTO countries VALUES (73,'France','FR','FRA',1,1,0);
-#INSERT INTO countries VALUES (74,'France, Metropolitan','FX','FXX',1,1,0);
-INSERT INTO countries VALUES (75,'French Guiana','GF','GUF',1,1,0);
-INSERT INTO countries VALUES (76,'French Polynesia','PF','PYF',1,1,0);
-INSERT INTO countries VALUES (77,'French Southern Territories','TF','ATF',1,1,0);
-INSERT INTO countries VALUES (78,'Gabon','GA','GAB',1,1,0);
-INSERT INTO countries VALUES (79,'Gambia','GM','GMB',1,1,0);
-INSERT INTO countries VALUES (80,'Georgia','GE','GEO',1,1,0);
-INSERT INTO countries VALUES (81,'Germany','DE','DEU',5,1,0);
-INSERT INTO countries VALUES (82,'Ghana','GH','GHA',1,1,0);
-INSERT INTO countries VALUES (83,'Gibraltar','GI','GIB',1,1,0);
-INSERT INTO countries VALUES (84,'Greece','GR','GRC',1,1,0);
-INSERT INTO countries VALUES (85,'Greenland','GL','GRL',1,1,0);
-INSERT INTO countries VALUES (86,'Grenada','GD','GRD',1,1,0);
-INSERT INTO countries VALUES (87,'Guadeloupe','GP','GLP',1,1,0);
-INSERT INTO countries VALUES (88,'Guam','GU','GUM',1,1,0);
-INSERT INTO countries VALUES (89,'Guatemala','GT','GTM',1,1,0);
-INSERT INTO countries VALUES (90,'Guinea','GN','GIN',1,1,0);
-INSERT INTO countries VALUES (91,'Guinea-bissau','GW','GNB',1,1,0);
-INSERT INTO countries VALUES (92,'Guyana','GY','GUY',1,1,0);
-INSERT INTO countries VALUES (93,'Haiti','HT','HTI',1,1,0);
-INSERT INTO countries VALUES (94,'Heard and Mc Donald Islands','HM','HMD',1,1,0);
-INSERT INTO countries VALUES (95,'Honduras','HN','HND',1,1,0);
-INSERT INTO countries VALUES (96,'Hong Kong','HK','HKG',1,1,0);
-INSERT INTO countries VALUES (97,'Hungary','HU','HUN',1,1,0);
-INSERT INTO countries VALUES (98,'Iceland','IS','ISL',1,1,0);
-INSERT INTO countries VALUES (99,'India','IN','IND',1,1,0);
-INSERT INTO countries VALUES (100,'Indonesia','ID','IDN',1,1,0);
-INSERT INTO countries VALUES (101,'Iran (Islamic Republic of)','IR','IRN',1,1,0);
-INSERT INTO countries VALUES (102,'Iraq','IQ','IRQ',1,1,0);
-INSERT INTO countries VALUES (103,'Ireland','IE','IRL',6,1,0);
-INSERT INTO countries VALUES (104,'Israel','IL','ISR',1,1,0);
-INSERT INTO countries VALUES (105,'Italy','IT','ITA',1,1,0);
-INSERT INTO countries VALUES (106,'Jamaica','JM','JAM',1,1,0);
-INSERT INTO countries VALUES (107,'Japan','JP','JPN',1,1,0);
-INSERT INTO countries VALUES (108,'Jordan','JO','JOR',1,1,0);
-INSERT INTO countries VALUES (109,'Kazakhstan','KZ','KAZ',1,1,0);
-INSERT INTO countries VALUES (110,'Kenya','KE','KEN',1,1,0);
-INSERT INTO countries VALUES (111,'Kiribati','KI','KIR',1,1,0);
-INSERT INTO countries VALUES (112,'Korea, Democratic People\'s Republic of','KP','PRK',1,1,0);
-INSERT INTO countries VALUES (113,'Korea, Republic of','KR','KOR',1,1,0);
-INSERT INTO countries VALUES (114,'Kuwait','KW','KWT',1,1,0);
-INSERT INTO countries VALUES (115,'Kyrgyzstan','KG','KGZ',1,1,0);
-INSERT INTO countries VALUES (116,'Lao People\'s Democratic Republic','LA','LAO',1,1,0);
-INSERT INTO countries VALUES (117,'Latvia','LV','LVA',1,1,0);
-INSERT INTO countries VALUES (118,'Lebanon','LB','LBN',1,1,0);
-INSERT INTO countries VALUES (119,'Lesotho','LS','LSO',1,1,0);
-INSERT INTO countries VALUES (120,'Liberia','LR','LBR',1,1,0);
-INSERT INTO countries VALUES (121,'Libyan Arab Jamahiriya','LY','LBY',1,1,0);
-INSERT INTO countries VALUES (122,'Liechtenstein','LI','LIE',1,1,0);
-INSERT INTO countries VALUES (123,'Lithuania','LT','LTU',1,1,0);
-INSERT INTO countries VALUES (124,'Luxembourg','LU','LUX',5,1,0);
-INSERT INTO countries VALUES (125,'Macau','MO','MAC',1,1,0);
-INSERT INTO countries VALUES (126,'Macedonia, The Former Yugoslav Republic of','MK','MKD',1,1,0);
-INSERT INTO countries VALUES (127,'Madagascar','MG','MDG',1,1,0);
-INSERT INTO countries VALUES (128,'Malawi','MW','MWI',1,1,0);
-INSERT INTO countries VALUES (129,'Malaysia','MY','MYS',1,1,0);
-INSERT INTO countries VALUES (130,'Maldives','MV','MDV',1,1,0);
-INSERT INTO countries VALUES (131,'Mali','ML','MLI',1,1,0);
-INSERT INTO countries VALUES (132,'Malta','MT','MLT',1,1,0);
-INSERT INTO countries VALUES (133,'Marshall Islands','MH','MHL',1,1,0);
-INSERT INTO countries VALUES (134,'Martinique','MQ','MTQ',1,1,0);
-INSERT INTO countries VALUES (135,'Mauritania','MR','MRT',1,1,0);
-INSERT INTO countries VALUES (136,'Mauritius','MU','MUS',1,1,0);
-INSERT INTO countries VALUES (137,'Mayotte','YT','MYT',1,1,0);
-INSERT INTO countries VALUES (138,'Mexico','MX','MEX',1,1,0);
-INSERT INTO countries VALUES (139,'Micronesia, Federated States of','FM','FSM',1,1,0);
-INSERT INTO countries VALUES (140,'Moldova, Republic of','MD','MDA',1,1,0);
-INSERT INTO countries VALUES (141,'Monaco','MC','MCO',1,1,0);
-INSERT INTO countries VALUES (142,'Mongolia','MN','MNG',1,1,0);
-INSERT INTO countries VALUES (143,'Montserrat','MS','MSR',1,1,0);
-INSERT INTO countries VALUES (144,'Morocco','MA','MAR',1,1,0);
-INSERT INTO countries VALUES (145,'Mozambique','MZ','MOZ',1,1,0);
-INSERT INTO countries VALUES (146,'Myanmar','MM','MMR',1,1,0);
-INSERT INTO countries VALUES (147,'Namibia','NA','NAM',1,1,0);
-INSERT INTO countries VALUES (148,'Nauru','NR','NRU',1,1,0);
-INSERT INTO countries VALUES (149,'Nepal','NP','NPL',1,1,0);
-INSERT INTO countries VALUES (150,'Netherlands','NL','NLD',5,1,0);
-INSERT INTO countries VALUES (151,'Netherlands Antilles','AN','ANT',1,1,0);
-INSERT INTO countries VALUES (152,'New Caledonia','NC','NCL',1,1,0);
-INSERT INTO countries VALUES (153,'New Zealand','NZ','NZL',1,1,0);
-INSERT INTO countries VALUES (154,'Nicaragua','NI','NIC',1,1,0);
-INSERT INTO countries VALUES (155,'Niger','NE','NER',1,1,0);
-INSERT INTO countries VALUES (156,'Nigeria','NG','NGA',1,1,0);
-INSERT INTO countries VALUES (157,'Niue','NU','NIU',1,1,0);
-INSERT INTO countries VALUES (158,'Norfolk Island','NF','NFK',1,1,0);
-INSERT INTO countries VALUES (159,'Northern Mariana Islands','MP','MNP',1,1,0);
-INSERT INTO countries VALUES (160,'Norway','NO','NOR',1,1,0);
-INSERT INTO countries VALUES (161,'Oman','OM','OMN',1,1,0);
-INSERT INTO countries VALUES (162,'Pakistan','PK','PAK',1,1,0);
-INSERT INTO countries VALUES (163,'Palau','PW','PLW',1,1,0);
-INSERT INTO countries VALUES (164,'Panama','PA','PAN',1,1,0);
-INSERT INTO countries VALUES (165,'Papua New Guinea','PG','PNG',1,1,0);
-INSERT INTO countries VALUES (166,'Paraguay','PY','PRY',1,1,0);
-INSERT INTO countries VALUES (167,'Peru','PE','PER',1,1,0);
-INSERT INTO countries VALUES (168,'Philippines','PH','PHL',1,1,0);
-INSERT INTO countries VALUES (169,'Pitcairn','PN','PCN',1,1,0);
-INSERT INTO countries VALUES (170,'Poland','PL','POL',1,1,0);
-INSERT INTO countries VALUES (171,'Portugal','PT','PRT',1,1,0);
-INSERT INTO countries VALUES (172,'Puerto Rico','PR','PRI',1,1,0);
-INSERT INTO countries VALUES (173,'Qatar','QA','QAT',1,1,0);
-INSERT INTO countries VALUES (174,'Reunion','RE','REU',1,1,0);
-INSERT INTO countries VALUES (175,'Romania','RO','ROM',1,1,0);
-INSERT INTO countries VALUES (176,'Russian Federation','RU','RUS',1,1,0);
-INSERT INTO countries VALUES (177,'Rwanda','RW','RWA',1,1,0);
-INSERT INTO countries VALUES (178,'Saint Kitts and Nevis','KN','KNA',1,1,0);
-INSERT INTO countries VALUES (179,'Saint Lucia','LC','LCA',1,1,0);
-INSERT INTO countries VALUES (180,'Saint Vincent and the Grenadines','VC','VCT',1,1,0);
-INSERT INTO countries VALUES (181,'Samoa','WS','WSM',1,1,0);
-INSERT INTO countries VALUES (182,'San Marino','SM','SMR',1,1,0);
-INSERT INTO countries VALUES (183,'Sao Tome and Principe','ST','STP',1,1,0);
-INSERT INTO countries VALUES (184,'Saudi Arabia','SA','SAU',1,1,0);
-INSERT INTO countries VALUES (185,'Senegal','SN','SEN',1,1,0);
-INSERT INTO countries VALUES (186,'Seychelles','SC','SYC',1,1,0);
-INSERT INTO countries VALUES (187,'Sierra Leone','SL','SLE',1,1,0);
-INSERT INTO countries VALUES (188,'Singapore','SG','SGP', '4','1',0);
-INSERT INTO countries VALUES (189,'Slovakia (Slovak Republic)','SK','SVK',1,1,0);
-INSERT INTO countries VALUES (190,'Slovenia','SI','SVN',1,1,0);
-INSERT INTO countries VALUES (191,'Solomon Islands','SB','SLB',1,1,0);
-INSERT INTO countries VALUES (192,'Somalia','SO','SOM',1,1,0);
-INSERT INTO countries VALUES (193,'South Africa','ZA','ZAF',1,1,0);
-INSERT INTO countries VALUES (194,'South Georgia and the South Sandwich Islands','GS','SGS',1,1,0);
-INSERT INTO countries VALUES (195,'Spain','ES','ESP','3','1',0);
-INSERT INTO countries VALUES (196,'Sri Lanka','LK','LKA',1,1,0);
-INSERT INTO countries VALUES (197,'St. Helena','SH','SHN',1,1,0);
-INSERT INTO countries VALUES (198,'St. Pierre and Miquelon','PM','SPM',1,1,0);
-INSERT INTO countries VALUES (199,'Sudan','SD','SDN',1,1,0);
-INSERT INTO countries VALUES (200,'Suriname','SR','SUR',1,1,0);
-INSERT INTO countries VALUES (201,'Svalbard and Jan Mayen Islands','SJ','SJM',1,1,0);
-INSERT INTO countries VALUES (202,'Swaziland','SZ','SWZ',1,1,0);
-INSERT INTO countries VALUES (203,'Sweden','SE','SWE',1,1,0);
-INSERT INTO countries VALUES (204,'Switzerland','CH','CHE',5,1,0);
-INSERT INTO countries VALUES (205,'Syrian Arab Republic','SY','SYR',1,1,0);
-INSERT INTO countries VALUES (206,'Taiwan','TW','TWN',6,1,0);
-INSERT INTO countries VALUES (207,'Tajikistan','TJ','TJK',1,1,0);
-INSERT INTO countries VALUES (208,'Tanzania, United Republic of','TZ','TZA',1,1,0);
-INSERT INTO countries VALUES (209,'Thailand','TH','THA',1,1,0);
-INSERT INTO countries VALUES (210,'Togo','TG','TGO',1,1,0);
-INSERT INTO countries VALUES (211,'Tokelau','TK','TKL',1,1,0);
-INSERT INTO countries VALUES (212,'Tonga','TO','TON',1,1,0);
-INSERT INTO countries VALUES (213,'Trinidad and Tobago','TT','TTO',1,1,0);
-INSERT INTO countries VALUES (214,'Tunisia','TN','TUN',1,1,0);
-INSERT INTO countries VALUES (215,'Turkey','TR','TUR',1,1,0);
-INSERT INTO countries VALUES (216,'Turkmenistan','TM','TKM',1,1,0);
-INSERT INTO countries VALUES (217,'Turks and Caicos Islands','TC','TCA',1,1,0);
-INSERT INTO countries VALUES (218,'Tuvalu','TV','TUV',1,1,0);
-INSERT INTO countries VALUES (219,'Uganda','UG','UGA',1,1,0);
-INSERT INTO countries VALUES (220,'Ukraine','UA','UKR',1,1,0);
-INSERT INTO countries VALUES (221,'United Arab Emirates','AE','ARE',1,1,0);
-INSERT INTO countries VALUES (222,'United Kingdom','GB','GBR',8,1,0);
-INSERT INTO countries VALUES (223,'United States','US','USA', '2','1',0);
-INSERT INTO countries VALUES (224,'United States Minor Outlying Islands','UM','UMI',1,1,0);
-INSERT INTO countries VALUES (225,'Uruguay','UY','URY',1,1,0);
-INSERT INTO countries VALUES (226,'Uzbekistan','UZ','UZB',1,1,0);
-INSERT INTO countries VALUES (227,'Vanuatu','VU','VUT',1,1,0);
-INSERT INTO countries VALUES (228,'Vatican City State (Holy See)','VA','VAT',1,1,0);
-INSERT INTO countries VALUES (229,'Venezuela','VE','VEN',1,1,0);
-INSERT INTO countries VALUES (230,'Viet Nam','VN','VNM',1,1,0);
-INSERT INTO countries VALUES (231,'Virgin Islands (British)','VG','VGB',1,1,0);
-INSERT INTO countries VALUES (232,'Virgin Islands (U.S.)','VI','VIR',1,1,0);
-INSERT INTO countries VALUES (233,'Wallis and Futuna Islands','WF','WLF',1,1,0);
-INSERT INTO countries VALUES (234,'Western Sahara','EH','ESH',1,1,0);
-INSERT INTO countries VALUES (235,'Yemen','YE','YEM',1,1,0);
-#INSERT INTO countries VALUES (236,'Yugoslavia','YU','YUG',1,1,0);
-INSERT INTO countries VALUES (237,'Zaire','ZR','ZAR',1,1,0);
-INSERT INTO countries VALUES (238,'Zambia','ZM','ZMB',1,1,0);
-INSERT INTO countries VALUES (239,'Zimbabwe','ZW','ZWE',1,1,0);
-INSERT INTO countries VALUES (240,'Serbia','RS','SRB',1,1,0);
-INSERT INTO countries VALUES (241,'Montenegro','ME','MNE',1,1,0);
-INSERT INTO countries VALUES (242,'Kosovo','CS','SCG',1,1,0);
+INSERT INTO countries VALUES (1,'Afghanistan','AF','AFG',1,1,0, 100);
+INSERT INTO countries VALUES (2,'Albania','AL','ALB',1,1,0, 100);
+INSERT INTO countries VALUES (3,'Algeria','DZ','DZA',1,1,0, 100);
+INSERT INTO countries VALUES (4,'American Samoa','AS','ASM',1,1,0, 100);
+INSERT INTO countries VALUES (5,'Andorra','AD','AND',1,1,0, 100);
+INSERT INTO countries VALUES (6,'Angola','AO','AGO',1,1,0, 100);
+INSERT INTO countries VALUES (7,'Anguilla','AI','AIA',1,1,0, 100);
+INSERT INTO countries VALUES (8,'Antarctica','AQ','ATA',1,1,0, 100);
+INSERT INTO countries VALUES (9,'Antigua and Barbuda','AG','ATG',1,1,0, 100);
+INSERT INTO countries VALUES (10,'Argentina','AR','ARG',1,1,0, 100);
+INSERT INTO countries VALUES (11,'Armenia','AM','ARM',1,1,0, 100);
+INSERT INTO countries VALUES (12,'Aruba','AW','ABW',1,1,0, 100);
+INSERT INTO countries VALUES (13,'Australia','AU','AUD',1,1,0, 100);
+INSERT INTO countries VALUES (14,'Austria','AT','AUT',5,1,0, 100);
+INSERT INTO countries VALUES (15,'Azerbaijan','AZ','AZE',1,1,0, 100);
+INSERT INTO countries VALUES (16,'Bahamas','BS','BHS',1,1,0, 100);
+INSERT INTO countries VALUES (17,'Bahrain','BH','BHR',1,1,0, 100);
+INSERT INTO countries VALUES (18,'Bangladesh','BD','BGD',1,1,0, 100);
+INSERT INTO countries VALUES (19,'Barbados','BB','BRB',1,1,0, 100);
+INSERT INTO countries VALUES (20,'Belarus','BY','BLR',1,1,0, 100);
+INSERT INTO countries VALUES (21,'Belgium','BE','BEL',1,1,0, 100);
+INSERT INTO countries VALUES (22,'Belize','BZ','BLZ',1,1,0, 100);
+INSERT INTO countries VALUES (23,'Benin','BJ','BEN',1,1,0, 100);
+INSERT INTO countries VALUES (24,'Bermuda','BM','BMU',1,1,0, 100);
+INSERT INTO countries VALUES (25,'Bhutan','BT','BTN',1,1,0, 100);
+INSERT INTO countries VALUES (26,'Bolivia','BO','BOL',1,1,0, 100);
+INSERT INTO countries VALUES (27,'Bosnia and Herzegowina','BA','BIH',1,1,0, 100);
+INSERT INTO countries VALUES (28,'Botswana','BW','BWA',1,1,0, 100);
+INSERT INTO countries VALUES (29,'Bouvet Island','BV','BVT',1,1,0, 100);
+INSERT INTO countries VALUES (30,'Brazil','BR','BRA',1,1,0, 100);
+INSERT INTO countries VALUES (31,'British Indian Ocean Territory','IO','IOT',1,1,0, 100);
+INSERT INTO countries VALUES (32,'Brunei Darussalam','BN','BRN',1,1,0, 100);
+INSERT INTO countries VALUES (33,'Bulgaria','BG','BGR',1,1,0, 100);
+INSERT INTO countries VALUES (34,'Burkina Faso','BF','BFA',1,1,0, 100);
+INSERT INTO countries VALUES (35,'Burundi','BI','BDI',1,1,0, 100);
+INSERT INTO countries VALUES (36,'Cambodia','KH','KHM',1,1,0, 100);
+INSERT INTO countries VALUES (37,'Cameroon','CM','CMR',1,1,0, 100);
+INSERT INTO countries VALUES (38,'Canada','CA','CAN',1,1,0, 100);
+INSERT INTO countries VALUES (39,'Cape Verde','CV','CPV',1,1,0, 100);
+INSERT INTO countries VALUES (40,'Cayman Islands','KY','CYM',1,1,0, 100);
+INSERT INTO countries VALUES (41,'Central African Republic','CF','CAF',1,1,0, 100);
+INSERT INTO countries VALUES (42,'Chad','TD','TCD',1,1,0, 100);
+INSERT INTO countries VALUES (43,'Chile','CL','CHL',1,1,0, 100);
+INSERT INTO countries VALUES (44,'China','CN','CHN',7,1,0, 100);
+INSERT INTO countries VALUES (45,'Christmas Island','CX','CXR',1,1,0, 100);
+INSERT INTO countries VALUES (46,'Cocos (Keeling) Islands','CC','CCK',1,1,0, 100);
+INSERT INTO countries VALUES (47,'Colombia','CO','COL',1,1,0, 100);
+INSERT INTO countries VALUES (48,'Comoros','KM','COM',1,1,0, 100);
+INSERT INTO countries VALUES (49,'Congo','CG','COG',1,1,0, 100);
+INSERT INTO countries VALUES (50,'Cook Islands','CK','COK',1,1,0, 100);
+INSERT INTO countries VALUES (51,'Costa Rica','CR','CRI',1,1,0, 100);
+INSERT INTO countries VALUES (52,'Cote D\'Ivoire','CI','CIV',1,1,0, 100);
+INSERT INTO countries VALUES (53,'Croatia','HR','HRV',1,1,0, 100);
+INSERT INTO countries VALUES (54,'Cuba','CU','CUB',1,1,0, 100);
+INSERT INTO countries VALUES (55,'Cyprus','CY','CYP',1,1,0, 100);
+INSERT INTO countries VALUES (56,'Czech Republic','CZ','CZE',1,1,0, 100);
+INSERT INTO countries VALUES (57,'Denmark','DK','DNK',1,1,0, 100);
+INSERT INTO countries VALUES (58,'Djibouti','DJ','DJI',1,1,0, 100);
+INSERT INTO countries VALUES (59,'Dominica','DM','DMA',1,1,0, 100);
+INSERT INTO countries VALUES (60,'Dominican Republic','DO','DOM',1,1,0, 100);
+INSERT INTO countries VALUES (61,'East Timor','TP','TMP',1,1,0, 100);
+INSERT INTO countries VALUES (62,'Ecuador','EC','ECU',1,1,0, 100);
+INSERT INTO countries VALUES (63,'Egypt','EG','EGY',1,1,0, 100);
+INSERT INTO countries VALUES (64,'El Salvador','SV','SLV',1,1,0, 100);
+INSERT INTO countries VALUES (65,'Equatorial Guinea','GQ','GNQ',1,1,0, 100);
+INSERT INTO countries VALUES (66,'Eritrea','ER','ERI',1,1,0, 100);
+INSERT INTO countries VALUES (67,'Estonia','EE','EST',1,1,0, 100);
+INSERT INTO countries VALUES (68,'Ethiopia','ET','ETH',1,1,0, 100);
+INSERT INTO countries VALUES (69,'Falkland Islands (Malvinas)','FK','FLK',1,1,0, 100);
+INSERT INTO countries VALUES (70,'Faroe Islands','FO','FRO',1,1,0, 100);
+INSERT INTO countries VALUES (71,'Fiji','FJ','FJI',1,1,0, 100);
+INSERT INTO countries VALUES (72,'Finland','FI','FIN',1,1,0, 100);
+INSERT INTO countries VALUES (73,'France','FR','FRA',1,1,0, 100);
+#INSERT INTO countries VALUES (74,'France, Metropolitan','FX','FXX',1,1,0, 100);
+INSERT INTO countries VALUES (75,'French Guiana','GF','GUF',1,1,0, 100);
+INSERT INTO countries VALUES (76,'French Polynesia','PF','PYF',1,1,0, 100);
+INSERT INTO countries VALUES (77,'French Southern Territories','TF','ATF',1,1,0, 100);
+INSERT INTO countries VALUES (78,'Gabon','GA','GAB',1,1,0, 100);
+INSERT INTO countries VALUES (79,'Gambia','GM','GMB',1,1,0, 100);
+INSERT INTO countries VALUES (80,'Georgia','GE','GEO',1,1,0, 100);
+INSERT INTO countries VALUES (81,'Germany','DE','DEU',5,1,0, 100);
+INSERT INTO countries VALUES (82,'Ghana','GH','GHA',1,1,0, 100);
+INSERT INTO countries VALUES (83,'Gibraltar','GI','GIB',1,1,0, 100);
+INSERT INTO countries VALUES (84,'Greece','GR','GRC',1,1,0, 100);
+INSERT INTO countries VALUES (85,'Greenland','GL','GRL',1,1,0, 100);
+INSERT INTO countries VALUES (86,'Grenada','GD','GRD',1,1,0, 100);
+INSERT INTO countries VALUES (87,'Guadeloupe','GP','GLP',1,1,0, 100);
+INSERT INTO countries VALUES (88,'Guam','GU','GUM',1,1,0, 100);
+INSERT INTO countries VALUES (89,'Guatemala','GT','GTM',1,1,0, 100);
+INSERT INTO countries VALUES (90,'Guinea','GN','GIN',1,1,0, 100);
+INSERT INTO countries VALUES (91,'Guinea-bissau','GW','GNB',1,1,0, 100);
+INSERT INTO countries VALUES (92,'Guyana','GY','GUY',1,1,0, 100);
+INSERT INTO countries VALUES (93,'Haiti','HT','HTI',1,1,0, 100);
+INSERT INTO countries VALUES (94,'Heard and Mc Donald Islands','HM','HMD',1,1,0, 100);
+INSERT INTO countries VALUES (95,'Honduras','HN','HND',1,1,0, 100);
+INSERT INTO countries VALUES (96,'Hong Kong','HK','HKG',1,1,0, 100);
+INSERT INTO countries VALUES (97,'Hungary','HU','HUN',1,1,0, 100);
+INSERT INTO countries VALUES (98,'Iceland','IS','ISL',1,1,0, 100);
+INSERT INTO countries VALUES (99,'India','IN','IND',1,1,0, 100);
+INSERT INTO countries VALUES (100,'Indonesia','ID','IDN',1,1,0, 100);
+INSERT INTO countries VALUES (101,'Iran (Islamic Republic of)','IR','IRN',1,1,0, 100);
+INSERT INTO countries VALUES (102,'Iraq','IQ','IRQ',1,1,0, 100);
+INSERT INTO countries VALUES (103,'Ireland','IE','IRL',6,1,0, 100);
+INSERT INTO countries VALUES (104,'Israel','IL','ISR',1,1,0, 100);
+INSERT INTO countries VALUES (105,'Italy','IT','ITA',1,1,0, 100);
+INSERT INTO countries VALUES (106,'Jamaica','JM','JAM',1,1,0, 100);
+INSERT INTO countries VALUES (107,'Japan','JP','JPN',1,1,0, 100);
+INSERT INTO countries VALUES (108,'Jordan','JO','JOR',1,1,0, 100);
+INSERT INTO countries VALUES (109,'Kazakhstan','KZ','KAZ',1,1,0, 100);
+INSERT INTO countries VALUES (110,'Kenya','KE','KEN',1,1,0, 100);
+INSERT INTO countries VALUES (111,'Kiribati','KI','KIR',1,1,0, 100);
+INSERT INTO countries VALUES (112,'Korea, Democratic People\'s Republic of','KP','PRK',1,1,0, 100);
+INSERT INTO countries VALUES (113,'Korea, Republic of','KR','KOR',1,1,0, 100);
+INSERT INTO countries VALUES (114,'Kuwait','KW','KWT',1,1,0, 100);
+INSERT INTO countries VALUES (115,'Kyrgyzstan','KG','KGZ',1,1,0, 100);
+INSERT INTO countries VALUES (116,'Lao People\'s Democratic Republic','LA','LAO',1,1,0, 100);
+INSERT INTO countries VALUES (117,'Latvia','LV','LVA',1,1,0, 100);
+INSERT INTO countries VALUES (118,'Lebanon','LB','LBN',1,1,0, 100);
+INSERT INTO countries VALUES (119,'Lesotho','LS','LSO',1,1,0, 100);
+INSERT INTO countries VALUES (120,'Liberia','LR','LBR',1,1,0, 100);
+INSERT INTO countries VALUES (121,'Libyan Arab Jamahiriya','LY','LBY',1,1,0, 100);
+INSERT INTO countries VALUES (122,'Liechtenstein','LI','LIE',1,1,0, 100);
+INSERT INTO countries VALUES (123,'Lithuania','LT','LTU',1,1,0, 100);
+INSERT INTO countries VALUES (124,'Luxembourg','LU','LUX',5,1,0, 100);
+INSERT INTO countries VALUES (125,'Macau','MO','MAC',1,1,0, 100);
+INSERT INTO countries VALUES (126,'North Macedonia','MK','MKD',1,1,0, 100);
+INSERT INTO countries VALUES (127,'Madagascar','MG','MDG',1,1,0, 100);
+INSERT INTO countries VALUES (128,'Malawi','MW','MWI',1,1,0, 100);
+INSERT INTO countries VALUES (129,'Malaysia','MY','MYS',1,1,0, 100);
+INSERT INTO countries VALUES (130,'Maldives','MV','MDV',1,1,0, 100);
+INSERT INTO countries VALUES (131,'Mali','ML','MLI',1,1,0, 100);
+INSERT INTO countries VALUES (132,'Malta','MT','MLT',1,1,0, 100);
+INSERT INTO countries VALUES (133,'Marshall Islands','MH','MHL',1,1,0, 100);
+INSERT INTO countries VALUES (134,'Martinique','MQ','MTQ',1,1,0, 100);
+INSERT INTO countries VALUES (135,'Mauritania','MR','MRT',1,1,0, 100);
+INSERT INTO countries VALUES (136,'Mauritius','MU','MUS',1,1,0, 100);
+INSERT INTO countries VALUES (137,'Mayotte','YT','MYT',1,1,0, 100);
+INSERT INTO countries VALUES (138,'Mexico','MX','MEX',1,1,0, 100);
+INSERT INTO countries VALUES (139,'Micronesia, Federated States of','FM','FSM',1,1,0, 100);
+INSERT INTO countries VALUES (140,'Moldova, Republic of','MD','MDA',1,1,0, 100);
+INSERT INTO countries VALUES (141,'Monaco','MC','MCO',1,1,0, 100);
+INSERT INTO countries VALUES (142,'Mongolia','MN','MNG',1,1,0, 100);
+INSERT INTO countries VALUES (143,'Montserrat','MS','MSR',1,1,0, 100);
+INSERT INTO countries VALUES (144,'Morocco','MA','MAR',1,1,0, 100);
+INSERT INTO countries VALUES (145,'Mozambique','MZ','MOZ',1,1,0, 100);
+INSERT INTO countries VALUES (146,'Myanmar','MM','MMR',1,1,0, 100);
+INSERT INTO countries VALUES (147,'Namibia','NA','NAM',1,1,0, 100);
+INSERT INTO countries VALUES (148,'Nauru','NR','NRU',1,1,0, 100);
+INSERT INTO countries VALUES (149,'Nepal','NP','NPL',1,1,0, 100);
+INSERT INTO countries VALUES (150,'Netherlands','NL','NLD',5,1,0, 100);
+INSERT INTO countries VALUES (151,'Netherlands Antilles','AN','ANT',1,1,0, 100);
+INSERT INTO countries VALUES (152,'New Caledonia','NC','NCL',1,1,0, 100);
+INSERT INTO countries VALUES (153,'New Zealand','NZ','NZL',1,1,0, 100);
+INSERT INTO countries VALUES (154,'Nicaragua','NI','NIC',1,1,0, 100);
+INSERT INTO countries VALUES (155,'Niger','NE','NER',1,1,0, 100);
+INSERT INTO countries VALUES (156,'Nigeria','NG','NGA',1,1,0, 100);
+INSERT INTO countries VALUES (157,'Niue','NU','NIU',1,1,0, 100);
+INSERT INTO countries VALUES (158,'Norfolk Island','NF','NFK',1,1,0, 100);
+INSERT INTO countries VALUES (159,'Northern Mariana Islands','MP','MNP',1,1,0, 100);
+INSERT INTO countries VALUES (160,'Norway','NO','NOR',1,1,0, 100);
+INSERT INTO countries VALUES (161,'Oman','OM','OMN',1,1,0, 100);
+INSERT INTO countries VALUES (162,'Pakistan','PK','PAK',1,1,0, 100);
+INSERT INTO countries VALUES (163,'Palau','PW','PLW',1,1,0, 100);
+INSERT INTO countries VALUES (164,'Panama','PA','PAN',1,1,0, 100);
+INSERT INTO countries VALUES (165,'Papua New Guinea','PG','PNG',1,1,0, 100);
+INSERT INTO countries VALUES (166,'Paraguay','PY','PRY',1,1,0, 100);
+INSERT INTO countries VALUES (167,'Peru','PE','PER',1,1,0, 100);
+INSERT INTO countries VALUES (168,'Philippines','PH','PHL',1,1,0, 100);
+INSERT INTO countries VALUES (169,'Pitcairn','PN','PCN',1,1,0, 100);
+INSERT INTO countries VALUES (170,'Poland','PL','POL',1,1,0, 100);
+INSERT INTO countries VALUES (171,'Portugal','PT','PRT',1,1,0, 100);
+INSERT INTO countries VALUES (172,'Puerto Rico','PR','PRI',1,1,0, 100);
+INSERT INTO countries VALUES (173,'Qatar','QA','QAT',1,1,0, 100);
+INSERT INTO countries VALUES (174,'Reunion','RE','REU',1,1,0, 100);
+INSERT INTO countries VALUES (175,'Romania','RO','ROM',1,1,0, 100);
+INSERT INTO countries VALUES (176,'Russian Federation','RU','RUS',1,1,0, 100);
+INSERT INTO countries VALUES (177,'Rwanda','RW','RWA',1,1,0, 100);
+INSERT INTO countries VALUES (178,'Saint Kitts and Nevis','KN','KNA',1,1,0, 100);
+INSERT INTO countries VALUES (179,'Saint Lucia','LC','LCA',1,1,0, 100);
+INSERT INTO countries VALUES (180,'Saint Vincent and the Grenadines','VC','VCT',1,1,0, 100);
+INSERT INTO countries VALUES (181,'Samoa','WS','WSM',1,1,0, 100);
+INSERT INTO countries VALUES (182,'San Marino','SM','SMR',1,1,0, 100);
+INSERT INTO countries VALUES (183,'Sao Tome and Principe','ST','STP',1,1,0, 100);
+INSERT INTO countries VALUES (184,'Saudi Arabia','SA','SAU',1,1,0, 100);
+INSERT INTO countries VALUES (185,'Senegal','SN','SEN',1,1,0, 100);
+INSERT INTO countries VALUES (186,'Seychelles','SC','SYC',1,1,0, 100);
+INSERT INTO countries VALUES (187,'Sierra Leone','SL','SLE',1,1,0, 100);
+INSERT INTO countries VALUES (188,'Singapore','SG','SGP', '4','1',0, 100);
+INSERT INTO countries VALUES (189,'Slovakia (Slovak Republic)','SK','SVK',1,1,0, 100);
+INSERT INTO countries VALUES (190,'Slovenia','SI','SVN',1,1,0, 100);
+INSERT INTO countries VALUES (191,'Solomon Islands','SB','SLB',1,1,0, 100);
+INSERT INTO countries VALUES (192,'Somalia','SO','SOM',1,1,0, 100);
+INSERT INTO countries VALUES (193,'South Africa','ZA','ZAF',1,1,0, 100);
+INSERT INTO countries VALUES (194,'South Georgia and the South Sandwich Islands','GS','SGS',1,1,0, 100);
+INSERT INTO countries VALUES (195,'Spain','ES','ESP','3','1',0, 100);
+INSERT INTO countries VALUES (196,'Sri Lanka','LK','LKA',1,1,0, 100);
+INSERT INTO countries VALUES (197,'St. Helena','SH','SHN',1,1,0, 100);
+INSERT INTO countries VALUES (198,'St. Pierre and Miquelon','PM','SPM',1,1,0, 100);
+INSERT INTO countries VALUES (199,'Sudan','SD','SDN',1,1,0, 100);
+INSERT INTO countries VALUES (200,'Suriname','SR','SUR',1,1,0, 100);
+INSERT INTO countries VALUES (201,'Svalbard and Jan Mayen Islands','SJ','SJM',1,1,0, 100);
+INSERT INTO countries VALUES (202,'Swaziland','SZ','SWZ',1,1,0, 100);
+INSERT INTO countries VALUES (203,'Sweden','SE','SWE',1,1,0, 100);
+INSERT INTO countries VALUES (204,'Switzerland','CH','CHE',5,1,0, 100);
+INSERT INTO countries VALUES (205,'Syrian Arab Republic','SY','SYR',1,1,0, 100);
+INSERT INTO countries VALUES (206,'Taiwan','TW','TWN',6,1,0, 100);
+INSERT INTO countries VALUES (207,'Tajikistan','TJ','TJK',1,1,0, 100);
+INSERT INTO countries VALUES (208,'Tanzania, United Republic of','TZ','TZA',1,1,0, 100);
+INSERT INTO countries VALUES (209,'Thailand','TH','THA',1,1,0, 100);
+INSERT INTO countries VALUES (210,'Togo','TG','TGO',1,1,0, 100);
+INSERT INTO countries VALUES (211,'Tokelau','TK','TKL',1,1,0, 100);
+INSERT INTO countries VALUES (212,'Tonga','TO','TON',1,1,0, 100);
+INSERT INTO countries VALUES (213,'Trinidad and Tobago','TT','TTO',1,1,0, 100);
+INSERT INTO countries VALUES (214,'Tunisia','TN','TUN',1,1,0, 100);
+INSERT INTO countries VALUES (215,'Turkey','TR','TUR',1,1,0, 100);
+INSERT INTO countries VALUES (216,'Turkmenistan','TM','TKM',1,1,0, 100);
+INSERT INTO countries VALUES (217,'Turks and Caicos Islands','TC','TCA',1,1,0, 100);
+INSERT INTO countries VALUES (218,'Tuvalu','TV','TUV',1,1,0, 100);
+INSERT INTO countries VALUES (219,'Uganda','UG','UGA',1,1,0, 100);
+INSERT INTO countries VALUES (220,'Ukraine','UA','UKR',1,1,0, 100);
+INSERT INTO countries VALUES (221,'United Arab Emirates','AE','ARE',1,1,0, 100);
+INSERT INTO countries VALUES (222,'United Kingdom','GB','GBR',8,1,0, 100);
+INSERT INTO countries VALUES (223,'United States','US','USA', '2','1',0, 100);
+INSERT INTO countries VALUES (224,'United States Minor Outlying Islands','UM','UMI',1,1,0, 100);
+INSERT INTO countries VALUES (225,'Uruguay','UY','URY',1,1,0, 100);
+INSERT INTO countries VALUES (226,'Uzbekistan','UZ','UZB',1,1,0, 100);
+INSERT INTO countries VALUES (227,'Vanuatu','VU','VUT',1,1,0, 100);
+INSERT INTO countries VALUES (228,'Vatican City State (Holy See)','VA','VAT',1,1,0, 100);
+INSERT INTO countries VALUES (229,'Venezuela','VE','VEN',1,1,0, 100);
+INSERT INTO countries VALUES (230,'Viet Nam','VN','VNM',1,1,0, 100);
+INSERT INTO countries VALUES (231,'Virgin Islands (British)','VG','VGB',1,1,0, 100);
+INSERT INTO countries VALUES (232,'Virgin Islands (U.S.)','VI','VIR',1,1,0, 100);
+INSERT INTO countries VALUES (233,'Wallis and Futuna Islands','WF','WLF',1,1,0, 100);
+INSERT INTO countries VALUES (234,'Western Sahara','EH','ESH',1,1,0, 100);
+INSERT INTO countries VALUES (235,'Yemen','YE','YEM',1,1,0, 100);
+#INSERT INTO countries VALUES (236,'Yugoslavia','YU','YUG',1,1,0, 100);
+INSERT INTO countries VALUES (237,'Zaire','ZR','ZAR',1,1,0, 100);
+INSERT INTO countries VALUES (238,'Zambia','ZM','ZMB',1,1,0, 100);
+INSERT INTO countries VALUES (239,'Zimbabwe','ZW','ZWE',1,1,0, 100);
+INSERT INTO countries VALUES (240,'Serbia','RS','SRB',1,1,0, 100);
+INSERT INTO countries VALUES (241,'Montenegro','ME','MNE',1,1,0, 100);
+INSERT INTO countries VALUES (242,'Kosovo','CS','SCG',1,1,0, 100);
 
 # currencies
 INSERT INTO currencies VALUES (1,'Euro','EUR','','EUR',',','.','2','1.0000',NOW(),'1');
 INSERT INTO currencies VALUES (2,'United States Dollar','USD', '$', '', '.', ',', '2','1.2978',NOW(),'0');
 INSERT INTO currencies VALUES (3,'Schweizer Franken','CHF', 'CHF', '', '.', '', '2','1.2044',NOW(),'0');
-INSERT INTO currencies VALUES (4,'Great Britain Pound','GBP', '', '£', '.', ',', '2','0.8094',NOW(),'0');
+INSERT INTO currencies VALUES (4,'Great Britain Pound','GBP', '', '¬£', '.', ',', '2','0.8094',NOW(),'0');
 
 # database Version
-INSERT INTO database_version(version) VALUES ('MOD_2.0.6.0');
+INSERT INTO database_version(version) VALUES ('MOD_2.0.7.0');
 
 # languages
 INSERT INTO languages VALUES (1,'English','en','icon.gif','english',2,'iso-8859-15',1,1);
@@ -2223,7 +2295,7 @@ INSERT INTO shipping_status VALUES (3, 2, '2 Wochen', '', 3);
 
 # shop offline
 INSERT INTO shop_configuration (configuration_id, configuration_key, configuration_value) VALUES(NULL, 'SHOP_OFFLINE', '');
-INSERT INTO shop_configuration (configuration_id, configuration_key, configuration_value) VALUES(NULL, 'SHOP_OFFLINE_MSG', '<p style="text-align: center;"><span style="font-size: large;"><font face="Arial">Unser Shop ist aufgrund von Wartungsarbeiten im Moment nicht erreichbar.<br /></font><font face="Arial">Bitte besuchen Sie uns zu einem sp‰teren Zeitpunkt noch einmal.<br /><br /><br /><br /></font></span><font><font><a href="login_admin.php"><font color="#808080">Login</font></a></font></font><span style="font-size: large;"><font face="Arial"><br /></font></span></p>');
+INSERT INTO shop_configuration (configuration_id, configuration_key, configuration_value) VALUES(NULL, 'SHOP_OFFLINE_MSG', '<p style="text-align: center;"><span style="font-size: large;"><font face="Arial">Unser Shop ist aufgrund von Wartungsarbeiten im Moment nicht erreichbar.<br /></font><font face="Arial">Bitte besuchen Sie uns zu einem sp√§teren Zeitpunkt noch einmal.<br /><br /><br /><br /></font></span><font><font><a href="login_admin.php"><font color="#808080">Login</font></a></font></font><span style="font-size: large;"><font face="Arial"><br /></font></span></p>');
 
 # USA
 INSERT INTO zones VALUES (NULL,223,'AL','Alabama');
@@ -2309,7 +2381,7 @@ INSERT INTO zones VALUES (NULL,38,'YT','Yukon Territory');
 
 # Germany
 INSERT INTO zones VALUES (NULL,81,'NI','Niedersachsen');
-INSERT INTO zones VALUES (NULL,81,'BW','Baden-W¸rttemberg');
+INSERT INTO zones VALUES (NULL,81,'BW','Baden-W√ºrttemberg');
 INSERT INTO zones VALUES (NULL,81,'BY','Bayern');
 INSERT INTO zones VALUES (NULL,81,'BE','Berlin');
 INSERT INTO zones VALUES (NULL,81,'BR','Brandenburg');
@@ -2323,14 +2395,14 @@ INSERT INTO zones VALUES (NULL,81,'SL','Saarland');
 INSERT INTO zones VALUES (NULL,81,'SN','Sachsen');
 INSERT INTO zones VALUES (NULL,81,'ST','Sachsen-Anhalt');
 INSERT INTO zones VALUES (NULL,81,'SH','Schleswig-Holstein');
-INSERT INTO zones VALUES (NULL,81,'TH','Th¸ringen');
+INSERT INTO zones VALUES (NULL,81,'TH','Th√ºringen');
 
 # Austria
 INSERT INTO zones VALUES (NULL,14,'WI','Wien');
-INSERT INTO zones VALUES (NULL,14,'NO','Niederˆsterreich');
-INSERT INTO zones VALUES (NULL,14,'OO','Oberˆsterreich');
+INSERT INTO zones VALUES (NULL,14,'NO','Nieder√∂sterreich');
+INSERT INTO zones VALUES (NULL,14,'OO','Ober√∂sterreich');
 INSERT INTO zones VALUES (NULL,14,'SB','Salzburg');
-INSERT INTO zones VALUES (NULL,14,'KN','K‰rnten');
+INSERT INTO zones VALUES (NULL,14,'KN','K√§rnten');
 INSERT INTO zones VALUES (NULL,14,'ST','Steiermark');
 INSERT INTO zones VALUES (NULL,14,'TI','Tirol');
 INSERT INTO zones VALUES (NULL,14,'BL','Burgenland');
@@ -2346,7 +2418,7 @@ INSERT INTO zones VALUES (NULL,204,'BS','Basel-Stadt');
 INSERT INTO zones VALUES (NULL,204,'FR','Freiburg');
 INSERT INTO zones VALUES (NULL,204,'GE','Genf');
 INSERT INTO zones VALUES (NULL,204,'GL','Glarus');
-INSERT INTO zones VALUES (NULL,204,'GR','Graub¸nden');
+INSERT INTO zones VALUES (NULL,204,'GR','Graub√ºnden');
 INSERT INTO zones VALUES (NULL,204,'JU','Jura');
 INSERT INTO zones VALUES (NULL,204,'LU','Luzern');
 INSERT INTO zones VALUES (NULL,204,'NE','Neuenburg');
@@ -2362,38 +2434,38 @@ INSERT INTO zones VALUES (NULL,204,'UR','Uri');
 INSERT INTO zones VALUES (NULL,204,'VD','Waadt');
 INSERT INTO zones VALUES (NULL,204,'VS','Wallis');
 INSERT INTO zones VALUES (NULL,204,'ZG','Zug');
-INSERT INTO zones VALUES (NULL,204,'ZH','Z¸rich');
+INSERT INTO zones VALUES (NULL,204,'ZH','Z√ºrich');
 
 # Spain
-INSERT INTO zones VALUES (NULL,195,'ES-C','A CoruÒa');
-INSERT INTO zones VALUES (NULL,195,'ES-VI','¡lava');
+INSERT INTO zones VALUES (NULL,195,'ES-C','A Coru√±a');
+INSERT INTO zones VALUES (NULL,195,'ES-VI','√Ålava');
 INSERT INTO zones VALUES (NULL,195,'ES-AB','Albacete');
 INSERT INTO zones VALUES (NULL,195,'ES-A','Alicante');
-INSERT INTO zones VALUES (NULL,195,'ES-AL','AlmerÌa');
+INSERT INTO zones VALUES (NULL,195,'ES-AL','Almer√≠a');
 INSERT INTO zones VALUES (NULL,195,'ES-O','Asturias');
-INSERT INTO zones VALUES (NULL,195,'ES-AV','¡vila');
+INSERT INTO zones VALUES (NULL,195,'ES-AV','√Åvila');
 INSERT INTO zones VALUES (NULL,195,'ES-BA','Badajoz');
 INSERT INTO zones VALUES (NULL,195,'ES-PM','Balears');
 INSERT INTO zones VALUES (NULL,195,'ES-B','Barcelona');
 INSERT INTO zones VALUES (NULL,195,'ES-BU','Burgos');
-INSERT INTO zones VALUES (NULL,195,'ES-CC','C·ceres');
-INSERT INTO zones VALUES (NULL,195,'ES-CA','C·diz');
+INSERT INTO zones VALUES (NULL,195,'ES-CC','C√°ceres');
+INSERT INTO zones VALUES (NULL,195,'ES-CA','C√°diz');
 INSERT INTO zones VALUES (NULL,195,'ES-S','Cantabria');
-INSERT INTO zones VALUES (NULL,195,'ES-CS','CastellÛn');
+INSERT INTO zones VALUES (NULL,195,'ES-CS','Castell√≥n');
 INSERT INTO zones VALUES (NULL,195,'ES-CE','Ceuta');
 INSERT INTO zones VALUES (NULL,195,'ES-CR','Ciudad Real');
-INSERT INTO zones VALUES (NULL,195,'ES-CO','CÛrdoba');
+INSERT INTO zones VALUES (NULL,195,'ES-CO','C√≥rdoba');
 INSERT INTO zones VALUES (NULL,195,'ES-CU','Cuenca');
 INSERT INTO zones VALUES (NULL,195,'ES-GI','Girona');
 INSERT INTO zones VALUES (NULL,195,'ES-GR','Granada');
 INSERT INTO zones VALUES (NULL,195,'ES-GU','Guadalajara');
-INSERT INTO zones VALUES (NULL,195,'ES-SS','Guip˙zcoa');
+INSERT INTO zones VALUES (NULL,195,'ES-SS','Guip√∫zcoa');
 INSERT INTO zones VALUES (NULL,195,'ES-H','Huelva');
 INSERT INTO zones VALUES (NULL,195,'ES-HU','Huesca');
-INSERT INTO zones VALUES (NULL,195,'ES-J','JaÈn');
+INSERT INTO zones VALUES (NULL,195,'ES-J','Ja√©n');
 INSERT INTO zones VALUES (NULL,195,'ES-LO','La Rioja');
 INSERT INTO zones VALUES (NULL,195,'ES-GC','Las Palmas');
-INSERT INTO zones VALUES (NULL,195,'ES-LE','LeÛn');
+INSERT INTO zones VALUES (NULL,195,'ES-LE','Le√≥n');
 INSERT INTO zones VALUES (NULL,195,'ES-L','Lleida');
 INSERT INTO zones VALUES (NULL,195,'ES-LU','Lugo');
 INSERT INTO zones VALUES (NULL,195,'ES-M','Madrid');
@@ -2447,7 +2519,7 @@ INSERT INTO zones VALUES (NULL,153,'Nelson','Nelson');
 INSERT INTO zones VALUES (NULL,153,'Marlborough','Marlborough');
 
 #Brazil
-INSERT INTO zones VALUES (NULL,30,'SP','S„o Paulo');
+INSERT INTO zones VALUES (NULL,30,'SP','S√£o Paulo');
 INSERT INTO zones VALUES (NULL,30,'RJ','Rio de Janeiro');
 INSERT INTO zones VALUES (NULL,30,'PE','Pernanbuco');
 INSERT INTO zones VALUES (NULL,30,'BA','Bahia');
@@ -2455,7 +2527,7 @@ INSERT INTO zones VALUES (NULL,30,'AM','Amazonas');
 INSERT INTO zones VALUES (NULL,30,'MG','Minas Gerais');
 INSERT INTO zones VALUES (NULL,30,'ES','Espirito Santo');
 INSERT INTO zones VALUES (NULL,30,'RS','Rio Grande do Sul');
-INSERT INTO zones VALUES (NULL,30,'PR','Paran·');
+INSERT INTO zones VALUES (NULL,30,'PR','Paran√°');
 INSERT INTO zones VALUES (NULL,30,'SC','Santa Catarina');
 INSERT INTO zones VALUES (NULL,30,'RG','Rio Grande do Norte');
 INSERT INTO zones VALUES (NULL,30,'MS','Mato Grosso do Sul');
@@ -2468,27 +2540,27 @@ INSERT INTO zones VALUES (NULL,30,'AC','Acre');
 INSERT INTO zones VALUES (NULL,30,'AP','Amapa');
 INSERT INTO zones VALUES (NULL,30,'RR','Roraima');
 INSERT INTO zones VALUES (NULL,30,'AL','Alagoas');
-INSERT INTO zones VALUES (NULL,30,'CE','Cear·');
-INSERT INTO zones VALUES (NULL,30,'MA','Maranh„o');
-INSERT INTO zones VALUES (NULL,30,'PA','Par·');
-INSERT INTO zones VALUES (NULL,30,'PB','ParaÌba');
-INSERT INTO zones VALUES (NULL,30,'PI','PiauÌ');
+INSERT INTO zones VALUES (NULL,30,'CE','Cear√°');
+INSERT INTO zones VALUES (NULL,30,'MA','Maranh√£o');
+INSERT INTO zones VALUES (NULL,30,'PA','Par√°');
+INSERT INTO zones VALUES (NULL,30,'PB','Para√≠ba');
+INSERT INTO zones VALUES (NULL,30,'PI','Piau√≠');
 INSERT INTO zones VALUES (NULL,30,'SE','Sergipe');
 
 #Chile
-INSERT INTO zones VALUES (NULL,43,'I','I RegiÛn de Tarapac·');
-INSERT INTO zones VALUES (NULL,43,'II','II RegiÛn de Antofagasta');
-INSERT INTO zones VALUES (NULL,43,'III','III RegiÛn de Atacama');
-INSERT INTO zones VALUES (NULL,43,'IV','IV RegiÛn de Coquimbo');
-INSERT INTO zones VALUES (NULL,43,'V','V RegiÛn de ValaparaÌso');
-INSERT INTO zones VALUES (NULL,43,'RM','RegiÛn Metropolitana');
-INSERT INTO zones VALUES (NULL,43,'VI','VI RegiÛn de L. B. O¥higgins');
-INSERT INTO zones VALUES (NULL,43,'VII','VII RegiÛn del Maule');
-INSERT INTO zones VALUES (NULL,43,'VIII','VIII RegiÛn del BÌo BÌo');
-INSERT INTO zones VALUES (NULL,43,'IX','IX RegiÛn de la AraucanÌa');
-INSERT INTO zones VALUES (NULL,43,'X','X RegiÛn de los Lagos');
-INSERT INTO zones VALUES (NULL,43,'XI','XI RegiÛn de AysÈn');
-INSERT INTO zones VALUES (NULL,43,'XII','XII RegiÛn de Magallanes');
+INSERT INTO zones VALUES (NULL,43,'I','I Regi√≥n de Tarapac√°');
+INSERT INTO zones VALUES (NULL,43,'II','II Regi√≥n de Antofagasta');
+INSERT INTO zones VALUES (NULL,43,'III','III Regi√≥n de Atacama');
+INSERT INTO zones VALUES (NULL,43,'IV','IV Regi√≥n de Coquimbo');
+INSERT INTO zones VALUES (NULL,43,'V','V Regi√≥n de Valapara√≠so');
+INSERT INTO zones VALUES (NULL,43,'RM','Regi√≥n Metropolitana');
+INSERT INTO zones VALUES (NULL,43,'VI','VI Regi√≥n de L. B. O¬¥higgins');
+INSERT INTO zones VALUES (NULL,43,'VII','VII Regi√≥n del Maule');
+INSERT INTO zones VALUES (NULL,43,'VIII','VIII Regi√≥n del B√≠o B√≠o');
+INSERT INTO zones VALUES (NULL,43,'IX','IX Regi√≥n de la Araucan√≠a');
+INSERT INTO zones VALUES (NULL,43,'X','X Regi√≥n de los Lagos');
+INSERT INTO zones VALUES (NULL,43,'XI','XI Regi√≥n de Ays√©n');
+INSERT INTO zones VALUES (NULL,43,'XII','XII Regi√≥n de Magallanes');
 
 #Columbia
 INSERT INTO zones VALUES (NULL,47,'AMA','Amazonas');
@@ -2532,39 +2604,39 @@ INSERT INTO zones VALUES (NULL,73,'03','Allier');
 INSERT INTO zones VALUES (NULL,73,'04','Alpes de Haute Provence');
 INSERT INTO zones VALUES (NULL,73,'05','Hautes-Alpes');
 INSERT INTO zones VALUES (NULL,73,'06','Alpes Maritimes');
-INSERT INTO zones VALUES (NULL,73,'07','ArdËche');
+INSERT INTO zones VALUES (NULL,73,'07','Ard√®che');
 INSERT INTO zones VALUES (NULL,73,'08','Ardennes');
-INSERT INTO zones VALUES (NULL,73,'09','AriËge');
+INSERT INTO zones VALUES (NULL,73,'09','Ari√®ge');
 INSERT INTO zones VALUES (NULL,73,'10','Aube');
 INSERT INTO zones VALUES (NULL,73,'11','Aude');
 INSERT INTO zones VALUES (NULL,73,'12','Aveyron');
-INSERT INTO zones VALUES (NULL,73,'13','Bouches-du-RhÙne');
+INSERT INTO zones VALUES (NULL,73,'13','Bouches-du-Rh√¥ne');
 INSERT INTO zones VALUES (NULL,73,'14','Calvados');
 INSERT INTO zones VALUES (NULL,73,'15','Cantal');
 INSERT INTO zones VALUES (NULL,73,'16','Charente');
 INSERT INTO zones VALUES (NULL,73,'17','Charente Maritime');
 INSERT INTO zones VALUES (NULL,73,'18','Cher');
-INSERT INTO zones VALUES (NULL,73,'19','CorrËze');
+INSERT INTO zones VALUES (NULL,73,'19','Corr√®ze');
 INSERT INTO zones VALUES (NULL,73,'2A','Corse du Sud');
 INSERT INTO zones VALUES (NULL,73,'2B','Haute Corse');
-INSERT INTO zones VALUES (NULL,73,'21','CÙte-d\'Or');
-INSERT INTO zones VALUES (NULL,73,'22','CÙtes-d\'Armor');
+INSERT INTO zones VALUES (NULL,73,'21','C√¥te-d\'Or');
+INSERT INTO zones VALUES (NULL,73,'22','C√¥tes-d\'Armor');
 INSERT INTO zones VALUES (NULL,73,'23','Creuse');
 INSERT INTO zones VALUES (NULL,73,'24','Dordogne');
 INSERT INTO zones VALUES (NULL,73,'25','Doubs');
-INSERT INTO zones VALUES (NULL,73,'26','DrÙme');
+INSERT INTO zones VALUES (NULL,73,'26','Dr√¥me');
 INSERT INTO zones VALUES (NULL,73,'27','Eure');
 INSERT INTO zones VALUES (NULL,73,'28','Eure et Loir');
-INSERT INTO zones VALUES (NULL,73,'29','FinistËre');
+INSERT INTO zones VALUES (NULL,73,'29','Finist√®re');
 INSERT INTO zones VALUES (NULL,73,'30','Gard');
 INSERT INTO zones VALUES (NULL,73,'31','Haute Garonne');
 INSERT INTO zones VALUES (NULL,73,'32','Gers');
 INSERT INTO zones VALUES (NULL,73,'33','Gironde');
-INSERT INTO zones VALUES (NULL,73,'34','HÈrault');
+INSERT INTO zones VALUES (NULL,73,'34','H√©rault');
 INSERT INTO zones VALUES (NULL,73,'35','Ille et Vilaine');
 INSERT INTO zones VALUES (NULL,73,'36','Indre');
 INSERT INTO zones VALUES (NULL,73,'37','Indre et Loire');
-INSERT INTO zones VALUES (NULL,73,'38','IsËre');
+INSERT INTO zones VALUES (NULL,73,'38','Is√®re');
 INSERT INTO zones VALUES (NULL,73,'39','Jura');
 INSERT INTO zones VALUES (NULL,73,'40','Landes');
 INSERT INTO zones VALUES (NULL,73,'41','Loir et Cher');
@@ -2574,7 +2646,7 @@ INSERT INTO zones VALUES (NULL,73,'44','Loire Atlantique');
 INSERT INTO zones VALUES (NULL,73,'45','Loiret');
 INSERT INTO zones VALUES (NULL,73,'46','Lot');
 INSERT INTO zones VALUES (NULL,73,'47','Lot et Garonne');
-INSERT INTO zones VALUES (NULL,73,'48','LozËre');
+INSERT INTO zones VALUES (NULL,73,'48','Loz√®re');
 INSERT INTO zones VALUES (NULL,73,'49','Maine et Loire');
 INSERT INTO zones VALUES (NULL,73,'50','Manche');
 INSERT INTO zones VALUES (NULL,73,'51','Marne');
@@ -2584,20 +2656,20 @@ INSERT INTO zones VALUES (NULL,73,'54','Meurthe et Moselle');
 INSERT INTO zones VALUES (NULL,73,'55','Meuse');
 INSERT INTO zones VALUES (NULL,73,'56','Morbihan');
 INSERT INTO zones VALUES (NULL,73,'57','Moselle');
-INSERT INTO zones VALUES (NULL,73,'58','NiËvre');
+INSERT INTO zones VALUES (NULL,73,'58','Ni√®vre');
 INSERT INTO zones VALUES (NULL,73,'59','Nord');
 INSERT INTO zones VALUES (NULL,73,'60','Oise');
 INSERT INTO zones VALUES (NULL,73,'61','Orne');
 INSERT INTO zones VALUES (NULL,73,'62','Pas de Calais');
-INSERT INTO zones VALUES (NULL,73,'63','Puy-de-DÙme');
-INSERT INTO zones VALUES (NULL,73,'64','PyrÈnÈes-Atlantiques');
-INSERT INTO zones VALUES (NULL,73,'65','Hautes-PyrÈnÈes');
-INSERT INTO zones VALUES (NULL,73,'66','PyrÈnÈes-Orientales');
+INSERT INTO zones VALUES (NULL,73,'63','Puy-de-D√¥me');
+INSERT INTO zones VALUES (NULL,73,'64','Pyr√©n√©es-Atlantiques');
+INSERT INTO zones VALUES (NULL,73,'65','Hautes-Pyr√©n√©es');
+INSERT INTO zones VALUES (NULL,73,'66','Pyr√©n√©es-Orientales');
 INSERT INTO zones VALUES (NULL,73,'67','Bas Rhin');
 INSERT INTO zones VALUES (NULL,73,'68','Haut Rhin');
-INSERT INTO zones VALUES (NULL,73,'69','RhÙne');
-INSERT INTO zones VALUES (NULL,73,'70','Haute-SaÙne');
-INSERT INTO zones VALUES (NULL,73,'71','SaÙne-et-Loire');
+INSERT INTO zones VALUES (NULL,73,'69','Rh√¥ne');
+INSERT INTO zones VALUES (NULL,73,'70','Haute-Sa√¥ne');
+INSERT INTO zones VALUES (NULL,73,'71','Sa√¥ne-et-Loire');
 INSERT INTO zones VALUES (NULL,73,'72','Sarthe');
 INSERT INTO zones VALUES (NULL,73,'73','Savoie');
 INSERT INTO zones VALUES (NULL,73,'74','Haute Savoie');
@@ -2605,13 +2677,13 @@ INSERT INTO zones VALUES (NULL,73,'75','Paris');
 INSERT INTO zones VALUES (NULL,73,'76','Seine Maritime');
 INSERT INTO zones VALUES (NULL,73,'77','Seine et Marne');
 INSERT INTO zones VALUES (NULL,73,'78','Yvelines');
-INSERT INTO zones VALUES (NULL,73,'79','Deux-SËvres');
+INSERT INTO zones VALUES (NULL,73,'79','Deux-S√®vres');
 INSERT INTO zones VALUES (NULL,73,'80','Somme');
 INSERT INTO zones VALUES (NULL,73,'81','Tarn');
 INSERT INTO zones VALUES (NULL,73,'82','Tarn et Garonne');
 INSERT INTO zones VALUES (NULL,73,'83','Var');
 INSERT INTO zones VALUES (NULL,73,'84','Vaucluse');
-INSERT INTO zones VALUES (NULL,73,'85','VendÈe');
+INSERT INTO zones VALUES (NULL,73,'85','Vend√©e');
 INSERT INTO zones VALUES (NULL,73,'86','Vienne');
 INSERT INTO zones VALUES (NULL,73,'87','Haute Vienne');
 INSERT INTO zones VALUES (NULL,73,'88','Vosges');
@@ -2628,10 +2700,10 @@ INSERT INTO zones VALUES (NULL,73,'973 (DOM)','Guyane');
 INSERT INTO zones VALUES (NULL,73,'974 (DOM)','Saint Denis');
 INSERT INTO zones VALUES (NULL,73,'975 (DOM)','St-Pierre de Miquelon');
 INSERT INTO zones VALUES (NULL,73,'976 (TOM)','Mayotte');
-INSERT INTO zones VALUES (NULL,73,'984 (TOM)','Terres australes et Antartiques franÁaises');
-INSERT INTO zones VALUES (NULL,73,'985 (TOM)','Nouvelle CalÈdonie');
+INSERT INTO zones VALUES (NULL,73,'984 (TOM)','Terres australes et Antartiques fran√ßaises');
+INSERT INTO zones VALUES (NULL,73,'985 (TOM)','Nouvelle Cal√©donie');
 INSERT INTO zones VALUES (NULL,73,'986 (TOM)','Wallis et Futuna');
-INSERT INTO zones VALUES (NULL,73,'987 (TOM)','PolynÈsie franÁaise');
+INSERT INTO zones VALUES (NULL,73,'987 (TOM)','Polyn√©sie fran√ßaise');
 
 #India
 INSERT INTO zones VALUES (NULL,99,'DL','Delhi');
@@ -2707,7 +2779,7 @@ INSERT INTO zones VALUES (NULL,105,'FM','Fermo');
 INSERT INTO zones VALUES (NULL,105,'FE','Ferrara');
 INSERT INTO zones VALUES (NULL,105,'FI','Firenze');
 INSERT INTO zones VALUES (NULL,105,'FG','Foggia');
-INSERT INTO zones VALUES (NULL,105,'FC','ForlÏ-Cesena');
+INSERT INTO zones VALUES (NULL,105,'FC','Forl√¨-Cesena');
 INSERT INTO zones VALUES (NULL,105,'FR','Frosinone');
 INSERT INTO zones VALUES (NULL,105,'GE','Genova');
 INSERT INTO zones VALUES (NULL,105,'GO','Gorizia');
@@ -2875,17 +2947,17 @@ INSERT INTO zones VALUES (NULL,160,'BUS','Buskerud');
 INSERT INTO zones VALUES (NULL,160,'FIN','Finnmark');
 INSERT INTO zones VALUES (NULL,160,'HED','Hedmark');
 INSERT INTO zones VALUES (NULL,160,'HOR','Hordaland');
-INSERT INTO zones VALUES (NULL,160,'MOR','M¯re og Romsdal');
+INSERT INTO zones VALUES (NULL,160,'MOR','M√∏re og Romsdal');
 INSERT INTO zones VALUES (NULL,160,'NOR','Nordland');
-INSERT INTO zones VALUES (NULL,160,'NTR','Nord-Tr¯ndelag');
+INSERT INTO zones VALUES (NULL,160,'NTR','Nord-Tr√∏ndelag');
 INSERT INTO zones VALUES (NULL,160,'OPP','Oppland');
 INSERT INTO zones VALUES (NULL,160,'ROG','Rogaland');
 INSERT INTO zones VALUES (NULL,160,'SOF','Sogn og Fjordane');
-INSERT INTO zones VALUES (NULL,160,'STR','S¯r-Tr¯ndelag');
+INSERT INTO zones VALUES (NULL,160,'STR','S√∏r-Tr√∏ndelag');
 INSERT INTO zones VALUES (NULL,160,'TEL','Telemark');
 INSERT INTO zones VALUES (NULL,160,'TRO','Troms');
 INSERT INTO zones VALUES (NULL,160,'VEA','Vest-Agder');
-INSERT INTO zones VALUES (NULL,160,'OST','ÿstfold');
+INSERT INTO zones VALUES (NULL,160,'OST','√òstfold');
 INSERT INTO zones VALUES (NULL,160,'SVA','Svalbard');
 
 #Pakistan
@@ -2958,24 +3030,24 @@ INSERT INTO zones VALUES (NULL,193,'NP','Northern Province');
 INSERT INTO zones VALUES (NULL,203,'K','Blekinge');
 INSERT INTO zones VALUES (NULL,203,'W','Dalarna');
 INSERT INTO zones VALUES (NULL,203,'I','Gotland');
-INSERT INTO zones VALUES (NULL,203,'X','G‰vleborg');
+INSERT INTO zones VALUES (NULL,203,'X','G√§vleborg');
 INSERT INTO zones VALUES (NULL,203,'N','Halland');
-INSERT INTO zones VALUES (NULL,203,'Z','J‰mtland');
-INSERT INTO zones VALUES (NULL,203,'F','Jˆnkˆping');
+INSERT INTO zones VALUES (NULL,203,'Z','J√§mtland');
+INSERT INTO zones VALUES (NULL,203,'F','J√∂nk√∂ping');
 INSERT INTO zones VALUES (NULL,203,'H','Kalmar');
 INSERT INTO zones VALUES (NULL,203,'G','Kronoberg');
 INSERT INTO zones VALUES (NULL,203,'BD','Norrbotten');
-INSERT INTO zones VALUES (NULL,203,'T','÷rebro');
-INSERT INTO zones VALUES (NULL,203,'E','÷stergˆtland');
-INSERT INTO zones VALUES (NULL,203,'M','SkÂne');
+INSERT INTO zones VALUES (NULL,203,'T','√ñrebro');
+INSERT INTO zones VALUES (NULL,203,'E','√ñsterg√∂tland');
+INSERT INTO zones VALUES (NULL,203,'M','Sk√•ne');
 INSERT INTO zones VALUES (NULL,203,'AB','Stockholm');
-INSERT INTO zones VALUES (NULL,203,'D','Sˆdermanland');
+INSERT INTO zones VALUES (NULL,203,'D','S√∂dermanland');
 INSERT INTO zones VALUES (NULL,203,'C','Uppsala');
-INSERT INTO zones VALUES (NULL,203,'S','V‰rmland');
-INSERT INTO zones VALUES (NULL,203,'AC','V‰sterbotten');
-INSERT INTO zones VALUES (NULL,203,'Y','V‰sternorrland');
-INSERT INTO zones VALUES (NULL,203,'U','V‰stmanland');
-INSERT INTO zones VALUES (NULL,203,'O','V‰stra Gˆtaland');
+INSERT INTO zones VALUES (NULL,203,'S','V√§rmland');
+INSERT INTO zones VALUES (NULL,203,'AC','V√§sterbotten');
+INSERT INTO zones VALUES (NULL,203,'Y','V√§sternorrland');
+INSERT INTO zones VALUES (NULL,203,'U','V√§stmanland');
+INSERT INTO zones VALUES (NULL,203,'O','V√§stra G√∂taland');
 
 #Turkey
 INSERT INTO zones VALUES (NULL,215,'AA', 'Adana');
@@ -2994,17 +3066,17 @@ INSERT INTO zones VALUES (NULL,215,'BR', 'Bartin');
 INSERT INTO zones VALUES (NULL,215,'BM', 'Batman');
 INSERT INTO zones VALUES (NULL,215,'BB', 'Bayburt');
 INSERT INTO zones VALUES (NULL,215,'BC', 'Bilecik');
-INSERT INTO zones VALUES (NULL,215,'BG', 'Bingˆl');
+INSERT INTO zones VALUES (NULL,215,'BG', 'Bing√∂l');
 INSERT INTO zones VALUES (NULL,215,'BT', 'Bitlis');
 INSERT INTO zones VALUES (NULL,215,'BL', 'Bolu' );
 INSERT INTO zones VALUES (NULL,215,'BD', 'Burdur');
 INSERT INTO zones VALUES (NULL,215,'BU', 'Bursa');
-INSERT INTO zones VALUES (NULL,215,'CK', '«anakkale');
-INSERT INTO zones VALUES (NULL,215,'CI', '«ankiri');
-INSERT INTO zones VALUES (NULL,215,'CM', '«orum');
+INSERT INTO zones VALUES (NULL,215,'CK', '√áanakkale');
+INSERT INTO zones VALUES (NULL,215,'CI', '√áankiri');
+INSERT INTO zones VALUES (NULL,215,'CM', '√áorum');
 INSERT INTO zones VALUES (NULL,215,'DN', 'Denizli');
 INSERT INTO zones VALUES (NULL,215,'DY', 'Diyarbakir');
-INSERT INTO zones VALUES (NULL,215,'DU', 'D¸zce');
+INSERT INTO zones VALUES (NULL,215,'DU', 'D√ºzce');
 INSERT INTO zones VALUES (NULL,215,'ED', 'Edirne');
 INSERT INTO zones VALUES (NULL,215,'EG', 'Elazig');
 INSERT INTO zones VALUES (NULL,215,'EN', 'Erzincan');
@@ -3012,7 +3084,7 @@ INSERT INTO zones VALUES (NULL,215,'EM', 'Erzurum');
 INSERT INTO zones VALUES (NULL,215,'ES', 'Eskisehir');
 INSERT INTO zones VALUES (NULL,215,'GA', 'Gaziantep');
 INSERT INTO zones VALUES (NULL,215,'GI', 'Giresun');
-INSERT INTO zones VALUES (NULL,215,'GU', 'G¸m¸shane');
+INSERT INTO zones VALUES (NULL,215,'GU', 'G√ºm√ºshane');
 INSERT INTO zones VALUES (NULL,215,'HK', 'Hakkari');
 INSERT INTO zones VALUES (NULL,215,'HT', 'Hatay');
 INSERT INTO zones VALUES (NULL,215,'IG', 'Igdir');
@@ -3020,7 +3092,7 @@ INSERT INTO zones VALUES (NULL,215,'IP', 'Isparta');
 INSERT INTO zones VALUES (NULL,215,'IB', 'Istanbul');
 INSERT INTO zones VALUES (NULL,215,'IZ', 'Izmir');
 INSERT INTO zones VALUES (NULL,215,'KM', 'Kahramanmaras');
-INSERT INTO zones VALUES (NULL,215,'KB', 'Karab¸k');
+INSERT INTO zones VALUES (NULL,215,'KB', 'Karab√ºk');
 INSERT INTO zones VALUES (NULL,215,'KR', 'Karaman');
 INSERT INTO zones VALUES (NULL,215,'KA', 'Kars');
 INSERT INTO zones VALUES (NULL,215,'KS', 'Kastamonu');
@@ -3031,7 +3103,7 @@ INSERT INTO zones VALUES (NULL,215,'KL', 'Kirklareli');
 INSERT INTO zones VALUES (NULL,215,'KH', 'Kirsehir');
 INSERT INTO zones VALUES (NULL,215,'KC', 'Kocaeli');
 INSERT INTO zones VALUES (NULL,215,'KO', 'Konya');
-INSERT INTO zones VALUES (NULL,215,'KU', 'K¸tahya');
+INSERT INTO zones VALUES (NULL,215,'KU', 'K√ºtahya');
 INSERT INTO zones VALUES (NULL,215,'ML', 'Malatya');
 INSERT INTO zones VALUES (NULL,215,'MN', 'Manisa');
 INSERT INTO zones VALUES (NULL,215,'MR', 'Mardin');
@@ -3062,26 +3134,26 @@ INSERT INTO zones VALUES (NULL,215,'ZO', 'Zonguldak');
 
 #Venezuela
 INSERT INTO zones VALUES (NULL,229,'AM','Amazonas');
-INSERT INTO zones VALUES (NULL,229,'AN','Anzo·tegui');
+INSERT INTO zones VALUES (NULL,229,'AN','Anzo√°tegui');
 INSERT INTO zones VALUES (NULL,229,'AR','Aragua');
 INSERT INTO zones VALUES (NULL,229,'AP','Apure');
 INSERT INTO zones VALUES (NULL,229,'BA','Barinas');
-INSERT INTO zones VALUES (NULL,229,'BO','BolÌvar');
+INSERT INTO zones VALUES (NULL,229,'BO','Bol√≠var');
 INSERT INTO zones VALUES (NULL,229,'CA','Carabobo');
 INSERT INTO zones VALUES (NULL,229,'CO','Cojedes');
 INSERT INTO zones VALUES (NULL,229,'DA','Delta Amacuro');
 INSERT INTO zones VALUES (NULL,229,'DC','Distrito Capital');
-INSERT INTO zones VALUES (NULL,229,'FA','FalcÛn');
-INSERT INTO zones VALUES (NULL,229,'GA','Gu·rico');
+INSERT INTO zones VALUES (NULL,229,'FA','Falc√≥n');
+INSERT INTO zones VALUES (NULL,229,'GA','Gu√°rico');
 INSERT INTO zones VALUES (NULL,229,'GU','Guayana');
 INSERT INTO zones VALUES (NULL,229,'LA','Lara');
-INSERT INTO zones VALUES (NULL,229,'ME','MÈrida');
+INSERT INTO zones VALUES (NULL,229,'ME','M√©rida');
 INSERT INTO zones VALUES (NULL,229,'MI','Miranda');
 INSERT INTO zones VALUES (NULL,229,'MO','Monagas');
 INSERT INTO zones VALUES (NULL,229,'NE','Nueva Esparta');
 INSERT INTO zones VALUES (NULL,229,'PO','Portuguesa');
 INSERT INTO zones VALUES (NULL,229,'SU','Sucre');
-INSERT INTO zones VALUES (NULL,229,'TA','T·chira');
+INSERT INTO zones VALUES (NULL,229,'TA','T√°chira');
 INSERT INTO zones VALUES (NULL,229,'TU','Trujillo');
 INSERT INTO zones VALUES (NULL,229,'VA','Vargas');
 INSERT INTO zones VALUES (NULL,229,'YA','Yaracuy');
@@ -3213,17 +3285,17 @@ INSERT INTO zones VALUES (NULL,10,'BA','Buenos Aires');
 INSERT INTO zones VALUES (NULL,10,'CT','Catamarca');
 INSERT INTO zones VALUES (NULL,10,'CC','Chaco');
 INSERT INTO zones VALUES (NULL,10,'CH','Chubut');
-INSERT INTO zones VALUES (NULL,10,'CD','CÛrdoba');
+INSERT INTO zones VALUES (NULL,10,'CD','C√≥rdoba');
 INSERT INTO zones VALUES (NULL,10,'CR','Corrientes');
-INSERT INTO zones VALUES (NULL,10,'ER','Entre RÌos');
+INSERT INTO zones VALUES (NULL,10,'ER','Entre R√≠os');
 INSERT INTO zones VALUES (NULL,10,'FO','Formosa');
 INSERT INTO zones VALUES (NULL,10,'JY','Jujuy');
 INSERT INTO zones VALUES (NULL,10,'LP','La Pampa');
 INSERT INTO zones VALUES (NULL,10,'LR','La Rioja');
 INSERT INTO zones VALUES (NULL,10,'MZ','Mendoza');
 INSERT INTO zones VALUES (NULL,10,'MN','Misiones');
-INSERT INTO zones VALUES (NULL,10,'NQ','NeuquÈn');
-INSERT INTO zones VALUES (NULL,10,'RN','RÌo Negro');
+INSERT INTO zones VALUES (NULL,10,'NQ','Neuqu√©n');
+INSERT INTO zones VALUES (NULL,10,'RN','R√≠o Negro');
 INSERT INTO zones VALUES (NULL,10,'SA','Salta');
 INSERT INTO zones VALUES (NULL,10,'SJ','San Juan');
 INSERT INTO zones VALUES (NULL,10,'SL','San Luis');
@@ -3231,7 +3303,7 @@ INSERT INTO zones VALUES (NULL,10,'SC','Santa Cruz');
 INSERT INTO zones VALUES (NULL,10,'SF','Santa Fe');
 INSERT INTO zones VALUES (NULL,10,'SE','Santiago del Estero');
 INSERT INTO zones VALUES (NULL,10,'TF','Tierra del Fuego');
-INSERT INTO zones VALUES (NULL,10,'TM','Tucum·n');
+INSERT INTO zones VALUES (NULL,10,'TM','Tucum√°n');
 
 #ID
 INSERT INTO zones VALUES (NULL,100,'AC','Aceh');

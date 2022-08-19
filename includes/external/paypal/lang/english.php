@@ -1,6 +1,6 @@
 <?php
 /* -----------------------------------------------------------------------------------------
-   $Id: english.php 12938 2020-11-23 10:22:10Z GTB $
+   $Id: english.php 14449 2022-05-09 16:28:32Z GTB $
 
    modified eCommerce Shopsoftware
    http://www.modified-shop.org
@@ -24,6 +24,7 @@ $lang_array = array(
   'TEXT_PAYPAL_TRANSACTION_ACCOUNT_STATE' => 'Account Status:',
   'TEXT_PAYPAL_TRANSACTION_INTENT' => 'Intent:',
   'TEXT_PAYPAL_TRANSACTION_STATE' => 'Status:',
+  'TEXT_PAYPAL_TRANSACTION_ID' => 'ID:',
   
   
   // transactions
@@ -34,6 +35,7 @@ $lang_array = array(
   'TEXT_PAYPAL_TRANSACTIONS_TOTAL' => 'Amount:',
   'TEXT_PAYPAL_TRANSACTIONS_VALID' => 'valid to:',
   'TEXT_PAYPAL_TRANSACTIONS_ID' => 'ID:',
+  'TEXT_PAYPAL_TRANSACTIONS_FEE' => 'Fee:',
   
   
   // instruction
@@ -55,6 +57,7 @@ $lang_array = array(
   'TEXT_PAYPAL_REFUND_COMMENT' => 'Comment:<br />(max 127 characters)',
   'TEXT_PAYPAL_REFUND_AMOUNT' => 'Amount:',
   'TEXT_PAYPAL_REFUND_SUBMIT' => 'Refund',
+  'TEXT_PAYPAL_REFUND_CAPTURE' => 'Capture:',
   
   
   // capture
@@ -64,8 +67,15 @@ $lang_array = array(
   'TEXT_PAYPAL_CAPTURE_AMOUNT' => 'Amount:',
   'TEXT_PAYPAL_CAPTURE_SUBMIT' => 'Capture',
   'TEXT_PAYPAL_CAPTURED' => 'Payment captured',
+  'TEXT_PAYPAL_CAPTURE_AUTHORIZE' => 'Authorize:',
+
   
-  
+  // tracking
+  'TEXT_PAYPAL_TRACKING' => 'Tracking:',
+  'TEXT_PAYPAL_ADDTRACKING' => 'Tracking',
+  'TEXT_PAYPAL_TRACKING_SUBMIT' => 'Add Tracking number',
+
+
   // products
   'TEXT_PAYPAL_PRODUCTS_TYPE' => 'Products type',
   'TEXT_PAYPAL_CREATE_PRODUCT' => 'Create Product',
@@ -113,7 +123,7 @@ $lang_array = array(
   'TEXT_PAYPAL_CANCEL_SUBMIT' => 'Confirm',
 
   // error
-  'TEXT_PAYPAL_ERROR_AMOUNT' => 'Please enter an valid amount',
+  'TEXT_PAYPAL_ERROR_AMOUNT' => 'Please enter a valid amount',
   'TEXT_PAYPAL_ERROR_ALREADY_PAID' => 'We have already received your payment. Thanks a lot!',
   'TEXT_PAYPAL_ERROR_NO_PLAN' => 'Please choose a plan.',
   'TEXT_PAYPAL_ERROR_MAX_PRODUCTS' => 'This product can only be purchased on its own.',
@@ -121,7 +131,7 @@ $lang_array = array(
   'TEXT_PAYPAL_ERROR_SUBSCRIPTION_PRODUCTS' => 'You have a subscription product in your shopping cart which can only be bought alone.',  
   
   // diverse
-  'MODULE_PAYMENT_PAYPAL_TEXT_ORDER' => 'Your order at '.STORE_NAME,
+  'MODULE_PAYMENT_PAYPAL_TEXT_ORDER' => 'Your order at '.(defined('STORE_NAME') ? STORE_NAME : ''),
 
   // status
   'TEXT_PAYPAL_NO_STATUS_CHANGE' => 'no status change',
@@ -149,6 +159,8 @@ $lang_array = array(
   'TEXT_PAYPALINSTALLMENT_CREDITOR' => 'Borrower',
   'TEXT_PAYPALINSTALLMENT_INFO_LINK' => 'Information on possible rates',
 
+  'TEXT_PAYPAL_INSTRUMENT_DECLINED_ERROR' => 'The instrument presented  was either declined by the processor or bank, or it can\'t be used for this payment.',
+  'IMAGE_ICON_STATUS_YELLOW' => 'temporarily not available',
 );
 
 
